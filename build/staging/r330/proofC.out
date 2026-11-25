@@ -1,0 +1,47 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a course off its plate read",
+  "detail": "masts[0] (station 0.115): the yard stands 0.666 of the way from the mast's foot (y 3.58) to its top (y 12.97); the plate reads 0.879 +/- 0.03"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a course off its plate read",
+  "detail": "masts[1] (station 0.556): the yard stands 0.667 of the way from the mast's foot (y 3.00) to its top (y 14.22); the plate reads 0.886 +/- 0.03"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a course off its plate read",
+  "detail": "masts[0] (station 0.115): the yard stands 0.666 of the way from the mast's foot (y 5.37) to its top (y 18.54); the plate reads 0.815 +/- 0.03"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a course off its plate read",
+  "detail": "masts[1] (station 0.556): the yard stands 0.667 of the way from the mast's foot (y 4.60) to its top (y 18.10); the plate reads 0.788 +/- 0.03"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a course off its plate read",
+  "detail": "masts[2] (station 0.85): the yard stands 0.802 of the way from the mast's foot (y 4.93) to its top (y 14.91); the plate reads 0.848 +/- 0.03"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a course off its plate read",
+  "detail": "masts[2] (station 0.85): the yard stands 0.668 of the way from the mast's foot (y 5.73) to its top (y 31.03); the plate reads 0.845 +/- 0.025"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a course off its plate read",
+  "detail": "masts[0] (station 0.115): the yard stands 0.665 of the way from the mast's foot (y 3.58) to its top (y 11.51); the plate reads 0.815 +/- 0.03"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a course off its plate read",
+  "detail": "masts[1] (station 0.556): the yard stands 0.667 of the way from the mast's foot (y 3.00) to its top (y 11.13); the plate reads 0.788 +/- 0.03"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a course off its plate read",
+  "detail": "masts[2] (station 0.85): the yard stands 0.802 of the way from the mast's foot (y 3.22) to its top (y 9.23); the plate reads 0.848 +/- 0.03"
+ }
+]

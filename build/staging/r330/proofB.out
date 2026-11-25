@@ -1,0 +1,12 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a course read at its own top",
+  "detail": "masts[0] (station 0.115): courseRead.ofDeckToTop 0.987; a course yard hangs in slings under its top, so one of the two rows read is the other feature"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a top through the sail set over it",
+  "detail": "the sail on masts[0] from the yard at y 11.83: the Top stands 0.088 m before the cloth (24 of its vertices inside the sail's rows)"
+ }
+]

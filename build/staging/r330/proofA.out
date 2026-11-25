@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a course and a mast read that disagree on the top",
+  "detail": "masts[0] (station 0.115): courseRead puts the top on row 563 and mastHeightsRead on row 600, off the same plate (build/staging/r328/dl/hollar-flute.jpg)"
+ }
+]

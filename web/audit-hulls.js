@@ -7784,7 +7784,12 @@
        the SILENCE convicts. A read carries its plate rows, and its value is the mean of the two deck datums' shares
        (0.005). BUILT: the course mesh records where it hangs (`userData.courseAt`, from 'record' | 'class'); a read is
        drawn as the record's, a class yard as the class figure; and the yard's height over the mast's foot, over the
-       height of that mast's own TOP mesh over the foot, stands within the read's bound of the read. */
+       height of that mast's own TOP mesh over the foot, stands within the read's bound of the read.
+       r330 (0y¹⁷⁴): r329 read the fluyt's fore top on the row where her course yard crosses the mast, and built the top
+       1.02 m low. A course read and a mast read are two reads of the same top: where a mast carries both off the same plate
+       file, their top rows agree within 1 px ('a course and a mast read that disagree on the top'). A course yard hangs
+       in its slings under the top, so a read at 0.97 of the deck-to-top height or more means one of the two rows is
+       the other feature ('a course read at its own top'). */
     {
       const courseM = [], topM = [];
       g.traverse(o => { if (o.isMesh && o.userData.courseAt) courseM.push(o);
@@ -7803,6 +7808,13 @@
           const w = R.rows, a = (w.deckRail - w.yard) / (w.deckRail - w.top), b = (w.deckHidden - w.yard) / (w.deckHidden - w.top);
           if (Math.abs((a + b) / 2 - R.ofDeckToTop) > 0.005)
             say(v.id, 'a course read off its own rows', `${at}: rows give ${a.toFixed(3)} and ${b.toFixed(3)} (mean ${((a + b) / 2).toFixed(3)}) against ofDeckToTop ${R.ofDeckToTop}`);
+        }
+        if (R && typeof R.ofDeckToTop === 'number' && R.ofDeckToTop >= 0.97)   // r330
+          say(v.id, 'a course read at its own top', `${at}: courseRead.ofDeckToTop ${R.ofDeckToTop}; a course yard hangs in slings under its top, so one of the two rows read is the other feature`);
+        {
+          const MR = mk.mastHeightsRead, file = s => String(s || '').split(' (')[0];
+          if (R && R.rows && MR && MR.rows && typeof MR.rows.top === 'number' && file(R.plate) === file(MR.plate) && Math.abs(R.rows.top - MR.rows.top) > 1)
+            say(v.id, 'a course and a mast read that disagree on the top', `${at}: courseRead puts the top on row ${R.rows.top} and mastHeightsRead on row ${MR.rows.top}, off the same plate (${file(R.plate)})`);
         }
         const mine = courseM.filter(o => o.userData.courseAt.mast === mi);
         if (mine.length !== 1) { say(v.id, 'a course that does not say where it hangs', `${at}: ${mine.length} course meshes record where they hang, 1 expected`); return; }

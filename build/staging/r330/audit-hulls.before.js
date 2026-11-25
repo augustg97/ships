@@ -1,0 +1,12329 @@
+/* ── THE HULL AUDIT ───────────────────────────────────────────────────────────────────────
+ * Paste into the console on any page of the app, or run it from a capture harness.
+ *
+ * WHY THIS EXISTS. The frame ratchet compares each view against its own last picture, so it
+ * catches CHANGE and is blind to WRONGNESS: `ship-titanic` sat green for rounds while showing a
+ * liner with no superstructure, four funnels stacked into two positions in her after half, and
+ * 47 m of stack against a real 19. `ship-container` sat green while photographing the ship of
+ * the line. A baseline says "the same as last time"; it never says "right".
+ *
+ * So this asks questions of the MODEL rather than of the picture, and every one of them is a
+ * fact about ships rather than a threshold someone liked the look of:
+ *
+ *   AIR DRAUGHT. Nothing above a hull's deck is taller than the hull is long. Masts and funnels
+ *     have real proportions and a 263 m battleship does not carry a 126 m mast.
+ *   THE SILHOUETTE IS BUILT. A ship that declares funnels or turrets or boxes must draw them,
+ *     and a steam vessel that declares decks must have a deckhouse with geometry in it — the
+ *     Titanic's superstructure was tagged and EMPTY, which no picture-diff can see.
+ *   FUNNELS DO NOT SHARE A FRAME. Two uptakes at the same station is two boiler casings in one
+ *     place. Checked against the drawn positions, not the intended ones.
+ *   NOTHING HANGS OVER THE SIDE. A deckhouse wider than the beam is the jutting fault of round
+ *     4, and it is cheap to assert against forever.
+ *   FUNNEL AND MAST PROPORTIONS. Against the vessel's own stated dimensions, with the bounds
+ *     wide enough that only an absurdity trips them.
+ *
+ * Add a rule whenever a fault gets past the ratchet. That is the whole discipline: the picture
+ * ratchet defends against regression, this defends against being wrong in the first place.
+ */
+(async function auditHulls() {
+  /* async since round 84: the shore rules drive the app's own patch loader and must await
+     it. Both runners eval this and get the promise; playwright resolves promises itself. */
+  /* ⚠ NOT window.APP. Classic scripts share one global SCOPE, but a top-level `const` creates
+     a lexical binding rather than a property of window — so `window.APP` is undefined while
+     bare `APP` resolves. This project has been caught by that twice; the audit was caught by it
+     on its first run and reported a clean sweep of zero ships. */
+  const list = (typeof APP !== 'undefined' && (APP.vessels.vessels || APP.vessels)) || [];
+  const problems = [];
+  const rows = [];
+  const say = (id, rule, detail) => problems.push({ id, rule, detail });
+
+  /* ── THE PROVENANCE IS MERGED BEFORE ANY RULE READS THE RECORD (round 274) ────────────
+     The published record (docs/) carries its provenance strings in data/provenance.json,
+     fetched on demand by APP.loadProvenance() and merged into APP.vessels in place; served
+     from web/ the record is whole and the loader merges nothing. Every silence rule below —
+     a head, a platform, a deck depth, a castle, a shroud count, a yard list with no provenance — reads the
+     merged record, so a split that lost a string would convict as the silence it is. What
+     that cannot see is a string that arrived and found no home (a path the builder of the
+     split writes in one grammar and this reader parses in another): A-PROVENANCE-HOME
+     convicts each such string by its path, and a split file that merged nothing at all. */
+  const PROV = (typeof APP !== 'undefined' && APP.loadProvenance)
+    ? await APP.loadProvenance() : { split: false, merged: 0, missed: [] };
+  if (PROV.split && PROV.merged === 0)
+    say('(record)', 'a split provenance file that merged nothing',
+        'data/provenance.json was served and no string of it found a record');
+  for (const m of PROV.missed)
+    say(m.split(':')[0], 'a provenance string with no home',
+        `${m} — the path finds no object in the record to hold it`);
+
+  /* ── ONE WORD FOR A SIDE (round 269, 0y⁵³) ─────────────────────────────────────────────
+     The hull frame is right-handed with +x aft and +y up, so +z is PORT: the beam b=90 looks
+     at, the side every fore-and-aft cloth sheets to, measured on screen in r254/side.json
+     (from ahead at b=0, +z stands on the viewer's right). From r247 to r268 every rule that
+     named a side wrote its own ternary on a sign and read z− as port, the mirror of the app's
+     word — right about the geometry, wrong about the word, in every message. No rule spells
+     the word now: sideOf takes any signed athwartships quantity — a z, a sign, a double hull's
+     lane — and returns the app's word for it, off a three-word table so the helper itself is
+     not a ternary. A-SIDE-WORD at the end reads the source for a ternary that spells one. */
+  const SIDE_WORD = ['starboard', 'centreline', 'port'];          // indexed by Math.sign(z) + 1
+  const sideOf = z => SIDE_WORD[Math.sign(+z) + 1];
+  /* ── THE LOFT'S DECK-LEVEL LINE (round 294): x(u) = (u − 0.5) lwl + rake(u), hull.js hullSurface.rake —
+     the line every mast foot, island end and deck-level fitting is placed on. It is linear in u only
+     between the forefoot and the run; inside them the two overhangs are absorbed quadratically, so at
+     deck level u 0 is the stem head (−lwl/2 − stemRake·loa) and u 1 the stern end. Every rule that
+     turns a u or a plate distance into an x along the deck goes through this one function (A-STATIONS,
+     A-ISLANDS); a rule that multiplies u by lwl is wrong by the overhang anywhere inside the ends —
+     the r292 island rule agreed with a builder that made the same error, and neither could see it. */
+  const loftDeckX = (H, u) => {
+    const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
+    let r = 0;
+    if (u < H.forefoot) { const k = (H.forefoot - u) / H.forefoot; r = -(H.stemRake || 0) * rs * k * k * H.loa; }
+    else if (u > 1 - H.run) { const k = (u - (1 - H.run)) / H.run; r = (H.sternRake || 0) * rs * k * k * H.loa; }
+    return (u - 0.5) * H.lwl + r;
+  };
+
+  /* ── AN ASTERISK THE RENDERER CANNOT SPEND (round 180) ────────────────────────────────
+     rows, cite and text are markdown-bearing fields, and every path that renders them now
+     spends the emphasis through inlineMD/proseHTML (bold first, then italic). A star that
+     survives that pass has no meaning to the renderer: it prints as itself in the panel —
+     the r178 kalba fault, as data rather than as a render path. A fact about the record,
+     not the geometry, so it sweeps every card collection, not only hulls. */
+  {
+    const spend = s => String(s == null ? '' : s)
+      .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+    const sweep = (coll, items) => (items || []).forEach(it => {
+      const id = `data:${coll}/${it.id || it.name || '?'}`;
+      (it.rows || []).forEach((r, i) => [0, 1].forEach(j => {
+        if (spend(r[j]).includes('*'))
+          say(id, 'an asterisk the renderer cannot spend',
+              `rows[${i}][${j}] = ${JSON.stringify(String(r[j]).slice(0, 60))}`);
+      }));
+      for (const f of ['cite', 'text'])
+        if (spend(it[f]).includes('*'))
+          say(id, 'an asterisk the renderer cannot spend',
+              `${f} = ${JSON.stringify(String(it[f]).slice(0, 60))}`);
+    });
+    const V = (APP.voyages && (APP.voyages.voyages || APP.voyages)) || [];
+    const C = (APP.chapters && APP.chapters.chapters) || [];
+    const B = (APP.battles && APP.battles.battles) || [];
+    const P = (APP.ports && APP.ports.ports) || [];
+    sweep('vessels', list);
+    sweep('voyages', V);
+    sweep('chapters', C);
+    sweep('battles', B);
+    sweep('ports', P);
+
+    /* ── AND A TITLE SLOT CANNOT SPEND ONE AT ALL (round 181) ───────────────────────────
+       Names and titles are plain-text slots: cTitle/cSub and the hover tag go out through
+       textContent, the voyage list interpolates v.name into raw HTML, and no title path
+       runs inlineMD — so in a title slot even a well-formed pair of stars prints as
+       punctuation. One star convicts, spent or not. Voyage LEG names are in scope though
+       nothing renders them today: a slot with no renderer is exactly where a star lies
+       latent until someone wires the field into a label (the r180→r181 Magellan leg). */
+    const titles = (coll, items, fields) => (items || []).forEach(it => {
+      const id = `data:${coll}/${it.id || it.name || it.title || '?'}`;
+      for (const f of fields)
+        if (String(it[f] == null ? '' : it[f]).includes('*'))
+          say(id, 'an asterisk in a title slot',
+              `${f} = ${JSON.stringify(String(it[f]).slice(0, 60))}`);
+      (it.legs || []).forEach((l, i) => {
+        if (String(l.name == null ? '' : l.name).includes('*'))
+          say(id, 'an asterisk in a title slot',
+              `legs[${i}].name = ${JSON.stringify(String(l.name).slice(0, 60))}`);
+      });
+    });
+    titles('vessels', list, ['name', 'sub']);
+    titles('voyages', V, ['name', 'dates']);
+    titles('chapters', C, ['title', 'short', 'years', 'stat', 'lede']);
+    titles('battles', B, ['name', 'date', 'campaign']);
+    titles('ports', P, ['name', 'modern', 'eyebrow', 'kind']);
+  }
+
+  for (const v of list) {
+    /* ── A SPEED FLOOR MUST NAME WHAT DRIVES IT (round 104) ─────────────────────────────
+       The Shipwright's cap prints "under <word>" for any polar floor, and the word was
+       guessed off the RIG string — /oar/ or else 'paddle'. Endurance's barquentine rig
+       string says nothing about her 350 ihp auxiliary, so her steam floor printed
+       "4.0 kn UNDER PADDLE" on a screw steamer, for as long as she has had a card. The
+       floor now carries its means as data (`polar.floor.by`), the card prints the
+       record's own word, and this convicts any floor that does not say — plus the exact
+       fault that happened: a floor whose own provenance attests steam while its label
+       claims muscle. Sits before the hull gate because it is a fact about the record,
+       not the geometry. */
+    if (v.polar && v.polar.floor) {
+      const fb = v.polar.floor;
+      if (!/^(oar|paddle|steam|motor)$/.test(fb.by || ''))
+        say(v.id, 'speed floor with no means', `floor.by = ${JSON.stringify(fb.by)}`);
+      else if (/steam|\bihp\b|\bbhp\b/i.test(fb.source || '') && !/^(steam|motor)$/.test(fb.by))
+        say(v.id, 'floor attests steam but claims muscle',
+            `floor.by = ${fb.by}; the floor's own source says steam`);
+    }
+    if (!v.hull) continue;
+    const H = v.hull;
+    /* r315 (0y¹⁴⁹): a segment rig's crossjack — the builder's isMizzen (the aftermost of three or more masts),
+       square, no `yards` list, more than one tier */
+    const isSegCrossjack = mk => !!(H && mk && mk.rig === 'square' && !mk.yards && (mk.only || 3) > 1
+      && (H.masts || []).length >= 3 && mk.at === Math.max(...(H.masts || []).map(m2 => m2.at)));
+
+    /* ── D-CASTLES, THE RECORD (round 243): A HULL ROW THAT NAMES A CASTLE MUST DECLARE ONE.
+       The carrack's own Hull row read 'forecastle forward, high rounded stern with aftcastle'
+       for 243 rounds while her data declared neither, so the Shipwright drew a flush-decked
+       barque and every check downstream read 'generated, moderate' and stopped. The record's
+       words and the record's data are read against each other here: a Hull row naming a
+       castle (or a poop) must be matched by `castle` (the cog's open platform), `castles`
+       (the walled tiers of the southern tradition), `poop` (a junk's tiered quarters) or a
+       liner's raised ends (hull.islands since r295). And a `castles` declaration without its
+       provenance is the Azzam-cluster fault in a new field: nothing bounds the claim. */
+    {
+      const hullRow = (v.rows || []).find(r => Array.isArray(r) && /^hull$/i.test(String(r[0]).trim()));
+      /* scoped to timber builds this round: Queen Mary 2's Hull row names 'a true forecastle' — a
+         liner's raised end, which hull.islands carries where it is read, and her house runs from u 0.079
+         to the stern with no well — and the first r243 run convicted her (r243/audit.out). Whether
+         her bow's mooring deck is a raised forecastle the model must draw is a question for her
+         plates, named as residual (0l); the rule reaches steel when that is answered. */
+      const timber = !/^(steel|iron)$/.test(String(H.build || ''));
+      const names = timber && hullRow && /castle|\bpoop\b/i.test(String(hullRow[1]));
+      const declares = !!(H.castle || H.castles || H.poop || (H.islands && H.islands.list));
+      if (names && !declares)
+        say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop, islands or raised ends in the data`);
+      if (H.castles && !H.castlesProvenance)
+        say(v.id, 'castles with no provenance', 'hull.castles declared, hull.castlesProvenance absent');
+      if (H.castles) for (const end of ['fore', 'aft']) {
+        const c = H.castles[end]; if (!c) continue;
+        if (!(Array.isArray(c) && c.length === 3 && c[0] >= 0 && c[1] <= 1 && c[1] > c[0] && c[2] >= 1))
+          say(v.id, 'a castle declared out of shape', `castles.${end} = ${JSON.stringify(c)}; want [fromU, toU, tiers]`);
+      }
+    }
+    /* ── A RECORDED DECK COVERING MUST BE DRAWABLE, AND MUST SAY WHERE IT CAME FROM
+       (round 106). The covering became data (`hull.deck`) when Azzam's teak arrived;
+       hull.js falls back silently to the old heuristic for any covering it does not
+       know, so a typo'd covering would print an "INFERRED" card against a record that
+       states the fact — the record ignored without a word. And a stated material with
+       no source is the Azzam-cluster fault in a new field: nothing bounds what the
+       claim can support. Sits before the geometry rules because it is a fact about
+       the record. */
+    if (H.deck) {
+      if (!/^(teak|hinoki|pine|wood|steel|bare)$/.test(H.deck.covering || ''))
+        say(v.id, 'deck covering unknown to the model',
+            `hull.deck.covering = ${JSON.stringify(H.deck.covering)}; the registry `
+            + 'draws teak/hinoki/pine/wood/steel/bare, and an unknown word falls back to '
+            + 'the heuristic silently');
+      else if (!(H.deck.provenance && H.deck.provenance.length > 20))
+        say(v.id, 'deck covering with no provenance',
+            `hull.deck.covering = ${H.deck.covering} but no source is recorded`);
+    }
+
+    /* ── A RECORDED STEAM PLANT MUST SHOW ITS UPTAKE (round 103) ────────────────────────
+       Endurance carried a 350 ihp coal-fired auxiliary — her card says so, her polar's
+       steam floor says so — and for 40 rounds she drew no funnel at all, because funnels
+       are opt-in (`hull.funnels`) and nothing cross-examined the record against the
+       silhouette. The ratchet was structurally blind: a funnel that never existed never
+       CHANGED. So: any vessel whose own record attests steam (the word in her rows or in
+       her polar's provenance, with ihp/bhp as corroborators) and whose hull predates 1950
+       must declare at least one funnel. Post-1950 plants breathe through casings and
+       nuclear ships have no stack worth the name, so the gate closes there. */
+    if ((H.year || 0) < 1950) {
+      const recordText = JSON.stringify([v.rows || [], (v.polar || {}).anchor || {},
+                                         (v.polar || {}).floor || {}, v.sub || '']);
+      if (/steam|\bihp\b|\bbhp\b/i.test(recordText) && !(H.funnels >= 1))
+        say(v.id, 'steam attested, no funnel drawn',
+            `year ${H.year}; record says steam; hull.funnels = ${H.funnels}`);
+    }
+
+    /* ── A RECORDED WINDOW GROUP MUST LIE WHERE ITS SURFACE IS (round 96) ───────────────
+       tierBands.groups and hullRows put glazing at recorded u-spans and heights. A group
+       outside its wall, or a hull row above the freeboard, maps past the surface's own
+       coordinate range and silently never draws — the multiply-by-zero family, invisible
+       to the ratchet because nothing changes. Checked on the record, before the build. */
+    if (H.tierBands && H.tierBands.groups) {
+      const [hA2, hB2] = H.houseAt || [0.10, 0.90];
+      for (const ti in H.tierBands.groups)
+        for (const gr of H.tierBands.groups[ti]) {
+          if (!(gr[0] < gr[1]))
+            say(v.id, 'window group inverted', `tier ${ti} group [${gr[0]}, ${gr[1]}]`);
+          if (gr[0] < hA2 - 0.03 || gr[1] > hB2 + 0.03)
+            say(v.id, 'window group outside its wall',
+                `tier ${ti} group [${gr[0]}, ${gr[1]}] vs house ${hA2}-${hB2}`);
+        }
+    }
+    if (H.hullRows && H.hullRows.groups) {
+      for (const gr of H.hullRows.groups) {
+        if (!(gr.u[0] < gr.u[1]) || gr.u[0] < 0 || gr.u[1] > 1)
+          say(v.id, 'hull row group off the hull', `u [${gr.u[0]}, ${gr.u[1]}]`);
+        if (gr.hM[1] > (H.freeboard || 6) + 0.01 || gr.hM[0] < 0 || !(gr.hM[0] < gr.hM[1]))
+          say(v.id, 'hull row beyond the freeboard',
+              `hM [${gr.hM[0]}, ${gr.hM[1]}] vs freeboard ${H.freeboard}`);
+      }
+    }
+
+    /* ── A RECORDED BAND HEIGHT MUST LIE INSIDE ITS OWN TIER (round 97) ─────────────────
+       bandsM places a tier's glazing at [sill, head] metres over the waterline; the wall
+       that draws it spans that tier's floors. A band past its floor or ceiling converts to
+       a fraction outside 0..1 and the builder's clamp quietly parks it at the tier edge —
+       drawn, but not where the plate read it, which no picture-diff can prove wrong.
+       Checked on the record, before the build. */
+    if (H.tierBands && H.tierBands.bandsM && H.tierFloorsM) {
+      const nT = H.decks || 0;
+      const fl = i => i <= 0 ? (H.freeboard || 0)
+        : i >= nT ? (H.houseTopM !== undefined ? H.houseTopM : Infinity)
+        : (H.tierFloorsM[i - 1] !== undefined ? H.tierFloorsM[i - 1] : Infinity);
+      for (const ti in H.tierBands.bandsM) {
+        const bm = H.tierBands.bandsM[ti], i = +ti;
+        if (!(bm[0] < bm[1]) || bm[0] < fl(i) - 0.01 || bm[1] > fl(i + 1) + 0.01)
+          say(v.id, 'tier band outside its tier',
+              `tier ${ti} band ${bm[0]}-${bm[1]} m vs floors ${fl(i)}-${fl(i + 1)}`);
+      }
+    }
+
+    /* ── A FOOTING MUST STAND ON A TERRACE THAT REACHES IT (round 97) ───────────────────
+       cluster.domes[].onTier plants a dome on that tier's roof. Round 95 recorded the aft
+       pair at u 0.763/0.803 on tier 2 while the measured tier-2 wall ends at 0.744: the
+       dome would stand on air past its own terrace, and the contact looks fine in any
+       elevation because the miss is fore-and-aft. Checked on the record. */
+    if (H.cluster && H.cluster.domes) {
+      const [hA3, hB3] = H.houseAt || [0.10, 0.90];
+      for (const dm of H.cluster.domes) {
+        if (dm.onTier === undefined) continue;
+        const aft = (H.tierAftU && H.tierAftU[dm.onTier] !== undefined)
+          ? H.tierAftU[dm.onTier] : hB3;
+        if (dm.u < hA3 - 0.01 || dm.u > aft + 0.01)
+          say(v.id, 'dome past its terrace',
+              `dome u ${dm.u} on tier ${dm.onTier}, terrace ends ${aft}`);
+      }
+    }
+
+    /* ── A TERRACED STERN DESCENDS, CONTIGUOUSLY (round 98) ─────────────────────────────
+       sternSteps records the bulwark cap line the broadside reads, span by span, and the
+       derived deck behind each parapet. A gap between spans leaves a slice of hull on the
+       OLD sheer; an ascending cap line puts a terrace above the one forward of it; a deck
+       above its own cap is a parapet of negative height. All record errors the picture
+       cannot see, because the build would draw each of them faithfully. */
+    if (H.sternSteps) {
+      const ss = H.sternSteps.steps || [];
+      for (let i = 0; i < ss.length; i++) {
+        const st = ss[i];
+        if (!(st.u[0] < st.u[1]) || st.u[0] < 0 || st.u[1] > 1)
+          say(v.id, 'stern step span inverted', `step ${i} u [${st.u[0]}, ${st.u[1]}]`);
+        if (i && Math.abs(ss[i - 1].u[1] - st.u[0]) > 0.001)
+          say(v.id, 'stern steps not contiguous',
+              `step ${i - 1} ends ${ss[i - 1].u[1]}, step ${i} starts ${st.u[0]}`);
+        if (i && st.topM[0] > ss[i - 1].topM[1] + 0.05)
+          say(v.id, 'stern cap line ascends aft',
+              `step ${i} fwd top ${st.topM[0]} m over step ${i - 1} aft top ${ss[i - 1].topM[1]} m`);
+        if (st.deckM !== undefined) {
+          const para = Math.min(st.topM[0], st.topM[1]) - st.deckM;
+          if (para < 0.4 || para > 2.0)
+            say(v.id, 'stern parapet off human height',
+                `step ${i} deck ${st.deckM} m under cap ${st.topM} m — parapet ${para.toFixed(2)} m`);
+          if (st.deckM > (H.freeboard || 6))
+            say(v.id, 'stern step deck above the freeboard',
+                `step ${i} deck ${st.deckM} m on ${H.freeboard} m freeboard`);
+        }
+      }
+    }
+
+    let g = null;
+    try { g = SHIPS_HULL.buildShip(H, { fine: true }); }
+    catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }
+
+    /* what actually got built, by part and by mesh */
+    /* ⚠ AND A TAG SITS ON THE GROUP, NOT ON EVERY MESH IN IT. First run, this asked for
+       `o.isMesh && userData.part` and reported that the Titanic had no superstructure and the
+       container ship no containers — both of which are groups carrying one tag over untagged
+       children. The audit was wrong about two of the three things it was built to catch. A part
+       is the nearest tagged ANCESTOR of a mesh. */
+    const tagOf = o => { for (let e = o; e; e = e.parent)
+                           if (e.userData && e.userData.part) return e.userData.part;
+                         return null; };
+    /* (r187) parts that cannot BEAR: a rest-ray asking what surface is under a
+       stow must not accept a rope or an oar shaft as the answer — the sekibune's
+       forestay crossed the anchor's rest-ray 0.44 m over the planking and the
+       first live run convicted a seated anchor as stabbed-through. Every deck is
+       a surface; a line crossing over one is not. r193 adds the mast shaft by
+       the same measurement: the dhow's raked foremast crossed the grapnel's
+       rest-ray 0.85 m over the planking (probe, before any live run) — a stow
+       lies BESIDE a mast foot, never on the shaft leaning over it. */
+    const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
+                                'sheet', 'tack', 'ratline', 'oar', 'mast', 'parrel']);
+
+    /* r155: the record may attest the FLAG-BUTTON (`truckM`, deck-to-truck) instead of a
+       lower-mast length — every expectation below that derives from the lower must mirror
+       hull.js's own solution (lower = truckM / 1.708 for the full square stack), or a
+       truckM record reads as a mast of height zero and every mast rule fires on it. */
+    /* r300: a pole recorded by its truck over the water (`truckWLM`) is the truck less the deck at
+       its foot, hull.js's own derivation */
+    const HSlo = (H.masts || []).some(mk => mk.truckWLM !== undefined) ? SHIPS_HULL.hullSurface(H) : null;
+    const lowerOf = mk => {
+      if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;   // r318
+      if (mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+        return mk.mastHeightsM.top / mk.lateenTopmast.topOfLower;   // r329, hull.js mastLowerOf
+      if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+        return mk.truckM * mk.capFrac;                       // r304, hull.js mastLowerOf
+      if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
+        return mk.truckWLM - HSlo.deck(mk.at);
+      if (mk.truckM !== undefined && mk.rig === 'square') {
+        const K = mk.only === 1 ? 1.0 : mk.only === 2 ? 0.88 + 0.60
+                : 0.88 * (1 + 0.60) + 0.30;
+        return mk.truckM / K;
+      }
+      return mk.heightM !== undefined ? mk.heightM
+                                      : (mk.height || 0) * (H.lwl + H.beam) / 2;
+    };
+
+    /* ── NOTHING ABOARD IS NaN ──────────────────────────────────────────────────────────
+       Round 86: the first lateen mast with an ATTESTED height (`heightM`, the galley) hit
+       a yard-share formula that assumed the Steel-share form of the record; both masts,
+       both yards and both sails built with NaN in every position, the ship's bounding box
+       went NaN with them, the camera fit died of it, and the Shipwright showed a black
+       canvas behind working panels. The ratchet cannot convict a NEW frame (no baseline),
+       and no proportion rule fires on a value that is not a number — so the audit walks
+       every vertex of every mesh. One non-finite float anywhere is a conviction. */
+    {
+      const bad = {};
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+        const a = o.geometry.attributes.position.array;
+        for (let i = 0; i < a.length; i++)
+          if (!Number.isFinite(a[i])) {
+            const p = tagOf(o);
+            bad[(p && p.name) || o.geometry.type] = true;
+            return;
+          }
+      });
+      const names = Object.keys(bad);
+      if (names.length)
+        say(v.id, 'geometry with non-finite vertices',
+            `NaN positions in: ${names.join(', ')} — the black-canvas class`);
+    }
+
+    /* ── A TRIANGLE IS DRAWN ONCE (round 156) ───────────────────────────────────────────
+       The both-ways index trick — the same three vertices indexed AGAIN in opposite
+       winding so a strip reads from below — breaks computeVertexNormals: each cancelling
+       pair is an exact FP negation, but per-vertex accumulation is not associative, so
+       about half the sums come out exactly zero (normalize's `|| 1` guard keeps them —
+       unlit) and the rest come out ~1e-16 dust that normalize amplifies to a FULL UNIT
+       vector in an arbitrary direction (lit upside-down). The plank reads as alternating
+       washed and dark bands — r118 saw exactly this on the sangjang wall, fixed that one
+       instance (single winding on a DoubleSide clone) and named the class; this is the
+       class rule. A magnitude test cannot convict it — the garbage normals are unit
+       length — so the rule convicts the PATTERN: one unordered vertex triple drawn
+       twice in one indexed geometry. Opposite winding is the both-ways form; same
+       winding is a double draw, the z-fight form. Both convict. */
+    {
+      const bad = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry || !o.geometry.index) return;
+        const ia = o.geometry.index.array;
+        const seen = new Set(); let dup = 0;
+        for (let i = 0; i < ia.length; i += 3) {
+          const t = [ia[i], ia[i + 1], ia[i + 2]].sort((a, b) => a - b).join(',');
+          if (seen.has(t)) dup++; else seen.add(t);
+        }
+        if (dup) {
+          const p = tagOf(o);
+          bad.push(`${(p && (p.name || p.key)) || o.geometry.type}: ${dup} of ${ia.length / 3}`);
+        }
+      });
+      if (bad.length)
+        say(v.id, 'triangles drawn twice over the same vertices',
+            `${bad.join('; ')} — the both-ways class: computeVertexNormals cancels `
+            + 'shared windings to zeros and unit garbage');
+    }
+
+    const part = {};
+    g.traverse(o => {
+      if (!o.isMesh) return;
+      const p = tagOf(o);
+      if (!p) return;
+      const bb = new THREE.Box3().setFromObject(o);
+      const e = part[p.key] || (part[p.key] = { n: 0, x: [1e9, -1e9], y: [1e9, -1e9], z: [1e9, -1e9], xs: [] });
+      e.n++; e.xs.push((bb.min.x + bb.max.x) / 2);
+      e.x[0] = Math.min(e.x[0], bb.min.x); e.x[1] = Math.max(e.x[1], bb.max.x);
+      e.y[0] = Math.min(e.y[0], bb.min.y); e.y[1] = Math.max(e.y[1], bb.max.y);
+      e.z[0] = Math.min(e.z[0], bb.min.z); e.z[1] = Math.max(e.z[1], bb.max.z);
+    });
+    const deckY = part.deck ? part.deck.y[1] : 0;
+    /* the deck at the MAST, for the rig rules: the deck's highest vertex — unless the record
+       gives the hull a FOREDECK (deck.foredeck, round 232), when that vertex is the bow platform
+       a level over the deck the mast is stepped on; then the mast's own foot, which is the deck
+       at its station by construction. Without the field, byte-identical. */
+    const mastDeckY = (part.deck && H.deck && H.deck.foredeck && part.mast) ? part.mast.y[0] : deckY;
+    const bb = new THREE.Box3().setFromObject(g);
+    const airM = bb.max.y - deckY;
+
+    /* ── HOLD FURNITURE REQUIRES A HOLD (round 120) ─────────────────────────────────────
+       A grating covers a hatch — an opening through a laid deck into a hold — and a
+       capstan stands ON a deck, heaving cable. Both were gated on "timber" for as long as
+       buildFittings has existed, so the 8.6 m dugout and the voyaging canoe (the record's
+       deckLaid: false — an open log, and a lashed platform between two open hulls) carried
+       three hatch gratings and a bar-capstan whose bars overhung the sides. The
+       expectation here is read off the RECORD, independently of the builder's own
+       deckCovering() judgement, so a bug in that one judgement cannot hide from this rule.
+       Two arms: an undecked hull draws NO hold furniture, and a decked timber hull STILL
+       draws hers — so the gate that fixed the class cannot silently widen and strip the
+       fleet's working ships of their hatches. */
+    {
+      const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+      const timber = !(H.build === 'iron' || H.build === 'steel');
+      const steelDeck = H.deck && H.deck.covering === 'steel';
+      /* r172: the capstan left this rule — its presence is the RECORD's (`capstan`
+         field, the round-172 rule below), not an inference from timber-and-decked;
+         that inference put a Georgian bar capstan on a trireme for 172 rounds. The
+         gratings arm stays: a hatch through a laid deck is what a laid deck IS. */
+      for (const k of ['grating']) {
+        if (undecked && part[k])
+          say(v.id, 'hold furniture on an undecked hull',
+              `${part[k].n} ${k} mesh(es) drawn, but the record declares deckLaid: false — `
+              + 'no laid deck, no hatch to cover');
+        else if (!undecked && timber && !steelDeck && !part[k])
+          say(v.id, `a decked timber ship lost her ${k}`,
+              'the hull is timber and the record does not refuse a laid deck, so hatch '
+              + 'gratings belong aboard and none is drawn');
+      }
+      if (undecked && part.capstan)
+        say(v.id, 'hold furniture on an undecked hull',
+            `${part.capstan.n} capstan mesh(es) drawn on a hull with no laid deck — `
+            + 'nothing for a capstan to stand on');
+    }
+
+    /* ── AN OPEN HULL SHOWS HER GEAR, AND THE GEAR LIES IN THE HOLLOW (round 127) ───────
+       deckLaid: false bought an empty hollow for 122 rounds. Both undecked hulls attest
+       their gear in their own rows — the dugout steers with "the paddle itself" and her
+       one measured figure is a paddled crossing; the canoe's rows say "a long paddle,
+       not a rudder" and "lashed-lug planking" — and neither drew any of it. Three arms,
+       read off the record as always: an undecked hull DRAWS stowage; a decked hull draws
+       NONE (below her own deck it would be invisible, so a stowage part there means the
+       gate widened wrongly); and every piece lies INSIDE the hollow — under the rim
+       line, above the floor, inside the hull's own extents. The containment arm is what
+       no picture can promise: a paddle floating over the rail still reads as "gear" in
+       a frame, and only the bounds say it is adrift. A NEW open hull convicting on the
+       bare-floor arm is the rule working: its gear must be decided from its own record,
+       not inherited from another ship's stores. */
+    {
+      const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+      const st = part.stowage;
+      if (undecked && !st)
+        say(v.id, 'an open hull with a bare floor',
+            'the record lays no deck, so the floor is in plain sight — and the gear the '
+            + 'record itself attests (paddles, a bailer) is not drawn');
+      else if (!undecked && st)
+        say(v.id, 'stowage drawn on a decked hull',
+            `${st.n} stowage mesh(es) on a hull whose deck would hide them — the open-`
+            + 'hull gate widened wrongly');
+      if (undecked && st && part.deck) {
+        const eps = 0.03;
+        if (st.y[1] > part.deck.y[1] + eps)
+          say(v.id, 'stowed gear above the rim',
+              `gear tops at ${st.y[1].toFixed(2)} m against a rim line of `
+              + `${part.deck.y[1].toFixed(2)} m — adrift, not stowed`);
+        if (st.y[0] < part.deck.y[0] - eps)
+          say(v.id, 'stowed gear below the floor',
+              `gear bottoms at ${st.y[0].toFixed(2)} m against a floor of `
+              + `${part.deck.y[0].toFixed(2)} m — sunk through the hull`);
+        if (st.x[0] < part.deck.x[0] - eps || st.x[1] > part.deck.x[1] + eps
+            || st.z[0] < part.deck.z[0] - eps || st.z[1] > part.deck.z[1] + eps)
+          say(v.id, 'stowed gear outside the hull',
+              `gear spans x ${st.x[0].toFixed(2)}..${st.x[1].toFixed(2)}, `
+              + `z ${st.z[0].toFixed(2)}..${st.z[1].toFixed(2)} against the open hull's `
+              + `x ${part.deck.x[0].toFixed(2)}..${part.deck.x[1].toFixed(2)}, `
+              + `z ${part.deck.z[0].toFixed(2)}..${part.deck.z[1].toFixed(2)}`);
+      }
+    }
+
+    /* ── STEERING IS A FACT OF THE RECORD (round 121) ───────────────────────────────────
+       The rudder was added to every hull UNCONDITIONALLY, so the 68,000 BP dugout hung a
+       pintled stern rudder her card refuses ("Paddled"), the voyaging canoe carried one
+       per hull against her own row — "a long paddle, not a rudder" — and the sewn dhow
+       hung hers on an iron hinge under a construction row reading "no iron". The record
+       now declares the kind — paddle | quarter | median | stern | steel — and this rule
+       cross-examines the drawn parts against the declaration, both directions: what the
+       record refuses must not be drawn, what it declares must be drawn, and drawn the
+       right KIND in the right place. A record that declares nothing convicts too, because
+       the builder's fallback is exactly the guess-off-the-build-string this round retired. */
+    {
+      const st = H.steering;
+      if (!/^(paddle|quarter|median|stern|steel)$/.test(st || ''))
+        say(v.id, 'record declares no steering',
+            `hull.steering = ${JSON.stringify(st)}; the model draws paddle | quarter | `
+            + 'median | stern | steel, and an undeclared record leaves the builder '
+            + 'guessing off the build string — the round-121 fault standing again');
+      else if (st === 'paddle') {
+        for (const k of ['rudder', 'quarterRudder'])
+          if (part[k])
+            say(v.id, 'a paddled hull mounts steering',
+                `${part[k].n} ${k} mesh(es) drawn, but the record steers with a hand-held `
+                + 'paddle — nothing is hung on the hull');
+      } else {
+        const want = st === 'quarter' ? 'quarterRudder' : 'rudder';
+        const other = st === 'quarter' ? 'rudder' : 'quarterRudder';
+        if (!part[want])
+          say(v.id, 'declared steering not drawn',
+              `hull.steering = ${st} and no ${want} mesh exists`);
+        if (part[other])
+          say(v.id, 'steering of the wrong kind drawn',
+              `hull.steering = ${st} but ${part[other].n} ${other} mesh(es) drawn`);
+        if (st === 'quarter' && part.quarterRudder) {
+          const q = part.quarterRudder;
+          if (q.n !== 2)
+            say(v.id, 'a quarter-rudder pair is a pair',
+                `${q.n} quarter-rudder mesh(es); one steers over each quarter`);
+          else if (!(q.z[0] < -0.1 && q.z[1] > 0.1))
+            say(v.id, 'both quarter rudders on one side',
+                `z extent ${q.z[0].toFixed(2)}..${q.z[1].toFixed(2)} m does not straddle `
+                + 'the centreline');
+          if (q.y[0] > -0.15 * (H.draught || 1))
+            say(v.id, 'quarter rudder not immersed',
+                `blade bottoms at ${q.y[0].toFixed(2)} m on a ${H.draught} m draught — `
+                + 'a steering blade out of the water steers nothing');
+          if (q.y[1] < 0.3)
+            say(v.id, 'quarter rudder with no loom above the rail',
+                `head tops out at ${q.y[1].toFixed(2)} m — nothing for a helmsman to hold`);
+          if (q.xs && !q.xs.every(x => x > 0.15 * (H.lwl || 1)))
+            say(v.id, 'quarter rudder off the quarter',
+                `mesh centres at x ${q.xs.map(x => x.toFixed(1)).join(', ')} m — the `
+                + 'quarter is the after end of the run, well abaft amidships');
+        }
+        if (st === 'steel' && part.rudder && part.rudder.y[1] > 0.05)
+          say(v.id, 'steel rudder above the waterline',
+              `rudder tops at ${part.rudder.y[1].toFixed(2)} m; a motor ship's plate lives `
+              + 'wholly below the counter — the carrier fault of round 27');
+      }
+    }
+
+    /* ── THE TIMBER RUDDER HANGS ON THE POST (round 213) ─────────────────────────────
+       The stern-hung timber rudder was one vertical plate sampled at the waterline's after
+       end, while the sternpost it hangs on runs from u 0.90 at the keel to u 1.0 at the
+       sheer: on the cog the plate's leading edge stood two metres abaft the post's heel with
+       water between them, and above the sea it read as a pale slab (r173). The Bremen cog's
+       own irons survive — DSM I/10393/08, a gudgeon whose clamp plates gripped the post,
+       "four were needed", pintles down from the blade — and Lahn's Blatt 9 draws the blade
+       parallel to the post from heel to castle beam with the tiller level under the castle
+       deck. So a 'stern' rudder on a timber build is read from its vertices against the
+       post's: the STOCK's leading edge must lie on the post's after face at every height
+       they share (R-STOCK); the irons must be there, the record's count where the record
+       gives one, pintle and two clamp plates per hanging, each within the stock's height
+       (R-IRONS), and no two closer than a hand span (record-blind); where the record gives
+       a castle, a TILLER must exist, level, its head end at the stock's top, its hand end
+       under the castle deck at a standing man's height (R-TILLER, the stature arms
+       record-blind); and where the record gives the foot chord the blade must carry it
+       within 30% (R-CHORD). */
+    if (H.steering === 'stern' && !/^(steel|iron)$/.test(H.build || '')) {
+      const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
+      const post = (() => { let r = null; g.traverse(o => {
+        if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+      const stock = byName('rudder-stock'), planks = byName('rudder-plank'), bands = byName('rudder-band');
+      const pins = byName('rudder-pintle'), clamps = byName('rudder-gudgeon'), tillers = byName('rudder-tiller');
+      const world = o => {           // vertices in hull space (the hull group's frame)
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      if (!stock.length)
+        say(v.id, 'a rudder with no stock', 'no rudder-stock mesh on a stern-hung timber build');
+      else {
+        const sv = world(stock[0]);
+        let sy0 = 1e9, sy1 = -1e9; for (const q of sv) { sy0 = Math.min(sy0, q[1]); sy1 = Math.max(sy1, q[1]); }
+        /* R-STOCK: at every 0.3 m of shared height, the stock's leading edge against the
+           post's after face */
+        if (!post) say(v.id, 'a rudder with no post to hang on', 'no Sternpost mesh');
+        else {
+          /* the post's after face as a ridge (max x per centimetre of height), then the
+             stock's leading edge read at ITS OWN heights against the ridge interpolated
+             there — a height band compares two heights on a raked post and reads a gap
+             that is not there (the first draft convicted eleven faithful hulls) */
+          const pv = world(post), ridge = new Map();
+          for (const q of pv) { const k = Math.round(q[1] * 100); ridge.set(k, Math.max(ridge.get(k) ?? -1e9, q[0])); }
+          const rk = [...ridge.keys()].sort((a, b) => a - b);
+          const ridgeAt = y => {
+            const k = y * 100; if (k < rk[0] || k > rk[rk.length - 1]) return null;
+            let i = 0; while (i + 1 < rk.length && rk[i + 1] < k) i++;
+            const a = rk[i], b = rk[Math.min(i + 1, rk.length - 1)];
+            if (b === a) return ridge.get(a);
+            const t = (k - a) / (b - a); return ridge.get(a) + (ridge.get(b) - ridge.get(a)) * t;
+          };
+          const edge = new Map();
+          for (const q of sv) { const k = Math.round(q[1] * 100); edge.set(k, Math.min(edge.get(k) ?? 1e9, q[0])); }
+          let worst = 0, worstY = 0, seen = 0;
+          for (const [k, x] of edge) {
+            const px = ridgeAt(k / 100); if (px == null) continue;
+            seen++; const gap = x - px;
+            if (Math.abs(gap) > Math.abs(worst)) { worst = gap; worstY = k / 100; }
+          }
+          if (!seen) say(v.id, 'a rudder that shares no height with its post', `stock ${sy0.toFixed(2)}..${sy1.toFixed(2)} m`);
+          else if (worst > 0.30 || worst < -0.12)
+            say(v.id, 'a rudder hung off its post',
+                `stock's leading edge ${worst.toFixed(2)} m from the post's after face at ${worstY.toFixed(2)} m — `
+                + 'the irons clasp the post; the blade lies on it');
+        }
+        /* R-IRONS */
+        const want = H.rudder && H.rudder.hangings;
+        if (!bands.length) say(v.id, 'a rudder with no irons', '0 straps drawn; the Bremen gudgeons say four were needed');
+        else {
+          if (want && bands.length !== want)
+            say(v.id, "the irons off the record's count", `${bands.length} hangings drawn, record says ${want}`);
+          else if (!want && bands.length < 3)
+            say(v.id, 'too few irons for a stern-hung blade', `${bands.length} hangings`);
+          if (pins.length !== bands.length || clamps.length !== 2 * bands.length)
+            say(v.id, 'irons without their other half',
+                `${bands.length} straps, ${pins.length} pintles, ${clamps.length} clamp plates — one pintle and two plates per strap`);
+          const ys = bands.map(b => { const w = world(b); return w.reduce((a, q) => a + q[1], 0) / w.length; }).sort((a, b) => a - b);
+          for (const y of ys) if (y < sy0 - 0.05 || y > sy1 + 0.05)
+            say(v.id, 'an iron off the blade', `strap at ${y.toFixed(2)} m, stock ${sy0.toFixed(2)}..${sy1.toFixed(2)}`);
+          for (let i = 1; i < ys.length; i++) if (ys[i] - ys[i - 1] < 0.5)
+            say(v.id, 'irons closer than a hand span', `${(ys[i] - ys[i - 1]).toFixed(2)} m between hangings — record-blind`);
+        }
+        /* R-TILLER, record-gated on the castle */
+        if (H.castle && H.castle.fromU != null) {
+          if (!tillers.length) say(v.id, 'a castle with no tiller under it', 'record gives the castle; Ellmers puts the man at the tiller under its deck');
+          else {
+            const tv = world(tillers[0]);
+            let tx0 = 1e9, tx1 = -1e9, ty0 = 1e9, ty1 = -1e9;
+            for (const q of tv) { tx0 = Math.min(tx0, q[0]); tx1 = Math.max(tx1, q[0]); ty0 = Math.min(ty0, q[1]); ty1 = Math.max(ty1, q[1]); }
+            if (ty1 - ty0 > 0.3) say(v.id, 'a tiller that is not level', `${(ty1 - ty0).toFixed(2)} m of rise`);
+            if (sy1 < ty0 - 0.1) say(v.id, 'a tiller with no head to fit', `stock tops at ${sy1.toFixed(2)} m, tiller at ${ty0.toFixed(2)}`);
+            const uHand = 0.5 + tx0 / (H.lwl || 1);
+            if (uHand < H.castle.fromU || uHand > H.castle.toU)
+              say(v.id, 'a tiller whose hand end is not under the castle',
+                  `hand end at u ${uHand.toFixed(2)}, castle ${H.castle.fromU}–${H.castle.toU} — the man stood under the castle deck`);
+            if (H.rudder && H.rudder.tillerAtU != null && Math.abs(uHand - H.rudder.tillerAtU) > 0.12)
+              say(v.id, "the tiller off the record's station", `hand end u ${uHand.toFixed(2)}, record says ${H.rudder.tillerAtU}`);
+            /* stature, off the deck the man stands on: the weather deck's edge at the hand
+               (round 232; the castle deck less deckHM before, and the deck under the castle
+               is no longer a fixed headroom below it) */
+            let deckY = -1e9, seen = 0;
+            g.traverse(o => { if (!o.isMesh || o.name !== 'castle-deck') return;
+              for (const q of world(o)) if (Math.abs(q[0] - tx0) < 0.6) { deckY = Math.max(deckY, q[1]); seen++; } });
+            if (seen) {
+              let after = 1e9, bestD = 0.6;
+              g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || ''))) return;
+                for (const q of world(o)) { const d = Math.abs(q[0] - tx0); if (d < bestD - 1e-6) { bestD = d; after = q[1]; } else if (d <= bestD + 1e-6) after = Math.min(after, q[1]); } });
+              if (after > 1e8) after = deckY - (H.castle.deckHM || 1.95);
+              const hand = (ty0 + ty1) / 2 - after;
+              if (hand < 0.8 || hand > 1.7) say(v.id, 'a tiller nobody could hold', `${hand.toFixed(2)} m over the afterdeck at the hand`);
+              if (deckY - ty1 < 0.2) say(v.id, 'a tiller through the castle deck', `${(deckY - ty1).toFixed(2)} m under the planks`);
+            }
+          }
+        }
+        /* R-CHORD */
+        if (H.rudder && H.rudder.chordFootM) {
+          const all = sv.concat(...planks.map(world));
+          let lo = 1e9; for (const q of all) lo = Math.min(lo, q[1]);
+          let x0 = 1e9, x1 = -1e9;
+          for (const q of all) if (q[1] < lo + 0.35) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); }
+          const c = x1 - x0;
+          if (Math.abs(c - H.rudder.chordFootM) > 0.30 * H.rudder.chordFootM)
+            say(v.id, "the blade off the record's chord", `${c.toFixed(2)} m at the foot, record says ${H.rudder.chordFootM}`);
+        }
+      }
+    }
+
+    /* ── A STRAIGHT POST IS A LINE, AND THE PLANKING CLOSES ON IT (round 237) ─────────
+       The cog's sternpost ran buried inside the after body from u 0.90 at the keel to u 1.0
+       at the sheer, bent at the waterline (0.60 m/m under it, 0.51 over), while the skin
+       ended in a vertical cut 0.7 m abaft the post at the water; Lahn's Blatt 1 draws one
+       straight line at 110° from the keel's underside to a head under the stern beams, and
+       Tanner 2021 says why (the stern hook's upper scarf). Where the record carries
+       hull.sternpost.form 'straight' with angleToKeelDeg: the Sternpost mesh's after face
+       (max x per centimetre of height, the R-STOCK ridge) is fitted with a line over its
+       height less 0.2 m at each end — the slope within 0.05 m/m of tan(θ − 90°)
+       (R-POST-ANGLE), no point 0.08 m off the line (R-POST-STRAIGHT), the line's crossing of
+       the load waterline within 0.2 m of lwl/2 plus the post's moulding (R-POST-LWL, what
+       lwl means), the head within 0.2 m of headAboveKeelM where recorded (R-POST-HEAD), the
+       foot within 0.2 m of the keel (R-POST-FOOT); and the planking's aftmost vertex in
+       every 0.25 m of shared height neither abaft the post's after face by more than 0.05 m
+       nor more than 0.45 m short of it (R-POST-CLOSE — a skin standing abaft its post is
+       the vertical cut; daylight between them is a post the planks do not land on). A
+       record without the field is not read. */
+    if (H.sternpost && H.sternpost.form === 'straight' && H.sternpost.angleToKeelDeg != null) {
+      const SP = H.sternpost;
+      const post = (() => { let r = null; g.traverse(o => {
+        if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      if (!post) say(v.id, 'a straight sternpost with no post drawn', 'record gives sternpost.form straight; no Sternpost mesh');
+      else {
+        const pv = world(post), ridge = new Map();
+        for (const q of pv) { const k = Math.round(q[1] * 100); ridge.set(k, Math.max(ridge.get(k) ?? -1e9, q[0])); }
+        const ks = [...ridge.keys()].sort((a, b) => a - b);
+        const yLo = ks[0] / 100, yHi = ks[ks.length - 1] / 100;
+        const pts = ks.filter(k => k / 100 > yLo + 0.2 && k / 100 < yHi - 0.2).map(k => [k / 100, ridge.get(k)]);
+        const n = pts.length; let sy = 0, sx = 0, syy = 0, sxy = 0;
+        for (const [y, x] of pts) { sy += y; sx += x; syy += y * y; sxy += x * y; }
+        const slope = n > 2 ? (n * sxy - sx * sy) / (n * syy - sy * sy) : 0, icpt = n ? (sx - slope * sy) / n : 0;
+        const wantTan = Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180);
+        let worst = 0; for (const [y, x] of pts) worst = Math.max(worst, Math.abs(x - (icpt + slope * y)));
+        if (n < 3) say(v.id, 'a sternpost too short to read', `${n} centimetres of after face`);
+        else {
+          if (Math.abs(slope - wantTan) > 0.05)
+            say(v.id, 'the sternpost off its attested angle', `${(90 + Math.atan(slope) * 180 / Math.PI).toFixed(1)}° to the keel drawn, the record says ${SP.angleToKeelDeg}`);
+          if (worst > 0.08)
+            say(v.id, 'a straight sternpost drawn bent', `after face ${worst.toFixed(2)} m off its own line`);
+          const wantWL = H.lwl / 2 + 0.05 * H.draught;
+          if (Math.abs(icpt - wantWL) > 0.2)
+            say(v.id, "the sternpost off the waterline's after end", `after face ${icpt.toFixed(2)} m abaft midships at the water, lwl/2 and the moulding say ${wantWL.toFixed(2)}`);
+          if (SP.headAboveKeelM != null && Math.abs((yHi + H.draught) - SP.headAboveKeelM) > 0.2)
+            say(v.id, "the sternpost's head off its attested height", `${(yHi + H.draught).toFixed(2)} m over the keel, the record says ${SP.headAboveKeelM}`);
+          if (yLo > -H.draught + 0.2)
+            say(v.id, 'a sternpost whose foot stands above the keel', `foot ${(yLo + H.draught).toFixed(2)} m over the keel's rabbet`);
+        }
+        /* R-POST-CLOSE */
+        const skins = []; g.traverse(o => { const p = o.userData && o.userData.part; if (o.isMesh && p && p.key === 'planking') skins.push(o); });
+        if (!skins.length) say(v.id, 'a straight sternpost with no planking to close on it', 'no planking mesh');
+        else {
+          const sv = [].concat(...skins.map(world)); let skinTop = -1e9; for (const q of sv) skinTop = Math.max(skinTop, q[1]);
+          const ridgeAt = y => { const k = Math.round(y * 100); let best = null, bd = 1e9;
+            for (const kk of ks) { const d = Math.abs(kk - k); if (d < bd) { bd = d; best = kk; } } return bd <= 3 ? ridge.get(best) : null; };
+          let worstAft = 0, worstGap = 0, yAft = 0, yGap = 0, bands = 0;
+          for (let y = yLo + 0.35; y < Math.min(yHi - 0.2, skinTop - 0.2); y += 0.25) {
+            const pa = ridgeAt(y); if (pa == null) continue;
+            let sx = -1e9; for (const q of sv) if (Math.abs(q[1] - y) < 0.13) sx = Math.max(sx, q[0]);
+            if (sx < -1e8) continue;
+            bands++; const gap = pa - sx;
+            if (-gap > worstAft) { worstAft = -gap; yAft = y; }
+            if (gap > worstGap) { worstGap = gap; yGap = y; }
+          }
+          if (!bands) say(v.id, 'a sternpost that shares no height with the planking', `post ${yLo.toFixed(2)}..${yHi.toFixed(2)} m`);
+          if (worstAft > 0.05)
+            say(v.id, 'planking standing abaft its sternpost', `skin ${worstAft.toFixed(2)} m abaft the post's after face at ${yAft.toFixed(2)} m — the planks close on the post, not past it`);
+          if (worstGap > 0.45)
+            say(v.id, 'daylight between the planking and the sternpost', `skin ${worstGap.toFixed(2)} m short of the post's after face at ${yGap.toFixed(2)} m`);
+          /* R-HOOD-ENDS (round 238): where the record carries hoodEndHalfBreadthM the skin's
+             after end is a rabbet, not a face — in every 0.25 m of shared height the planking's
+             vertices within 0.10 m of its aftmost x stand no wider than that half-breadth plus
+             0.12 m. The r237 loft closed the plan to sternFineness: an end cap 0.91 m each
+             side of a 0.42 m post, which this reads as 0.91 against 0.17. */
+          if (SP.hoodEndHalfBreadthM != null) {
+            let worstW = 0, yW = 0;
+            for (let y = yLo + 0.35; y < Math.min(yHi - 0.2, skinTop - 0.2); y += 0.25) {
+              let sx = -1e9; for (const q of sv) if (Math.abs(q[1] - y) < 0.13) sx = Math.max(sx, q[0]);
+              if (sx < -1e8) continue;
+              let w = 0; for (const q of sv) if (Math.abs(q[1] - y) < 0.13 && q[0] > sx - 0.10) w = Math.max(w, Math.abs(q[2]));
+              if (w > worstW) { worstW = w; yW = y; }
+            }
+            if (worstW > SP.hoodEndHalfBreadthM + 0.12)
+              say(v.id, "the planking's hood ends standing off the post", `${worstW.toFixed(2)} m half-breadth at the skin's after end at ${yW.toFixed(2)} m, the record's rabbet ${SP.hoodEndHalfBreadthM} — an end face, not a rabbet`);
+          }
+        }
+      }
+    }
+
+    /* ── A STRAIGHT STEM IS A LINE, AND THE PLANKING CLOSES ON IT (round 239) ─────────
+       The cog's stem timber ran along the class skin from the keel to the sheer, and the
+       skin's underwater entry stood at −lwl/2 at every height below the water — 1.65 m
+       forward of the plate's stem at the laden draught and 3.25 m at the keel — while the
+       timber stopped at the sheer, 1.6 m under the plate's head. Lahn's Blatt 1 draws one
+       straight line at 124° from a flat keel plank to a head 7.1 m over it, its foot 15.4 m
+       forward of the station datum. Where the record carries hull.stem.form 'straight'
+       with angleToKeelDeg: the Stem mesh's forward face (min x per centimetre of height)
+       is fitted with a line over its height less 0.2 m at each end — the slope within
+       0.05 m/m of −tan(θ − 90°) (R-STEM-ANGLE), no point 0.08 m off the line
+       (R-STEM-STRAIGHT), the foot within 0.2 m of the keel and, where the record and the
+       straight post give a datum, within 0.25 m of footForwardOfStationDatumM forward of
+       it (R-STEM-FOOT), the head within 0.2 m of headAboveKeelM (R-STEM-HEAD); the
+       planking's foremost vertex in every 0.25 m of shared height neither forward of the
+       stem's face by more than 0.05 m nor more than 0.45 m short of it (R-STEM-CLOSE);
+       and with hoodEndHalfBreadthM, the planking within 0.10 m of its foremost x no wider
+       than that plus 0.12 m (R-HOOD-ENDS at the bow). A record without the field is not read. */
+    if (H.stem && H.stem.form === 'straight' && H.stem.angleToKeelDeg != null) {
+      const ST = H.stem;
+      const stem = (() => { let r = null; g.traverse(o => {
+        if (!r && o.isMesh && (o.name === 'Stem' || (o.userData.part && o.userData.part.name === 'Stem'))) r = o; }); return r; })();
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      if (!stem) say(v.id, 'a straight stem with no stem drawn', 'record gives stem.form straight; no Stem mesh');
+      else {
+        const pv = world(stem), ridge = new Map();
+        for (const q of pv) { const k = Math.round(q[1] * 100); ridge.set(k, Math.min(ridge.get(k) ?? 1e9, q[0])); }
+        const ks = [...ridge.keys()].sort((a, b) => a - b);
+        const yLo = ks[0] / 100, yHi = ks[ks.length - 1] / 100;
+        const pts = ks.filter(k => k / 100 > yLo + 0.2 && k / 100 < yHi - 0.2).map(k => [k / 100, ridge.get(k)]);
+        const n = pts.length; let sy = 0, sx = 0, syy = 0, sxy = 0;
+        for (const [y, x] of pts) { sy += y; sx += x; syy += y * y; sxy += x * y; }
+        const slope = n > 2 ? (n * sxy - sx * sy) / (n * syy - sy * sy) : 0, icpt = n ? (sx - slope * sy) / n : 0;
+        const wantTan = -Math.tan((ST.angleToKeelDeg - 90) * Math.PI / 180);
+        let worst = 0; for (const [y, x] of pts) worst = Math.max(worst, Math.abs(x - (icpt + slope * y)));
+        if (n < 3) say(v.id, 'a stem too short to read', `${n} centimetres of forward face`);
+        else {
+          if (Math.abs(slope - wantTan) > 0.05)
+            say(v.id, 'the stem off its attested angle', `${(90 - Math.atan(slope) * 180 / Math.PI).toFixed(1)}° to the keel drawn, the record says ${ST.angleToKeelDeg}`);
+          if (worst > 0.08)
+            say(v.id, 'a straight stem drawn bent', `forward face ${worst.toFixed(2)} m off its own line`);
+          if (ST.headAboveKeelM != null && Math.abs((yHi + H.draught) - ST.headAboveKeelM) > 0.2)
+            say(v.id, "the stem's head off its attested height", `${(yHi + H.draught).toFixed(2)} m over the keel, the record says ${ST.headAboveKeelM}`);
+          if (yLo > -H.draught + 0.2)
+            say(v.id, 'a stem whose foot stands above the keel', `foot ${(yLo + H.draught).toFixed(2)} m over the keel's rabbet`);
+          /* R-STEM-FOOT against the datum: the straight post's heel less footAbaftStationDatumM (D-BEAM-HEEL's reading) */
+          const SPd = H.sternpost && H.sternpost.form === 'straight' ? H.sternpost : null;
+          if (SPd && SPd.footAbaftStationDatumM != null && ST.footForwardOfStationDatumM != null) {
+            const posts = []; g.traverse(o => { if (o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) posts.push(o); });
+            if (posts.length) {
+              const qv = [].concat(...posts.map(world)); let yMin = 1e9; for (const q of qv) yMin = Math.min(yMin, q[1]);
+              let heelX = -1e9; for (const q of qv) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+              const datumX = heelX - SPd.footAbaftStationDatumM;
+              let footX = 1e9; for (const q of pv) if (q[1] < yLo + 0.15) footX = Math.min(footX, q[0]);
+              const got = datumX - footX;
+              if (Math.abs(got - ST.footForwardOfStationDatumM) > 0.25)
+                say(v.id, "the stem's foot off the plate's station", `${got.toFixed(2)} m forward of the datum (datum x ${datumX.toFixed(2)}, foot x ${footX.toFixed(2)}), the record says ${ST.footForwardOfStationDatumM}`);
+            }
+          }
+        }
+        /* R-STEM-CLOSE and the bow's R-HOOD-ENDS */
+        const skins = []; g.traverse(o => { const p = o.userData && o.userData.part; if (o.isMesh && p && p.key === 'planking') skins.push(o); });
+        if (!skins.length) say(v.id, 'a straight stem with no planking to close on it', 'no planking mesh');
+        else {
+          const sv = [].concat(...skins.map(world)); let skinTop = -1e9; for (const q of sv) skinTop = Math.max(skinTop, q[1]);
+          const ridgeAt = y => { const k = Math.round(y * 100); let best = null, bd = 1e9;
+            for (const kk of ks) { const d = Math.abs(kk - k); if (d < bd) { bd = d; best = kk; } } return bd <= 3 ? ridge.get(best) : null; };
+          let worstFwd = 0, worstGap = 0, yFwd = 0, yGap = 0, bands = 0, worstW = 0, yW = 0;
+          for (let y = yLo + 0.35; y < Math.min(yHi - 0.2, skinTop - 0.2); y += 0.25) {
+            const pf = ridgeAt(y); if (pf == null) continue;
+            let sx = 1e9; for (const q of sv) if (Math.abs(q[1] - y) < 0.13) sx = Math.min(sx, q[0]);
+            if (sx > 1e8) continue;
+            bands++; const gap = sx - pf;
+            if (-gap > worstFwd) { worstFwd = -gap; yFwd = y; }
+            if (gap > worstGap) { worstGap = gap; yGap = y; }
+            if (ST.hoodEndHalfBreadthM != null) {
+              let w = 0; for (const q of sv) if (Math.abs(q[1] - y) < 0.13 && q[0] < sx + 0.10) w = Math.max(w, Math.abs(q[2]));
+              if (w > worstW) { worstW = w; yW = y; }
+            }
+          }
+          if (!bands) say(v.id, 'a stem that shares no height with the planking', `stem ${yLo.toFixed(2)}..${yHi.toFixed(2)} m`);
+          if (worstFwd > 0.05)
+            say(v.id, 'planking standing forward of its stem', `skin ${worstFwd.toFixed(2)} m forward of the stem's face at ${yFwd.toFixed(2)} m — the planks close on the stem, not past it`);
+          if (worstGap > 0.45)
+            say(v.id, 'daylight between the planking and the stem', `skin ${worstGap.toFixed(2)} m short of the stem's face at ${yGap.toFixed(2)} m`);
+          if (ST.hoodEndHalfBreadthM != null && worstW > ST.hoodEndHalfBreadthM + 0.12)
+            say(v.id, "the planking's hood ends standing off the stem", `${worstW.toFixed(2)} m half-breadth at the skin's forward end at ${yW.toFixed(2)} m, the record's rabbet ${ST.hoodEndHalfBreadthM} — an end face, not a rabbet`);
+        }
+      }
+    }
+
+    /* ── THE CASTLE STANDS ON ITS PLAN (round 214) ───────────────────────────────────
+       The cog's aftcastle was an open platform lofted off the hull's own skin between two
+       text-read stations (r205). The wreck's castle is not that: Westphal (DAS LOGBUCH
+       27/1991, citing Lahn 1979) gives its PLAN — an after part trapezoidal, 4.75 m long,
+       7.20 m broad forward and 6.50 aft, two side parts 3.45 × 1.65 m — and its structure:
+       it overhangs the hull aft and at both sides, the after posts stand on two stern beams
+       (Heckbalken), the side wall's upper part is 17 vertical boards. A castle that must
+       overhang cannot be read off the skin, so this rule reads it off its own vertices in
+       hull space against the record: the deck's LENGTH is the plan's (C-EXTENT), its after
+       edge stands the recorded overhang abaft the sternpost's head (C-OVERHANG, read off
+       the post's own top vertices); the deck's breadth at the after part's two ends and the
+       wings' inner clearance are the plan's (C-PLAN); two stern beams exist, well below the
+       castle deck, and reach the castle's side (C-BEAMS); the board count each side is the
+       record's and each board is a board (C-WALL, with a lower wall present); and
+       record-blind: nothing of the castle crosses the tiller's box (C-TILLER-PORT — the
+       first draft's after wall ran across it), the wall is breast-high over the deck
+       (C-STATURE), and the castle does not hang more than a man's reach past its post
+       (C-REACH). Gated on castle.plan: a castle record without one keeps the r205 platform
+       and this rule is silent. */
+    if (H.castle && H.castle.plan) {
+      const P = H.castle.plan;
+      const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const bbox = o => { const b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9];
+        for (const q of world(o)) { b[0] = Math.min(b[0], q[0]); b[1] = Math.min(b[1], q[1]); b[2] = Math.min(b[2], q[2]); b[3] = Math.max(b[3], q[0]); b[4] = Math.max(b[4], q[1]); b[5] = Math.max(b[5], q[2]); }
+        return b; };
+      const decks = byName('castle-deck');
+      if (!decks.length) say(v.id, 'a castle plan with no deck', 'record gives castle.plan; no castle-deck mesh');
+      else {
+        const dv = [].concat(...decks.map(world));
+        let xF = 1e9, xA = -1e9, yD = -1e9;
+        for (const q of dv) { xF = Math.min(xF, q[0]); xA = Math.max(xA, q[0]); yD = Math.max(yD, q[1]); }
+        /* C-OVERHANG and C-REACH, against the sternpost's own head; its heel is the datum
+           of the plate's stations (castle.stationsFromHeelM, round 236) */
+        const post = (() => { let r = null; g.traverse(o => {
+          if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+        const ST = H.castle.stationsFromHeelM || null;
+        let heelX = -1e9;
+        if (post) { const pv0 = world(post); let yMin = 1e9; for (const q of pv0) yMin = Math.min(yMin, q[1]);
+                    for (const q of pv0) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+                    heelX -= ((v.hull.sternpost && v.hull.sternpost.form === 'straight' && v.hull.sternpost.footAbaftStationDatumM) || 0); }   // the datum, not the foot (round 237)
+        const len = xA - xF;
+        const wantL = ST && heelX > -1e8 ? xA - (heelX - ST.wingFwd) : P.aftLenM + P.sideLenM;
+        /* C-EXTENT */
+        if (Math.abs(len - wantL) > 0.15)
+          say(v.id, "a castle off the record's length", `${len.toFixed(2)} m of deck, the ${ST ? 'plate' : 'plan'} says ${wantL.toFixed(2)}`);
+        /* C-STATIONS: the wing's forward end on the plate's station forward of the heel */
+        if (ST && heelX > -1e8 && Math.abs((heelX - xF) - ST.wingFwd) > 0.3)
+          say(v.id, "the castle's forward end off the plate's station",
+              `wing ends ${(heelX - xF).toFixed(2)} m forward of the heel, the plate says ${ST.wingFwd}`);
+        if (!post) say(v.id, 'a castle with no post to overhang', 'no Sternpost mesh');
+        else {
+          const pv = world(post); let top = -1e9; for (const q of pv) top = Math.max(top, q[1]);
+          let xp = -1e9; for (const q of pv) if (q[1] > top - 0.3) xp = Math.max(xp, q[0]);
+          const ovh = H.castle.overhangAftM != null ? H.castle.overhangAftM : 0.7;
+          /* C-AFTEDGE (round 237): where the plate gives the after edge's station abaft the
+             datum (castle.stationsFromHeelM.aftEdge, negative), the edge stands there; the
+             recorded overhang is then a derived number and C-OVERHANG stands down */
+          if (ST && ST.aftEdge != null && heelX > -1e8) {
+            if (Math.abs((xA - heelX) + ST.aftEdge) > 0.3)
+              say(v.id, "the castle's after edge off the plate's station", `after edge ${(xA - heelX).toFixed(2)} m abaft the heel, the plate says ${-ST.aftEdge}`);
+          } else if (Math.abs((xA - xp) - ovh) > 0.25)
+            say(v.id, "a castle off the record's overhang", `after edge ${(xA - xp).toFixed(2)} m abaft the post's head, record says ${ovh}`);
+          if (xA - xp > 1.5)
+            say(v.id, 'a castle hanging past its stern', `after edge ${(xA - xp).toFixed(2)} m abaft the post's head — the stern beams cannot carry that`);
+        }
+        /* C-PLAN */
+        const halfAt = (x0, x1) => { let w = 0; for (const q of dv) if (q[0] >= x0 && q[0] <= x1) w = Math.max(w, Math.abs(q[2])); return w; };
+        const xT = ST && heelX > -1e8 ? heelX - ST.aftPartFwd : xA - P.aftLenM;
+        const wFwd = halfAt(xT - 0.35, xT + 0.35), wAft = halfAt(xA - 0.35, xA + 0.01);
+        if (Math.abs(2 * wFwd - P.aftBreadthFwdM) > 0.2)
+          say(v.id, "the castle off the plan's forward breadth", `${(2 * wFwd).toFixed(2)} m at the after part's forward edge, record says ${P.aftBreadthFwdM}`);
+        if (Math.abs(2 * wAft - P.aftBreadthAftM) > 0.2)
+          say(v.id, "the castle off the plan's after breadth", `${(2 * wAft).toFixed(2)} m at the after edge, record says ${P.aftBreadthAftM}`);
+        let innermost = 1e9; for (const q of dv) if (q[0] < xT - 0.35) innermost = Math.min(innermost, Math.abs(q[2]));
+        const wantIn = P.aftBreadthFwdM / 2 - P.sideBreadthM;
+        if (Math.abs(innermost - wantIn) > 0.15)
+          say(v.id, "the wings off the plan's breadth", `deck reaches to ${innermost.toFixed(2)} m of the centreline along the wings; ${P.sideBreadthM} m wings on a ${P.aftBreadthFwdM} m front leave ${wantIn.toFixed(2)}`);
+        /* C-BEAMS */
+        const heck = byName('castle-heckbalken');
+        if (heck.length < 2) say(v.id, 'a castle with no stern beams', `${heck.length} castle-heckbalken; the after posts stand on two (Westphal)`);
+        for (const hb of heck) {
+          const b = bbox(hb);
+          if (yD - b[4] < 1.0) say(v.id, 'a stern beam up in the castle', `top ${(yD - b[4]).toFixed(2)} m under the castle deck`);
+          const w = Math.max(-b[2], b[5]), wc = halfAt(b[0] - 0.4, b[3] + 0.4);
+          if (wc - w > 0.3) say(v.id, "a stern beam short of the castle's side", `reaches ${w.toFixed(2)} m, the deck ${wc.toFixed(2)}`);
+        }
+        /* C-WALL */
+        const walls = byName('castle-wall'), wantB = H.castle.wallBoards || 17;
+        const stbd = walls.filter(w => bbox(w)[5] > 0).length, portN = walls.length - stbd;
+        if (stbd !== wantB || portN !== wantB)
+          say(v.id, "the castle wall off the record's board count", `${stbd} / ${portN} boards a side, record says ${wantB}`);
+        for (const w of walls) { const b = bbox(w); if (b[4] - b[1] < 0.6) { say(v.id, 'a castle board that is not a board', `${(b[4] - b[1]).toFixed(2)} m tall`); break; } }
+        if (byName('castle-wall-lower').length < 8)
+          say(v.id, 'a castle wall with no lower part', 'three stringers and a plank below the deck (Westphal); fewer than 8 castle-wall-lower');
+        /* C-STATURE, record-blind */
+        if (walls.length) { const b = bbox(walls[0]), h = b[4] - yD;
+          if (h < 0.8 || h > 1.4) say(v.id, 'a castle wall nobody could stand behind', `${h.toFixed(2)} m over the deck`); }
+        /* C-TILLER-PORT, record-blind */
+        const tl = byName('rudder-tiller');
+        if (tl.length) {
+          const tb = bbox(tl[0]); let hit = null;
+          g.traverse(o => { if (hit || !o.isMesh || !/^castle-(wall|wall-lower|wall-aft|wall-wing|heckbalken|beam|post|longitudinal|cabin.*|door)$/.test(o.name)) return;
+            const b = bbox(o);
+            if (b[0] < tb[3] && b[3] > tb[0] && b[1] < tb[4] && b[4] > tb[1] && b[2] < tb[5] && b[5] > tb[2]) hit = o.name; });
+          if (hit) say(v.id, 'the castle across the tiller', `${hit} crosses the tiller's box`);
+        }
+      }
+    }
+
+    /* ── THE DECK LIES WHERE THE RECORD PUTS IT (round 215) ─────────────────────────────
+       Every builder in hull.js read the sheer as the deck — deckAtU = H.sheer(u) — so the
+       cog's deck lay at her top strake and everything on her (castle, windlass, tiller,
+       mast heel) rode a metre high; the wreck's deck beams sit about a third of the side's
+       height under the sheer (Lahn, Blatt 2 sections). The loft's deck(u) is the one answer
+       now, record-gated on deck.belowSheerM. This rule reads the BUILT deck against the
+       record off its own vertices in hull space: the skin's top stands the recorded depth
+       over the deck's edge at midships (D-DEPTH); a deck the record calls level has one
+       edge height fore and aft (D-LEVEL); the through-beams are the record's count, each
+       reaching through the skin on both sides with its top under the deck (D-BEAMS); with a
+       castle plan, the castle deck stands its headroom over the main deck, so the chain the
+       castle reads holds (D-CASTLE). Record-blind: the capping rail stays on the SKIN and
+       does not follow the deck down (D-RAIL), and the deck lies above the waterline — a
+       deck below it is a hull that floods (D-WELL). Silent without the field. */
+    /* D-FRAME-PLUMB (round 240): a frame is a timber set square across the keel, so every
+       point of it stands at one x. The builder drew each frame at a constant u, and a
+       station's x is not constant over its height wherever the hull's end leans — the class
+       rake above the water on every raked hull, the whole height under a straight stem or
+       post — so the cog's Frame 1 of 30 spanned 2.90 m of x from its floor to its head
+       (r239/measure-after.out), a timber drawn on a slant. Read on the built frames, each
+       its own mesh in the fine build ('Frame k of n'): the x-span of a frame's vertices is
+       at most its siding — two sidings for a recorded chain of lapped timbers, whose lower
+       pieces stand one siding forward of the upper (frames.laps) — plus 0.06 m. The class
+       ribbon's siding is 0.016·lwl (buildFramesGeometry). A hull whose frames are one mesh
+       (the token build) is not read. */
+    {
+      const fr = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'frames' && /^Frame \d+ of \d+$/.test(p.name || '')) fr.push(o); });
+      if (fr.length > 1) {
+        const worldF = o => {
+          const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+          o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+          for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+          return out;
+        };
+        const REC = !!(H.frames && H.frames.roomAndSpaceM);
+        const siding = REC ? (H.frames.sidedM || 0.18) : 0.016 * (H.lwl || H.loa);
+        const allow = siding * (REC && H.frames.laps && H.frames.laps.length ? 2 : 1) + 0.06;
+        let worst = null;
+        for (const f of fr) {
+          let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+          for (const q of worldF(f)) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
+          const span = x1 - x0;
+          if (span > allow && (!worst || span > worst.span)) worst = { span, y0, y1, name: tagOf(f).name, n: 0 };
+          if (span > allow && worst) worst.n++;
+        }
+        if (worst)
+          say(v.id, 'a frame drawn on a slant', `${worst.name} spans ${worst.span.toFixed(2)} m of x over ${(worst.y1 - worst.y0).toFixed(2)} m of height, a timber ${allow.toFixed(2)} m fore and aft at most${worst.n > 1 ? ' (' + worst.n + ' frames over)' : ''}`);
+      }
+    }
+    if (H.deck && H.deck.belowSheerM) {
+      const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const bbox = o => { const b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9];
+        for (const q of world(o)) { b[0] = Math.min(b[0], q[0]); b[1] = Math.min(b[1], q[1]); b[2] = Math.min(b[2], q[2]); b[3] = Math.max(b[3], q[0]); b[4] = Math.max(b[4], q[1]); b[5] = Math.max(b[5], q[2]); }
+        return b; };
+      let skin = null; g.traverse(o => { const p = tagOf(o); if (!skin && o.isMesh && p && p.key === 'planking') skin = o; });
+      const deckMeshes = []; g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckMeshes.push(o); });
+      if (!skin || !deckMeshes.length)
+        say(v.id, 'a deck record with no deck to measure', `${skin ? '' : 'no planking mesh; '}${deckMeshes.length} deck mesh(es)`);
+      else {
+        const sv = world(skin), dv = [].concat(...deckMeshes.map(world));
+        const L = H.lwl || H.loa;
+        const skinTopNear = x => { let t = -1e9; for (const q of sv) if (Math.abs(q[0] - x) < 0.5) t = Math.max(t, q[1]); return t; };
+        /* the skin's half-breadth at x AND at height y: a raked bow leans forward, so the
+           vertices near a beam head's x include a fuller station's waterline further aft —
+           the first draft read the cog's foremost beam as 'not through' against that (r215) */
+        const skinHalfNear = (x, y) => { let w = 0; for (const q of sv) if (Math.abs(q[0] - x) < 0.3 && Math.abs(q[1] - y) < 0.3) w = Math.max(w, Math.abs(q[2])); return w; };
+        /* the deck's edge near x: the lowest vertex of the deck's NEAREST station (round 232 —
+           the lowest within half a metre read the main deck under a beam that carries the
+           foredeck, a level higher; a station's nine vertices share an x, and the edge is the
+           lowest of them because the camber lifts the middle) */
+        const deckEdgeNear = x => { let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - x);
+          if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); } return e; };
+        /* the deck's height over the top of the beam under it: the record's distance from the
+           beam's centre less the half-siding (deck.deckAboveBeamCentreM, round 232), else 2 cm */
+        const gapBeam = (H.deck.beamHeightsFromKeelM && H.deck.deckAboveBeamCentreM != null)
+          ? H.deck.deckAboveBeamCentreM - (H.deck.beamSidedM || 0.30) / 2 : 0.02;
+        const top0 = skinTopNear(0), edge0 = deckEdgeNear(0);
+        /* D-DEPTH */
+        if (edge0 > 1e8) say(v.id, 'a deck with no midship edge', 'no deck vertex within 0.5 m of midships');
+        else if (Math.abs((top0 - edge0) - H.deck.belowSheerM) > 0.15)
+          say(v.id, "a deck off the record's depth", `${(top0 - edge0).toFixed(2)} m under the top strake at midships, record says ${H.deck.belowSheerM}`);
+        /* D-LEVEL */
+        if (H.deck.level) {
+          const eF = deckEdgeNear(-0.3 * L), eA = deckEdgeNear(0.3 * L);
+          if (eF < 1e8 && eA < 1e8 && Math.abs(eF - eA) > 0.1)
+            say(v.id, 'a level deck that is not level', `edge ${eF.toFixed(2)} m at u 0.2, ${eA.toFixed(2)} at u 0.8`);
+        }
+        /* D-BEAMS */
+        if (H.deck.throughBeams) {
+          const beams = byName('deck-beam');
+          if (beams.length !== H.deck.throughBeams)
+            say(v.id, "through-beams off the record's count", `${beams.length} deck-beam, record says ${H.deck.throughBeams}`);
+          for (const bm of beams) {
+            const b = bbox(bm), xc = (b[0] + b[3]) / 2, half = skinHalfNear(xc, (b[1] + b[4]) / 2), edge = deckEdgeNear(xc);
+            if (b[5] < half + 0.1 || -b[2] < half + 0.1) {
+              say(v.id, 'a through-beam that does not come through', `reaches ${Math.min(b[5], -b[2]).toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`); }
+            if (edge < 1e8 && (b[4] > edge - gapBeam + 0.04 || b[4] < edge - gapBeam - 0.15))
+              say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}, wanted ${gapBeam.toFixed(2)} under it`);
+          }
+          /* D-BEAM-STATION (round 229): a record that names the beams' stations
+             (deck.beamStations, each { spant | u }, a frame number placed by the arithmetic
+             D-FRAMES counts with) stands a deck-beam at every one of them. The station's x
+             is read off the SKIN — the vertex at that u (the skin's uv, as D-SECTION reads
+             it) nearest the beam's own height — because a raked end carries its stations
+             forward of (u − 0.5)·L, and the beam is placed on the skin's edge. Before this
+             rule the sections and the rail were read at the sheet's frames while the beams
+             stood at class stations 0.65–0.87 m from them, and nothing compared the two. */
+          if (H.deck.beamStations) {
+            const rsB = H.frames && H.frames.roomAndSpaceM, nFB = rsB ? Math.floor(0.89 * L / rsB) + 1 : 0;
+            const oUB = H.frames && H.frames.originU !== undefined ? H.frames.originU : 0.055;   // the numbering's origin (round 230)
+            const uvB = skin.geometry.attributes.uv;
+            const bxs = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; });
+            if (H.deck.beamStations.length !== H.deck.throughBeams)
+              say(v.id, "beam stations off the record's count", `${H.deck.beamStations.length} stations, throughBeams ${H.deck.throughBeams}`);
+            H.deck.beamStations.forEach((st, i) => {
+              const label = st.name || ('beam ' + (i + 1));
+              /* under a straight stem (round 239) the forefoot's u is compressed and the loft stands
+                 a beam the plate places in metres (deck.beamHeadsFromHeelM) at those metres; that
+                 beam is read by D-BEAM-HEEL against the plate's own number, and its Spant number —
+                 which r230 derived FROM the metres by one pitch fit — is not a second station */
+              if (H.stem && H.stem.form === 'straight' && H.deck.beamHeadsFromHeelM && H.deck.beamHeadsFromHeelM[i] != null) return;
+              let u;
+              if (st.u !== undefined) u = st.u;
+              else if (rsB) u = oUB + 0.89 * st.spant / (nFB - 1);
+              else { say(v.id, 'a beam station named by frame number on a record with no frame pitch', `${label}: Spant ${st.spant}, no frames.roomAndSpaceM`); return; }
+              const yRef = bxs.length ? bxs[0].y : deckEdgeNear(0);
+              let want = (u - 0.5) * L;
+              if (uvB) {
+                let best = 1e9; for (let k = 0; k < uvB.count; k++) best = Math.min(best, Math.abs(uvB.getX(k) - u));
+                let dy = 1e9; for (let k = 0; k < uvB.count; k++) if (Math.abs(uvB.getX(k) - u) <= best + 1e-6 && Math.abs(sv[k][1] - yRef) < dy) { dy = Math.abs(sv[k][1] - yRef); want = sv[k][0]; }
+              }
+              let near = 1e9; for (const q of bxs) near = Math.min(near, Math.abs(q.x - want));
+              if (near > 0.15)
+                say(v.id, "a through-beam off the record's station", `${label} wanted at x ${want.toFixed(2)} m (${st.spant !== undefined ? 'Spant ' + st.spant : 'u ' + u}${st.derived ? ', derived' : ''}), the nearest deck-beam ${near.toFixed(2)} m away`);
+            });
+          }
+          /* D-BEAM-HEEL (round 230): a record that carries a plate's own distances from the
+             sternpost's heel to each beam head (deck.beamHeadsFromHeelM, bow first, read off
+             Lahn's Blatt 1 at 590 px/m) has a deck-beam within 0.30 m of each, measured from
+             the built hull's own heel — the sternpost's (the part keyed stempost and named
+             Sternpost) aftmost vertex within a hand of its foot, or the skin's where no post is built. This is the check r229's origin
+             question needed and had no field for: the numbered stations are placed by
+             frames.originU and the pitch, and nothing else compares a beam's built x with
+             a plate's metres. Before this round DB 1 stood 0.7–1.0 m abaft the sheet's head
+             and DB 5 1.4 m, and every station rule passed. */
+          if (H.deck.beamHeadsFromHeelM) {
+            const want = H.deck.beamHeadsFromHeelM;
+            if (want.length !== beams.length)
+              say(v.id, "beam heel distances off the beams' count", `${want.length} distances, ${beams.length} deck-beams`);
+            const posts = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'stempost' && p.name === 'Sternpost') posts.push(o); });
+            const pv = posts.length ? [].concat(...posts.map(world)) : sv;
+            let yMin = 1e9; for (const p of pv) yMin = Math.min(yMin, p[1]);
+            let heelX = -1e9; for (const p of pv) if (p[1] < yMin + 0.15) heelX = Math.max(heelX, p[0]);
+            /* the record's datum stands hull.sternpost.footAbaftStationDatumM forward of the built
+               post's foot where the post is a straight one (round 237: on the cog the plate's
+               datum is the keel plank's after end at the stern hook, 1.12 m forward of the post) */
+            heelX -= ((v.hull.sternpost && v.hull.sternpost.form === 'straight' && v.hull.sternpost.footAbaftStationDatumM) || 0);
+            const bx = beams.map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; }).sort((a, b) => a - b);
+            want.forEach((d, i) => {
+              if (i >= bx.length) return;
+              const got = heelX - bx[i];
+              if (Math.abs(got - d) > 0.30)
+                say(v.id, "a through-beam off the sheet's distance from the heel", `beam ${i + 1} of ${bx.length} stands ${got.toFixed(2)} m forward of the heel (heel x ${heelX.toFixed(2)}, ${posts.length ? 'the sternpost' : 'the skin'}), the sheet says ${d.toFixed(2)}`);
+            });
+          }
+          /* D-BEAM-HEIGHT (round 232): a record that carries a plate's own height of each
+             beam head's centre over the keel's underside (deck.beamHeightsFromKeelM, bow
+             first, Lahn's Blatt 1 at 590 px/m) has a deck-beam whose centre stands within
+             0.15 m of it, measured from the built skin's lowest vertex at midships — the
+             planking's bottom, which is the loft's −draught and the plate's datum (the model's
+             keel timber hangs under it and is not the datum). This is the check r231 read
+             the plate for and had no rule for: the beams stood 0.7–1.0 m too high from DB 2
+             aft and 0.4 m too low at DB 1 with every deck rule passing, because every deck
+             rule read the deck against the sheer and the beams against the deck. */
+          if (H.deck.beamHeightsFromKeelM) {
+            const want = H.deck.beamHeightsFromKeelM;
+            if (want.length !== beams.length)
+              say(v.id, "beam heights off the beams' count", `${want.length} heights, ${beams.length} deck-beams`);
+            let datum = 1e9; for (const q of sv) if (Math.abs(q[0]) < 0.5) datum = Math.min(datum, q[1]);
+            const by = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; }).sort((a, b) => a.x - b.x);
+            want.forEach((h, i) => {
+              if (i >= by.length) return;
+              const got = by[i].y - datum;
+              if (Math.abs(got - h) > 0.15)
+                say(v.id, "a through-beam off the plate's height over the keel", `beam ${i + 1} of ${by.length} centre ${got.toFixed(2)} m over the skin's bottom at midships (y ${datum.toFixed(2)}), the plate says ${h.toFixed(2)}`);
+            });
+          }
+          /* D-LOAD (round 233): a through-beam whose centre stands under the water — y < 0
+             in hull space, where y 0 is the waterline the loft floats her at (hull.draught) —
+             is a laden ship, and the record must SAY which load she carries
+             (hull.draughtCondition). Lahn's Blatt 1 draws no waterline (read r233); the Kiel
+             replicas' 2.25 m is their laden figure and floats the cog's midship heads 0.24 m
+             under; Tanner's beam-ends condition floats them dry 0.43 m lighter. Silence is
+             convicted (the r108 pattern): beams awash on a hull whose card cannot say why. */
+          {
+            const wet = beams.filter(bm => { const b = bbox(bm); return (b[1] + b[4]) / 2 < 0; });
+            if (wet.length && !H.draughtCondition)
+              say(v.id, 'a through-beam under the waterline on a hull whose record does not name its load', `${wet.length} of ${beams.length} deck-beams have their centres under the water at hull.draught ${H.draught}; hull.draughtCondition is not on the record`);
+          }
+          /* D-KNEES (round 216): a standing knee at every beam end, both sides — its foot on
+             the beam (at the deck's edge), its head up at the top strake, and the whole of it
+             INSIDE the planking. A knee outboard of the skin is a knee drawn through the hull. */
+          const knees = byName('deck-knee');
+          if (knees.length !== 2 * H.deck.throughBeams)
+            say(v.id, 'through-beams without their knees', `${knees.length} deck-knee, ${2 * H.deck.throughBeams} wanted for ${H.deck.throughBeams} beams`);
+          for (const kn of knees) {
+            const b = bbox(kn), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
+            /* ── EACH END AT ITS OWN HEIGHT (round 241). This rule read the knee's whole
+               reach against the skin's WIDEST breadth over its height, so a knee leaning
+               the wrong way — foot through the planking, head a beam's width inside it —
+               passed as long as the foot stayed under the rail's breadth; on the flared cog
+               eight of ten did, by up to 0.76 m (r241/knees-before.json). Now the foot's
+               reach (its lowest 0.3 m of vertices) is read against the skin at the top of
+               that band, and the head's likewise, each within 0.12 m of height; and a knee
+               standing more than 0.30 m off the planking at either end is convicted too —
+               it is meant to stand a hand inside the skin. */
+            const reachIn = (yA, yB) => { let w = 0; const pos = kn.geometry.attributes.position, p = new THREE.Vector3();
+              for (let i = 0; i < pos.count; i++) { p.fromBufferAttribute(pos, i); kn.localToWorld(p); if (p.y >= yA && p.y <= yB) w = Math.max(w, Math.abs(p.z)); } return w; };
+            const skinAt = y => { let w = 0; for (const q of sv) if (Math.abs(q[0] - xc) < 0.3 && Math.abs(q[1] - y) < 0.12) w = Math.max(w, Math.abs(q[2])); return w; };
+            const ends = [['foot', reachIn(b[1] - 0.01, b[1] + 0.3), skinAt(b[1] + 0.3)],
+                          ['head', reachIn(b[4] - 0.3, b[4] + 0.01), skinAt(b[4] - 0.3)]];
+            if (edge < 1e8 && (b[1] > edge - gapBeam + 0.07 || b[1] < edge - gapBeam - 0.35))
+              say(v.id, 'a knee off its beam', `foot ${b[1].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}, the beam ${gapBeam.toFixed(2)} under it`);
+            if (b[4] < top - 0.5)
+              say(v.id, 'a knee that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
+            for (const [end, out, half] of ends) {
+              if (half > 0 && out > half + 0.02)
+                say(v.id, 'a knee outside the planking', `${end} reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
+              if (half > 0 && out < half - 0.30)
+                say(v.id, 'a knee standing off the planking', `${end} reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}; a hand's gap is the build`);
+            }
+          }
+        }
+        /* D-LOAD-CONDITION (round 233): a record that names the load she floats at
+           (hull.draughtCondition) must carry that condition in hull.loadConditions with a
+           draughtM equal to hull.draught within 0.05, so the draught the loft floats her at
+           cannot drift from the condition the card names. */
+        if (H.draughtCondition !== undefined) {
+          const lc = H.loadConditions || [];
+          const c = lc.find(q => q.name === H.draughtCondition);
+          if (!c)
+            say(v.id, 'a named load condition the record does not carry', `hull.draughtCondition ${JSON.stringify(H.draughtCondition)}, hull.loadConditions ${lc.map(q => q.name).join(', ') || 'absent'}`);
+          else if (c.draughtM === undefined || Math.abs(c.draughtM - H.draught) > 0.05)
+            say(v.id, "a draught off the named load condition's", `hull.draught ${H.draught}, the ${H.draughtCondition} condition's draughtM ${c.draughtM}`);
+        }
+        /* D-SECTION (round 226): a hull whose record gives a FLARED section (hull.section.form
+           'flared', the Bremen cog from Lahn's Blatt 2) is widest at her RAIL — the side widens
+           all the way from the keel plank to the top strake — and her bottom is a flat of the
+           recorded half-width (floorHalfFrac of the rail's half-breadth) that the curve starts
+           from. Read on the DRAWN skin at midships, never on surfacePoint: a section fuller
+           below the rail than at it is the superellipse's waterline beam back again, and a
+           keel with no flat beside it is a round bottom. A record whose form the loft does
+           not know is convicted too (rule 10: a silent fallback to the superellipse would
+           draw the old shape under a record that says otherwise). */
+        if (H.section) {
+          if (H.section.form !== 'flared')
+            say(v.id, 'a section form the loft does not build', `hull.section.form ${JSON.stringify(H.section.form)}`);
+          else {
+            /* Rule 8 fired on this rule's first form (r226/inject-variantA.out, -B.out): it
+               tested the rail's breadth and one vertex row over the keel, and neither variant
+               tripped it — the superellipse under a record with tumblehome 0 is plumb above
+               the waterline (its rail IS the beam), and at the first row over the keel
+               (0.11 m) the two forms differ by 0.18 m. The forms differ by 0.45 m at a third
+               of the side's height and the flat by 0.42 m at the first row, so the test is
+               EVERY midship vertex against the record's own curve, the formula written here
+               a second time on purpose. */
+            /* ── THE FORM IS READ AT EVERY RECORDED STATION (round 227) ───────────────
+               Blatt 2 carries four sections, and the record may carry them
+               (hull.section.stations[] { spant | u, floorHalfFrac, power }): the loft
+               interpolates F and n in u between them and holds the end values beyond. So
+               the test is per STATION: the drawn skin at each recorded station's own u,
+               and at midships with the form interpolated the same way, the arithmetic
+               written here a second time on purpose. A station is found by the planking's
+               own u — buildHullGeometry stores (u, v) in the uv attribute — so its
+               vertices above the water, where the rake shifts x, are read with the rest;
+               a skin that carries no uv falls back to an x window, and a record with
+               stations and no uv to read them at is convicted (rule 10). */
+            const rs = H.frames && H.frames.roomAndSpaceM;
+            const nFr = rs ? Math.max(2, Math.floor(0.89 * L / rs) + 1) : 0;
+            const oU = H.frames && H.frames.originU !== undefined ? H.frames.originU : 0.055;   // the numbering's origin (round 230)
+            const frameU = k => rs ? oU + 0.89 * k / (nFr - 1) : 0.5;
+            const F0 = H.section.floorHalfFrac || 0, n0 = H.section.power || 2.2;
+            const rows = (H.section.stations || []).map(s => ({
+              u: s.u !== undefined ? s.u : frameU(s.spant),
+              F: s.floorHalfFrac !== undefined ? s.floorHalfFrac : F0,
+              n: s.power !== undefined ? s.power : n0, spant: s.spant, r: s.railHalfFrac })).sort((a, b) => a.u - b.u);
+            const formAt = u => {
+              if (!rows.length) return { F: F0, n: n0 };
+              if (u <= rows[0].u) return rows[0];
+              const last = rows[rows.length - 1]; if (u >= last.u) return last;
+              for (let i = 1; i < rows.length; i++) if (u <= rows[i].u) {
+                const a = rows[i - 1], b = rows[i], f = (u - a.u) / Math.max(1e-9, b.u - a.u);
+                return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
+              }
+              return last;
+            };
+            const uvA = skin.geometry.attributes.uv;
+            if (rows.length && !uvA)
+              say(v.id, 'a section record with stations and a skin that carries no u to read them at', `${rows.length} stations`);
+            const stations = [{ u: 0.5, label: 'midships' }].concat(rows.map(r => ({ u: r.u, r: r.r, label: r.spant !== undefined ? `Spant ${r.spant} (u ${r.u.toFixed(3)})` : `u ${r.u.toFixed(3)}` })));
+            for (const st of stations) {
+              let sel;
+              if (uvA) {
+                let best = 1e9; for (let i = 0; i < uvA.count; i++) best = Math.min(best, Math.abs(uvA.getX(i) - st.u));
+                sel = []; for (let i = 0; i < uvA.count; i++) if (Math.abs(uvA.getX(i) - st.u) <= best + 1e-6) sel.push(sv[i]);
+              } else sel = sv.filter(q => Math.abs(q[0] - (st.u - 0.5) * L) < 0.35);
+              if (sel.length < 8) { say(v.id, 'a section station with no skin to read', `${st.label}: ${sel.length} vertices`); continue; }
+              let yTop = -1e9, yKeel = 1e9, wAll = 0, wTop = 0;
+              for (const q of sel) { yTop = Math.max(yTop, q[1]); yKeel = Math.min(yKeel, q[1]); }
+              for (const q of sel) { const w = Math.abs(q[2]); wAll = Math.max(wAll, w); if (q[1] > yTop - 0.25) wTop = Math.max(wTop, w); }
+              if (wAll > wTop + 0.05)
+                say(v.id, 'a flared section not widest at its rail', `${wAll.toFixed(2)} m half-breadth below the rail, ${wTop.toFixed(2)} at it, at ${st.label}`);
+              if (st.label === 'midships' && Math.abs(wTop - H.beam / 2) > 0.1)
+                say(v.id, "a flared section's rail off the record's beam", `${(2 * wTop).toFixed(2)} m across the rail, the record ${H.beam}`);
+              /* D-PLAN (round 228): a station that carries railHalfFrac names its rail
+                 half-breadth as a fraction of the record's half-beam (Blatt 2's 104 / 115 /
+                 114 / 113 plate px at Spant 5 / 12 / 26 / 33), and the drawn rail at that
+                 station must stand there. The class parabola (wlPower, stemFineness,
+                 sternFineness) read 0.67 / 0.93 / 0.88 / 0.58 of the beam at those
+                 stations — a third of the beam fine at the stern — under section forms the
+                 plate had already been read for: the form was the plate's, the breadth it
+                 scaled was not. Between stations the loft's plan is its own (a monotone
+                 cubic); the test is at the stations the record names. */
+              if (st.r !== undefined && Math.abs(wTop - st.r * H.beam / 2) > 0.1)
+                say(v.id, "a rail off the record's plan", `${wTop.toFixed(2)} m half-breadth at the rail, the record's ${(st.r * H.beam / 2).toFixed(2)} (${st.r} of the half-beam) at ${st.label}`);
+              const { F, n } = formAt(st.u), D = yTop - yKeel;
+              const want = h => wTop * (F + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - Math.max(0, Math.min(1, h / D)), n)), 1 / n));
+              let worst = 0, worstH = 0, worstW = 0, worstWant = 0;
+              for (const q of sel) {
+                const h = q[1] - yKeel; if (h < 0.05 || h > D - 0.05) continue;
+                const w = Math.abs(q[2]), e = Math.abs(w - want(h));
+                if (e > worst) { worst = e; worstH = h; worstW = w; worstWant = want(h); }
+              }
+              if (worst > 0.2)
+                say(v.id, "a flared section off its record's curve", `${worstW.toFixed(2)} m half-breadth at ${worstH.toFixed(2)} m over the keel, the record's curve ${worstWant.toFixed(2)} (F ${F.toFixed(3)}, n ${n.toFixed(2)}, D ${D.toFixed(2)}) at ${st.label}; worst of ${sel.length} vertices`);
+            }
+          }
+        }
+        /* D-FRAMES (round 217): a hull whose record gives a room-and-space stands her frames
+           at that pitch over the run, each a timber against the inside of the planking. The
+           count lies within the record's (the stations a through-beam's knee displaces
+           excepted); every frame is INSIDE the skin; its outer face is within a plank of the
+           skin at bulwark height (a frame standing off the planking is a frame floating in
+           the hold); its head is up at the top strake; and neighbours stand one pitch apart,
+           two where a beam takes a station. */
+        if (H.frames && H.frames.roomAndSpaceM) {
+          const fr = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'frames') fr.push(o); });
+          const rs = H.frames.roomAndSpaceM; let nWant = Math.floor(0.89 * L / rs) + 1;
+          /* under a straight stem (round 239) a station forward of the stem's line at the water is
+             no frame: the line replicated here in closed form — the foot at the keel timber's
+             underside, x from the straight post's datum less footForwardOfStationDatumM, the
+             timber's half-thickness, the record's angle — and the nominal stations counted against it */
+          if (H.stem && H.stem.form === 'straight' && H.stem.angleToKeelDeg != null && H.sternpost && H.sternpost.form === 'straight'
+              && H.sternpost.footAbaftStationDatumM != null && H.stem.footForwardOfStationDatumM != null) {
+            const kd = 0.055 * H.draught + 0.02, t = 0.05 * H.draught;
+            const yPF = -H.draught * Math.max(0.06, 1 - (H.riseA || 0)) - kd, yF = -H.draught * Math.max(0.06, 1 - (H.riseF || 0)) - kd;
+            const datumX = L / 2 + yPF * Math.tan((H.sternpost.angleToKeelDeg - 90) * Math.PI / 180) + t - H.sternpost.footAbaftStationDatumM;
+            const xFoot = datumX - H.stem.footForwardOfStationDatumM + t;
+            const xEnd = xFoot + yF * Math.tan((H.stem.angleToKeelDeg - 90) * Math.PI / 180);   // the line at the water
+            const n0 = nWant; nWant = 0;
+            for (let f = 0; f < n0; f++) if ((0.055 + 0.89 * f / (n0 - 1) - 0.5) * L >= xEnd) nWant++;
+          }
+          const nBeams = H.deck.throughBeams || 0;
+          if (fr.length > nWant || fr.length < nWant - nBeams)
+            say(v.id, "frames off the record's count", `${fr.length} frames, ${nWant} at ${rs} m over the run (less up to ${nBeams} at the beams)`);
+          const xs = [], floorArms = [], cutFrames = new Set();   // cutFrames: round 240
+          for (const f of fr) {
+            const b = bbox(f), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
+            xs.push(xc);
+            const yB = edge < 1e8 ? edge + 0.5 : top - 0.5;          // a height inside the bulwark
+            /* the frame's outermost vertex in the bulwark band, and the planking NEAREST to it
+               in its own section plane. Rule 8 fired on this rule's first run (r217): a
+               half-breadth compared over a 0.6 m height band read eight frames at the ends as
+               0.15-0.21 m off a skin they stood 5 cm from, because a flared section's
+               half-breadth grows through the band and the ends narrow 0.2 m within the x
+               window — the gap has to be measured as a DISTANCE to the skin, not as a
+               difference of breadths. */
+            let oq = null; for (const q of world(f)) if (Math.abs(q[1] - yB) < 0.3 && (!oq || Math.abs(q[2]) > Math.abs(oq[2]))) oq = q;
+            if (oq) {
+              let dmin = 1e9, halfAt = 0;
+              for (const s of sv) if (Math.abs(s[0] - oq[0]) < 0.15) {
+                dmin = Math.min(dmin, Math.hypot(s[1] - oq[1], Math.abs(s[2]) - Math.abs(oq[2])));
+                if (Math.abs(s[1] - oq[1]) < 0.08) halfAt = Math.max(halfAt, Math.abs(s[2]));
+              }
+              if (halfAt > 0 && Math.abs(oq[2]) > halfAt + 0.02)
+                say(v.id, 'a frame outside the planking', `reaches ${Math.abs(oq[2]).toFixed(2)} m, the skin ${halfAt.toFixed(2)} at x ${xc.toFixed(1)}`);
+              if (dmin > 0.15)
+                say(v.id, 'a frame standing off the planking', `outer face ${dmin.toFixed(2)} m from the nearest planking at x ${xc.toFixed(1)}`);
+            }
+            if (b[4] < top - 0.5)
+              say(v.id, 'a frame that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
+            /* D-FRAMES head (round 223): a record that gives the head's siding as a fraction of
+               the body's (frames.headSidedFrac) is built as a tapered timber, and one that says
+               the head is rounded (frames.headRound) narrows again over its last half-siding.
+               The siding is read station by station — a frame's vertices come four to a
+               station, the first two a siding apart — so a frame leaning with a raked post
+               (Frame 1 spans 1.18 m in x) is not read wider for its lean. Body: the median
+               siding within 0.3 m of the bulwark height; near-head: the widest station between
+               0.12 and 0.35 m under the head, below the round; head: the topmost station. */
+            if (H.frames.headSidedFrac || H.frames.laps) {
+              const W = world(f);
+              /* D-FRAMES lap (round 224): a recorded frame is a CHAIN of timbers (frames.laps),
+                 each a run of stations climbing from its foot to its head, one chain a side.
+                 The runs are split where the height DROPS from one station to the next (the
+                 next timber begins at its foot); the head rules read the top run of each side
+                 and the lap rules read each neighbouring pair. */
+              const st = [];
+              for (let k = 0; k + 1 < W.length; k += 4)
+                st.push({ y: W[k][1], x: (W[k][0] + W[k + 1][0]) / 2, z: W[k][2], s: Math.abs(W[k + 1][0] - W[k][0]) });
+              const all = [[]];
+              /* a run also ends where the SIDE changes (r225): the floor's head now stands
+                 under the next side's top futtock's foot, so no height drops between them —
+                 the rule's first run this round read one side's floor and the other's top
+                 futtock as one timber (33 × 'fewer timbers than its laps') */
+              for (let k = 0; k < st.length; k++) {
+                if (k && (st[k].y < st[k - 1].y - 0.01 || Math.sign(st[k].z) * Math.sign(st[k - 1].z) < 0)) all.push([]);
+                all[all.length - 1].push(st[k]);
+              }
+              /* a run belongs to the side its stations lie on, by their mean z — the keel
+                 station of either side has z exactly 0 (the rule's first run, r224, put one
+                 side's keel station at the head of the other side's list and read that
+                 side's top timber as reaching the keel) */
+              for (const sg of [-1, 1]) {
+                const runs = all.filter(run => Math.sign(run.reduce((a2, r) => a2 + r.z, 0)) === sg);
+                if (!runs.length) continue;
+                const headOf = run => Math.max(...run.map(r => r.y)), footOf = run => Math.min(...run.map(r => r.y));
+                runs.sort((p, q) => headOf(q) - headOf(p));
+                const top = runs[0], topY = headOf(top), side = sideOf(sg);
+                const tp = H.frames.headTaperM || 0;
+                /* the body is read BELOW the taper: on the cog the taper's 1.2 m starts at the
+                   deck, so the bulwark band is already inside it (the rule's first run, r223,
+                   read 0.161 there against 0.180 below and called the head untapered) */
+                let body = top.filter(q => q.y < topY - tp - 0.02).map(q => q.s);
+                if (!body.length) body = top.slice().sort((a, c) => a.y - c.y).slice(0, 4).map(q => q.s);
+                body.sort((a, c) => a - c);
+                const bs = body.length ? body[body.length >> 1] : 0;
+                const near = top.filter(q => q.y > topY - 0.35 && q.y < topY - 0.12).map(q => q.s);
+                const topS = top.reduce((m2, q) => (q.y > m2.y ? q : m2), { y: -1e9, s: 0 }).s;
+                if (H.frames.headSidedFrac && bs && near.length) {
+                  const ratio = Math.max(...near) / bs, want = H.frames.headSidedFrac;
+                  if (ratio > want + 0.12)
+                    say(v.id, 'a futtock head that is not tapered', `siding ${Math.max(...near).toFixed(3)} m under the head, ${bs.toFixed(3)} at the deck (${ratio.toFixed(2)}), record ${want} at x ${xc.toFixed(1)} ${side}`);
+                  if (ratio < want - 0.15)
+                    say(v.id, 'a futtock head tapered past the record', `${ratio.toFixed(2)} of the body's siding, record ${want} at x ${xc.toFixed(1)} ${side}`);
+                  if (H.frames.headRound && topS > 0.5 * bs)
+                    say(v.id, 'a futtock head cut square', `top station ${topS.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)} ${side}`);
+                }
+                if (H.frames.laps) {
+                  /* D-FRAMES floor lap (round 225): a lap given over the keel (headAboveKeelM)
+                     is the floor's, and one that alternates (altM) stands its head altM higher
+                     on the frame's long side; the rule accepts EITHER height here, notes which
+                     side is long, and reads the alternation across the frames below */
+                  const keelY = Math.min(...runs.map(footOf));
+                  /* a frame whose plane passes forward of the stem (or abaft the post) under the
+                     water ENDS on it (round 240): its foot stands above the skin's bottom, a lap
+                     given over the keel is measured over the ship's keel, not over that foot, and
+                     a lap whose lower timber's head lies below the foot is a floor the frame does
+                     not have — the chain is read from the laps above the foot */
+                  const skinBottom = Math.min(...sv.map(q => q[1]));
+                  const cutF = keelY > skinBottom + 0.15, keelBase = cutF ? skinBottom : keelY;
+                  const wantOf = lp => lp.headAboveKeelM != null ? keelBase + lp.headAboveKeelM : topY - lp.headBelowM;
+                  const laps = H.frames.laps.slice().sort((a, c) => wantOf(c) - wantOf(a)).filter(lp => !cutF || wantOf(lp) > keelY + 0.02);
+                  if (cutF && sg < 0) cutFrames.add(xc.toFixed(2));
+                  const sided = H.frames.sidedM || 0.18;
+                  if (runs.length < laps.length + 1)
+                    say(v.id, 'a frame built as fewer timbers than its laps', `${runs.length} timbers, record ${laps.length} lap(s) at x ${xc.toFixed(1)} ${side}`);
+                  laps.forEach((lp, i) => {
+                    const up = runs[i], lo = runs[i + 1]; if (!up || !lo) return;
+                    const want0 = wantOf(lp), gotHead = headOf(lo);
+                    const alt = lp.altM || 0, isLong = alt > 0 && Math.abs(gotHead - (want0 + alt)) < Math.abs(gotHead - want0);
+                    const wantHead = want0 + (isLong ? alt : 0);
+                    if (Math.abs(gotHead - wantHead) > 0.15)
+                      say(v.id, 'a lap head off the record', `lower timber's head ${gotHead.toFixed(2)} m, record ${wantHead.toFixed(2)} (${lp.headAboveKeelM != null ? lp.headAboveKeelM + ' over the keel' : lp.headBelowM + ' under the top head'}${alt ? (isLong ? ' + ' + alt + ' on the long side' : ', the short side') : ''}) at x ${xc.toFixed(1)} ${side}`);
+                    if (alt > 0) floorArms.push({ x: xc, side: sg, y: gotHead, long: isLong, alt });
+                    const gotLap = gotHead - footOf(up);
+                    if (lp.lapM && Math.abs(gotLap - lp.lapM) > 0.15)
+                      say(v.id, 'a lap off its length', `upper timber's foot ${gotLap.toFixed(2)} m below the lower's head, record ${lp.lapM} at x ${xc.toFixed(1)} ${side}`);
+                    /* side by side: the two timbers' centres compared IN THE LAP ZONE and AT
+                       ONE HEIGHT — the lower timber's x read at each upper station's height by
+                       a linear walk up the lower run, because a leaning end frame's x moves
+                       0.27 m a metre and the two runs' stations do not share heights */
+                    const zLo = footOf(up), zHi = gotHead;
+                    const xAt = (run, y) => {
+                      const q = run.slice().sort((a2, c2) => a2.y - c2.y);
+                      if (y <= q[0].y) return q[0].x; if (y >= q[q.length - 1].y) return q[q.length - 1].x;
+                      let k = 1; while (k < q.length - 1 && q[k].y < y) k++;
+                      const t2 = (y - q[k - 1].y) / Math.max(1e-6, q[k].y - q[k - 1].y);
+                      return q[k - 1].x + t2 * (q[k].x - q[k - 1].x);
+                    };
+                    const xu = up.filter(r => r.y >= zLo + 0.02 && r.y <= zHi - 0.02);
+                    const dx = xu.length ? xu.reduce((s2, r) => s2 + Math.abs(r.x - xAt(lo, r.y)), 0) / xu.length : sided;
+                    if (dx < sided - 0.06)
+                      say(v.id, 'lapped timbers in one another', `${dx.toFixed(2)} m between their centres in the lap, a siding is ${sided} at x ${xc.toFixed(1)} ${side}`);
+                    if (dx > 1.5 * sided)
+                      say(v.id, 'lapped timbers standing apart', `${dx.toFixed(2)} m between their centres in the lap, a siding is ${sided} at x ${xc.toFixed(1)} ${side}`);
+                    const loTop = lo.reduce((m2, q) => (q.y > m2.y ? q : m2), { y: -1e9, s: 0 }).s;
+                    if (H.frames.headRound && bs && loTop > 0.5 * bs)
+                      say(v.id, 'a lap head cut square', `lower timber's top station ${loTop.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)} ${side}`);
+                  });
+                }
+              }
+            }
+          }
+          /* neighbours one pitch apart; a wider gap is allowed only where a through-beam
+             stands in it (its knee took the station) */
+          const beamX = byName('deck-beam').map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; });
+          /* D-FRAMES floor alternation (round 225): where the record's floor lap alternates
+             (altM), each floor's two arms stand altM apart in height, and the long arm changes
+             side from one frame to the next — except across a station a through-beam's knee
+             took, where the numbering skips with the station and the neighbours are long on the
+             SAME side; a skipped station is a gap of two pitches. */
+          if (floorArms.length) {
+            const byX = new Map();
+            for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[sideOf(fa.side) === 'port' ? 'p' : 's'] = fa; }
+            const fl = [...byX.values()].filter(f => f.s && f.p).sort((a, c) => a.x - c.x);
+            if (fl.length < fr.length - 1 - cutFrames.size)
+              say(v.id, 'floors whose arms the rule could not pair', `${fl.length} floors read on both sides of ${fr.length} frames${cutFrames.size ? ' (' + cutFrames.size + ' end on the stem or the post and have none)' : ''}`);
+            for (const f of fl) {
+              const d = Math.abs(f.p.y - f.s.y);
+              if (Math.abs(d - f.p.alt) > 0.15)
+                say(v.id, "a floor whose arms do not stand the record's height apart", `port arm ${f.p.y.toFixed(2)} m, starboard ${f.s.y.toFixed(2)}, ${d.toFixed(2)} apart, record ${f.p.alt} at x ${f.x.toFixed(1)}`);
+              f.longSide = sideOf(f.p.y > f.s.y ? 1 : -1);
+            }
+            for (let i = 1; i < fl.length; i++) {
+              const skipped = (fl[i].x - fl[i - 1].x) > 1.5 * rs;
+              const same = fl[i].longSide === fl[i - 1].longSide;
+              if (same !== skipped)
+                say(v.id, skipped ? 'floors across a skipped station long on different sides' : 'neighbouring floors long on the same side', `${fl[i - 1].longSide} at x ${fl[i - 1].x.toFixed(1)} and ${fl[i].longSide} at x ${fl[i].x.toFixed(1)}${skipped ? ' (a station skipped between)' : ''}`);
+            }
+          }
+          xs.sort((a, b) => a - b);
+          for (let i = 1; i < xs.length; i++) {
+            const d = xs[i] - xs[i - 1];
+            const beamIn = beamX.some(x => x > xs[i - 1] && x < xs[i]);
+            if (d < rs - 0.1 || (d > rs + 0.1 && !beamIn) || d > 2.3 * rs + 0.05)
+              say(v.id, 'frames off their pitch', `${d.toFixed(2)} m between frames at x ${xs[i - 1].toFixed(1)} and ${xs[i].toFixed(1)}, record ${rs}${beamIn ? ' (a beam stands between)' : ''}`);
+          }
+        }
+        /* D-CASTLE */
+        if (H.castle && H.castle.plan) {
+          const cd = byName('castle-deck'); let yC = -1e9, x0 = 1e9, x1 = -1e9;
+          for (const q of [].concat(...cd.map(world))) { yC = Math.max(yC, q[1]); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); }
+          let under = 1e9; for (const q of dv) if (q[0] >= x0 && q[0] <= x1) under = Math.min(under, q[1]);
+          /* the record may fix the castle deck over the keel's underside instead of over the
+             afterdeck (castle.deckAboveKeelM, round 232): then the test is against the skin's
+             bottom at midships, the datum D-BEAM-HEIGHT uses, and the headroom is derived */
+          if (H.castle.deckAboveKeelM != null) {
+            let datumC = 1e9; for (const q of sv) if (Math.abs(q[0]) < 0.5) datumC = Math.min(datumC, q[1]);
+            if (cd.length && Math.abs((yC - datumC) - H.castle.deckAboveKeelM) > 0.15)
+              say(v.id, "a castle deck off the record's height over the keel", `${(yC - datumC).toFixed(2)} m over the skin's bottom at midships, record says ${H.castle.deckAboveKeelM}`);
+          } else {
+            const want = H.castle.deckHM || 1.95;
+            if (cd.length && under < 1e8 && Math.abs((yC - under) - want) > 0.15)
+              say(v.id, 'a castle deck off its headroom', `${(yC - under).toFixed(2)} m over the main deck's edge, record says ${want}`);
+          }
+        }
+        /* D-RAIL, record-blind */
+        if (part.rail && part.rail.y[0] < top0 - 0.3)
+          say(v.id, 'a rail that followed the deck down', `rail from ${part.rail.y[0].toFixed(2)} m, the skin's top at midships ${top0.toFixed(2)}`);
+        /* D-WELL, record-blind */
+        if (edge0 < 1e8 && edge0 < 0.2)
+          say(v.id, 'a deck at the waterline', `edge ${edge0.toFixed(2)} m over the water at midships — she floods`);
+      }
+    }
+
+    /* ── THE SKIN IS WOUND OUTWARD (round 218) ──────────────────────────────────────────
+       The hull shader lights a back face by its own facing since r216 (gl_FrontFacing), so
+       the winding of every skin triangle is now LIGHT: a face wound against the normal its
+       vertices carry is lit as the inside of the ship. r216's close ratchet found the loft's
+       end caps that way — the flat transom the loft closes across the counter, and the stem's
+       closure — on every hull, and accepted the darker transom with the reason written; the
+       fact stayed in the geometry. This rule makes it a conviction: every skin triangle's
+       geometric normal, (b−a)×(c−a), must not stand more than 120° from the mean of its three
+       vertex normals (a reversed face reads cos −1; the caps read −1.00 exactly). Record-blind.
+       Slivers under 1e-4 m² are skipped (a degenerate triangle has no winding to speak of).
+       Rule 8 on the first run (r218): the caps convicted every hull at −1, and Azzam alone kept
+       512 faces at cos −0.03 to −0.05 — the risers of her stern terraces, whose vertices carry
+       the neighbouring SIDE's normal by the loft's one-sided difference at a snap pair, so the
+       stored normal lies in the riser's own plane. That is not a reversed winding; it is a
+       face with no normal of its own, a different fault, named in HANDOFF r218 with its
+       numbers and left for its own rule and a loft fix (the snap-pair rows duplicated so the
+       riser takes ±x). The threshold is what keeps this rule to the fault it names.
+
+       ── THE SKIN FACE OWNS ITS NORMAL (round 219) — the fault r218 named, now convicted.
+       A stored normal is the direction the shader lights a face BY. One lying in the face's
+       own plane (|cos| < 0.3 against the geometric normal, i.e. more than 72° off) lights it
+       as some other surface — Azzam's terrace risers on the shell, at the loft's snap pairs,
+       carried the neighbouring side's normal and were shaded as the side they stand at right
+       angles to. The loft now gives a snap slot its own rows (hull.js, buildHullGeometry);
+       this rule holds the class on every hull, record-blind. Proven on the r218 loft before
+       the fix: Azzam 512 faces, the same 512 the r218 probe binned at cos −0.03 to −0.05. */
+    {
+      let skin = null; g.traverse(o => { const p = tagOf(o); if (!skin && o.isMesh && p && p.key === 'planking') skin = o; });
+      const geo = skin && skin.geometry;
+      if (geo && geo.index && geo.attributes.normal) {
+        const P = geo.attributes.position, Nn = geo.attributes.normal, I = geo.index;
+        let bad = 0, tot = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+        let flat = 0, fx0 = 1e9, fx1 = -1e9, fy0 = 1e9, fy1 = -1e9;
+        for (let t = 0; t < I.count; t += 3) {
+          const a = I.getX(t), b = I.getX(t + 1), c = I.getX(t + 2);
+          const ax = P.getX(a), ay = P.getY(a), az = P.getZ(a);
+          const e1x = P.getX(b) - ax, e1y = P.getY(b) - ay, e1z = P.getZ(b) - az;
+          const e2x = P.getX(c) - ax, e2y = P.getY(c) - ay, e2z = P.getZ(c) - az;
+          const nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
+          if (Math.hypot(nx, ny, nz) / 2 < 1e-4) continue;
+          tot++;
+          const sx = Nn.getX(a) + Nn.getX(b) + Nn.getX(c), sy = Nn.getY(a) + Nn.getY(b) + Nn.getY(c), sz = Nn.getZ(a) + Nn.getZ(b) + Nn.getZ(c);
+          const ln = Math.hypot(nx, ny, nz), ls = Math.hypot(sx, sy, sz) || 1;
+          const cos = (nx * sx + ny * sy + nz * sz) / (ln * ls);
+          if (cos < -0.5) { bad++; x0 = Math.min(x0, ax); x1 = Math.max(x1, ax); y0 = Math.min(y0, ay); y1 = Math.max(y1, ay); }
+          else if (Math.abs(cos) < 0.3) { flat++; fx0 = Math.min(fx0, ax); fx1 = Math.max(fx1, ax); fy0 = Math.min(fy0, ay); fy1 = Math.max(fy1, ay); }
+        }
+        if (bad) say(v.id, 'skin faces wound against their normals', `${bad} of ${tot} triangles, at x ${x0.toFixed(1)} to ${x1.toFixed(1)}, y ${y0.toFixed(1)} to ${y1.toFixed(1)}`);
+        if (flat) say(v.id, 'skin faces with no normal of their own', `${flat} of ${tot} triangles carry a normal lying in their own plane, at x ${fx0.toFixed(1)} to ${fx1.toFixed(1)}, y ${fy0.toFixed(1)} to ${fy1.toFixed(1)}`);
+      }
+    }
+
+    /* ── A ONE-PIECE HULL RAISES NO POSTS AND WEARS NO WALES (round 121) ────────────────
+       "Construction: single trunk, fire and adze" — there is nothing to scarf a stem to
+       and no strake to thicken into a wale, yet the dugout wore separate posts and two
+       hogging girders because both were gated on "not iron and not steel". Two arms, the
+       r120 pattern: a one-piece hull draws neither, and an assembled hull STILL draws
+       hers, so the gate cannot silently widen and strip the fleet. Posts: every build
+       except bulkhead (whose ends are transoms, tagged as such) and dugout. Wales: every
+       timber build except dugout. */
+    {
+      const onePiece = H.build === 'dugout';
+      const metal = H.build === 'iron' || H.build === 'steel';
+      /* keel and frames joined the list in round 122, when opening the hull would have
+         put thirty ribs inside a log whose own card says "no keel, no frame" — while
+         the cap stood, the contradiction was invisible and only the part table knew */
+      for (const k of ['stempost', 'wale', 'keel', 'frames']) {
+        const belongs = k === 'stempost' ? !onePiece && H.build !== 'bulkhead'
+                      : k === 'wale' ? !onePiece && !metal
+                      : !onePiece;
+        if (onePiece && part[k])
+          say(v.id, 'assembly timber on a one-piece hull',
+              `${part[k].n} ${k} mesh(es) drawn on a hull the record calls one piece`);
+        else if (belongs && !part[k])
+          say(v.id, `an assembled ship lost her ${k}`,
+              `build ${H.build} is assembled from members, and no ${k} is drawn`);
+      }
+    }
+
+    /* ── AN UNDECKED HULL IS OPEN (round 122) ───────────────────────────────────────────
+       deckLaid: false bought a "bare timber" CAP across the sheer for as long as the deck
+       loft has existed — a deck by any other name, on the two hulls whose records refuse
+       one. The question is the viewer's own: can you see INTO her? Rays straight down at
+       the hull's midbody centreline must reach geometry BELOW the load waterline — the
+       floor of the hollow — at at least one probed station. The waterplane mask is
+       exempted by name: it draws nothing, so sight passes through it, and a rule that
+       counted it would convict the very build it guards. Capped, every ray lands at
+       sheer height and the rule convicts. The decked arm is bounding-box: a real deck
+       has no business below the load line, so a decked hull whose deck-tagged geometry
+       dips under it has been wrongly opened. Twin hulls are probed on each hull's own
+       centreline, at stations halfway between the BUILT crossbeams (userData.crossbeam,
+       round 247: the record's eight put a beam on every one of the five stations the rule
+       had picked clear of the class's three, and the rule convicted the beams). */
+    {
+      const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+      if (undecked && part.deck) {
+        g.updateMatrixWorld(true);
+        const rc = new THREE.Raycaster();
+        const lanes = H.doubleHull ? [-(H.hullSep || 0) / 2, (H.hullSep || 0) / 2] : [0];
+        const bmU = []; g.traverse(o => { if (o.userData && o.userData.crossbeam) bmU.push(o.userData.crossbeam.u); });
+        bmU.sort((a, b) => a - b);
+        const stations = bmU.length >= 2
+          ? bmU.slice(0, -1).map((u, i) => (u + bmU[i + 1]) / 2).filter(u => u >= 0.3 && u <= 0.8)
+          : [0.35, 0.45, 0.55, 0.65, 0.75];
+        for (const lane of lanes) {
+          let deepest = 1e9;
+          for (const u of stations) {
+            const x = (u - 0.5) * H.lwl;
+            rc.set(new THREE.Vector3(x, 50, lane), new THREE.Vector3(0, -1, 0));
+            /* the question is what the VIEWER meets: an invisible mesh draws nothing
+               (the log's pre-hollowing top face ships visible: false), and the
+               waterplane mask draws nothing by construction — sight passes through
+               both, and the Raycaster alone passes through neither */
+            const hit = rc.intersectObject(g, true)
+              .find(h => { for (let e = h.object; e; e = e.parent)
+                             if (e.visible === false) return false;
+                           const p = tagOf(h.object);
+                           return !p || p.name !== 'Waterplane mask'; });
+            if (hit) deepest = Math.min(deepest, hit.point.y);
+          }
+          if (deepest > -0.02)
+            say(v.id, 'an undecked hull is capped',
+                `rays down the ${lane ? sideOf(lane) + ' hull ' : ''}`
+                + `centreline bottom out at ${deepest === 1e9 ? 'nothing' : deepest.toFixed(2) + ' m'}`
+                + ' — the record lays no deck, so the view should reach the floor of the '
+                + 'hollow, below the load waterline');
+        }
+      } else if (!undecked && part.deck && part.deck.y[0] < -0.02)
+        say(v.id, 'a decked hull opened up',
+            `deck geometry reaches down to ${part.deck.y[0].toFixed(2)} m — below the load `
+            + 'waterline, where no laid deck belongs; the open-hull gate has widened');
+      /* and the rail follows the deck it caps: an open hull has no deck edge, so the
+         rim of the hull wall is the gunwale and a fitted capping is assembly timber.
+         Found both ways in round 122: the dugout's rail z-fighting her rim, and the
+         canoe's rail — never in the twin-hull clone list — floating at the CENTRELINE
+         over open water. The decked arm keeps the fleet's rails aboard. */
+      if (undecked && part.rail)
+        say(v.id, 'a capping rail on a hull with no deck edge',
+            `${part.rail.n} rail mesh(es) drawn, but the record lays no deck — the rim `
+            + 'of the hull wall is the gunwale');
+      else if (!undecked && !part.rail)
+        say(v.id, 'a decked hull lost her rail',
+            'every decked hull carries her capping (empty spans come out '
+            + 'vertex-identical, but the mesh exists), and none is drawn');
+    }
+
+    /* ── A STAY ENDS ON A SPAR, NOT ON AN ESTIMATE OF ONE (round 99) ────────────────────
+       buildRigging anchors every stay and backstay at __mastTops; for rounds those points
+       were `y + lower*0.14` — 3.0 to 3.4 m ABOVE the trucks the mast loop actually drew, so
+       the whole fleet's standing rigging converged on empty air. Invisible to the ratchet
+       (a rope is thin, and it moved with everything else) and invisible from the deck. The
+       question is geometric: near each anchor's own x there must be mast mesh reaching it. */
+    if (H.__mastTops && H.__mastTops.length) {
+      const mastBoxes = [];
+      g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast')
+                          mastBoxes.push(new THREE.Box3().setFromObject(o)); });
+      H.__mastTops.forEach((mt, i) => {
+        let my = -1e9;
+        mastBoxes.forEach(b2 => {
+          if (mt.x > b2.min.x - 3 && mt.x < b2.max.x + 3) my = Math.max(my, b2.max.y);
+        });
+        if (my > -1e9 && mt.y - my > 0.5)
+          say(v.id, 'stay anchored above its own truck',
+              `mast ${i} stay collar at ${mt.y.toFixed(1)} m vs drawn truck ${my.toFixed(1)} m`);
+      });
+    }
+
+    /* ── r160: A BOW THE RECORD MEASURED BUT THE SHEER IGNORES ──────────────────────────
+       Azzam's sheerBow survived at a liner's 3.0 — a 12.0 m bow — for 160 rounds while
+       two of her own broadsides read the stem head at 8.05–8.37 m, BELOW her 9.0 m
+       freeboard: an inverted sheer, one sweep rising aft into the house. The plates are
+       data now: bowTopM, the measured stem-head height over the waterline. Both
+       directions of the r84 class: (a) the RECORD must agree with itself — freeboard +
+       sheerBow is the bow the plates measured; (b) the DRAWING must obey the record —
+       rays down just aft of the stem meet the loft on the record's own sheer line, so a
+       builder that drops or double-applies the rise convicts here. Record-gated: no
+       bowTopM, no rule, no other hull touched. */
+    if (typeof H.bowTopM === 'number' && typeof H.freeboard === 'number') {
+      const expect = H.freeboard + (H.sheerBow || 0);
+      if (Math.abs(expect - H.bowTopM) > 0.4)
+        say(v.id, 'a bow the record measured but the sheer ignores',
+            `freeboard ${H.freeboard} + sheerBow ${H.sheerBow} draws the stem head at `
+            + `${expect.toFixed(1)} m against the plates' bowTopM ${H.bowTopM} m`);
+      else {
+        g.updateMatrixWorld(true);
+        const rc = new THREE.Raycaster();
+        let worst = 0, at = null;
+        for (const u of [0.01, 0.02, 0.03]) {
+          const line = H.freeboard + (H.sheerBow || 0) * Math.pow(1 - 2 * u, 2.8);
+          rc.set(new THREE.Vector3((u - 0.5) * H.lwl, 50, 0), new THREE.Vector3(0, -1, 0));
+          const hit = rc.intersectObject(g, true)
+            .find(ht => { for (let e = ht.object; e; e = e.parent)
+                            if (e.visible === false) return false;
+                          const p = tagOf(ht.object);
+                          return !p || p.name !== 'Waterplane mask'; });
+          if (hit && Math.abs(hit.point.y - line) > worst) {
+            worst = Math.abs(hit.point.y - line); at = { u, hit: hit.point.y, line };
+          }
+        }
+        if (worst > 0.65)
+          say(v.id, 'a drawn bow off its own recorded sheer line',
+              `ray at u ${at.u} lands ${at.hit.toFixed(2)} m where the record's sheer `
+              + `line runs ${at.line.toFixed(2)} m (bowTopM ${H.bowTopM})`);
+      }
+    }
+
+    /* ── r162: A TERRACE THE RECORD PINS BUT THE DRAWN TIER IGNORES ─────────────────────
+       Queen Mary 2's aft cascade drew seven near-equal steps for 65 rounds because the
+       u-spans came off the Commons scale DRAWING; the 2016 aerial and the 2004 Hamburg
+       pair read five terraces with the deep ones low and mid, and r162 wrote the measured
+       pins into tierAftU (Research/QM2-PLATES.md). The pins are data now, and this rule
+       keeps drawing and record from drifting the way r161's roofPlate flags had: at every
+       pinned tier the aft wall must STAND at (u−0.5)·lwl — down-rays just forward of the
+       pin meet the tier's roof, down-rays just aft fall past it toward the terrace below.
+       Three z-stations each side, because a deck work standing on the lower terrace can
+       block one ray but only a wall blocks all three (fwd takes the max, aft the min).
+       Record-gated: no tierAftU, no rule, no other hull touched. */
+    if (H.tierAftU && H.decks && H.lwl) {
+      const nT = H.decks, baseT = H.freeboard || 0,
+            dhT = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+      const fl = i => (i <= 0) ? baseT
+        : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+        : baseT + dhT * i;
+      const rcT = new THREE.Raycaster();
+      const zs = [0, (H.beam || 10) * 0.2, -(H.beam || 10) * 0.2];
+      const drop = (x, z) => {
+        rcT.set(new THREE.Vector3(x, 90, z), new THREE.Vector3(0, -1, 0));
+        const hit = rcT.intersectObject(g, true)
+          .find(ht => { for (let e = ht.object; e; e = e.parent)
+                          if (e.visible === false) return false;
+                        const p = tagOf(ht.object);
+                        return !p || p.name !== 'Waterplane mask'; });
+        return hit ? hit.point.y : -1;
+      };
+      for (const k in H.tierAftU) {
+        const i = +k;
+        if (!(i > 0 && i < nT - 1)) continue;          // mkPin's own key filter
+        const wall = (H.tierAftU[k] - 0.5) * H.lwl, roof = fl(i + 1);
+        /* r166: a recorded plan round bulges the face AFT of its own chord by the
+           sagitta — the aft probe moves past the recorded apex, or it would convict
+           the arc the record attests. No tierRound, the old 0.6, byte for byte. */
+        const sagK = (H.tierRound && H.tierRound[k]) ? H.tierRound[k].sagittaM : 0;
+        const fwd = Math.max(...zs.map(z => drop(wall - 0.6, z)));
+        const aft = Math.min(...zs.map(z => drop(wall + sagK + 0.6, z)));
+        if (fwd < roof - 0.5)
+          say(v.id, 'a terrace the record pins but the drawn tier ignores',
+              `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just forward of the `
+              + `pin lands ${fwd.toFixed(2)} m where the tier roof runs ${roof.toFixed(2)} m`);
+        else if (aft > roof - 0.5)
+          say(v.id, 'a tier drawn past its recorded aft pin',
+              `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just aft of the pin `
+              + `still lands ${aft.toFixed(2)} m — the wall stands beyond its own record`);
+      }
+
+      /* ── AND A PIN PAST THE PERPENDICULAR MUST RIDE THE COUNTER (round 163) ──────────
+         Queen Mary 2's fantail edge is recorded at u 1.008 — past the after
+         perpendicular, over the counter (the r162 chain closure; the 2011 Southampton
+         astern plate reads one continuous rounded shell from counter to fantail rail).
+         Two ways that record can rot, so two arms. ARITHMETIC: the record's own
+         loa/lwl/rakes place the drawn stern extremity, and a pin past it stands on
+         water no loft can reach. RAYS: under the old u 0.999 clamp the walls freeze at
+         the clamp's half-breadth and the last five metres of stern are a tube inside
+         the counter — drawn, roofed, and wrong in plan only, which no elevation shows.
+         So at three stations across the swept quarter a down-ray one waterway plus a
+         margin inside the TRUE deck edge (surfacePoint at the bisection-inverted x, the
+         same loft the builder rides) must meet the pinned tier's roof, both sides.
+         Ray arm record-gated on a pin past u 1.0: no such pin, no rays, no other hull
+         touched. */
+      if (H.loa) {
+        const rakeAllow2 = ((H.stemRake || 0) + (H.sternRake || 0)) * H.loa;
+        const rakeScale2 = rakeAllow2 > 0
+          ? Math.min(1, Math.max(0, H.loa - H.lwl) / rakeAllow2) : 1;
+        const tipU = 0.5 + (0.5 * H.lwl + (H.sternRake || 0) * rakeScale2 * H.loa) / H.lwl;
+        const pins2 = Object.entries(H.tierAftU).map(([k2, p2]) => [+k2, p2]);
+        if (H.houseAt && H.houseAt.length === 2) pins2.push([0, H.houseAt[1]]);
+        for (const [i2, p2] of pins2)
+          if (p2 > tipU - 0.0005)
+            say(v.id, 'a terrace pinned past the ship\'s own counter',
+                `tier ${i2} aft pin u ${p2} vs the drawn stern extremity u ${tipU.toFixed(4)}`);
+        const swept = pins2.filter(([i2, p2]) =>
+          i2 > 0 && i2 < nT - 1 && p2 > 1.0 && p2 <= tipU - 0.0005);
+        if (swept.length) {
+          const HSs2 = SHIPS_HULL.hullSurface(H);
+          const qAtX2 = (x) => {
+            let lo = 0, hi = 1;
+            for (let it = 0; it < 32; it++) {
+              const q = (lo + hi) / 2;
+              if ((q - 0.5) * H.lwl + HSs2.rake(q) < x) lo = q; else hi = q;
+            }
+            return (lo + hi) / 2;
+          };
+          for (const [i2, p2] of swept) {
+            const xPin = (p2 - 0.5) * H.lwl;
+            const above = H.tierAftU[String(i2 + 1)];
+            const xAbove = ((above !== undefined ? above : p2 - 0.05) - 0.5) * H.lwl;
+            const roof2 = fl(i2 + 1);
+            for (const f of [0.45, 0.6, 0.75]) {
+              const x = xAbove + (xPin - xAbove) * f;
+              const zE = Math.abs(SHIPS_HULL.surfacePoint(H, HSs2, qAtX2(x), 1.0)[2])
+                         - (H.beam || 10) * 0.015 - 0.35;
+              if (zE < 0.8) continue;
+              const land = Math.min(drop(x, zE), drop(x, -zE));
+              if (land < roof2 - 0.5)
+                say(v.id, 'a counter the record pins but the drawn sweep never reaches',
+                    `tier ${i2} pinned at u ${p2} past the perpendicular, yet the ray one `
+                    + `waterway inside the true deck edge at x ${x.toFixed(1)} lands `
+                    + `${land.toFixed(2)} m where the tier roof runs ${roof2.toFixed(2)} m`);
+            }
+          }
+        }
+      }
+
+      /* ── r165: A WING THE RECORD PINS BUT THE DRAWN TIER CUTS OFF ────────────────────
+         Queen Mary 2's terraces sit recessed between side balcony wings — enclosed
+         structure running aft past each tier's own centre face (the 2016 aerial,
+         Research/QM2-PLATES.md read 3a) — and r165 recorded them (tierWings: the u
+         each wing tip reaches and its inboard depth) and wound the tier perimeter
+         around the notch. Three arms. ARITHMETIC: a wing must run AFT of its own
+         tier's face and STAND ON the roof below — a tip past the floor that carries
+         it hangs over the terrace or the sea. WING STANDS: a down-ray inside the wing
+         strip midway between face and tip must land no lower than the wing's own roof
+         less tolerance (one-sided, so a rail stanchion on the strip cannot
+         false-convict). NOTCH OPEN: down-rays at the centreline at that same station
+         must NOT land at the tier's roof — a full-width tier there is the wing drawn
+         as a shelf, the exact fault the record exists to forbid. And the counter
+         direction, closing r162's outboard blind spot: at every pinned tier WITHOUT a
+         wing record, a down-ray at the deck edge just aft of the pin must land no
+         higher than the terrace floor plus a rail — anything a story high there is a
+         wing nobody attested. Record-gated: no tierWings and the counter arm sees
+         only pinned tiers; a hull with neither is untouched. */
+      {
+        const HSw = SHIPS_HULL.hullSurface(H);
+        const edgeZ = (u) => Math.abs(SHIPS_HULL.surfacePoint(H, HSw, u, 1.0)[2])
+                             - (H.beam || 10) * 0.015 - 0.35;
+        const wrec = H.tierWings || {};
+        for (const k in wrec) {
+          const i = +k;
+          if (!Number.isFinite(i)) continue;               // the provenance key
+          const w = wrec[k];
+          const face = H.tierAftU[k];
+          if (face === undefined) {
+            say(v.id, 'a wing on a tier whose face no record pins',
+                `tierWings[${k}] with no tierAftU[${k}]`);
+            continue;
+          }
+          if (!(w.aftU > face + 0.004))
+            say(v.id, 'a wing that does not outrun its own face',
+                `tierWings[${k}].aftU ${w.aftU} against the tier face u ${face}`);
+          if (!(w.depthM > 0 && w.depthM < (H.beam || 10) / 2))
+            say(v.id, 'a wing deeper than the half-beam it stands in',
+                `tierWings[${k}].depthM ${w.depthM} on beam ${H.beam}`);
+          const bw = wrec[String(i - 1)];
+          const below = bw ? bw.aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)]
+                          : (H.houseAt ? H.houseAt[1] : undefined));
+          if (below !== undefined && w.aftU > below + 1e-6)
+            say(v.id, 'a wing tip past the floor that carries it',
+                `tierWings[${k}].aftU ${w.aftU} against the tier-below extent u ${below}`);
+          /* the scene: the wing stands, and the notch is open */
+          const uMid = (face + Math.min(w.aftU,
+                                        below !== undefined ? below : w.aftU)) / 2;
+          const zE = edgeZ(uMid);
+          if (zE > 0.8) {
+            const x = (uMid - 0.5) * H.lwl, wroof = fl(i + 1);
+            const stand = Math.max(drop(x, zE), drop(x, -zE));
+            if (stand < wroof - 0.5)
+              say(v.id, 'a recorded wing with no drawn structure',
+                  `tierWings[${k}] pins the tip at u ${w.aftU} yet the deck-edge ray `
+                  + `at u ${uMid.toFixed(3)} lands ${stand.toFixed(2)} m where the `
+                  + `wing roof runs ${wroof.toFixed(2)} m`);
+            /* r166: a recorded round is allowed to reach into the notch as far as
+               its own apex — the open-notch probes stand aft of it. No tierRound,
+               uOpen === uMid, byte for byte. */
+            const uOpen = Math.max(uMid, face
+              + ((H.tierRound && H.tierRound[k]) ? H.tierRound[k].sagittaM : 0)
+                / H.lwl + 0.002);
+            const xO = (uOpen - 0.5) * H.lwl;
+            const open = Math.min(...[0, (H.beam || 10) * 0.1, -(H.beam || 10) * 0.1]
+                                  .map(z => drop(xO, z)));
+            if (open > wroof - 0.5)
+              say(v.id, 'a wing drawn as a full-width shelf',
+                  `tier ${k} centreline ray at u ${uOpen.toFixed(3)} lands `
+                  + `${open.toFixed(2)} m — the tier still crosses the notch the `
+                  + `record recesses`);
+          }
+        }
+        /* the counter direction: r162's aft arm watches z ±beam·0.2, and a wing
+           lives outboard of that — so watch the deck edge at every pinned tier
+           that carries NO wing record */
+        for (const k in H.tierAftU) {
+          const i = +k;
+          if (!(i > 0 && i < nT - 1) || wrec[k]) continue;
+          const pin = H.tierAftU[k];
+          const bw2 = wrec[String(i - 1)];
+          const ext = bw2 ? bw2.aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)] : undefined);
+          const uProbe = pin + 0.012;
+          if (ext === undefined || uProbe > ext - 0.005) continue;  // no floor to probe
+          const zP = edgeZ(uProbe);
+          if (zP < 0.8) continue;
+          const xP = (uProbe - 0.5) * H.lwl;
+          const landE = Math.max(drop(xP, zP), drop(xP, -zP));
+          if (landE > fl(i) + 1.5)
+            say(v.id, 'a wing nobody attested',
+                `tier ${k} ends at u ${pin} with no tierWings, yet the deck-edge ray `
+                + `just aft lands ${landE.toFixed(2)} m — a story above the terrace `
+                + `floor ${fl(i).toFixed(2)} m`);
+        }
+      }
+
+      /* ── r166: A ROUND THE RECORD PINS BUT THE DRAWN FACE CUTS SQUARE ────────────────
+         Queen Mary 2's jacuzzi step sweeps convex-aft between its r165 wing decks on
+         the 2016 aerial — the aft rail an arc, 2.9 m of sagitta at the centreline —
+         and r166 recorded it (tierRound: how far the face's centre stands aft of the
+         chord through its notch corners) and bent the perimeter's centre-face leg
+         into the arc. Two arms plus the counter. ARITHMETIC: a sagitta below any
+         plate's support is a number nobody measured, and an apex past the tier's own
+         wing chamfer (or, unwinged, past the terrace floor below) bulges into
+         structure the record contradicts. SCENE: a centreline down-ray just aft of
+         the chord, inside the recorded bulge, must land ON the tier's own roof — a
+         fall to the terrace below is the square cut the record exists to forbid.
+         COUNTER: at every pinned tier with NO round, a centreline ray 1.2 m aft of
+         the pin must fall past the face — a roof there is a bulge nobody attested.
+         Record-gated: no tierRound and the counter arm sees only pinned tiers. */
+      {
+        const rrec = H.tierRound || {};
+        const pitchR = ((H.tierBands && H.tierBands.pitchM) || 2.6) / H.lwl;
+        for (const k in rrec) {
+          const i = +k;
+          if (!Number.isFinite(i)) continue;             // the provenance key
+          const r = rrec[k];
+          const face = H.tierAftU[k];
+          if (face === undefined) {
+            say(v.id, 'a round on a tier whose face no record pins',
+                `tierRound[${k}] with no tierAftU[${k}]`);
+            continue;
+          }
+          if (!(r.sagittaM > 0.3 && r.sagittaM <= (H.beam || 10) * 0.45))
+            say(v.id, 'a round the plate cannot support',
+                `tierRound[${k}].sagittaM ${r.sagittaM} on beam ${H.beam}`);
+          const wR = (H.tierWings || {})[k];
+          const boundR = (wR ? wR.aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)]
+                          : (H.houseAt ? H.houseAt[1] : 1))) - pitchR;
+          const apexU = face + r.sagittaM / H.lwl;
+          if (apexU >= boundR)
+            say(v.id, 'a round whose apex outruns its own notch',
+                `tierRound[${k}] puts the apex at u ${apexU.toFixed(4)} against the `
+                + `${wR ? 'wing chamfer' : 'floor below'} at u ${boundR.toFixed(4)}`);
+          /* the scene: the bulge stands */
+          if (i > 0 && i < nT - 1) {
+            const xR = (face - 0.5) * H.lwl + r.sagittaM * 0.55;
+            const landR = drop(xR, 0), roofR = fl(i + 1);
+            if (landR < roofR - 0.5)
+              say(v.id, 'a recorded round with no drawn bulge',
+                  `tierRound[${k}] attests ${r.sagittaM} m of sweep yet the centreline `
+                  + `ray at x ${xR.toFixed(1)} lands ${landR.toFixed(2)} m where the `
+                  + `tier roof runs ${roofR.toFixed(2)} m`);
+          }
+        }
+        /* the counter direction: a centre bulge slips the r162 aft arm, which takes
+           the MIN over three z-stations exactly so deck furniture cannot convict —
+           so the centreline gets its own one-sided watch at every unrounded pin */
+        for (const k in H.tierAftU) {
+          const i = +k;
+          if (!(i > 0 && i < nT - 1) || rrec[k]) continue;
+          const pin = H.tierAftU[k];
+          const below = (H.tierWings && H.tierWings[k]) ? H.tierWings[k].aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)] : undefined);
+          const uC = pin + 1.2 / H.lwl;
+          if (below !== undefined && uC > below - pitchR) continue;  // no room to probe
+          const landC = drop((uC - 0.5) * H.lwl, 0);
+          if (landC > fl(i + 1) - 0.5)
+            say(v.id, 'a bulge nobody attested',
+                `tier ${k} ends square at u ${pin} with no tierRound, yet the `
+                + `centreline ray 1.2 m aft lands ${landC.toFixed(2)} m at the tier's `
+                + `own roof height ${fl(i + 1).toFixed(2)} m`);
+        }
+      }
+    }
+
+    /* ── r167: A WALL SIZED OFF A STATION IT DOES NOT STAND AT ──────────────────────────
+       linerHouse half() sampled the shell at u as if x were (u − 0.5)·lwl — no rake —
+       on every hull without a pin past the perpendicular (r163 fixed only those), so
+       inside the rake spans each wall stood up to a rake's length INBOARD of the shell
+       at its own station: Queen Mary 2's forward tiers 1.7 m too narrow before her r163
+       gate, the warship bow tiers 0.2–0.3 m, titanic's aft corner 5 cm (measured,
+       build/staging/r167/bias-before.json). r167 re-lofted the FLEET: every
+       half-breadth inverts the true deck-edge x by bisection. Three arms. ARITHMETIC:
+       the audit's own re-derived inversion must return a q whose x matches the target
+       within 2 cm at every tier edge — a rake term bisection cannot invert breaks
+       every derivation downstream, silently. RAYS (gated on a predicted bias over
+       0.5 m at some tier edge, so a hull whose house never enters a rake span is
+       untouched): a down-ray one margin inside the PREDICTED wall at the biased edge
+       must meet the tier's roof — under no-rake sampling the wall stands a rake's
+       length further inboard and the ray falls to the deck. COUNTER: rays just
+       outside the predicted wall, at three x-stations so a davit or a boat cannot
+       false-convict (min per side), must NOT land at roof height — structure out
+       there is sized off yet another station nobody attested. Only hulls that draw
+       the house are probed (no turrets, no flight deck — their tiers feed fittings
+       and boats, not walls). */
+    if (H.decks && H.lwl && !H.turrets && !H.flightDeck && g) {
+      const n7 = H.decks, B7 = H.beam || 10, L7 = H.lwl;
+      const HS7 = SHIPS_HULL.hullSurface(H);
+      const base7 = H.freeboard || 0,
+            dh7 = H.deckM || Math.min(B7 * 0.105, 3.0);
+      const fl7 = i => (i <= 0) ? base7
+        : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+        : base7 + dh7 * i;
+      const qAtX7 = (x) => {
+        if (x <= -0.5 * L7 + HS7.rake(0)) return 0;
+        if (x >= 0.5 * L7 + HS7.rake(1)) return 1;
+        let lo = 0, hi = 1;
+        for (let it = 0; it < 32; it++) {
+          const q = (lo + hi) / 2;
+          if ((q - 0.5) * L7 + HS7.rake(q) < x) lo = q; else hi = q;
+        }
+        return (lo + hi) / 2;
+      };
+      const shellTrue7 = x => Math.abs(SHIPS_HULL.surfacePoint(H, HS7, qAtX7(x), 1.0)[2]);
+      const shellOld7 = u => Math.abs(SHIPS_HULL.surfacePoint(H, HS7,
+                              Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
+      const ns7 = H.shellTiers || 0,
+            taper7 = H.houseTaper !== undefined ? H.houseTaper : 0.16;
+      const predHalf = (i, x) => {
+        const sh = i < ns7;
+        const wid = sh ? B7 : B7 * (1 - taper7 * (0.5 + i / n7));
+        const ins = sh ? B7 * 0.015 : (taper7 < 0.06 ? B7 * 0.015 : B7 * 0.055);
+        return Math.max(B7 * 0.06, Math.min(wid / 2, shellTrue7(x) - ins));
+      };
+      /* the tier SPANS come from the builder (record-interpolated pins — not the
+         contested quantity); the predicted HALVES are re-derived above, independently */
+      const T7 = SHIPS_HULL.linerHouse(H);
+      let pick = null;
+      for (let i = 0; i < T7.tiers.length; i++) {
+        const t = T7.tiers[i];
+        for (const [u7, dir7] of [[t.uA, 1], [t.uB, -1]]) {
+          const x7 = (u7 - 0.5) * L7, q7 = qAtX7(x7);
+          if (q7 > 0 && q7 < 1
+              && Math.abs((q7 - 0.5) * L7 + HS7.rake(q7) - x7) > 0.02)
+            say(v.id, 'a station inversion the loft cannot trust',
+                `tier ${i} edge u ${u7.toFixed(4)}: bisection returns q ${q7.toFixed(5)} `
+                + `whose x misses the target by more than 2 cm`);
+          const bias7 = shellTrue7(x7) - shellOld7(u7);
+          if (!pick || Math.abs(bias7) > Math.abs(pick.bias))
+            pick = { i, u: u7, dir: dir7, bias: bias7 };
+        }
+      }
+      if (pick && Math.abs(pick.bias) > 0.5) {
+        const rc7 = new THREE.Raycaster();
+        const drop7 = (x, z) => {
+          rc7.set(new THREE.Vector3(x, 90, z), new THREE.Vector3(0, -1, 0));
+          const hit = rc7.intersectObject(g, true)
+            .find(ht => { for (let e = ht.object; e; e = e.parent)
+                            if (e.visible === false) return false;
+                          const p = tagOf(ht.object);
+                          return !p || p.name !== 'Waterplane mask'; });
+          return hit ? hit.point.y : -1;
+        };
+        const xP = (pick.u - 0.5) * L7 + pick.dir * 1.2;
+        const wall7 = predHalf(pick.i, xP), roof7 = fl7(pick.i + 1);
+        const inn = Math.min(drop7(xP, wall7 - 0.35), drop7(xP, -(wall7 - 0.35)));
+        if (inn < roof7 - 0.5)
+          say(v.id, 'a wall sized off a station it does not stand at',
+              `tier ${pick.i} edge u ${pick.u.toFixed(3)} carries ${pick.bias.toFixed(2)} m `
+              + `of rake bias, yet the ray one margin inside the true wall at x `
+              + `${xP.toFixed(1)} lands ${inn.toFixed(2)} m where the tier roof runs `
+              + `${roof7.toFixed(2)} m`);
+        for (const sgn of [1, -1]) {
+          const outs = Math.min(...[xP - 2, xP, xP + 2]
+            .map(xx => drop7(xx, sgn * (predHalf(pick.i, xx) + 0.6))));
+          if (outs > roof7 - 0.5)
+            say(v.id, 'a wall standing outside the shell station that sizes it',
+                `tier ${pick.i} edge u ${pick.u.toFixed(3)}: rays just outside the `
+                + `predicted wall land ${outs.toFixed(2)} m, at the tier's own roof `
+                + `height ${roof7.toFixed(2)} m`);
+        }
+      }
+    }
+
+    /* ── r164: THE HULL'S PAINT DOES NOT STOP AT THE HULL ───────────────────────────────
+       Queen Mary 2's black rises over the counter: every aft-quarter plate reads ONE deck
+       of white at the stern face — the name is painted on black — and r164 recorded it
+       (sternLivery: how many white shell strakes the black swallows at the face, and the
+       knee where the line leaves the level sheer) and drew it as a paint strip riding the
+       strake walls' own loft, its top edge the paint line. Two ways record and drawing
+       can drift, so two arms. ARITHMETIC: the rise must fit the ship that carries it —
+       at least one strake, no more than the shell has, the knee inside the house and
+       forward of the stern extremity. SCENE: the strip must STAND — meshes named
+       sternLivery must reach the house's aft extremity in x, run from the house floor to
+       the recorded strake boundary in y, and wear the topside's own colour, not the
+       strake white they cover. And the other direction: a strip on a hull whose record
+       says nothing is paint nobody attested. Record-gated both ways: no sternLivery and
+       no strip, no rule, no other hull touched. */
+    {
+      const strips = [];
+      g.traverse(o => { if (o.isMesh && o.name === 'sternLivery') strips.push(o); });
+      const sl = H.sternLivery;
+      if (sl) {
+        const shellsA = H.shellTiers || 0;
+        if (!(sl.strakes >= 1) || sl.strakes > shellsA)
+          say(v.id, 'a livery rise the ship cannot carry',
+              `sternLivery.strakes ${sl.strakes} against ${shellsA} shell strake(s)`);
+        if (H.houseAt && H.houseAt.length === 2
+            && !(sl.fromU > H.houseAt[0] && sl.fromU < H.houseAt[1] - 0.01))
+          say(v.id, 'a livery knee outside the house it paints',
+              `sternLivery.fromU ${sl.fromU} against houseAt [${H.houseAt}]`);
+        if (!strips.length) {
+          say(v.id, 'a recorded livery rise with no drawn paint',
+              `sternLivery attests ${sl.strakes} strake(s) risen and no sternLivery `
+              + 'mesh stands in the scene');
+        } else {
+          const baseL = H.freeboard || 0,
+                dhL = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+          const flL = i => (i <= 0) ? baseL
+            : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+            : baseL + dhL * i;
+          const topL = flL(Math.min(sl.strakes, shellsA));
+          const bb = new THREE.Box3();
+          strips.forEach(s2 => bb.union(new THREE.Box3().setFromObject(s2)));
+          if (H.houseAt && H.houseAt.length === 2
+              && bb.max.x < (H.houseAt[1] - 0.5) * H.lwl - 1.0)
+            say(v.id, 'a livery rise that stops short of the stern it paints',
+                `the strip ends at x ${bb.max.x.toFixed(1)} where the house aft `
+                + `extremity runs to x ${((H.houseAt[1] - 0.5) * H.lwl).toFixed(1)}`);
+          if (Math.abs(bb.max.y - topL) > 0.35 || Math.abs(bb.min.y - baseL) > 0.35)
+            say(v.id, 'a paint line off its own recorded strake boundary',
+                `the strip spans y ${bb.min.y.toFixed(2)}–${bb.max.y.toFixed(2)} m where `
+                + `the record puts the rise ${baseL.toFixed(2)}–${topL.toFixed(2)} m`);
+          const ca = strips[0].geometry.getAttribute('color');
+          const want = new THREE.Color(H.topside || '#3a3a3c');
+          if (ca && (Math.abs(ca.getX(0) - want.r) > 0.03
+                  || Math.abs(ca.getY(0) - want.g) > 0.03
+                  || Math.abs(ca.getZ(0) - want.b) > 0.03))
+            say(v.id, 'risen paint that is not the topside\'s own',
+                `strip colour (${ca.getX(0).toFixed(2)}, ${ca.getY(0).toFixed(2)}, `
+                + `${ca.getZ(0).toFixed(2)}) against topside ${H.topside}`);
+        }
+      } else if (strips.length) {
+        say(v.id, 'risen paint nobody attested',
+            `${strips.length} sternLivery mesh(es) stand on a hull whose record `
+            + 'carries no sternLivery');
+      }
+    }
+
+    /* ── r166: THE FANTAIL RAIL IS A SCREEN THE RECORD NAMES ────────────────────────────
+       Both of Queen Mary 2's aft-quarter plate eras read the fantail's swept edge
+       carrying a continuous translucent windscreen band under a dark top rail — panel
+       posts and a person leaning on the rail resolved on the 2011 astern plate — and
+       r166 recorded it (fantailScreen: which tier's exposed aft roof edge, the height
+       over the deck, the outward lean) and drew it riding the promenade path the open
+       rail rode. Two arms. ARITHMETIC: the height and lean must be what a deck screen
+       can be, and the tier must exist. SCENE: a mesh named fantailScreen must stand —
+       base at the tier's own roof, head the recorded height above it, reaching the
+       house's aft extremity, and LEANING: the top vertex of each pair stands farther
+       from the path's own horizontal centroid than its base, or the record's one
+       attested direction is not drawn. And the other direction: a screen on a hull
+       whose record names none is glass nobody attested. Record-gated both ways. */
+    {
+      const scr = [];
+      g.traverse(o => { if (o.isMesh && o.name === 'fantailScreen') scr.push(o); });
+      const fs = H.fantailScreen;
+      if (fs) {
+        if (!(fs.hM >= 0.9 && fs.hM <= 2.0))
+          say(v.id, 'a screen no deck edge carries',
+              `fantailScreen.hM ${fs.hM} — outside 0.9–2.0 m`);
+        if (!(fs.leanDeg >= 0 && fs.leanDeg <= 25))
+          say(v.id, 'a screen leaning past its own plates',
+              `fantailScreen.leanDeg ${fs.leanDeg} — outside 0–25 deg`);
+        if (!(Number.isInteger(fs.tier) && fs.tier >= 0 && fs.tier < (H.decks || 0)))
+          say(v.id, 'a screen on a tier the ship does not have',
+              `fantailScreen.tier ${fs.tier} on ${H.decks || 0} decks`);
+        if (!scr.length) {
+          say(v.id, 'a recorded windscreen with no drawn glass',
+              `fantailScreen attests ${fs.hM} m of screen and no fantailScreen mesh `
+              + 'stands in the scene');
+        } else {
+          const baseF = H.freeboard || 0,
+                dhF = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+          const flF = i => (i <= 0) ? baseF
+            : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+            : baseF + dhF * i;
+          const yDeck = flF(fs.tier + 1);
+          const bbF = new THREE.Box3();
+          scr.forEach(s2 => bbF.union(new THREE.Box3().setFromObject(s2)));
+          if (Math.abs(bbF.min.y - yDeck) > 0.35
+              || Math.abs(bbF.max.y - (yDeck + fs.hM)) > 0.35)
+            say(v.id, 'a screen off its own recorded deck edge',
+                `the glass spans y ${bbF.min.y.toFixed(2)}–${bbF.max.y.toFixed(2)} m `
+                + `where the record puts it ${yDeck.toFixed(2)}–`
+                + `${(yDeck + fs.hM).toFixed(2)} m`);
+          if (H.houseAt && H.houseAt.length === 2
+              && bbF.max.x < (H.houseAt[1] - 0.5) * H.lwl - 1.5)
+            say(v.id, 'a screen that stops short of the sweep it rings',
+                `the glass ends at x ${bbF.max.x.toFixed(1)} where the house aft `
+                + `extremity runs to x ${((H.houseAt[1] - 0.5) * H.lwl).toFixed(1)}`);
+          /* the lean: base/top vertex pairs, the top outboard of the base */
+          const pa = scr[0].geometry.getAttribute('position');
+          let cx = 0, cz = 0, nB = 0;
+          for (let q2 = 0; q2 < pa.count; q2 += 2) { cx += pa.getX(q2); cz += pa.getZ(q2); nB++; }
+          cx /= nB; cz /= nB;
+          let leanOK = 0;
+          for (let q2 = 0; q2 + 1 < pa.count; q2 += 2) {
+            const dB = Math.hypot(pa.getX(q2) - cx, pa.getZ(q2) - cz);
+            const dT = Math.hypot(pa.getX(q2 + 1) - cx, pa.getZ(q2 + 1) - cz);
+            if (dT > dB + 0.02) leanOK++;
+          }
+          if (fs.leanDeg > 2 && leanOK < nB * 0.9)
+            say(v.id, 'a screen that does not lean the way the plates read',
+                `${leanOK} of ${nB} panel pairs stand outboard of their own base`);
+        }
+      } else if (scr.length) {
+        say(v.id, 'a windscreen nobody attested',
+            `${scr.length} fantailScreen mesh(es) stand on a hull whose record `
+            + 'carries no fantailScreen');
+      }
+    }
+
+    /* ── r155: A RECORDED FLAG-BUTTON IS WHERE THE MAST STOPS ───────────────────────────
+       Preussen's record attests ONE mast height and its datum is the truck: 58 m deck to
+       flag-button, all five masts — the Laeisz Standardrigg cut interchangeable spars, so
+       one figure covers the rig. `truckM` on a square mast record states it. The drawn
+       stack must LAND it, and the mast's own meshes are the witnesses: every segment is
+       stepped at the deck and the stack tops out at the truck, so the y-span of the
+       mast-tagged meshes at that station IS deck-to-truck. Before r155 the builder drew
+       heightM (a lower-mast guess) through the fidded fractions and Preussen's trucks
+       stood 51.2 m — 6.8 m short of her record, on all five masts. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.truckM === undefined || mk.rig !== 'square') return;
+      const mt = (H.__mastTops || []).find(t => Math.abs(t.u - mk.at) < 0.02);
+      if (!mt) {
+        say(v.id, 'recorded truck with no drawn masthead',
+            `mast ${i} attests truckM ${mk.truckM} m and no masthead stands near u ${mk.at}`);
+        return;
+      }
+      const win = (H.beam || 10) * 0.25;
+      let lo = 1e9, hi = -1e9;
+      g.traverse(o => {
+        if (!o.isMesh || !tagOf(o) || tagOf(o).key !== 'mast') return;
+        const b2 = new THREE.Box3().setFromObject(o);
+        if (Math.abs((b2.min.x + b2.max.x) / 2 - mt.x) < win) {
+          lo = Math.min(lo, b2.min.y); hi = Math.max(hi, b2.max.y);
+        }
+      });
+      if (hi > lo && Math.abs((hi - lo) - mk.truckM) > 0.75)
+        say(v.id, 'mast short of its recorded flag-button',
+            `mast ${i} spans ${(hi - lo).toFixed(2)} m deck-to-truck against the record's `
+            + `${mk.truckM} m`);
+    });
+
+    /* ── A-GAFF-TOPMAST (round 304, Endurance): A GAFF MAST RECORDED WITH A TOPMAST IS BUILT AS ONE ──
+       Endurance's main and mizzen stood as single poles while the beset broadside shows each as a
+       thick lower mast stepping to a thin topmast about halfway up. The record now gives the truck
+       over the deck (truckM) and the cap's share of it (capFrac), read off the plate. (1) RECORD: a
+       gaff mast with capFrac carries topmast, truckM, capFrac in 0.3..0.9, and a capRead whose
+       over-deck pixel heights give capFrac within 0.02, with a provenance. (2) BUILT: the mast's
+       segment meshes (userData.seg) number two; segment 0's head stands at truckM*capFrac over its
+       foot within 0.1 m; the last segment's head at truckM within 0.1 m; the topmast's heel inside
+       the lower mast's head (a doubling, not a gap); and the gaff's throat (the mast top marked
+       gaff in __mastTops is the truck; the throat is read from the gaff spar's lowest vertex) under
+       the cap. SILENCE: a gaff mast with truckM and no capFrac, which the builder cannot solve. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.rig !== 'gaff') return;
+      if (mk.truckM !== undefined && mk.capFrac === undefined)
+        { say(v.id, 'a gaff truck with no cap share', `mast ${i}: truckM ${mk.truckM} and no capFrac`); return; }
+      if (mk.capFrac === undefined) return;
+      if (!mk.topmast || !(mk.capFrac >= 0.3 && mk.capFrac <= 0.9))
+        say(v.id, 'a gaff cap share out of its domain', `mast ${i}: topmast ${mk.topmast}, capFrac ${mk.capFrac}`);
+      const CR = mk.capRead;
+      if (!CR || !(CR.provenance && CR.provenance.length > 20) || !(CR.capOverDeckPx > 0 && CR.truckOverDeckPx > 0))
+        say(v.id, 'a gaff cap share with no plate read', `mast ${i}: capRead absent or incomplete`);
+      else if (Math.abs(CR.capOverDeckPx / CR.truckOverDeckPx - mk.capFrac) > 0.02)
+        say(v.id, "a gaff cap share off its plate read", `mast ${i}: read ${(CR.capOverDeckPx / CR.truckOverDeckPx).toFixed(3)}, record ${mk.capFrac}`);
+      const segsB = [];
+      g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg && sg.mi === i) segsB[sg.si] = sg; });
+      if (segsB.length !== 2 || !segsB[0] || !segsB[1])
+        { say(v.id, 'a recorded gaff topmast not built', `mast ${i}: ${segsB.filter(Boolean).length} segment(s) built, want lower + topmast`); return; }
+      const foot = segsB[0].footY, cap = segsB[0].headY, truck = segsB[1].headY;
+      if (Math.abs((cap - foot) - mk.truckM * mk.capFrac) > 0.1)
+        say(v.id, 'a gaff lower mast off its cap share', `mast ${i}: cap ${(cap - foot).toFixed(2)} m over its foot, record ${(mk.truckM * mk.capFrac).toFixed(2)}`);
+      if (Math.abs((truck - foot) - mk.truckM) > 0.1)
+        say(v.id, 'a gaff topmast off its recorded truck', `mast ${i}: truck ${(truck - foot).toFixed(2)} m over its foot, record ${mk.truckM}`);
+      if (!(segsB[1].footY < cap - 0.3 && segsB[1].footY > foot + (cap - foot) * 0.7))
+        say(v.id, 'a gaff topmast heel outside the doubling', `mast ${i}: heel ${(segsB[1].footY - foot).toFixed(2)} m, cap ${(cap - foot).toFixed(2)} m`);
+      let throat = Infinity;
+      g.traverse(o => { const t = o.isMesh && tagOf(o); if (!t || t.key !== 'yard' || t.name !== 'Gaff') return;
+        const b2 = new THREE.Box3().setFromObject(o);
+        if (Math.abs(b2.min.x - segsB[0].headX) < (H.beam || 8) * 0.6 && b2.min.y > foot) throat = Math.min(throat, b2.min.y); });
+      if (throat < Infinity && throat > cap)
+        say(v.id, 'a gaff hoisted above its lower masthead', `mast ${i}: gaff's lowest point ${(throat - foot).toFixed(2)} m over the foot, cap ${(cap - foot).toFixed(2)} m`);
+    });
+
+    /* ── A-GAFF-TOPMAST-STAYED (round 305, 0y¹³³): A BUILT GAFF TOPMAST IS STAYED ──────────────
+       The builder stayed only square topmasts, so Endurance's two, Great Eastern's six, Wyoming's
+       six and the steamer's one stood with nothing on them but the spring stay. For every gaff mast
+       with shrouds whose topmast segment is built (userData.seg si 1), on the fine build:
+       (1) a 'Crosstrees at the lower masthead' group carrying userData.gaffCrosstrees for that mast, standing between the
+       topmast's heel and the lower cap; (2) a 'Gaff topmast shrouds' mesh carrying
+       userData.gaffTopShrouds for that mast, one lead a side, each with its head between 0.8 of the
+       topmast and its head on or outside the pole's skin and within 0.12 m of it (r305's proof: a 0.12 m band either side let a head on the axis of a slender pole through), its bend on the crosstree's end
+       (on the bars, from their underside to 0.1 m over their top face; |z| within the bars' own extent and over 0.7 of it), and its foot at the
+       lower shrouds' foot row (height within 0.05 m, |z| within 0.5 m of the after shroud's foot),
+       abaft the after lower shroud; and the mesh's own vertices reaching the head's height within
+       0.1 m. SILENCE: a built gaff topmast with no such mesh, 'a gaff topmast unstayed'. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.rig !== 'gaff' || !mk.topmast || !mk.shrouds) return;
+      const sgB = [];
+      g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg && sg.mi === i) sgB[sg.si] = { sg, o }; });
+      if (!sgB[0] || !sgB[1]) return;
+      const S0 = sgB[0].sg, S1 = sgB[1].sg;
+      let ctG = null, tsM = null;
+      g.traverse(o => {
+        if (o.userData.gaffCrosstrees && o.userData.gaffCrosstrees.mi === i) ctG = o;
+        if (o.isMesh && o.userData.gaffTopShrouds && o.userData.gaffTopShrouds.mi === i) tsM = o;
+      });
+      if (!tsM) { say(v.id, 'a gaff topmast unstayed', `mast ${i}: topmast ${S1.footY.toFixed(2)}–${S1.headY.toFixed(2)} m built, no topmast shrouds`); return; }
+      if (!ctG || (tagOf(ctG) || {}).name !== 'Crosstrees at the lower masthead') { say(v.id, 'a gaff topmast shroud with no crosstrees', `mast ${i}`); return; }
+      const ctBox = new THREE.Box3().setFromObject(ctG);
+      const ctY = (ctBox.min.y + ctBox.max.y) / 2, ctZ = Math.max(-ctBox.min.z, ctBox.max.z);
+      if (!(ctY > S1.footY && ctY < S0.headY))
+        say(v.id, 'gaff crosstrees off the doubling', `mast ${i}: crosstrees at ${ctY.toFixed(2)} m, heel ${S1.footY.toFixed(2)}, cap ${S0.headY.toFixed(2)}`);
+      /* the topmast's radius at the hounds, from its own mesh: the widest |z| of vertices in a 0.3 m band */
+      const T = tsM.userData.gaffTopShrouds, B1 = T.built || [];
+      const pm = sgB[1].o; pm.updateMatrixWorld(true);
+      const pa = pm.geometry.attributes.position, V = new THREE.Vector3();
+      /* a cylinder has vertices only at its two rims, so the radius is read at each rim and
+         interpolated along the pole (r279's lesson) */
+      let yLo = Infinity, yHi = -Infinity;
+      for (let k = 0; k < pa.count; k++) { V.set(pa.getX(k), pa.getY(k), pa.getZ(k)).applyMatrix4(pm.matrixWorld); yLo = Math.min(yLo, V.y); yHi = Math.max(yHi, V.y); }
+      let rLo = 0, rHi = 0;
+      for (let k = 0; k < pa.count; k++) { V.set(pa.getX(k), pa.getY(k), pa.getZ(k)).applyMatrix4(pm.matrixWorld);
+        if (V.y < yLo + 0.05) rLo = Math.max(rLo, Math.abs(V.z)); if (V.y > yHi - 0.05) rHi = Math.max(rHi, Math.abs(V.z)); }
+      const radAt = y => rLo + (rHi - rLo) * Math.max(0, Math.min(1, (y - yLo) / Math.max(1e-6, yHi - yLo)));
+      const sh = [];
+      g.traverse(o => { const p2 = o.isMesh && tagOf(o); if (p2 && p2.key === 'shroud' && p2.name === 'Shrouds' && o.userData.segs) sh.push(o); });
+      const lowFeet = [];
+      for (const o of sh) for (const [a, b2] of o.userData.segs) if (Math.abs(b2[0] - S0.headX) < 3 && b2[1] > S0.footY + (S0.headY - S0.footY) * 0.8 && b2[1] <= S0.headY + 0.05) lowFeet.push(a);
+      if (B1.length !== 2) { say(v.id, 'a gaff topmast unstayed', `mast ${i}: ${B1.length} topmast shroud lead(s), want one a side`); return; }
+      for (const q of B1) {
+        const [hx, hy, hz] = q.head, [, ty, tz] = q.tip, [fx, fy, fz] = q.foot;
+        const len = S1.headY - S1.footY, rH = radAt(hy);
+        if (!(hy >= S1.footY + 0.8 * len && hy <= S1.headY) || Math.abs(hz) < rH * 0.95 || Math.abs(hz) > rH + 0.12)
+          say(v.id, 'a gaff topmast shroud off its hounds', `mast ${i} side ${q.side}: head ${hy.toFixed(2)} m (topmast ${S1.footY.toFixed(2)}–${S1.headY.toFixed(2)}), ${Math.abs(hz).toFixed(3)} m off the axis, pole ${rH.toFixed(3)}`);
+        if (ty < ctBox.min.y - 0.02 || ty > ctBox.max.y + 0.1 || Math.abs(tz) > ctZ + 0.02 || Math.abs(tz) < 0.7 * ctZ)
+          say(v.id, 'a gaff topmast shroud off its crosstree', `mast ${i} side ${q.side}: bend at ${ty.toFixed(2)} m, ${Math.abs(tz).toFixed(2)} m out; crosstrees ${ctY.toFixed(2)} m, ${ctZ.toFixed(2)} m out`);
+        const own = lowFeet.filter(a => Math.sign(a[2]) === Math.sign(q.side));
+        if (!own.length) { say(v.id, 'a gaff topmast shroud with no lower shrouds to set up beside', `mast ${i} side ${q.side}`); continue; }
+        const aft = own.reduce((m2, a) => (a[0] > m2[0] ? a : m2), own[0]);
+        if (Math.abs(fy - aft[1]) > 0.05 || Math.abs(Math.abs(fz) - Math.abs(aft[2])) > 0.5 || !(fx > aft[0]) || fx - aft[0] > (H.beam || 8) * 0.25)
+          say(v.id, 'a gaff topmast shroud set up off the rail', `mast ${i} side ${q.side}: foot ${fx.toFixed(2)}, ${fy.toFixed(2)}, ${Math.abs(fz).toFixed(2)}; after lower shroud's foot ${aft[0].toFixed(2)}, ${aft[1].toFixed(2)}, ${Math.abs(aft[2]).toFixed(2)}`);
+      }
+      const mb = new THREE.Box3().setFromObject(tsM);
+      const hMax = Math.max(...B1.map(q => q.head[1]));
+      if (Math.abs(mb.max.y - hMax) > 0.1)
+        say(v.id, 'a gaff topmast shroud record off its mesh', `mast ${i}: mesh top ${mb.max.y.toFixed(2)}, record head ${hMax.toFixed(2)}`);
+    });
+
+    /* ── A STOWED BOWER LIES FLAT ALONG THE SIDE (round 99) ─────────────────────────────
+       The fished anchor's fork plane is parallel to the planking — that is why broadside
+       photographs of a preserved two-decker show the anchor's whole profile. A fixed roll
+       constant had the fork athwartships instead: one fluke buried two metres INSIDE the
+       skin, the other 3.0 m off the ship in open air, and no bearing in the baseline set
+       could tell, because a black anchor against a dark wale reads as an anchor. The two
+       flukes are the fork's own witnesses: cones on one anchor group must stand at the
+       same distance off the centreline, or the fork is rotated off the side. */
+    g.traverse(o => {
+      if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
+      const flukes = [];
+      o.traverse(m => { if (m.isMesh && m.geometry && m.geometry.type === 'ConeGeometry')
+                          flukes.push(Math.abs(new THREE.Box3().setFromObject(m)
+                            .getCenter(new THREE.Vector3()).z)); });
+      if (flukes.length === 2 && Math.abs(flukes[0] - flukes[1]) > 1.5)
+        say(v.id, 'anchor fork athwart the ship',
+            `flukes at ${flukes[0].toFixed(1)} and ${flukes[1].toFixed(1)} m off centre — `
+            + 'one in the planking or one in the air');
+    });
+
+    /* ── EVERY MESH HAS A PART (round 99) ───────────────────────────────────────────────
+       The stated rule of this view: the geometry is the source of the labels, no second
+       list. A mesh with no tagged ancestor is invisible to the part picker, uncounted by
+       every census in this audit, and unnameable by a viewer — the 74 carried her boat
+       skids that way for sixty rounds. */
+    {
+      let untagged = 0, first = null;
+      g.traverse(o => {
+        if (!o.isMesh || tagOf(o)) return;
+        untagged++;
+        if (!first) {
+          const b2 = new THREE.Box3().setFromObject(o);
+          first = `${o.geometry ? o.geometry.type : '?'} at x ${b2.min.x.toFixed(1)}..${b2.max.x.toFixed(1)}`;
+        }
+      });
+      if (untagged)
+        say(v.id, 'mesh with no part tag', `${untagged} untagged mesh(es); first: ${first}`);
+    }
+
+    /* ── THE BUILT CAP LINE STANDS WHERE THE RECORD READS IT (round 98) ─────────────────
+       The record can be right and the build still wrong — a dropped gate, a stale copy of
+       the sheer, a loft fed the deck instead of the cap. So ask the MESHES: inside each
+       span (margins exclude the riser and end stations; u from x assumes the terrace region
+       carries no stern rake, which a terraced stern does not), the tallest terrace-tagged
+       vertex must reach the span's own cap line and nothing tagged terrace may stand past
+       it. Fires 1-for-1 under a y-shift injection; silent when the build honours the read. */
+    if (H.sternSteps) {
+      const ss = H.sternSteps.steps || [];
+      /* the cap is RAKED, so a span has no single height: every vertex is judged against
+         the record's own line AT ITS OWN u. The tallest deviation should be ~0 — the cap
+         tops sit on the line — so a build shifted low reads a large negative maxDev and
+         anything standing proud reads positive. (The first version compared the span's
+         interior max against the span's FORWARD cap value and convicted every raked cap
+         of being its own rake short — the audit was the fault, rule 8.) */
+      const spanDev = ss.map(() => -1e9);
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return;
+        const p = tagOf(o);
+        if (!p || p.key !== 'terrace') return;
+        const a = o.geometry.attributes.position.array;
+        for (let i = 0; i < a.length; i += 3) {
+          const uu = a[i] / H.lwl + 0.5;
+          for (let s2 = 0; s2 < ss.length; s2++)
+            if (uu > ss[s2].u[0] + 0.002 && uu < ss[s2].u[1] - 0.002) {
+              const t = (uu - ss[s2].u[0]) / (ss[s2].u[1] - ss[s2].u[0]);
+              const want = ss[s2].topM[0] + (ss[s2].topM[1] - ss[s2].topM[0]) * t;
+              spanDev[s2] = Math.max(spanDev[s2], a[i + 1] - want);
+            }
+        }
+      });
+      for (let s2 = 0; s2 < ss.length; s2++) {
+        if (spanDev[s2] < -1e8) continue;   // a span too short to hold an interior station
+        if (spanDev[s2] < -0.2 || spanDev[s2] > 0.3)
+          say(v.id, 'stern cap off its record',
+              `step ${s2} built cap sits ${spanDev[s2].toFixed(2)} m off the recorded line`);
+      }
+
+      /* ── A STAIR LANDS ON BOTH ITS DECKS, INSIDE THE HULL (round 102) ────────────────
+         A terrace flight's top tread is flush with the deck above its break and its feet
+         stand on the deck below; both decks CROWN 0.035·half above their edge height, so
+         the tolerance absorbs the camber. And every tread stays inside the deck edge at
+         its own station — a flight placed from a stale half-breadth would hang past the
+         shell exactly like round 100's rails. Fires under a ±0.5 m y-shift and a 1.2 m
+         outboard shift (inject-stair-shift.js / inject-stair-outboard.js). */
+      const HSs = SHIPS_HULL.hullSurface(H);
+      const wv = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        if (!o.userData.part || o.userData.part.key !== 'stair' || !o.children.length) return;
+        let minY = 1e9, maxY = -1e9, maxZ = 0, mx = 0, nch = 0;
+        for (const c of o.children) {
+          if (!c.isMesh || !c.geometry.parameters) continue;
+          const p = c.geometry.parameters;
+          c.getWorldPosition(wv);          // world, not local — a shifted GROUP must still convict
+          minY = Math.min(minY, wv.y - p.height / 2);
+          maxY = Math.max(maxY, wv.y + p.height / 2);
+          maxZ = Math.max(maxZ, Math.abs(wv.z) + p.depth / 2);
+          mx += wv.x; nch++;
+        }
+        if (!nch) return;
+        const u = (mx / nch) / H.lwl + 0.5;
+        let bu = null;
+        for (const st of ss) if (st.u[0] > 0.5 && Math.abs(st.u[0] - u) < 0.05 &&
+                                 (bu === null || Math.abs(st.u[0] - u) < Math.abs(bu - u)))
+          bu = st.u[0];
+        if (bu === null) { say(v.id, 'stair off its decks', `flight at u ${u.toFixed(3)} near no break`); return; }
+        const dUp = HSs.sheer(bu - 1e-5), dLo = HSs.sheer(bu + 1e-5);
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSs, bu + 1e-5, 1)[2]);
+        if (maxY < dUp - 0.05 || maxY > dUp + 0.45)
+          say(v.id, 'stair off its decks',
+              `top tread ${maxY.toFixed(2)} m vs upper deck ${dUp.toFixed(2)} at break ${bu}`);
+        if (minY < dLo - 0.05 || minY > dLo + 0.45)
+          say(v.id, 'stair off its decks',
+              `foot ${minY.toFixed(2)} m vs lower deck ${dLo.toFixed(2)} at break ${bu}`);
+        if (maxZ > half + 0.05)
+          say(v.id, 'stair off its decks',
+              `tread reaches ${maxZ.toFixed(2)} m off centre on a ${half.toFixed(2)} m half-breadth`);
+      });
+    }
+
+    /* ── the rules ─────────────────────────────────────────────────────────────────── */
+    /* ⚠ AND A SQUARE-RIGGER'S MAST TRUCK GENUINELY APPROACHES HER OWN LENGTH — a 57 m ship of
+       the line carries 58 m of rig, which is correct and which this rule called a fault on its
+       first run. The limit belongs to the KIND of ship: sail is tall by construction, and a
+       motor vessel with nothing but a funnel and a mast is not. */
+    /* a rigid wing is sail: the USV's 14.8 m wing on a 22 m hull is her whole propulsion */
+    const carriesSail = !!H.wingSail ||
+      (H.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole');
+    const airLimit = carriesSail ? H.loa * 1.15 : H.loa * 0.35;
+    if (airM > airLimit)
+      say(v.id, 'air draught', `${airM.toFixed(0)} m above deck on a ${H.loa} m hull` +
+                               (carriesSail ? ' (square rig)' : ' (no sail)'));
+
+    for (const [flag, key, label] of [['funnels', 'funnel', 'funnels'],
+                                      ['turrets', 'turret', 'turrets'],
+                                      ['boats', 'boat', 'boats'],
+                                      ['containers', 'container', 'containers'],
+                                      ['flightDeck', 'flightdeck', 'a flight deck'],
+                                      ['aaLight', 'aaLight', 'the light AA battery'],
+                                      ['searchlights', 'searchlight', 'searchlights'],
+                                      ['floatplanes', 'floatplane', 'floatplanes'],
+                                      ['deckHatches', 'hatch', 'stowage hatches'],
+                                      ['sternSteps', 'terrace', 'the stern terraces']])
+      if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key]
+          /* a boatsInboard record EXPLAINS the absence: the tenders live in a garage
+             inside the shell, so a declared count rightly draws nothing topside */
+          && !(flag === 'boats' && H.boatsInboard))
+        say(v.id, 'declared but not drawn', label);
+
+    /* ── THE UPPER DECK STANDS ON WHAT IT CLAIMS (round 89). A gunDeck record now has two
+       laws: over the apostis (the galleass) or on the hull's own rail (the panokseon — no
+       frame exists, so the stanchions stand on the gunwale and the deck edge follows the
+       rail line). Either way it must be DRAWN, its deck plane must sit at the declared
+       height over the water, and nothing of it may reach below the waterline. And a tower
+       record (the janggundae) must be drawn AND must stand on the fighting deck it claims
+       — the r58 stern-furniture class in Korean dress: furniture buried in the hull or
+       floating over it is invisible from every bearing, and the frame ratchet cannot see
+       wrongness, only change. Datum: y is metres over water, deck plane derives as
+       freeboard + gunDeck.height (rail amidships IS the freeboard, the fleet convention). */
+    if (H.gunDeck) {
+      const gd = part.gundeck;
+      const planeY = H.freeboard + H.gunDeck.height;
+      if (!gd) say(v.id, 'gun deck declared but not drawn', 'gunDeck record with no geometry');
+      else {
+        if (gd.y[0] < 0)
+          say(v.id, 'gun deck under water',
+              `lowest gun-deck vertex ${gd.y[0].toFixed(1)} m over water`);
+        if (planeY < gd.y[0] - 0.3 || planeY > gd.y[1] + 0.3)
+          say(v.id, 'gun deck off its declared height',
+              `deck plane derives to ${planeY.toFixed(1)} m over water, drawn band ` +
+              `${gd.y[0].toFixed(1)}–${gd.y[1].toFixed(1)}`);
+      }
+      /* ── AND THE SAMA ARE OPENINGS, NOT MARKS (round 140, supersedes the round-90
+         plate count). GD.loops declares sama a side — the sekibune's whole armament
+         story — and since r140 the tate-ita is built PIERCED: each sama a real slot
+         through the plank, dark board behind it. A count of plate meshes can no
+         longer see the story, so what convicts now is PASSAGE, slot by slot: at each
+         declared slot centre a perpendicular ray from outside must pass THROUGH the
+         wall's own plane — its first strike on the wall-band meshes deeper than the
+         outer face — and midway between two slots the same ray must be STOPPED at
+         the face. Expectation from the record and surfacePoint, never from the drawn
+         meshes (the r113 discipline). The old plate form convicts itself here: a
+         plate stands PROUD of the face, so the slot-centre ray strikes it shallower
+         than the face, never deeper. Band check on the sama meshes kept from r90. */
+      if (H.gunDeck.loops) {
+        const sm = part.sama;
+        if (!sm) say(v.id, 'loopholes declared but not drawn', 'GD.loops with no sama geometry');
+        else {
+          const bandTop = planeY + (H.gunDeck.screenH || 0) + 0.3;
+          if (sm.y[0] < planeY - 0.1 || sm.y[1] > bandTop)
+            say(v.id, 'loopholes out of the bulwark band',
+                `sama band ${sm.y[0].toFixed(1)}–${sm.y[1].toFixed(1)} m, bulwark ` +
+                `${planeY.toFixed(1)}–${bandTop.toFixed(1)}`);
+          const wallSet = [];
+          g.updateMatrixWorld(true);
+          g.traverse(o => { const p = tagOf(o);
+            if (o.isMesh && p && (p.key === 'sama' || p.name === 'Tate-ita')) wallSet.push(o); });
+          const HSs = SHIPS_HULL.hullSurface(H);
+          const GDs = H.gunDeck;
+          const overS = GDs.over !== undefined ? GDs.over : H.beam * 0.045;
+          const shHs = GDs.screenH !== undefined ? GDs.screenH : H.beam * 0.042;
+          const nL = GDs.loops;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let bad = 0, shot = 0, first = '';
+          const yRay = planeY + H.beam * 0.007 + shHs * 0.60;
+          for (const sgn of [-1, 1]) for (let j = 0; j < 2 * nL - 1; j++) {
+            /* even j: slot centre (must pass); odd j: midway between slots (must stop) */
+            const u = GDs.from + (GDs.to - GDs.from) * (j / 2 + 0.5) / nL;
+            const pd = SHIPS_HULL.surfacePoint(H, HSs, u, 1.0);
+            const faceZ = Math.abs(pd[2]) + overS;
+            rc.set(new THREE.Vector3(pd[0], yRay, sgn * (faceZ + 4)),
+                   new THREE.Vector3(0, 0, -sgn));
+            shot++;
+            const hit = rc.intersectObjects(wallSet, true)[0];
+            const depth = hit ? faceZ - hit.point.z * sgn : 99;
+            const isSlot = j % 2 === 0;
+            if (isSlot ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
+              bad++;
+              if (!first) first = `${isSlot ? 'slot' : 'wall'} at u ${u.toFixed(2)} `
+                + `${sideOf(sgn)}: first strike ${hit ? depth.toFixed(2) + ' m in'
+                                                                    : 'nothing'}`;
+            }
+          }
+          if (bad) say(v.id, 'sama are not openings through the wall',
+                       `${bad} of ${shot} passage rays wrong — ${first}`);
+        }
+      }
+      /* ── AND THE GUN PORTS ARE OPENINGS TOO (round 141, the r140 law on the battery).
+         On a hull with no rowing frame the guns fire through the fighting-deck wall
+         itself — gunsPerSide with no apostis is the panokseon's broadside — and since
+         r141 that wall is built pierced: one square port at each gun's station, cut
+         low on the battery's axis line, the muzzle through it. Same conviction as the
+         sama: PASSAGE. At each port centre a perpendicular ray from outside must
+         strike the wall-band meshes DEEPER than the outer face (the dark board
+         inboard); midway between ports it must be STOPPED at the face. Expectation
+         from the record and surfacePoint, never the drawn meshes (r113). The old form
+         — a dark plate proud of the wall, the barrel through solid plank — convicts
+         itself both ways. Rays intersect the wall set alone: the muzzle standing in
+         its own port must not answer for the wall. */
+      if (!H.apostis && H.gunDeck.gunsPerSide) {
+        const wallSet = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && (p.name === 'Bulwark' || p.name === 'Gun port'))
+            wallSet.push(o); });
+        if (!wallSet.length)
+          say(v.id, 'a battery with no wall to fire through',
+              'gunsPerSide on a frameless hull with no Bulwark or Gun port mesh');
+        else {
+          const HSp = SHIPS_HULL.hullSurface(H);
+          const GDp = H.gunDeck;
+          const overP = GDp.over !== undefined ? GDp.over : H.beam * 0.045;
+          const nP2 = GDp.gunsPerSide;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let bad = 0, shot = 0, first = '';
+          const yRay = planeY + H.beam * 0.007 + H.beam * 0.042;  // the battery's axis
+          for (const sgn of [-1, 1]) for (let j = 0; j < 2 * nP2 - 1; j++) {
+            /* even j: port centre (must pass); odd j: midway between ports (must stop) */
+            const u = GDp.from + (GDp.to - GDp.from) * (j / 2 + 0.5) / nP2;
+            const pd = SHIPS_HULL.surfacePoint(H, HSp, u, 1.0);
+            const faceZ = Math.abs(pd[2]) + overP;
+            rc.set(new THREE.Vector3(pd[0], yRay, sgn * (faceZ + 4)),
+                   new THREE.Vector3(0, 0, -sgn));
+            shot++;
+            const hit = rc.intersectObjects(wallSet, true)[0];
+            const depth = hit ? faceZ - hit.point.z * sgn : 99;
+            const isPort = j % 2 === 0;
+            if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
+              bad++;
+              if (!first) first = `${isPort ? 'port' : 'wall'} at u ${u.toFixed(2)} `
+                + `${sideOf(sgn)} side: first strike `
+                + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
+            }
+          }
+          if (bad) say(v.id, 'gun ports are not openings through the wall',
+                       `${bad} of ${shot} passage rays wrong — ${first}`);
+        }
+      }
+      /* ── AND THE OAR-DECK PORTS ARE OPENINGS TOO (round 142, the r140 law one
+         storey down). GD.walls closes the band between the gunwale and the fighting
+         deck and GD.wallPorts counts the port row a side — the panokseon's sangjang
+         belt, whose record has said "pierced by a row of small ports" since r118
+         while the drawn ports were dark plates PROUD of the loft. Since r142 the
+         belt is built pierced, so the same conviction applies: PASSAGE. At each
+         drawn port centre a perpendicular ray from outside must strike the belt
+         meshes DEEPER than the outer face; midway between ports it must be STOPPED
+         at the face. The belt RAKES between rail and deck clamp, so the expected
+         face is interpolated at the port row's own height — foot on the rail one
+         post-face inboard, head at the clamp — from the record and surfacePoint,
+         never the drawn meshes (r113). The rail's world height comes off
+         surfacePoint anchored to the fleet convention (rail amidships IS the
+         freeboard). The old plate form convicts itself at every port centre,
+         standing proud where the ray must pass. */
+      if (H.gunDeck.walls && H.gunDeck.wallPorts) {
+        const beltSet = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'sangjang') beltSet.push(o); });
+        if (!beltSet.length)
+          say(v.id, 'a port row with no belt to pierce',
+              'GD.wallPorts declared with no sangjang geometry');
+        else {
+          const HSw = SHIPS_HULL.hullSurface(H);
+          const GDw = H.gunDeck, B2 = H.beam;
+          const overW = GDw.over !== undefined ? GDw.over : B2 * 0.045;
+          const nW = GDw.wallPorts;
+          const headYw = planeY - B2 * 0.016;
+          const yRow = headYw - 0.42;
+          const pdM = SHIPS_HULL.surfacePoint(H, HSw, 0.5, 1.0);
+          const yOff = H.freeboard - pdM[1];
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let bad = 0, shot = 0, first = '';
+          for (const sgn of [-1, 1]) for (let j = 0; j < 2 * nW - 1; j++) {
+            /* even j: port centre (must pass); odd j: midway between ports (must stop) */
+            const u = GDw.from + (GDw.to - GDw.from) * (j / 2 + 0.5) / nW;
+            const pd = SHIPS_HULL.surfacePoint(H, HSw, u, 1.0);
+            const footY = pd[1] + yOff - B2 * 0.010;
+            const footZ = Math.abs(pd[2]) - B2 * 0.006;
+            const headZ = Math.abs(pd[2]) + overW - B2 * 0.020 - B2 * 0.006;
+            const faceZ = footZ + (headZ - footZ) * (yRow - footY) / (headYw - footY);
+            rc.set(new THREE.Vector3(pd[0], yRow, sgn * (faceZ + 4)),
+                   new THREE.Vector3(0, 0, -sgn));
+            shot++;
+            const hit = rc.intersectObjects(beltSet, true)[0];
+            const depth = hit ? faceZ - hit.point.z * sgn : 99;
+            const isPort = j % 2 === 0;
+            if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
+              bad++;
+              if (!first) first = `${isPort ? 'port' : 'belt'} at u ${u.toFixed(2)} `
+                + `${sideOf(sgn)} side: first strike `
+                + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
+            }
+          }
+          if (bad) say(v.id, 'oar-deck ports are not openings through the belt',
+                       `${bad} of ${shot} passage rays wrong — ${first}`);
+        }
+      }
+      /* ── AND THE CLAMP IS ONE BENT TIMBER, NOT A CHAIN (round 143). On a hull that
+         carries her fighting deck on the gunwale — gunDeck with no apostis, so the
+         deck edge follows the hull's own curve — the fore-and-aft clamp under the
+         deck lip is bent round that curve in ONE piece per side, and since r143 it
+         is lofted that way. The old form was N chord boxes a side, a kink and a
+         wedge gap at every joint. Conviction is by SPAN, because passage cannot
+         tell two solid forms apart: every mesh tagged 'Deck clamp' must run the
+         deck's own length — its x-extent within one station's width of the
+         GD.from..GD.to run, from the record and surfacePoint, never the drawn
+         meshes (r113) — and there must be exactly two, one a side. A chain fails
+         both ways: 44 meshes, each spanning 1/22 of the run. The galleass keeps
+         her straight-framed clamp (apostis branch) and is out of scope by the same
+         clause that scopes the law. */
+      if (!H.apostis) {
+        const clamps = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.name === 'Deck clamp') clamps.push(o); });
+        if (!clamps.length)
+          say(v.id, 'a fighting deck with no clamp under its edge',
+              'gunDeck on a frameless hull with no Deck clamp mesh');
+        else {
+          const HSc = SHIPS_HULL.hullSurface(H);
+          const GDc = H.gunDeck;
+          const xFc = SHIPS_HULL.surfacePoint(H, HSc, GDc.from, 1.0)[0];
+          const xTc = SHIPS_HULL.surfacePoint(H, HSc, GDc.to, 1.0)[0];
+          const run = Math.abs(xTc - xFc), stW = run / 22;
+          let badC = 0, firstC = '';
+          for (const m of clamps) {
+            const bb = new THREE.Box3().setFromObject(m);
+            const span = bb.max.x - bb.min.x;
+            if (span < run - stW) {
+              badC++;
+              if (!firstC) firstC = `a clamp mesh spans ${span.toFixed(2)} m of a `
+                + `${run.toFixed(2)} m run`;
+            }
+          }
+          if (clamps.length !== 2 && !firstC)
+            firstC = `${clamps.length} clamp meshes for two sides`;
+          if (badC || clamps.length !== 2)
+            say(v.id, 'the deck clamp is a chain, not a bent timber',
+                `${badC} of ${clamps.length} clamp meshes short of the run — ${firstC}`);
+        }
+      }
+      /* ── AND THE WALL ANSWERS FROM EVERY BEARING (round 91). The fighting deck's wall
+         is hand-placed segment by segment along a curved rail — one side, one end panel
+         or one run of segments can silently not be there, and the berth baseline shows
+         each hull from ONE bearing. This is the deckhouse ring aimed at the wall's own
+         band: 72 bearings x 3 heights at the wall box centre, and every ray must strike
+         the ship — the panokseon closes her ends precisely because dead ahead and astern
+         are the bearings a fleet met her on. The ring found all four oared hulls solid
+         the day it was written (Research/ring_survey.py, 216/216 each); the rule stands
+         for the atakebune and whatever else declares a gunDeck next. */
+      {
+        const WALL = ['Bulwark', 'End bulwark', 'Screen', 'Tate-ita'];
+        const wallB = new THREE.Box3(); wallB.makeEmpty(); let nWall = 0;
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && WALL.includes(p.name)) { wallB.expandByObject(o); nWall++; } });
+        if (!nWall) say(v.id, 'gun deck without a wall',
+                        'a gunDeck hull with no bulwark or screen mesh at all');
+        else {
+          const cx = (wallB.min.x + wallB.max.x) / 2, cz = (wallB.min.z + wallB.max.z) / 2;
+          const bandH = wallB.max.y - wallB.min.y;
+          const rc = new THREE.Raycaster(); let through = 0, shot = 0, first = '';
+          for (const f of [0.25, 0.5, 0.8]) {
+            const y = wallB.min.y + bandH * f;
+            for (let b = 0; b < 72; b++) {
+              const th = b * Math.PI / 36;
+              rc.set(new THREE.Vector3(cx + Math.cos(th) * 400, y, cz + Math.sin(th) * 400),
+                     new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)).normalize());
+              rc.far = 900; shot++;
+              if (!rc.intersectObject(g, true).length) {
+                through++;
+                if (!first) first = `first at bearing ${Math.round(th * 180 / Math.PI)}°, ` +
+                                    `y ${y.toFixed(1)} m`;
+              }
+            }
+          }
+          if (through) say(v.id, 'you can see through the gun-deck wall',
+                           `${through} of ${shot} bearings at the wall band strike nothing — ${first}`);
+        }
+      }
+      /* ── THE OAR DECK IS PROTECTED, AND ITS OWN RECORD SAYS SO (round 118).
+         gunDeck.walls declares the sangjang belt — the closed plank band between the
+         hull's rail and the fighting deck that the panokseon's own plate paints a
+         dragon on. The class default is open stanchions, and the r91 ring above
+         guards only the bulwark ABOVE the deck, so a missing belt BELOW it convicts
+         nothing. ⚠ The first draft of this rule was a single-origin escape ring from
+         the band's centre, and its own hole injection refuted it: a ship's boat and
+         the capstan stand on the oar deck between the centre and the stern, so the
+         missing aft end wall hid behind honest furniture. A shared origin is blind
+         along any shadowed bearing. So instead: PERPENDICULAR rays at the wall's own
+         expected surface, station by station, the expectation derived from the
+         record and the hull surface (surfacePoint), never from the drawn meshes —
+         the r113 discipline. Sides: 24 stations x 3 heights x 2 sides, straight in
+         athwartships; the first strike ON THE SANGJANG MESHES must land in the
+         band's own depth window [rail − 0.35, rail + over + 0.6] — the rays
+         intersect the sangjang part alone, because the question is whether the
+         record's wall stands where the record puts it, and the foresail honestly
+         hanging across the forward approach convicted the first draft of THIS
+         version too. A ray through a gap still convicts: its first sangjang strike
+         is the far side's wall, outside the window. Ends: 3 heights x 3 offsets x
+         2 ends, straight in fore-and-aft from just outside the panel (an approach
+         from far out would start inside the bow loft), first sangjang strike
+         within 0.5 m of the end plane; approach heights clear the LOCAL sheer. And
+         the port row is counted like the sama: exactly 2 x wallPorts. */
+      if (H.gunDeck.walls) {
+        const sj = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'sangjang') sj.push(o); });
+        if (!sj.length)
+          say(v.id, 'sangjang walls declared but not drawn',
+              'gunDeck.walls with no sangjang geometry');
+        else {
+          const HSw = SHIPS_HULL.hullSurface(H);
+          const GDw = H.gunDeck;
+          const overW = GDw.over !== undefined ? GDw.over : H.beam * 0.045;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let open = 0, shot = 0, first = '';
+          const miss = (where, y) => {
+            open++;
+            if (!first) first = `first ${where}, y ${y.toFixed(1)} m`;
+          };
+          for (const sgn of [-1, 1]) for (let i = 0; i < 24; i++) {
+            const u = GDw.from + (GDw.to - GDw.from) * ((i + 0.5) / 24);
+            const pd = SHIPS_HULL.surfacePoint(H, HSw, u, 1.0);
+            const railZ = Math.abs(pd[2]);
+            for (const f of [0.30, 0.55, 0.85]) {
+              const y = pd[1] + (planeY - 0.15 - pd[1]) * f;
+              rc.set(new THREE.Vector3(pd[0], y, sgn * (railZ + overW + 4)),
+                     new THREE.Vector3(0, 0, -sgn));
+              shot++;
+              const hit = rc.intersectObjects(sj, true)[0];
+              if (!hit || hit.point.z * sgn < railZ - 0.35
+                       || hit.point.z * sgn > railZ + overW + 0.6)
+                miss(`at u ${u.toFixed(2)} ${sideOf(sgn)}`, y);
+            }
+          }
+          for (const uE of [GDw.from, GDw.to]) {
+            const pd = SHIPS_HULL.surfacePoint(H, HSw, uE, 1.0);
+            const railZ = Math.abs(pd[2]);
+            const dir = uE === GDw.from ? 1 : -1;      // +x is aft: approach the near end
+            const uO = uE - dir * (1.2 / H.loa);
+            const pO = SHIPS_HULL.surfacePoint(H, HSw, Math.max(0.01, Math.min(0.99, uO)), 1.0);
+            const yLo = Math.max(pd[1], pO[1]) + 0.2;
+            for (const zf of [-0.5, 0, 0.5]) for (const f of [0.30, 0.55, 0.85]) {
+              const y = yLo + (planeY - 0.15 - yLo) * f;
+              rc.set(new THREE.Vector3(pd[0] - dir * 1.2, y, zf * railZ),
+                     new THREE.Vector3(dir, 0, 0));
+              shot++;
+              const hit = rc.intersectObjects(sj, true)[0];
+              if (!hit || Math.abs(hit.point.x - pd[0]) > 0.5)
+                miss(`at the ${uE === GDw.from ? 'forward' : 'aft'} end`, y);
+            }
+          }
+          if (open) say(v.id, 'oar deck open where its wall should stand',
+                        `${open} of ${shot} rays at the sangjang band miss it — ${first}`);
+          if (H.gunDeck.wallPorts) {
+            /* r142 supersedes the r118 plate count: the ports are OPENINGS through
+               the belt now, and two meshes a side carry all sixteen (the reveal
+               faces and the shadow boards), so a mesh count can no longer see the
+               record. The r142 passage rule above shoots every declared port centre
+               and every midpoint; what this clause still owns is bare existence. */
+            const np = sj.filter(m => tagOf(m).name === 'Oar-deck port').length;
+            if (!np)
+              say(v.id, 'oar-deck ports declared but not drawn',
+                  `record declares ${H.gunDeck.wallPorts} a side, no Oar-deck port mesh`);
+          }
+        }
+      }
+      /* ── THE BAND WEARS CLOTH, NOT PLANK (round 119).
+         The panokseon's plate closes the oar band with a plank belt (gunDeck.walls,
+         r118); the sekibune's plate — the Busan scroll — draws no plank there and
+         hangs cloth instead: gunDeck.maku, the white band under a dark scalloped
+         hem. Same discipline as the sangjang rule above: PERPENDICULAR rays at the
+         band, station by station, the expectation derived from the record and
+         surfacePoint, never from the drawn meshes, intersecting the MAKU part
+         alone. A bare near side still convicts: its first maku strike is the far
+         side's cloth, sign flipped, far outside the depth window. Ray heights stay
+         BETWEEN hem and head. Until r170 the valance hung BELOW the hem line and a
+         rule aimed too low would have taken the scallops for the cloth; r170 moved
+         the valance to the band's HEAD, ON the cloth surface, where these rays may
+         honestly count it as cloth — the strip still owns the lower ray height, so
+         the r119 hole injection (strip removed, valance left) still convicts. */
+      if (H.gunDeck.maku) {
+        const mk = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'maku') mk.push(o); });
+        if (!mk.length)
+          say(v.id, 'maku declared but not drawn', 'gunDeck.maku with no cloth geometry');
+        else {
+          const HSm = SHIPS_HULL.hullSurface(H);
+          const GDm = H.gunDeck;
+          const overM = GDm.over !== undefined ? GDm.over : H.beam * 0.045;
+          const headYm = H.freeboard + GDm.height - H.beam * 0.016;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let open = 0, shot = 0, first = '';
+          for (const sgn of [-1, 1]) for (let i = 0; i < 24; i++) {
+            const u = GDm.from + (GDm.to - GDm.from) * ((i + 0.5) / 24);
+            const pd = SHIPS_HULL.surfacePoint(H, HSm, u, 1.0);
+            const railZ = Math.abs(pd[2]);
+            const hemY = pd[1] + 0.15;
+            if (headYm - hemY < 0.25) continue;   // the sheer squeezes the band out
+            for (const f of [0.35, 0.75]) {
+              const y = hemY + (headYm - hemY) * f;
+              rc.set(new THREE.Vector3(pd[0], y, sgn * (railZ + overM + 4)),
+                     new THREE.Vector3(0, 0, -sgn));
+              shot++;
+              const hit = rc.intersectObjects(mk, true)[0];
+              if (!hit || hit.point.z * sgn < railZ - 0.05
+                       || hit.point.z * sgn > railZ + overM + 0.3) {
+                open++;
+                if (!first) first = `first at u ${u.toFixed(2)} ` +
+                                    `${sideOf(sgn)}, y ${y.toFixed(1)} m`;
+              }
+            }
+          }
+          if (open) say(v.id, 'yagura band bare where its cloth should hang',
+                        `${open} of ${shot} rays at the maku band miss the cloth — ${first}`);
+        }
+      }
+      /* ── THE VALANCE HANGS FROM THE HEAD, IN ONE STRIP (round 170). The r168 sweep
+         flagged the 52 'Maku hem' half-discs; the plate overruled the drawing, not
+         the form — a scallop IS flat cloth, but on every hull of the scroll that
+         resolves the border it hangs from the band's HEAD, tangent semicircles cut
+         from one strip, white cusps rising between them to the hanging line. The
+         r119 code hung spaced medallions off the FOOT: the record's own sentence
+         ("white cloth UNDER a dark scalloped hem") drawn the other sign. Expectation
+         from the record, surfacePoint and the class constants (lip B·0.010, tuck
+         0.10, clear 0.15), never the drawn meshes; vertices read via matrixWorld in
+         the hull's own frame — the r169 lesson: geometry positions, no Box3, ever.
+         The band parameter is recovered from x by inverting the builder's own
+         station table piecewise — a global linear inverse samples the wrong station
+         where x(u) compresses at the curved ends, and a rule that measures against
+         the wrong station convicts the innocent. Arms: V-HEAD (the border's top
+         edge on the hanging line, judged amidships where the sheer cannot blur it),
+         V-COVER (a strip, not medallions — ≥97% of head-line stations within
+         0.075 m of a border vertex), V-ONCLOTH (every border vertex on the record's
+         own cloth surface, [−0.02, +0.06] outboard of it), and V-COUNTER
+         record-blind (no border vertex deeper than 0.75 m below the head, none
+         below the band's mid-height — a valance nobody hung; the one arm that
+         survives a dragged record). */
+      if (H.gunDeck.maku) {
+        const GDv = H.gunDeck;
+        const HSv = SHIPS_HULL.hullSurface(H);
+        const overV = GDv.over !== undefined ? GDv.over : H.beam * 0.045;
+        const headYv = H.freeboard + GDv.height - H.beam * 0.016;
+        const lipV = H.beam * 0.010, tuckV = 0.10, clearV = 0.15;
+        const NV = 22, sxV = [], ryV = [], hwV = [];
+        for (let i = 0; i <= NV; i++) {
+          const u = GDv.from + (GDv.to - GDv.from) * i / NV;
+          const pd = SHIPS_HULL.surfacePoint(H, HSv, u, 1.0);
+          sxV.push(pd[0]); ryV.push(pd[1]); hwV.push(Math.abs(pd[2]) + overV);
+        }
+        const dirV = Math.sign(sxV[NV] - sxV[0]) || 1;
+        const fInv = x => {           // invert the piecewise-linear station table
+          if ((x - sxV[0]) * dirV <= 0) return 0;
+          for (let i = 0; i < NV; i++)
+            if ((x - sxV[i + 1]) * dirV <= 0)
+              return (i + (x - sxV[i]) / (sxV[i + 1] - sxV[i])) / NV;
+          return 1;
+        };
+        const lerpV = (arr, f) => { const t = Math.min(1, Math.max(0, f)) * NV;
+          const i = Math.min(NV - 1, Math.floor(t)), w = t - i;
+          return arr[i] + (arr[i + 1] - arr[i]) * w; };
+        g.updateMatrixWorld(true);
+        const VW = new THREE.Vector3();
+        for (const sgn of [-1, 1]) {
+          const vtx = [];             // border vertices this side, hull frame
+          g.traverse(o => { const p = tagOf(o);
+            if (!(o.isMesh && p && p.key === 'maku' && p.name !== 'Maku')) return;
+            const pa = o.geometry.getAttribute('position');
+            for (let k = 0; k < pa.count; k++) {
+              VW.fromBufferAttribute(pa, k).applyMatrix4(o.matrixWorld);
+              if (VW.z * sgn > 0) vtx.push([VW.x, VW.y, VW.z]);
+            } });
+          if (!vtx.length) {
+            say(v.id, 'maku band drawn without its valance',
+                `no border geometry on the ${sideOf(sgn)} side`);
+            continue;
+          }
+          /* V-HEAD, judged amidships: the border's top edge is the hanging line */
+          const xMidLo = lerpV(sxV, 1 / 3), xMidHi = lerpV(sxV, 2 / 3);
+          const mid = vtx.filter(p => (p[0] - xMidLo) * dirV >= 0
+                                   && (p[0] - xMidHi) * dirV <= 0);
+          const topMid = mid.length ? Math.max(...mid.map(p => p[1])) : -1e9;
+          if (Math.abs(topMid - headYv) > 0.06)
+            say(v.id, 'maku valance hung off the head',
+                `border top edge ${topMid.toFixed(2)} m amidships, `
+                + `the hanging line at ${headYv.toFixed(2)}`);
+          /* V-COVER: a strip, not medallions */
+          const x0c = lerpV(sxV, 0) + dirV * 0.7, x1c = lerpV(sxV, 1) - dirV * 0.7;
+          let cov = 0; const MC = 60;
+          for (let m = 0; m < MC; m++) {
+            const xs = x0c + (x1c - x0c) * (m + 0.5) / MC;
+            if (vtx.some(p => Math.abs(p[0] - xs) <= 0.075)) cov++;
+          }
+          if (cov / MC < 0.97)
+            say(v.id, 'maku border is medallions, not a strip',
+                `${cov} of ${MC} head-line stations have border cloth within 0.075 m `
+                + '— the scallops are cut from one strip and touch');
+          /* V-ONCLOTH: every border vertex on the record's own cloth surface */
+          let offC = 0, firstC = '';
+          for (const p of vtx) {
+            const f = fInv(p[0]);
+            const depF = Math.max(0.05, headYv - (lerpV(ryV, f) + clearV));
+            const s = Math.min(1, Math.max(0, (headYv - p[1]) / depF));
+            const dev = Math.abs(p[2]) - (lerpV(hwV, f) - lipV - tuckV * s);
+            if (dev < -0.02 || dev > 0.06) {
+              offC++;
+              if (!firstC) firstC = `first at x ${p[0].toFixed(1)}, y ${p[1].toFixed(2)}, `
+                                  + `${dev.toFixed(3)} m off the cloth`;
+            }
+          }
+          if (offC) say(v.id, 'maku border off its own cloth',
+                        `${offC} of ${vtx.length} border vertices off the surface — ${firstC}`);
+          /* V-COUNTER, record-blind: a valance nobody hung */
+          const botV = Math.min(...vtx.map(p => p[1]));
+          const hemMidV = lerpV(ryV, 0.5) + clearV;
+          if (headYv - botV > 0.75)
+            say(v.id, 'a scallop nobody hung',
+                `border reaches ${(headYv - botV).toFixed(2)} m below the hanging line `
+                + '— no plate reads a valance past 0.75 m');
+          else if (botV < (headYv + hemMidV) / 2)
+            say(v.id, 'a scallop nobody hung',
+                `border bottom ${botV.toFixed(2)} m, below the band's own mid-height `
+                + `${((headYv + hemMidV) / 2).toFixed(2)}`);
+        }
+      }
+      if (H.tower) {
+        const tw = part.tower;
+        if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');
+        else {
+          if (Math.abs(tw.y[0] - planeY) > 0.6)
+            say(v.id, tw.y[0] < planeY ? 'tower buried in the deck' : 'tower floats above the deck',
+                `tower foot ${tw.y[0].toFixed(1)} m over water, fighting deck at ${planeY.toFixed(1)}`);
+          if (tw.y[1] < planeY + (H.tower.h || 0))
+            say(v.id, 'tower short of its record',
+                `tower top ${tw.y[1].toFixed(1)} m, record claims ${(planeY + H.tower.h).toFixed(1)}+`);
+        }
+      }
+      /* ── THE WALLED CABIN ANSWERS FROM EVERY BEARING, FROM ITS OWN SKIN (round 117).
+         tower.walls declares the yakata the Busan scroll draws: a CLOSED plank house,
+         not the open janggundae pavilion the class default draws. An open pavilion at
+         the wall band is four posts and a rail — most bearings pass straight through —
+         and a single missing wall panel hides from the one berth bearing a baseline
+         shows. So: 72 bearings x 3 heights in the wall band, aimed at the tower's own
+         centre, intersecting the TOWER part alone — and the first strike must land at
+         the face the ray ENTERS, because a ray through a hole still hits the far wall
+         from inside. That depth test is what the r91 ring could not do. */
+      if (H.tower && H.tower.walls) {
+        const tm = []; g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'tower') tm.push(o); });
+        if (tm.length) {
+          const tb = new THREE.Box3();
+          for (const m of tm) tb.expandByObject(m);
+          /* the entry datum is the WALL box, not the part box: the part box is inflated
+             by the roof overhang in both axes, and at a diagonal bearing the run from
+             that corner to the wall is longer than any honest margin — the first clean
+             run convicted its own house by 1 cm exactly there. Wall-band meshes are the
+             ones whose feet stand on the cabin sole. */
+          const wb = new THREE.Box3(); let nw = 0;
+          for (const m of tm) {
+            const b = new THREE.Box3().setFromObject(m);
+            if (b.min.y < tb.min.y + 0.3) { wb.union(b); nw++; }
+          }
+          const eb = nw ? wb : tb;
+          const cx = (eb.min.x + eb.max.x) / 2, cz = (eb.min.z + eb.max.z) / 2;
+          const rc = new THREE.Raycaster(); rc.far = 900;
+          const entry = new THREE.Vector3();
+          let open = 0, shot = 0, first = '';
+          for (const f of [0.25, 0.5, 0.8]) {
+            const y = tb.min.y + (H.tower.h || (tb.max.y - tb.min.y)) * f;
+            for (let b = 0; b < 72; b++) {
+              const th = b * Math.PI / 36;
+              rc.set(new THREE.Vector3(cx + Math.cos(th) * 400, y, cz + Math.sin(th) * 400),
+                     new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)));
+              shot++;
+              const hit = rc.intersectObjects(tm, true)[0];
+              const ent = rc.ray.intersectBox(eb, entry);
+              if (!hit || !ent || hit.point.distanceTo(ent) > 0.6) {
+                open++;
+                if (!first) first = `first at bearing ${Math.round(th * 180 / Math.PI)}°, ` +
+                                    `y ${y.toFixed(1)} m`;
+              }
+            }
+          }
+          if (open) say(v.id, 'walled cabin open to a bearing',
+                        `${open} of ${shot} rays into the wall band miss plank — ${first}`);
+        }
+      }
+    } else if (H.tower)
+      say(v.id, 'tower without a deck', 'tower record on a hull with no gunDeck to stand on');
+
+    /* ── A RO SCULLS, A SWEEP PULLS (round 115). A hull whose record declares oarStyle
+       'ro' rows the Japanese/Korean way: each blade trails AFT of its pin and stays IN
+       the water — that is what sculling is. Round 90 drew the sekibune's forty ro as
+       perpendicular western sweeps and recorded the simplification; this rule is that
+       record cashed, and it guards the panokseon's ro too. The audit sees the BUILT rest
+       pose (its own buildShip instances never animate), so the tolerances are the rest
+       pose's own. */
+    if (H.oarStyle === 'ro') {
+      let nRo = 0, bad = 0, first = '', badF = 0, firstF = '';
+      const tip = new THREE.Vector3(), pin = new THREE.Vector3(), cnr = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const d = o.userData && o.userData.oar;
+        if (!d) return;
+        nRo++;
+        if (d.style !== 'ro') { bad++; if (!first) first = 'drawn as a sweep'; return; }
+        tip.set(0, 0, d.outb).applyMatrix4(o.matrixWorld);
+        o.getWorldPosition(pin);
+        if (tip.x < pin.x + 0.3) {
+          bad++; if (!first) first = `tip not abaft its pin (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+        } else if (tip.y > 0.15 || tip.y < -(H.draught + 0.6)) {
+          bad++; if (!first) first = `tip at ${tip.y.toFixed(2)} m over water (draught ${H.draught})`;
+        }
+        /* ── AND THE BLADE IS ONE SCARFED TIMBER (round 144). A ro's blade widens
+           CONTINUOUSLY from the loom scarf to the tip — a step is not a scarf, and
+           the way a step gets drawn is a wider face plate OVERLAID on the limb.
+           Conviction is by OVERLAP, in the group's own frame where +z is the blade
+           run (so the rake cannot alias into the measure): exactly two timbers hang
+           on the pin — blade and loom — no two of them may share more than 15% of
+           the blade run, and the blade must REACH its own recorded tip. The r144
+           pre-form convicts itself twice over: three meshes on the pin, the face
+           plate sharing 0.45·outb of the run with the limb inside it. */
+        const kids = [];
+        o.traverse(m => { if (m.isMesh) kids.push(m); });
+        const ext = kids.map(m => {
+          m.updateMatrix();
+          const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox; let z0 = Infinity, z1 = -Infinity;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+                z0 = Math.min(z0, cnr.z); z1 = Math.max(z1, cnr.z);
+              }
+          return [z0, z1];
+        });
+        let ovl = 0;
+        for (let a2 = 0; a2 < ext.length; a2++)
+          for (let b2 = a2 + 1; b2 < ext.length; b2++)
+            ovl = Math.max(ovl,
+              Math.min(ext[a2][1], ext[b2][1]) - Math.max(ext[a2][0], ext[b2][0]));
+        const reach = Math.max(...ext.map(e => e[1]));
+        if (ovl > 0.15 * d.outb) {
+          badF++; if (!firstF) firstF = `two timbers overlap ${ovl.toFixed(2)} m of a `
+            + `${d.outb.toFixed(2)} m blade run`;
+        } else if (kids.length !== 2) {
+          badF++; if (!firstF) firstF = `${kids.length} meshes on one pin for a blade and a loom`;
+        } else if (reach < 0.95 * d.outb) {
+          badF++; if (!firstF) firstF = `blade reaches ${reach.toFixed(2)} m of its `
+            + `${d.outb.toFixed(2)} m run`;
+        }
+      });
+      if (!nRo) say(v.id, 'ro declared but no oars drawn', 'oarStyle ro with no oar groups');
+      else if (bad) say(v.id, 'ro drawn as sweeps', `${bad} of ${nRo} oars fail the scull test — ${first}`);
+      if (nRo && badF)
+        say(v.id, 'the ro blade is a stepped overlay, not one scarfed timber',
+            `${badF} of ${nRo} — ${firstF}`);
+    }
+
+    /* ── A BANK OF ROWERS FITS THE HULL THAT SEATS THEM (round 168) ─────────────────────
+       The record must agree with itself before the drawing is judged: a bank's extent is
+       (perBank − 1) · interscalmium, a REAL length, and it must fit inside nine tenths of
+       the waterline it claims to sit on. A record dragged to more rowers than the hull
+       has stations would seat men off both ends of the ship — the builder would draw it
+       faithfully, so only the record's own arithmetic can convict it. All oared hulls,
+       ro and sweep alike; the defaults mirror hull.js's own (Vitruvius 0.98, oarLen 4.2). */
+    if (H.oarBanks) {
+      const isc = H.interscalmium || 0.98;
+      const banks = Array.isArray(H.oarsPerBank) ? H.oarsPerBank
+                  : [H.oarsPerBank || 27];
+      for (let b = 0; b < banks.length; b++) {
+        const span = (banks[b] - 1) * isc;
+        if (span > 0.9 * H.lwl)
+          say(v.id, 'more rowers than the hull has stations',
+              `bank ${b}: ${banks[b]} rowers at ${isc} m span ${span.toFixed(1)} m `
+              + `on a ${H.lwl} m waterline`);
+      }
+    }
+
+    /* ── THE TOP'S PLAN FORM IS DATED (r211) ───────────────────────────────────────────
+       Lees (The Masting and Rigging of English Ships of War 1625–1860): tops were ROUND until
+       about 1710 and SQUARE-BACKED after — the after side straight, the fore side rounded.
+       Before that the top was a fighting position with a bulwark (the Kraeck engraving, the
+       Mataró model, the Mary Rose). The first builder drew one bare round disc on every hull
+       from the 1380 cog to the 1902 Preussen. Measured in each top group's own frame off its
+       platform — the child with the most triangles — with hull +x aft, on the RECORD's year
+       (H.year, the depicted year the top's own existence is gated on). ROUND: before 1710 the
+       aft extent is within 3% of the forward, and a bulwark stands on it — some child at least
+       0.3·r tall. SQUARE-BACKED: from 1710 the aft extent is 0.55–0.85 of the forward, and
+       nothing on the platform stands over 0.2·r — the bulwark is the fighting top's, and a
+       74's top carried none. The topmast crosstrees are tagged 'top' too, named Crosstrees,
+       and carry no platform: skipped by name. Record-gated: no year, no top, no rule. */
+    if ((H.year || 0) >= 1100 && (H.masts || []).some(m => m.rig === 'square')) {
+      let nTop = 0, badF = 0, firstF = '', badW = 0, firstW = '';
+      const cnr = new THREE.Vector3();
+      const square = H.year >= 1710;
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const part = o.userData && o.userData.part;
+        if (!part || part.key !== 'top' || /^Crosstrees/.test(part.name)) return;   // r305: and a gaff mast's, at its lower masthead
+        const kids = [];
+        o.traverse(m => { if (m.isMesh) kids.push(m); });
+        if (!kids.length) return;
+        nTop++;
+        const ext = kids.map(m => {
+          m.updateMatrix();
+          const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox;
+          let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+                x0 = Math.min(x0, cnr.x); x1 = Math.max(x1, cnr.x);
+                y0 = Math.min(y0, cnr.y); y1 = Math.max(y1, cnr.y);
+              }
+          const idx = gm.index ? gm.index.count : gm.attributes.position.count;
+          return { tris: idx / 3, fwd: -x0, aft: x1, h: y1 - y0 };
+        });
+        const plat = ext.reduce((a, b) => (b.tris > a.tris ? b : a));
+        const r = plat.fwd, ratio = plat.aft / plat.fwd;
+        const tallest = Math.max(...ext.map(e => e.h));
+        if (square) {
+          if (ratio < 0.55 || ratio > 0.85) {
+            badF++; if (!firstF) firstF = `aft ${plat.aft.toFixed(2)} m of forward ${r.toFixed(2)} m, `
+              + `${ratio.toFixed(2)} — a top depicted at ${H.year} is square-backed`;
+          }
+          if (tallest > 0.2 * r) {
+            badW++; if (!firstW) firstW = `a ${tallest.toFixed(2)} m wall on a ${r.toFixed(2)} m top `
+              + `depicted at ${H.year} — the bulwark is the fighting top's, before 1710`;
+          }
+        } else {
+          if (Math.abs(ratio - 1) > 0.03) {
+            badF++; if (!firstF) firstF = `aft ${plat.aft.toFixed(2)} m of forward ${r.toFixed(2)} m, `
+              + `${ratio.toFixed(2)} — a top depicted at ${H.year} is round`;
+          }
+          if (tallest < 0.3 * r) {
+            badW++; if (!firstW) firstW = `nothing over ${tallest.toFixed(2)} m on a ${r.toFixed(2)} m top `
+              + `depicted at ${H.year} — a fighting top without its bulwark is a bare disc`;
+          }
+        }
+      });
+      if (badF) say(v.id, "a top of the wrong century's form", `${badF} of ${nTop} — ${firstF}`);
+      if (badW) say(v.id, "a top walled for the wrong century", `${badW} of ${nTop} — ${firstW}`);
+    }
+
+    /* ── A SWEEP STOPS AT ITS OWN RECORD, AND ITS BLADE IS A LOFT (round 168) ───────────
+       The fleet probe ranked the oared fleet's 270 sweep blades the largest boxy class
+       left after the containers: every blade a 12-triangle crate, and the crate overran
+       the oar — centred at 0.90·outb with an 0.11·oarLen half-length, its corner stood
+       at 1.049·outb, five per cent past the oar's own recorded length. Three arms, in
+       the oar group's own frame (the ro rule's corner-transform, so the rest rake cannot
+       alias into the measure), outb derived from the RECORD (0.74 · (oarLen or the
+       builder's own 4.2 default), mirroring hull.js the way lowerOf mirrors the mast
+       stack). REACH: the oar's drawn tip lands on [0.97, 1.01]·outb — the crate's 1.049
+       convicts, and so does an oar cut short. FORM: the blade (the outboard mesh of the
+       pin's two) must deepen from its neck and ease at its tip — widest section over
+       1.15× the neck's and over 1.05× the tip's; a constant-section crate fails both.
+       COUNTER: no blade deeper than 0.045·B — a blade nobody attested, the arm that
+       watches the fix itself. */
+    if (H.oarBanks && H.oarStyle !== 'ro') {
+      const outbR = 0.74 * (H.oarLen || 4.2);
+      let nSw = 0, badR = 0, firstR = '', badF2 = 0, firstF2 = '', badC = 0, firstC = '';
+      const cnr = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const d = o.userData && o.userData.oar;
+        if (!d || d.style === 'ro') return;
+        nSw++;
+        const kids = [];
+        o.traverse(m => { if (m.isMesh) kids.push(m); });
+        if (kids.length !== 2) {
+          badF2++; if (!firstF2) firstF2 = `${kids.length} meshes on one thole for a loom and a blade`;
+          return;
+        }
+        /* z-extents of each timber in the group's frame */
+        const ext = kids.map(m => {
+          m.updateMatrix();
+          const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox; let z0 = Infinity, z1 = -Infinity;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+                z0 = Math.min(z0, cnr.z); z1 = Math.max(z1, cnr.z);
+              }
+          return [z0, z1];
+        });
+        const reach = Math.max(ext[0][1], ext[1][1]);
+        if (reach > 1.01 * outbR || reach < 0.97 * outbR) {
+          badR++; if (!firstR) firstR = `tip at ${reach.toFixed(2)} m of a recorded `
+            + `${outbR.toFixed(2)} m outboard run`;
+        }
+        /* the blade is the mesh that STARTS further outboard */
+        const bi = ext[0][0] > ext[1][0] ? 0 : 1;
+        const bm = kids[bi], bz0 = ext[bi][0], bz1 = ext[bi][1], run = bz1 - bz0;
+        const pa = bm.geometry.attributes.position.array;
+        const p3 = new THREE.Vector3();
+        let neckLo = Infinity, neckHi = -Infinity, tipLo = Infinity, tipHi = -Infinity,
+            allLo = Infinity, allHi = -Infinity;
+        for (let i = 0; i < pa.length; i += 3) {
+          p3.set(pa[i], pa[i + 1], pa[i + 2]).applyMatrix4(bm.matrix);
+          allLo = Math.min(allLo, p3.y); allHi = Math.max(allHi, p3.y);
+          if (p3.z < bz0 + 0.15 * run) { neckLo = Math.min(neckLo, p3.y);
+                                         neckHi = Math.max(neckHi, p3.y); }
+          if (p3.z > bz1 - 0.02 * run) { tipLo = Math.min(tipLo, p3.y);
+                                         tipHi = Math.max(tipHi, p3.y); }
+        }
+        const neckD = (neckHi - neckLo) / 2, tipD = (tipHi - tipLo) / 2,
+              maxD = (allHi - allLo) / 2;
+        if (!(maxD > 1.15 * neckD && maxD > 1.05 * tipD)) {
+          badF2++; if (!firstF2) firstF2 = `neck ${neckD.toFixed(3)}, widest `
+            + `${maxD.toFixed(3)}, tip ${tipD.toFixed(3)} m half-depth — the same depth `
+            + 'at the neck as at its widest is a crate, not a blade';
+        }
+        if (maxD > 0.045 * H.beam) {
+          badC++; if (!firstC) firstC = `blade ${(2 * maxD).toFixed(2)} m deep on a `
+            + `${H.beam} m beam — deeper than the class it replaced`;
+        }
+      });
+      if (H.oarBanks && !nSw) say(v.id, 'oar banks declared but no sweeps drawn',
+                                  'oarBanks with no oar groups');
+      if (badR) say(v.id, 'an oar drawn past its own record',
+                    `${badR} of ${nSw} sweeps — ${firstR}`);
+      if (badF2) say(v.id, 'the sweep blade is a crate, not a loft',
+                     `${badF2} of ${nSw} — ${firstF2}`);
+      if (badC) say(v.id, 'a blade nobody attested',
+                    `${badC} of ${nSw} — ${firstC}`);
+    }
+
+    /* ── A PADDLE FLOAT IS THE RECORDED BOARD (round 169) ───────────────────────────────
+       The r168 sweep ranked great-eastern's 96 paddle meshes the largest boxy class after
+       the containers, and the judgment came back from the record: a float IS a flat
+       board — 'the propelling boards fixed on the radiating arms' (Young's Nautical
+       Dictionary, 1863) — so the boxy FORM is attested and what convicts is ARITHMETIC.
+       Lindsay's specification table (1876) gives each wheel 30 floats of 13 ft × 3 ft;
+       the drawn wheel carried 24 floats of 7.6 × 2.0 m, every dimension roughly double
+       its record, and the housing rode out to 45.2 m against 120 ft attested over the
+       boxes. Four arms, all in the wheel group's own frame from geometry parameters and
+       local positions — Box3.setFromObject inflates a spinning wheel's rim AABB by √2
+       and convicted the rims falsely this same round. COUNT: floats drawn per wheel
+       equal the record's. BOARD: each float within 15% of the recorded depth and length,
+       its outer edge landing on [0.95, 1.01]·R. BREADTH: the face ornament lands on
+       [0.93, 1.01] of the recorded half-breadth over the boxes. COUNTER, record-blind:
+       no float deeper than 1.5 m or thicker than 0.30 m — a board nobody ever hung on a
+       wheel, the arm that convicts a dragged record under a faithful builder. */
+    if (H.paddleFloats) {
+      const Rw = (H.paddleDia || 0) / 2;
+      const fD = H.paddleFloatDeepM || 0, fL = H.paddleFloatLenM || 0;
+      let wheels = 0, badN = 0, firstN = '', badB = 0, firstB = '',
+          badC = 0, firstC = '';
+      g.traverse(o => {
+        if (!(o.userData && o.userData.wheel)) return;
+        wheels++;
+        let nF = 0;
+        o.children.forEach(m => {
+          if (!m.isMesh || m.name !== 'Float') return;
+          nF++;
+          const pp = m.geometry.parameters || {};
+          const deep = pp.height || 0, len = pp.depth || 0, thick = pp.width || 0;
+          const reach = Math.hypot(m.position.x, m.position.y) + deep / 2;
+          const dimBad = (fD && Math.abs(deep - fD) > 0.15 * fD)
+                      || (fL && Math.abs(len - fL) > 0.15 * fL);
+          if (dimBad || reach > 1.01 * Rw || reach < 0.95 * Rw) {
+            badB++; if (!firstB) firstB = `a ${len.toFixed(2)} × ${deep.toFixed(2)} m float `
+              + `reaching ${reach.toFixed(2)} m against a recorded ${fL.toFixed(2)} × `
+              + `${fD.toFixed(2)} m board on a ${Rw.toFixed(2)} m wheel`;
+          }
+          if (deep > 1.5 || thick > 0.30) {
+            badC++; if (!firstC) firstC = `a float ${deep.toFixed(2)} m deep and `
+              + `${thick.toFixed(2)} m thick`;
+          }
+        });
+        if (nF !== H.paddleFloats) {
+          badN++; if (!firstN) firstN =
+            `${nF} floats drawn on a wheel recorded with ${H.paddleFloats}`;
+        }
+      });
+      if (!wheels) say(v.id, 'paddle floats recorded but no wheel drawn',
+                       'paddleFloats with no wheel group');
+      if (badN) say(v.id, 'the wheel does not carry its recorded floats', firstN);
+      if (badB) say(v.id, 'a float drawn past its own record', `${badB} — ${firstB}`);
+      if (badC) say(v.id, 'a board nobody attested', `${badC} — ${firstC}`);
+      if (H.paddleOverBoxesM && wheels) {
+        /* the widest paddle-box structure, corner-transformed per mesh — exact for
+           boxes, and the box group only ever turns a half-turn about Y */
+        const obHalf = H.paddleOverBoxesM / 2;
+        let zMax = 0;
+        const cnr = new THREE.Vector3();
+        g.updateMatrixWorld(true);
+        g.traverse(o => {
+          if (!o.isMesh) return;
+          let part = null;
+          for (let e = o; e; e = e.parent)
+            if (e.userData && e.userData.part) { part = e.userData.part; break; }
+          if (!part || part.key !== 'paddlebox') return;
+          const gm = o.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(o.matrixWorld);
+                zMax = Math.max(zMax, Math.abs(cnr.z));
+              }
+        });
+        if (zMax > 1.01 * obHalf || zMax < 0.93 * obHalf)
+          say(v.id, 'the housing does not stop at its recorded breadth',
+              `widest box structure at ${(2 * zMax).toFixed(2)} m over a recorded `
+              + `${H.paddleOverBoxesM} m over the boxes`);
+      }
+    }
+
+    /* ── THE RECORD'S GUNS FIRE THE WAY THE RECORD SAYS (round 116). Round 88 recorded
+       two gaps on the galleass: 'chasers aft' claimed by her own Guns row and never
+       drawn, and the Lepanto conversions' ROUND bow fortress flattened to a galley
+       arrumbada. Both are record fields now, so both get the r113 discipline — a field
+       the builder silently ignores must convict. sternGuns: exactly that many chaser
+       groups, each standing abaft 0.8·LWL and firing ASTERN (muzzle tip abaft its
+       breech). bowFortress: fortress meshes must be DRAWN, and every bow piece fires
+       forward-OUT through the curve (tip forward of its breech and no closer to the
+       centreline), which is what a radial battery is. */
+    if (H.sternGuns) {
+      let nCh = 0, bad = 0, first = '';
+      const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const d = o.userData && o.userData.gun;
+        if (!d || d.style !== 'chaser') return;
+        nCh++;
+        tip.set(d.tip[0], d.tip[1], d.tip[2]).applyMatrix4(o.matrixWorld);
+        o.getWorldPosition(pin);
+        if (pin.x < (0.80 - 0.5) * H.lwl) {
+          bad++; if (!first) first = `chaser amidships (x ${pin.x.toFixed(1)} m)`;
+        } else if (tip.x < pin.x + 0.5) {
+          bad++; if (!first) first = `chaser fires forward (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+        }
+      });
+      if (nCh !== H.sternGuns)
+        say(v.id, 'stern chasers off the record', `record says ${H.sternGuns}, drawn ${nCh}`);
+      else if (bad) say(v.id, 'chasers mis-laid', `${bad} of ${nCh} — ${first}`);
+    }
+    if (H.bowFortress) {
+      let fortDrawn = false, nBow = 0, bad = 0, first = '';
+      const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'fortress') fortDrawn = true;
+        const d = o.userData && o.userData.gun;
+        if (!d || d.style !== 'fortress') return;
+        nBow++;
+        tip.set(d.tip[0], d.tip[1], d.tip[2]).applyMatrix4(o.matrixWorld);
+        o.getWorldPosition(pin);
+        if (tip.x > pin.x - 0.3) {
+          bad++; if (!first) first = `bow piece not firing ahead (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+        } else if (Math.abs(tip.z) < Math.abs(pin.z) - 0.15) {
+          bad++; if (!first) first = 'bow piece crossing inboard of its breech';
+        }
+      });
+      if (!fortDrawn)
+        say(v.id, 'bow fortress declared but not drawn', 'bowFortress with no fortress meshes');
+      else if (H.bowGuns && nBow !== H.bowGuns)
+        say(v.id, 'bow battery off the record', `record says ${H.bowGuns}, drawn on the fortress ${nBow}`);
+      else if (bad) say(v.id, 'bow battery mis-laid', `${bad} of ${nBow} — ${first}`);
+    }
+
+    /* ── THE DRESS IS A DATE (round 32). The plating shader keys fastening and bottom colour
+       off the year the hull is depicted at; a steel hull with no year silently falls back to
+       the Victorian scheme, which is exactly the fleet-wide anachronism the era key was built
+       to end. And a cove line on a post-1950 hull is that anachronism declared in the data:
+       the gilt cove is Victorian/Edwardian liner dress, gone from the record by the welded
+       era. Geometry cannot show either fault, so the DATA is audited. */
+    if (H.iron && !H.year)
+      say(v.id, 'no dress era', 'iron hull without year — shader falls back to Victorian dress');
+    if (H.iron && H.year >= 1950 && H.cove)
+      say(v.id, 'anachronistic dress', `cove line declared on a ${H.year} welded hull`);
+
+    /* ── THE HOUSE STANDS AT THE RECORD'S HEIGHT (round 34). Titanic's freeboard carried her
+       BOAT-DECK height (18.5 m) where the fleet convention is waterline-to-shell-deck, so the
+       drawn boat deck stood 30.3 m over the water against the record's 19 — the whole profile
+       1.6× too tall, and her masts level with her funnels instead of 20 m over them. Where
+       the record supplies the datum (boatDeckM), the derivation the house, boats and funnels
+       all stand on — freeboard + decks·(deckM, or beam·0.105 where no tween-deck is
+       recorded) — must land on it. Recessed boats (boatsRecessed) stow at the FOOT of the
+       house, on the first tier above the shell, so their datum is that sole, not the roof
+       — Queen Mary 2's Deck 8 gallery, not a boat deck she does not have. */
+    if (H.boatDeckM && H.decks) {
+      const dh = H.deckM || H.beam * 0.105;
+      /* r309: a hull with a read deck line stands its house on that line, not on the class
+         freeboard. Titanic's record keeps freeboard 10.1 m while her read C deck is 9.57 m
+         amidships; this rule went on deriving from 10.1, and passed r299's tree by 0.001 m. */
+      const base = H.sheerRead ? SHIPS_HULL.hullSurface(H).sheer(0.5) : H.freeboard;
+      const top = base + (H.boatsRecessed ? (H.shellTiers || 0) : H.decks) * dh;
+      if (Math.abs(top - H.boatDeckM) > 0.5)
+        say(v.id, 'house off the record',
+            `boat deck derives to ${top.toFixed(1)} m over water, record says ${H.boatDeckM}`);
+    }
+    /* and the MAST TOPS likewise (mastTopM, above the load line — the aerial height the
+       record states). Measured off the built geometry, so rake and stepping are included. */
+    if (H.mastTopM && part.mast) {
+      if (Math.abs(part.mast.y[1] - H.mastTopM) > 1.5)
+        say(v.id, 'mast tops off the record',
+            `tallest mast ${part.mast.y[1].toFixed(1)} m over water, record says ${H.mastTopM}`);
+    }
+
+    /* ── THE CLUSTER HONOURS ITS DERIVED RECORD (round 73). A `cluster` record is
+       plate-derived — every number in it was measured off the vessel's own photograph and
+       the card says so — and Azzam shipped three rounds as a bare white wedge because
+       nothing asked for the cluster she needed. So: it must be DRAWN; it must STAND ON
+       the house roof it claims (the linerHouse derivation — freeboard + decks·deckM),
+       neither floating above it nor reaching down inside the house; and its tallest
+       fixed structure must top out at the derived pipe height (the upper radome pair
+       derives to the same height on the plate, hence the tolerance). The MAST is tagged
+       'mast' and the existing mastTopM rule measures it. */
+    if (H.cluster) {
+      const cl = part.cluster;
+      if (!cl) say(v.id, 'cluster declared but not drawn', 'cluster record with no geometry');
+      else {
+        const dh2 = H.deckM || H.beam * 0.105;
+        const roofY = H.houseTopM !== undefined ? H.houseTopM
+                    : H.freeboard + (H.decks || 0) * dh2;
+        /* ── THE FLOOR IS THE LOWEST DECLARED FOOTING (round 77). A dome's onTier and
+           the fairing's fairFootTier land on that tier's roof — freeboard + (tier+1)·deck
+           — a full module below the house top the rest of the cluster stands on. Azzam's
+           aft domes and fairing foot the tier-3 terrace at 19.4 m; against a 22 m house
+           top alone that healthy geometry would read as 'reaches into the house'.
+           ⚠ AND THE AUDIT STACKS THE SAME FLOORS THE MODEL DOES (round 97): where the
+           record carries measured tierFloorsM/houseTopM the uniform deckM stack is
+           exactly the mis-derivation the record exists to correct, and deriving the
+           footing from it re-fires rule 8 — the audit disagreeing because the audit is
+           still running the old arithmetic. */
+        const tierRoofY = ti => (H.tierFloorsM && H.tierFloorsM[ti] !== undefined)
+          ? H.tierFloorsM[ti]
+          : (ti + 1 >= (H.decks || 0) && H.houseTopM !== undefined) ? H.houseTopM
+          : H.freeboard + (ti + 1) * dh2;
+        let floorY = roofY;
+        for (const d of H.cluster.domes || [])
+          if (!d.upper && d.onTier !== undefined) floorY = Math.min(floorY, tierRoofY(d.onTier));
+        if (H.cluster.fairFootTier !== undefined)
+          floorY = Math.min(floorY, tierRoofY(H.cluster.fairFootTier));
+        if (cl.y[0] < floorY - 1.5)
+          say(v.id, 'cluster reaches into the house',
+              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, lowest declared footing ${floorY.toFixed(1)}`);
+        if (cl.y[0] > floorY + 0.6)
+          say(v.id, 'cluster floats above its roof',
+              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, lowest declared footing ${floorY.toFixed(1)}`);
+        if (H.cluster.stack && Math.abs(cl.y[1] - H.cluster.stack.topFwdM) > 1.5)
+          say(v.id, 'cluster off its derived height',
+              `tallest cluster vertex ${cl.y[1].toFixed(1)} m over water, derived record says ${H.cluster.stack.topFwdM}`);
+      }
+      /* ── AND EACH FOOT HAS ITS OWN TIER UNDER IT (round 74, tier-footed round 77).
+         houseCrest narrows the top tier and tierAftU pins a measured terrace edge, and
+         every cluster element stands on SOME tier's roof — the block ends and undeclared
+         domes on the crest, a dome with onTier or the fairing foot with fairFootTier on
+         that tier's terrace. Each foot must land inside its own tier's u-span, or its
+         pedestal stands at deck height with air below (the height rules above cannot see
+         this: the lowest cluster vertex stays on a deck while one dome hangs past an
+         edge). Both derivations are the record's, so this fires on the mismatch, not on
+         a healthy build. */
+      if (H.decks && SHIPS_HULL.linerHouse) {
+        const T2 = SHIPS_HULL.linerHouse(H);
+        const top = T2.n - 1;
+        const feet = [];
+        if (H.cluster.blockU)
+          feet.push(['block fwd', H.cluster.blockU[0], top], ['block aft', H.cluster.blockU[1], top]);
+        for (const d of H.cluster.domes || [])
+          if (!d.upper) feet.push(['dome', d.u, d.onTier !== undefined ? d.onTier : top]);
+        if (H.cluster.fairAftU !== undefined)
+          feet.push(['fairing foot', H.cluster.fairAftU,
+                     H.cluster.fairFootTier !== undefined ? H.cluster.fairFootTier : top]);
+        for (const [what, u, ti] of feet) {
+          const t = T2.tiers[ti];
+          if (!t) {
+            say(v.id, 'cluster foot on a tier the house does not have',
+                `${what} declares tier ${ti}, the house has tiers 0–${top}`);
+            continue;
+          }
+          if (u < t.uA - 0.005 || u > t.uB + 0.005)
+            say(v.id, 'cluster foot off its tier',
+                `${what} at u ${u.toFixed(3)}, tier ${ti}${ti === top ? ' (crest)' : ''} spans ${t.uA.toFixed(3)}–${t.uB.toFixed(3)}`);
+        }
+      }
+    }
+
+    /* ── A DECLARED BAND IS WORN (round 75). tierBands/shellBands are photograph-derived —
+       Queen Mary 2's balcony rows and strake colonnade, Azzam's tinted glazing runs — and
+       both ships shipped for rounds wearing the Edwardian small-lights default because
+       nothing asked the walls what colour they actually carry. So ask the vertices: in every
+       banded tier's own y-span, a floor fraction of the superstructure wall vertices must
+       carry band glass. ⚠ VERTEX COLOURS READ BACK LINEAR, not sRGB — three.js converts on
+       set — so the thresholds live in linear space: band glass is under 0.07 luminance there,
+       the liner's small-light glass is 0.185, white faces 0.75. Dark means < 0.10, which a
+       builder that skips the band branch cannot reach. The recess tier never bands. */
+    if ((H.tierBands || H.shellBands) && H.decks && SHIPS_HULL.linerHouse) {
+      const T3 = SHIPS_HULL.linerHouse(H);
+      const walls = [];
+      g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'superstructure'
+                        && o.geometry.attributes && o.geometry.attributes.color) walls.push(o); });
+      const scan = (y0, y1) => {
+        let dark = 0, light = 0, all = 0;
+        for (const m of walls) {
+          const P = m.geometry.attributes.position, C = m.geometry.attributes.color;
+          for (let i = 0; i < P.count; i++) {
+            const y = P.getY(i);
+            if (y < y0 + 0.05 || y > y1 - 0.05) continue;
+            all++;
+            const l = 0.2126 * C.getX(i) + 0.7152 * C.getY(i) + 0.0722 * C.getZ(i);
+            if (l < 0.10) dark++; else if (l > 0.4) light++;
+          }
+        }
+        return { dark, light, all };
+      };
+      for (let i = 0; i < T3.n; i++) {
+        const t = T3.tiers[i];
+        const TBr = H.tierBands, SBr = H.shellBands;
+        const b = (TBr && !t.recess && i >= TBr.from && i <= TBr.to) ? TBr
+                : ((SBr && t.shell && !t.recess) ? SBr : null);
+        if (!b) continue;
+        const r = scan(t.y0, t.y1);
+        if (!r.all || r.dark / Math.max(1, r.all) < 0.08)
+          say(v.id, 'band declared but not worn',
+              `tier ${i}: ${r.dark} of ${r.all} wall vertices carry band glass`);
+        /* and a shell strake wears its RECORDED paint — shellTopside declared white and a
+           builder that ignores it paints the strake the hull's black, which the band rule
+           cannot see (the glass is dark either way) */
+        if (t.shell && H.shellTopside && r.all && r.light / r.all < 0.3)
+          say(v.id, 'strake off its recorded paint',
+              `tier ${i}: ${r.light} of ${r.all} wall vertices carry the shellTopside livery`);
+      }
+    }
+
+    /* ── AND THE BOATS STAND ON THEIR RECORDED DECK (round 75). The boatDeckM datum rule
+       above checks the DATA is self-consistent; this one asks the BUILT boats. Queen Mary 2
+       hung her gallery two decks low for five rounds — record 17.0, first-tier default,
+       both wrong together, so the datum rule agreed with the fault. The photograph put the
+       gallery at 23.4 m; now the lowest drawn boat must sit on the recorded deck. */
+    if (H.boatDeckM && H.boats && part.boat)
+      if (Math.abs(part.boat.y[0] - H.boatDeckM) > 1.5)
+        say(v.id, 'boats off their recorded deck',
+            `lowest boat at ${part.boat.y[0].toFixed(1)} m over water, record says ${H.boatDeckM}`);
+
+    /* ── AND AN INBOARD RECORD KEEPS THE TOPSIDE BARE (round 76). Azzam's four builder-
+       default boats rode her crest for six rounds while the published accounts stow her
+       tenders in a garage inside the hull — the design grew 35 m partly to fit them — and
+       her own delivery photograph shows no boat on any deck. Where the record says
+       boatsInboard, a drawn boat is the builder contradicting the ship's photograph. The
+       declared-but-not-drawn rule above skips boats for the same record, so a ship with a
+       published count AND a garage cannot deadlock the two rules. */
+    if (H.boatsInboard && part.boat)
+      say(v.id, 'boats drawn against an inboard record',
+          `${part.boat.n} boat meshes topside; the record stows the tenders inside the shell`);
+
+    /* ── A DECLARED DAVIT BOAT HANGS OUTBOARD OF THE SHELL, ONE PER SIDE, CLEAR OF THE
+       SEA (round 105). davitBoats is the record saying the sea boats hang in davits at
+       the quarters — Endurance's pair, in every Hurley plate. The r58 stern taught that
+       drawn-but-buried is invisible from every bearing, and the generic
+       declared-but-not-drawn rule cannot see this class because the skid boat already
+       populates part.boat. So ask the MESHES: each entry must hang one 'Quarter boat'
+       per side; each drawn boat's inboard edge must stand outboard of the shell's own
+       half-breadth at its station (surfacePoint, the geometry's source), and its keel
+       must stand above the load waterline. */
+    if (H.davitBoats && H.davitBoats.length) {
+      const qb = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Quarter boat')
+        qb.push(new THREE.Box3().setFromObject(o)); });
+      if (qb.length !== H.davitBoats.length * 2)
+        say(v.id, 'davit boat declared but not drawn',
+            `${H.davitBoats.length * 2} quarter boats declared, ${qb.length} drawn`);
+      const HSq = SHIPS_HULL.hullSurface(H);
+      for (const b of qb) {
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((b.min.x + b.max.x) / 2) / H.lwl));
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSq, u, 1)[2]);
+        const zin = Math.min(Math.abs(b.min.z), Math.abs(b.max.z));
+        if (Math.sign(b.min.z) !== Math.sign(b.max.z) || zin < half - 0.15)
+          say(v.id, 'davit boat buried in the shell',
+              `inboard edge ${zin.toFixed(2)} m off centre, hull side there ${half.toFixed(2)} m`);
+        if (b.min.y < 0.5)
+          say(v.id, 'davit boat in the water',
+              `keel at ${b.min.y.toFixed(2)} m over the load waterline`);
+      }
+    }
+
+    /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem
+       head PAST the waterline ending — Queen Mary 2 declared 0.085 and drew a blunt
+       vertical bow for three rounds, because the offset was applied uniformly at every
+       height: a vertical stem pushed bodily forward, which no picture-diff and no
+       record-match can see. So the lean is measured off the planking's own vertices —
+       foremost point at the waterline against foremost at the sheer, and the same aft.
+       Skipped where the recorded overhang is under 1.5 m: at that size the lean is inside
+       the mesh's own discretization. */
+    {
+      let pk = null;
+      g.traverse(o => { if (!pk && o.isMesh && tagOf(o) && tagOf(o).key === 'planking') pk = o; });
+      if (pk && pk.geometry && pk.geometry.attributes.position) {
+        const P = pk.geometry.attributes.position;
+        const wlBand = Math.min(0.6, 0.25 * H.draught + 0.1);
+        /* ⚠ each end's deck band is measured from that END's own sheer height — one global
+           top-y band lands only where the sheer is highest, and on a bow-sheer-only hull
+           (Queen Mary 2) the stern band was empty and the rule read -287 m of lean */
+        let topB = -1e9, topS = -1e9;
+        for (let i = 0; i < P.count; i++) {
+          const x = P.getX(i), y = P.getY(i);
+          if (x < 0) topB = Math.max(topB, y); else topS = Math.max(topS, y);
+        }
+        let foreWL = 1e9, foreDk = 1e9, aftWL = -1e9, aftDk = -1e9;
+        for (let i = 0; i < P.count; i++) {
+          const x = P.getX(i), y = P.getY(i);
+          if (Math.abs(y) < wlBand) { foreWL = Math.min(foreWL, x); aftWL = Math.max(aftWL, x); }
+          if (x < 0 && y > topB - 1.2) foreDk = Math.min(foreDk, x);
+          if (x > 0 && y > topS - 1.2) aftDk = Math.max(aftDk, x);
+        }
+        /* the lean the loft actually owes: since round 129 hull.js clamps both rakes by
+           one scale so the drawn length cannot outrun the record's loa. The rule asks
+           for the CLAMPED lean — asking for the raw product would convict the clamp. */
+        const rakeAllow = ((H.stemRake || 0) + (H.sternRake || 0)) * H.loa;
+        const rakeScale = rakeAllow > 0
+          ? Math.min(1, Math.max(0, H.loa - H.lwl) / rakeAllow) : 1;
+        for (const [name, want, got] of [
+            ['stem', H.stemRake * rakeScale * H.loa, foreWL - foreDk],
+            ['sternpost', H.sternRake * rakeScale * H.loa, aftDk - aftWL]]) {
+          if (want > 1.5 && Math.abs(got - want) > Math.max(1.2, want * 0.4))
+            say(v.id, 'a recorded rake drawn vertical',
+                `${name}: record asks a ${want.toFixed(1)} m lean, drawn ${got.toFixed(1)} m`);
+        }
+        /* ── THE DRAWN LENGTH MAY NOT OUTRUN THE RECORD (round 129). The clamp above is
+           code, and code regresses silently; this arm measures the planking's own x-span
+           against the card's LENGTH OVERALL, which is the fact a visitor reads beside
+           the drawn hull. One-sided on purpose: four hulls draw SHORTER than their loa
+           (wyoming −18.8 m) and what their loa rows actually measure — sparred length?
+           between perpendiculars? — is a research question, not a conviction. */
+        let px0 = 1e9, px1 = -1e9;
+        for (let i = 0; i < P.count; i++) {
+          const x = P.getX(i);
+          if (x < px0) px0 = x; if (x > px1) px1 = x;
+        }
+        const drawnL = px1 - px0;
+        if (drawnL > H.loa + Math.max(0.25, H.loa * 0.002))
+          say(v.id, 'drawn length beyond record loa',
+              `planking spans ${drawnL.toFixed(2)} m against loa ${H.loa} m`);
+      }
+    }
+
+    /* ⚠ a carrier's superstructure IS her island, and hull.js says so explicitly — the generic
+       deckhouse builder is skipped for her on purpose. The rule asks for a superstructure, not
+       for one particular shape of it. */
+    const house = part.superstructure || part.island;
+    if (H.decks && !house)
+      say(v.id, 'no superstructure', `decks: ${H.decks} and nothing built`);
+    if (H.decks && house && house.n < H.decks)
+      say(v.id, 'thin superstructure', `${house.n} meshes for ${H.decks} decks`);
+    /* ⚠ AND IT HAS TO BE ABOVE THE DECK. The Titanic's deckhouse walls were built about their
+       own centre and never positioned, so they sat at y = 0 — below her waterline — while the
+       railings alone stood correctly. The house existed, was tagged, had 256 meshes, and was
+       inside the hull. Ask where it IS, not merely whether it is there. */
+    if (H.decks && house && house.y[1] < deckY)
+      say(v.id, 'superstructure below deck',
+          `house top ${house.y[1].toFixed(1)} m, deck ${deckY.toFixed(1)} m`);
+
+    if (part.funnel && H.funnels > 1) {
+      /* funnel centres, deduplicated: two uptakes in one frame is two casings in one place */
+      const c = part.funnel.xs.slice().sort((a, b) => a - b);
+      const distinct = c.filter((x, i) => i === 0 || Math.abs(x - c[i - 1]) > H.loa * 0.02);
+      if (distinct.length < H.funnels)
+        say(v.id, 'funnels share a station',
+            `${H.funnels} declared, ${distinct.length} distinct positions`);
+      const fh = part.funnel.y[1] - deckY;
+      if (fh > H.beam * 1.35)
+        say(v.id, 'funnel height', `${fh.toFixed(0)} m above deck on a ${H.beam} m beam`);
+    }
+
+    /* ── THE RAKE IS WORN (round 37; measurement rebuilt round 72). funnelRake is the
+       record's inclination in degrees aft — Yamato's trunked uptake leaned 25°, the
+       Olympic class 9.46°, Dreadnought's stacks stood plumb (0) — and a lean that
+       silently stops being applied is invisible to every rule above: the funnel is
+       present, at its station, at its height, and WRONG. The lean is measured off the
+       stack's own VERTICES — the centroid of its bottom height band against the centroid
+       of its top band, both taken to world space — because round 72 bakes the rake into
+       the geometry as a horizontal-cut incline, and a matrix-axis reading of a sheared
+       mesh is 0° forever. Vertices are what the viewer sees; a tilt, a shear, or any
+       future mechanism measures the same. +x is aft. Every stack is measured and the
+       worst one answers, so one plumb funnel among raked sisters is caught too. */
+    if (H.funnels && part.funnel) {
+      const want = H.funnelRake !== undefined ? H.funnelRake : 4.87;
+      let worst = null;
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
+        const pos = o.geometry.attributes.position;
+        o.geometry.computeBoundingBox();
+        const bbL = o.geometry.boundingBox, span = bbL.max.y - bbL.min.y;
+        if (!pos || span < 1e-6) return;
+        const lo = bbL.min.y + span * 0.15, hi = bbL.max.y - span * 0.15;
+        const a = new THREE.Vector3(), b = new THREE.Vector3(), v = new THREE.Vector3();
+        let na = 0, nb = 0;
+        for (let j = 0; j < pos.count; j++) {
+          v.fromBufferAttribute(pos, j);
+          if (v.y <= lo) { a.add(v); na++; }
+          else if (v.y >= hi) { b.add(v); nb++; }
+        }
+        if (!na || !nb) return;
+        a.divideScalar(na).applyMatrix4(o.matrixWorld);
+        b.divideScalar(nb).applyMatrix4(o.matrixWorld);
+        const d = b.sub(a);
+        const got = Math.atan2(d.x, d.y) * 180 / Math.PI;
+        if (worst === null || Math.abs(got - want) > Math.abs(worst - want)) worst = got;
+      });
+      if (worst === null)
+        say(v.id, 'funnel rake unmeasurable', 'no stack mesh tagged Funnel');
+      else if (Math.abs(worst - want) > 1.5)
+        say(v.id, 'funnel rake not worn',
+            `drawn ${worst.toFixed(1)}° aft, record says ${want}°`);
+    }
+
+    /* ── THE TRIPOD IS WORN (round 38). `tripod` on a mast record is structure, not
+       decoration: two struts leaning to the pole and a spotting top at their join. The
+       round-37 class again — a declared build feature that silently stops producing
+       geometry, or produces it standing straight up, is invisible to every picture and
+       to 'declared but not drawn', because the MAST is drawn. Count the legs, count the
+       tops, and measure the lean of every leg the way the rake rule measures the stack:
+       the world direction of the strut's own +y axis. */
+    const tripods = (H.masts || []).filter(mk => mk.tripod).length;
+    if (tripods) {
+      let legs = 0, tops = 0, uprightLegs = 0;
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        if (o.userData.part.name === 'Tripod leg') {
+          legs++;
+          const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+          if (Math.acos(Math.min(1, Math.abs(d.y))) * 180 / Math.PI < 6) uprightLegs++;
+        }
+        if (o.userData.part.name === 'Spotting top') tops++;
+      });
+      if (legs !== tripods * 2)
+        say(v.id, 'tripod not worn',
+            `${tripods * 2} struts in the record, ${legs} drawn`);
+      if (tops !== tripods)
+        say(v.id, 'tripod not worn',
+            `${tripods} spotting tops in the record, ${tops} drawn`);
+      if (uprightLegs)
+        say(v.id, 'tripod not worn',
+            `${uprightLegs} strut(s) standing vertical — a tripod's legs LEAN`);
+    }
+
+    /* ── THE WING BATTERY IS ON THE WING (round 38). `turretSide` stands a main mount at
+       the deck edge; ignore it silently and five declared turrets still draw five groups —
+       two of them coincident on the centreline, which no count can see. The drawn battery's
+       sides must match the record's, sign for sign. */
+    if (H.turrets && H.turretAt && H.turretSide) {
+      const wantSides = H.turretAt.slice(0, H.turrets)
+        .map((u, i) => H.turretSide[i] || 0).sort();
+      const mains = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part &&
+                            o.userData.part.key === 'turret' &&
+                            o.userData.part.name === 'Main battery')
+                          mains.push(o); });
+      const gotSides = mains.map(o => {
+        const bbx = new THREE.Box3().setFromObject(o);
+        const zc = (bbx.min.z + bbx.max.z) / 2;
+        return zc > H.beam * 0.12 ? 1 : zc < -H.beam * 0.12 ? -1 : 0;
+      }).sort();
+      if (wantSides.join() !== gotSides.join())
+        say(v.id, 'wing turret not on the wing',
+            `record sides [${wantSides.join()}], drawn [${gotSides.join()}]`);
+    }
+
+    /* ── THE NET DEFENCE IS WORN (round 39). `netDefence` hangs the anti-torpedo outfit
+       on the hull side: the shelf, the rolled net, and the record's 40 ft booms stowed in
+       the row of down-aft diagonals that is the most conspicuous thing in photograph
+       H61017. The round-37 class again — a declared fitting that silently stops producing
+       geometry, or produces it floating, level, or off the plating, is invisible to the
+       one baseline bearing. One derivation — SHIPS_HULL.netDefenceGeom — for the builder
+       and this rule. Each boom must lie ALONG the hull (fore-aft), DROOP (stowed spars
+       trail down toward the tip), ride ON the plating at its own station, stay out of the
+       water and under the deck edge; the shelf must span the declared run. */
+    if (H.netDefence) {
+      const G = SHIPS_HULL.netDefenceGeom(H);
+      const HSn = SHIPS_HULL.hullSurface(H);
+      const booms = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Net boom') booms.push(o); });
+      if (booms.length !== G.heels.length * 2)
+        say(v.id, 'net defence not worn',
+            `${G.heels.length * 2} booms derived from the record, ${booms.length} drawn`);
+      for (const o of booms) {
+        const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+        if (Math.abs(d.x) < 0.85 || Math.abs(d.y) < 0.10 || Math.abs(d.y) > 0.50)
+          say(v.id, 'net boom not stowed',
+              `a boom points (${d.x.toFixed(2)}, ${d.y.toFixed(2)}, ${d.z.toFixed(2)}) — ` +
+              'stowed spars lie fore-and-aft against the hull, drooping to the tip');
+        const bbx = new THREE.Box3().setFromObject(o);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bbx.min.x + bbx.max.x) / 2) / H.lwl));
+        if (bbx.min.y < 0.3)
+          say(v.id, 'net boom in the water', `bottom at ${bbx.min.y.toFixed(2)} m`);
+        if (bbx.max.y > HSn.sheer(u) + 0.3)
+          say(v.id, 'net boom above the deck edge',
+              `top ${bbx.max.y.toFixed(1)} m, sheer there ${HSn.sheer(u).toFixed(1)} m`);
+        const zc = (Math.abs(bbx.min.z) + Math.abs(bbx.max.z)) / 2;
+        const k = Math.max(0, Math.min(1, (G.shelfY - G.drop / 2) / HSn.sheer(u)));
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSn, u, 0.62 + 0.38 * k)[2]);
+        if (zc < half - 0.7 || zc > half + 1.4)
+          say(v.id, 'net boom off the plating',
+              `boom centre ${zc.toFixed(1)} m off the centreline, hull side there ${half.toFixed(1)} m`);
+      }
+      if (!part.net) say(v.id, 'declared but not drawn', 'net defence');
+      else {
+        const span = part.net.x[1] - part.net.x[0];
+        const want = (G.u1 - G.u0) * H.lwl;
+        if (span < want * 0.85)
+          say(v.id, 'net shelf short',
+              `${span.toFixed(0)} m drawn against ${want.toFixed(0)} m in the record`);
+      }
+    }
+
+    /* ⚠ and on a carrier the reference is the FLIGHT DECK, which overhangs the hull by design —
+       that is the whole point of an angled deck. Comparing her island to the hull beam called a
+       correct 35 m a fault. */
+    const halfWide = (H.flightDeck ? H.flightDeck : H.beam) * 0.52;
+    for (const k of ['superstructure', 'island', 'container', 'turret'])
+      if (part[k] && Math.max(-part[k].z[0], part[k].z[1]) > halfWide)
+        say(v.id, 'overhangs the side',
+            `${k} reaches ${Math.max(-part[k].z[0], part[k].z[1]).toFixed(1)} m off centre, limit ${halfWide.toFixed(1)}`);
+
+    /* ⚠ A WALL YOU CAN SEE THROUGH FROM ASTERN IS NOT A WALL. The deckhouse shell is lofted by
+       hand — tapered sides, sole, roof, two end caps, one buffer — and a hand-wound shell has
+       faces pointing the wrong way somewhere. Under FrontSide those are simply not drawn, so
+       the house has holes and WHICH holes depends on where you stand: 46 of 72 bearings hit a
+       wall and 26 saw straight through to the funnel bases. A picture-diff cannot catch that
+       either, because the picture is taken from one place. Fire a ring of rays through the
+       LOWEST tier, which spans the whole house, and every bearing must hit something. */
+    if (H.decks && house) {
+      const g2 = g; g2.updateMatrixWorld(true);
+      const isHouse = o => { const p = tagOf(o); return !!(p && (p.key === 'superstructure' || p.key === 'island')); };
+      const hb = new THREE.Box3(); hb.makeEmpty();
+      g2.traverse(o => { if (o.isMesh && isHouse(o)) hb.expandByObject(o); });
+      /* ⚠ AND THE RAYS MUST BE AIMED AT THE HOUSE, NOT AT THE SHIP. The first version fired
+         through the hull's centreline at a nominal deck height — which is above a 0.5 m
+         steamer deckhouse entirely, and misses a carrier's island because an island is short
+         and a flight deck is long. It reported 106 of 108 and 66 of 108 for two ships that are
+         fine. Aim at the house's own centre, at fractions of the house's OWN height. */
+      /* ⚠ AND ONLY WITHIN THE LOWEST DECK. A deckhouse STEPS IN as it rises — that is what a
+         deckhouse is — so a ray at the height of the third tier passes beside it through open
+         air, correctly. Sampling the house's full height called that a hole and flagged four
+         ships that are right: 36 of 108 is exactly one of three heights, the stepped one.
+         The bottom deck always spans the whole footprint, so that is where the question "can
+         you see through the walls" actually has a yes-or-no answer. */
+      const cx = (hb.min.x + hb.max.x) / 2, cz = (hb.min.z + hb.max.z) / 2;
+      const deck1 = Math.min(H.beam * 0.105, Math.max(0.4, hb.max.y - hb.min.y));
+      const rc = new THREE.Raycaster(); let through = 0, shot = 0;
+      for (const f of [0.25, 0.5, 0.75]) {
+        const y = hb.min.y + deck1 * f;
+        for (let b = 0; b < 36; b++) {
+          const th = b * Math.PI / 18;
+          rc.set(new THREE.Vector3(cx + Math.cos(th) * 500, y, cz + Math.sin(th) * 500),
+                 new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)).normalize());
+          rc.far = 1200; shot++;
+          if (!rc.intersectObject(g2, true).some(h => isHouse(h.object))) through++;
+        }
+      }
+      if (through) say(v.id, 'you can see through the deckhouse',
+                       `${through} of ${shot} bearings pass through the lowest tier`);
+    }
+
+    /* ── THE PADDLE BOX MUST BE THERE FROM OUTSIDE (round 40). The box was a hand-wound
+       strip whose every face pointed INWARD at the wheel. computeVertexNormals derives
+       normals from the winding, so the round-35 winding rule saw agreement; the ratchet saw
+       no change because a box that was never drawn never changes; and under FrontSide the
+       largest object on the ship's side was culled from every bearing — the ship wore a
+       naked wheel with eleven ribs floating beside it. Which way a surface faces is a
+       RENDER fact, so ask it the way the renderer does: rays from far abeam, aimed at the
+       box's own face, must strike the box FIRST — a ray that reaches the wheel arms, the
+       hull, or nothing has passed through the housing. Raycaster honours material.side,
+       which is exactly why this catches what a bounding-box test cannot. */
+    if (H.paddleDia) {
+      const pb = part.paddlebox;
+      if (!pb) say(v.id, 'paddle box not built', 'a paddle steamer with an open wheel');
+      else {
+        const D = H.paddleDia;
+        if (pb.x[1] - pb.x[0] < D * 0.9)
+          say(v.id, 'paddle box does not span its wheel',
+              `box ${(pb.x[1] - pb.x[0]).toFixed(1)} m fore-and-aft on a ${D} m wheel`);
+        if (!(pb.z[0] < 0 && pb.z[1] > 0))
+          say(v.id, 'paddle box on one side only',
+              `z ${pb.z[0].toFixed(1)}..${pb.z[1].toFixed(1)} m`);
+        g.updateMatrixWorld(true);
+        const isPB = o => { const p = tagOf(o); return !!(p && p.key === 'paddlebox'); };
+        const rc = new THREE.Raycaster();
+        const cx = (pb.x[0] + pb.x[1]) / 2, W = pb.x[1] - pb.x[0], Hh = pb.y[1] - pb.y[0];
+        let miss = 0, shot = 0, sample = '';
+        for (const sgn of [1, -1])
+          for (const fx of [-0.30, -0.15, 0, 0.15, 0.30])
+            for (const fy of [0.20, 0.40, 0.60]) {
+              rc.set(new THREE.Vector3(cx + fx * W, pb.y[0] + fy * Hh, sgn * 500),
+                     new THREE.Vector3(0, 0, -sgn));
+              rc.far = 1000; shot++;
+              const h = rc.intersectObject(g, true);
+              if (!h.length || !isPB(h[0].object)) {
+                miss++;
+                if (!sample) sample = h.length
+                  ? `first hit at (${fx}, ${fy}) is ${(tagOf(h[0].object) || { key: 'untagged' }).key}`
+                  : `the ray at (${fx}, ${fy}) hits nothing at all`;
+              }
+            }
+        if (miss) say(v.id, 'you can see through the paddle box',
+                      `${miss} of ${shot} rays from abeam do not strike the box first — ${sample}`);
+      }
+    }
+
+    /* ⚠ A PART THAT TOUCHES NOTHING IS ATTACHED TO NOTHING. Found the container ship's funnel
+       hanging seventeen metres from the hull with its base forty-seven metres up, and the boat-
+       deck rails of the Great Eastern and the steamer floating three to five metres from their
+       own stanchions — the rails had been left at a constant half-breadth when the posts were
+       moved onto the lofted deck edge. Neither is visible from a single viewpoint, which is
+       what the frame ratchet is. */
+    {
+      const parts = [];
+      g.traverse(o => { if (o.isMesh && tagOf(o)) parts.push(new THREE.Box3().setFromObject(o)); });
+      const pad = Math.max(0.25, H.loa * 0.004);
+      const adrift = [];
+      for (let i = 0; i < parts.length; i++) {
+        const a = parts[i].clone().expandByScalar(pad);
+        let touches = false;
+        for (let j = 0; j < parts.length && !touches; j++)
+          if (j !== i && a.intersectsBox(parts[j])) touches = true;
+        if (!touches) adrift.push(i);
+      }
+      if (adrift.length) say(v.id, 'part attached to nothing',
+                             `${adrift.length} of ${parts.length} meshes touch no other part`);
+    }
+
+    /* ── THE RAIL SITS ON THE DECK EDGE, ASKED OF THE SURFACE (round 100) ───────────────
+       The rail loft computed its half-breadth as halfB·wl·(1−tumble) — a stale parallel
+       copy of surfacePoint that predates the counter flare, the bow flare, the rounded
+       stern and the stem rabbet. Measured before the fix: 20 of 33 hulls carried the rail
+       more than half a metre inboard of the true edge somewhere (carrier −4.9 m at the
+       counter), and Queen Mary 2's rail hung 4.1 m OUTBOARD of her rounded stern, in open
+       air. Same class the deck builder's own comment names; the deck and the waterway ask
+       surfacePoint, so anything capping their edge must land where they end. The rule
+       walks every drawn rail station: recover its u by nearest-x against the true edge,
+       and its outer face must sit at trueHalf + 0.3·r within tolerance, both directions. */
+    {
+      const HSr = SHIPS_HULL.hullSurface(H);
+      const spr = u => SHIPS_HULL.surfacePoint(H, HSr, u, 1);
+      const NSr = 2000, rxs = [], rus = [];
+      for (let i = 0; i <= NSr; i++) { const u = i / NSr; rus.push(u); rxs.push(spr(u)[0]); }
+      const uOfX = x => { let bi = 0, bd = Infinity;
+        for (let i = 0; i <= NSr; i++) { const d = Math.abs(rxs[i] - x); if (d < bd) { bd = d; bi = i; } }
+        return rus[bi]; };
+      const rr = H.capM ? H.capM / 1.6 : H.beam * 0.016;
+      const tol = Math.max(0.25, rr * 1.2);
+      let off = 0, worst = 0, wu = null, walked = 0;
+      g.traverse(o => { const p = tagOf(o);
+        if (!o.isMesh || !p || p.key !== 'rail') return;
+        const pos = o.geometry.attributes.position;
+        for (let k = 0; k + 3 < pos.count; k += 4) {
+          let maxZ = 0;
+          for (let j = 0; j < 4; j++) maxZ = Math.max(maxZ, Math.abs(pos.getZ(k + j)));
+          const u = uOfX(pos.getX(k));
+          const err = maxZ - (Math.abs(spr(u)[2]) + rr * 0.3);
+          walked++;
+          if (Math.abs(err) > tol) { off++;
+            if (Math.abs(err) > Math.abs(worst)) { worst = err; wu = u; } }
+        }
+      });
+      if (off) say(v.id, 'rail off its deck edge',
+                   `${off} of ${walked} rail stations off the surface edge, worst ` +
+                   `${worst.toFixed(2)} m (${worst < 0 ? 'inboard' : 'outboard'}) at u ${wu}`);
+    }
+
+    /* ⚠ A BATTLESHIP'S TURRETS ARE HER SILHOUETTE, AND FOR FOUR ROUNDS THEY WERE INSIDE THE
+       DECKHOUSE. The liner superstructure ran 80% of Yamato's length and the three main
+       turrets stood buried in it — declared, drawn, tagged, and invisible from all twelve
+       bearings. 'Declared but not drawn' cannot see it because they WERE drawn. Ask whether
+       any turret's flesh is inside the house's flesh, mesh box by mesh box.
+       ⚠ The BARBETTE is exempt: an armoured tube running down THROUGH the structure to the
+       magazine is not buried, it is doing its job. The fault is a GUNHOUSE or GUN inside. */
+    if (H.turrets && part.turret && (part.superstructure || part.island)) {
+      /* ⚠ A BOX OVER A WAISTED LOFT COVERS THE WAIST (round 38). The citadel pinches
+         between the wing barbettes, and its bounding box does not — the box called both
+         wing houses buried in walls that had been drawn two metres clear of them. For the
+         lofted tier meshes the test reads the loft's OWN stations: the point is inside
+         only if it is inboard of the drawn half-breadth at its own x. Boxes stay exact
+         for box geometry. */
+      const houseBoxes = [], lofts = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { const p = tagOf(o);
+        if (!o.isMesh || !p || (p.key !== 'superstructure' && p.key !== 'island')) return;
+        if (p.name === 'Citadel deck' || p.name === 'Shelter deck') lofts.push(o);
+        else houseBoxes.push(new THREE.Box3().setFromObject(o)); });
+      const inLoft = (mesh, c) => {
+        const pos = mesh.geometry.attributes.position;
+        const lc = mesh.worldToLocal(c.clone());
+        let best = -1, bd = Infinity;
+        for (let k = 0; k * 4 < pos.count; k++) {
+          const d = Math.abs(pos.getX(k * 4) - lc.x);
+          if (d < bd) { bd = d; best = k; }
+        }
+        if (best < 0) return false;
+        const half = Math.abs(pos.getZ(best * 4 + 1));
+        const y0 = pos.getY(best * 4), y1 = pos.getY(best * 4 + 2);
+        return bd < 2.5 && Math.abs(lc.z) < half + 0.05 &&
+               lc.y > Math.min(y0, y1) - 0.05 && lc.y < Math.max(y0, y1) + 0.05;
+      };
+      let buried = 0;
+      g.traverse(o => { const p = tagOf(o);
+        if (!o.isMesh || !p || p.key !== 'turret' || p.name === 'Barbette') return;
+        const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+        if (houseBoxes.some(hbx => hbx.containsPoint(c)) ||
+            lofts.some(m => inLoft(m, c))) buried++; });
+      if (buried) say(v.id, 'turret buried in the superstructure',
+                      `${buried} gunhouse/gun meshes centred inside deckhouse geometry`);
+    }
+
+    /* ⚠ THE GUNS POINT PAST THE SHIP'S END, AND FOR AS LONG AS THE TURRETS HAVE EXISTED THE
+       FORWARD ONES POINTED AT THE STERN. One sign error, invisible from the baseline bearing.
+       For every turret group: the barrels must reach beyond the gunhouse toward the end of
+       the ship the mount faces — bow end for a mount forward of amidships, stern end aft.
+       (A mount trained fore-and-aft the OTHER way exists at sea, but at rest — which is what
+       the model shows — a battery points past its own end of the ship.) */
+    if (H.turrets) {
+      g.updateMatrixWorld(true);
+      const turretGroups = [];
+      g.traverse(o => { if (o.userData.part && o.userData.part.key === 'turret' && o.isGroup)
+                          turretGroups.push(o); });
+      for (const tgp of turretGroups) {
+        let guns = null, house = null;
+        tgp.traverse(o => { if (!o.isMesh || !o.userData.part) return;
+          const bbx = new THREE.Box3().setFromObject(o);
+          if (o.userData.part.name === 'Main gun') guns = guns ? guns.union(bbx) : bbx;
+          if (o.userData.part.name === 'Turret') house = house ? house.union(bbx) : bbx; });
+        if (!guns || !house) continue;
+        const u = 0.5 + ((house.min.x + house.max.x) / 2) / H.lwl;
+        const fwd = u < 0.5;
+        if (fwd ? guns.min.x > house.min.x - 0.5 : guns.max.x < house.max.x + 0.5)
+          say(v.id, 'guns point the wrong way',
+              `mount at u=${u.toFixed(2)} faces ${fwd ? 'the bow' : 'the stern'} but its barrels do not clear the gunhouse that way`);
+      }
+    }
+
+    /* ⚠ THE RECORD'S BATTERY IS THE DRAWN BATTERY, MOUNT FOR MOUNT. Yamato declared her
+       secondaries for two rounds while the builder drew one of four — 'declared but not
+       drawn' could not see it because SOME secondary was drawn. Count them: mains plus one
+       per centreline secondary plus two per wing pair, no fewer, no more. */
+    if (H.turrets) {
+      const expect = H.turrets +
+        (H.secondaries || []).reduce((a, s) => a + (s.wing ? 2 : 1), 0);
+      const drawn = [];
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'turret')
+                          drawn.push(o); });
+      if (drawn.length !== expect)
+        say(v.id, 'battery miscounted',
+            `${expect} mounts in the record (${H.turrets} main), ${drawn.length} drawn`);
+    }
+
+    /* the high-angle battery: declared pairs are drawn BOTH sides, inside the beam, and
+       stand on the superstructure rather than in it or over it */
+    if (H.aa && H.aa.length) {
+      const mounts = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'aa')
+                          mounts.push(new THREE.Box3().setFromObject(o)); });
+      if (mounts.length !== H.aa.length * 2)
+        say(v.id, 'high-angle battery miscounted',
+            `${H.aa.length * 2} mounts in the record, ${mounts.length} drawn`);
+      for (const mb of mounts) {
+        if (Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)) > H.beam / 2 + 0.5)
+          say(v.id, 'high-angle mount outside the beam',
+              `z reaches ${Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)).toFixed(1)} m on ${(H.beam / 2).toFixed(1)} m of half-beam`);
+      }
+      if (part.superstructure && mounts.length &&
+          mounts.some(mb => mb.min.y < part.superstructure.y[0] ||
+                            mb.min.y > part.superstructure.y[1] + 1.4))
+        say(v.id, 'high-angle mount stands on nothing',
+            'a mount bottom is below the citadel or floats above its roofline');
+    }
+
+    /* ── EVERY RECORD-DRIVEN FITTING IS DRAWN AT THE RECORD'S COUNT, ON ITS SUPPORT
+       (round 36). The class behind the round-35 queue items: a record field that silently
+       stops producing geometry — or produces it adrift — is invisible to every picture,
+       and 'declared but not drawn' only sees total absence. So each new fitting field
+       answers the heavy battery's three questions: right count, inside the ship, standing
+       on something. */
+    if (H.aaLight && H.aaLight.length) {
+      const mounts = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'aaLight')
+                          mounts.push(new THREE.Box3().setFromObject(o)); });
+      if (mounts.length !== H.aaLight.length * 2)
+        say(v.id, 'light battery miscounted',
+            `${H.aaLight.length * 2} mounts in the record, ${mounts.length} drawn`);
+      for (const mb of mounts) {
+        if (Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)) > H.beam / 2 + 0.5)
+          say(v.id, 'light AA mount outside the beam',
+              `z reaches ${Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)).toFixed(1)} m`);
+        if (part.superstructure && (mb.min.y < part.superstructure.y[0] ||
+                                    mb.min.y > part.superstructure.y[1] + 1.4))
+          say(v.id, 'light AA mount stands on nothing',
+              'a bandstand bottom is below the citadel or floats above its roofline');
+      }
+    }
+    if (H.searchlights) {
+      let drums = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Searchlight') drums++; });
+      if (drums !== H.searchlights)
+        say(v.id, 'searchlights miscounted',
+            `${H.searchlights} in the record, ${drums} drawn`);
+    }
+    if (H.floatplanes) {
+      const HSf = SHIPS_HULL.hullSurface(H);
+      const planes = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'floatplane')
+                          planes.push(new THREE.Box3().setFromObject(o)); });
+      if (planes.length !== H.floatplanes)
+        say(v.id, 'floatplanes miscounted',
+            `${H.floatplanes} in the record, ${planes.length} drawn`);
+      for (const pb of planes) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((pb.min.x + pb.max.x) / 2) / H.lwl));
+        /* r221: the DECK, not the sheer — deck(u) is the sheer on every hull without
+           deck.belowSheerM and the recorded depth under it otherwise (r215), and the
+           builders were switched to it this round; a rule that kept the sheer convicted
+           a plane standing exactly on the deck by the record's own drop (Yamato, 2 m
+           injected: -1.4 m "off the sheer") */
+        const d = pb.min.y - HSf.deck(uu);
+        /* on the deck (plus its camber) or riding a catapult beam — never higher, never
+           sunk through the planking */
+        if (d < -0.6 || d > 3.6)
+          say(v.id, 'floatplane stands on nothing',
+              `float bottom ${d.toFixed(1)} m off the deck at its station`);
+        if (Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)) > H.beam / 2 + 0.5)
+          say(v.id, 'floatplane off the ship',
+              `z reaches ${Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)).toFixed(1)} m`);
+      }
+    }
+    if (H.deckHatches && H.deckHatches.length) {
+      const HSh = SHIPS_HULL.hullSurface(H);
+      const hs = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'hatch')
+                          hs.push({ grp: o, box: new THREE.Box3().setFromObject(o) }); });
+      if (hs.length !== H.deckHatches.length)
+        say(v.id, 'stowage hatches miscounted',
+            `${H.deckHatches.length} in the record, ${hs.length} drawn`);
+      for (const { box: hb } of hs) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hb.min.x + hb.max.x) / 2) / H.lwl));
+        const zc = (hb.min.z + hb.max.z) / 2;
+        const bB = Math.abs(SHIPS_HULL.surfacePoint(H, HSh, uu, 1.0)[2]);
+        const camber = Math.cos((zc / bB) * Math.PI / 2) * bB * 0.035;
+        const d = hb.min.y - (HSh.deck(uu) + camber);   // the deck the coaming is seated on (r221)
+        if (d < -0.6 || d > 0.6)
+          say(v.id, 'hatch off the deck',
+              `coaming bottom ${d.toFixed(2)} m from the cambered deck at its station`);
+      }
+      /* ⚠ A STOWAGE HATCH IS A COVER DROPPED INTO A COAMING (round 147). The part's own
+         card says these hatches are FLUSH; the convicted form was a lid box stacked ON a
+         coaming box with two seam strips proud of the lid — the cover stood 0.16 m above
+         its own rim and the seam strips 0.21. Rays straight down the cover's centreline
+         (and down the old strips' own stations) must stop BELOW a ray down the coaming's
+         rim line: a cover sits IN a coaming, not on it. */
+      for (const hc of H.deckHatches) {
+        const rx = (hc.at - 0.5) * H.lwl;
+        const rz = (hc.z || 0) * Math.abs(SHIPS_HULL.surfacePoint(H, HSh, hc.at, 1.0)[2]);
+        let best = null, bd = Infinity;
+        for (const h of hs) {
+          const c = h.box.getCenter(new THREE.Vector3());
+          const d2 = (c.x - rx) ** 2 + (c.z - rz) ** 2;
+          if (d2 < bd) { bd = d2; best = h; }
+        }
+        if (!best) continue;
+        const rc = new THREE.Raycaster(); rc.far = 60;
+        const down = new THREE.Vector3(0, -1, 0);
+        const top = best.box.max.y + 5;
+        const hitY = (dx, dz) => {
+          rc.set(new THREE.Vector3(rx + dx, top, rz + dz), down);
+          const h2 = rc.intersectObject(best.grp, true);
+          return h2.length ? h2[0].point.y : -Infinity;
+        };
+        const hC = Math.max(hitY(0, 0), hitY(-hc.lenM * 0.16, 0), hitY(hc.lenM * 0.16, 0));
+        const hR = Math.max(hitY(0, hc.widM / 2 - 0.07), hitY(0, -(hc.widM / 2 - 0.07)));
+        if (hR === -Infinity)
+          say(v.id, 'hatch has no coaming', 'no surface under the rim line');
+        else if (hC >= hR - 0.02)
+          say(v.id, 'hatch cover stands proud of its own coaming',
+              `cover line ${hC.toFixed(2)} m, rim line ${hR.toFixed(2)} m — ` +
+              'a lid stacked on a box, not a cover dropped into a ring');
+      }
+    }
+
+    /* ⚠ THE QUARTERDECK AVIATION DECK STANDS ON THE DECK. Declared catapults are drawn as a
+       PAIR, mirrored, each turntable resting on the DECK at its station (r221: deck(u),
+       the sheer less the record's drop) — the class of fault the funnel-attached-to-nothing
+       audit exists for, asserted before it happens. */
+    if (H.catapults) {
+      const HS3 = SHIPS_HULL.hullSurface(H);
+      const cats = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'catapult')
+                          cats.push(new THREE.Box3().setFromObject(o)); });
+      const wanted = 2 + (H.sternCrane ? 1 : 0);
+      if (cats.length !== wanted)
+        say(v.id, 'aviation deck miscounted',
+            `${wanted} structures in the record (2 catapults${H.sternCrane ? ' + crane' : ''}), ${cats.length} drawn`);
+      for (const cb of cats) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((cb.min.x + cb.max.x) / 2) / H.lwl));
+        if (Math.abs(cb.min.y - HS3.deck(uu)) > 1.5)
+          say(v.id, 'catapult stands on nothing',
+              `bottom at ${cb.min.y.toFixed(1)} m, deck there ${HS3.deck(uu).toFixed(1)} m`);
+      }
+    }
+
+    /* ⚠ A SUPERFIRING TURRET'S BARBETTE RUNS TO THE DECK. The raised mount was lifted by
+       moving its group up, so the barbette bottom floated exactly the raise above the
+       planking — and the contact audit could not see it, because the barbette touches the
+       gunhouse above it. Each turret group's bottom must rest on ITS OWN support: the DECK
+       at its station (r221: deck(u), which is the sheer unless the record drops it), or a
+       superstructure surface directly beneath it. */
+    if (H.turrets) {
+      const HS2 = SHIPS_HULL.hullSurface(H);
+      const houseBoxes2 = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && (p.key === 'superstructure' || p.key === 'island'))
+          houseBoxes2.push(new THREE.Box3().setFromObject(o)); });
+      const turretGroups2 = [];
+      g.traverse(o => { if (o.userData.part && o.userData.part.key === 'turret' && o.isGroup)
+                          turretGroups2.push(o); });
+      for (const tgp of turretGroups2) {
+        const tb = new THREE.Box3().setFromObject(tgp);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((tb.min.x + tb.max.x) / 2) / H.lwl));
+        const onDeck = Math.abs(tb.min.y - HS2.deck(u)) < 1.4;
+        const onHouse = houseBoxes2.some(hbx =>
+          Math.abs(tb.min.y - hbx.max.y) < 1.4 &&
+          tb.max.x > hbx.min.x && tb.min.x < hbx.max.x &&
+          tb.max.z > hbx.min.z && tb.min.z < hbx.max.z);
+        if (!onDeck && !onHouse)
+          say(v.id, 'turret stands on nothing',
+              `bottom at ${tb.min.y.toFixed(1)} m, deck there ${HS2.deck(u).toFixed(1)} m, no house beneath`);
+      }
+    }
+
+    /* ⚠ A MOTOR SHIP'S RUDDER IS UNDER THE COUNTER, AND THE FITTINGS FOLLOW THE BUILD.
+       Found on the carrier from her stern quarter: the timber-era barn door hung on the
+       sternpost stood 17 m past a nuclear carrier's transom and 4 m out of the water, in
+       timber brown. No baseline bearing looks at the stern, so the ratchet sat green for as
+       long as the ship has existed. On a steel or iron build the rudder stays below the
+       waterline and inside the ship's own length. */
+    if ((H.build === 'steel' || H.build === 'iron') && part.rudder) {
+      if (part.rudder.y[1] > 0.5)
+        say(v.id, 'rudder out of the water',
+            `top at ${part.rudder.y[1].toFixed(1)} m on a ${H.build} build`);
+      if (part.planking && part.rudder.x[1] > part.planking.x[1] + H.loa * 0.01)
+        say(v.id, 'rudder hung past the stern',
+            `${(part.rudder.x[1] - part.planking.x[1]).toFixed(1)} m beyond the hull`);
+    }
+
+    /* ⚠ AND THE STERN QUARTER FOLLOWS THE BUILD — round 31, the read HANDOFF carried from
+       round 27. A steel ship's transom is her own shell plating: the hull mesh closes its
+       stern with a cap the hull shader paints. The fitted transom plate is a TIMBER
+       structure — it has lights and galleries in it — and drawn on a steel ship it stood in
+       scene light, full-lit pale grey against the shader-lit hull, corners past the skin.
+       And nothing stands proud of a WELDED stern: stem bar and stern frame are castings the
+       plating closes over, so on a steel build the posts must sit inside the shell. */
+    if (H.build === 'steel' || H.build === 'iron') {
+      if (part.transom)
+        say(v.id, 'timber transom on a welded ship',
+            'a fitted transom plate is timber-era; a steel stern closes with the hull cap');
+      if (part.stempost && part.planking) {
+        const past = Math.max(part.planking.x[0] - part.stempost.x[0],
+                              part.stempost.x[1] - part.planking.x[1]);
+        if (past > 0.01)
+          say(v.id, 'post proud of a welded hull',
+              `stem or sternpost stands ${past.toFixed(2)} m outside the shell`);
+      }
+    }
+
+    /* ── THE STERN FURNITURE STANDS ON THE STERN (round 58). The fitted plate was sampled
+       at u = 0.985, and when the counter flare carried the skin to u = 1.0 every light and
+       gallery keyed to the plate's bounding box ended up INSIDE the ship — the 74 showed a
+       bare stern wall from astern, and no baseline bearing looked. Whether a ship carries
+       stern lights is data (`sternLights`); what is declared must be drawn, and what is
+       drawn must stand at or abaft the planking's own aft face, because a window buried
+       behind the skin is invisible from every bearing while counting as coverage. */
+    if (H.sternLights) {
+      if (!part.sternlight) say(v.id, 'declared but not drawn', 'stern lights');
+      else if (part.planking && part.sternlight.x[1] < part.planking.x[1])
+        say(v.id, 'stern furniture buried in the hull',
+            `lights end ${(part.planking.x[1] - part.sternlight.x[1]).toFixed(2)} m inboard ` +
+            'of the aft face');
+    }
+    if (H.gunDecks && H.transom && H.build !== 'steel' && H.build !== 'iron') {
+      if (!part.gallery) say(v.id, 'declared but not drawn', 'quarter galleries');
+      else if (part.planking && part.gallery.x[1] < part.planking.x[1])
+        say(v.id, 'stern furniture buried in the hull',
+            `galleries end ${(part.planking.x[1] - part.gallery.x[1]).toFixed(2)} m inboard ` +
+            'of the aft face');
+    }
+
+    /* ── THE LIGHTS ARE A PIERCED SASH, GLASS BEHIND ITS BARS (round 171). The r168
+       sweep flagged the 57 twelve-triangle sternlight boxes; the plate overruled the
+       drawing, not the form — a sash light IS flat glazing in a flat frame, but
+       SLR0338 (the RMG contemporary Bellona model, the 74's own sub-type) resolves
+       every light in both tiers as a 3×3 grid of panes recessed BEHIND the bars,
+       glazing filling 74–80% of the tier pilaster to pilaster — and the drawn light
+       was one uncastable 0.9 m sheet with a single stick, the glass slab and the bar
+       each floating PROUD of the slab meant to hold them, 36% of the tier blank
+       wall. Every read here is geometry parameters and sibling-local positions in
+       the stern group's own frame — no Box3, the r169 lesson. Arms: V-PIERCED (a
+       glazed tier has real apertures — an extruded sash whose shape carries holes; a
+       tier of solid slabs convicts), V-GRID (record arm — apertures = N·cols·rows of
+       the record's own sternLightPanes for an integer 3–7 lights), V-BEHIND (the
+       glass sheet's outer face at least 5 mm INBOARD of the sash's outer face — a
+       rebate, not an appliqué; the pre-r171 stack fails it by 0.001·B), V-COUNTER
+       record-blind (no aperture over 0.45 m either way — a pane nobody could cast;
+       the one arm that survives a dragged record). */
+    if (H.sternLights) {
+      const sl = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'sternlight') sl.push(o); });
+      const sashes = sl.filter(o => o.geometry && o.geometry.type === 'ExtrudeGeometry');
+      const sheets = sl.filter(o => o.geometry && o.geometry.type === 'BoxGeometry'
+        && o.material && o.material.metalness >= 0.3);
+      if (sashes.length < H.sternLights)
+        say(v.id, 'a glazed tier with no aperture',
+            `${H.sternLights} tier(s) declared, ${sashes.length} pierced sash frame(s) `
+            + 'drawn — a light laid ON a solid wall is a slab, not a window');
+      const gridRec = H.sternLightPanes || [3, 3];
+      const perLight = gridRec[0] * gridRec[1];
+      for (const fr of sashes) {
+        const shp = fr.geometry.parameters.shapes;
+        const holes = (shp && shp.holes) || [];
+        if (!holes.length) {
+          say(v.id, 'a glazed tier with no aperture',
+              'sash frame extruded without a single hole');
+          continue;
+        }
+        const nL = holes.length / perLight;
+        if (holes.length % perLight !== 0 || nL < 3 || nL > 7)
+          say(v.id, "stern lights off the record's grid",
+              `${holes.length} apertures cannot be an integer 3–7 lights of `
+              + `${gridRec[0]}×${gridRec[1]} panes`);
+        let big = 0, dims = '';
+        for (const hp of holes) {
+          let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9;
+          for (const q of hp.getPoints(1)) {
+            a0 = Math.min(a0, q.x); a1 = Math.max(a1, q.x);
+            b0 = Math.min(b0, q.y); b1 = Math.max(b1, q.y);
+          }
+          if (a1 - a0 > 0.45 || b1 - b0 > 0.45) {
+            big++;
+            if (!dims) dims = `${(a1 - a0).toFixed(2)} × ${(b1 - b0).toFixed(2)} m`;
+          }
+        }
+        if (big)
+          say(v.id, 'a pane nobody could cast',
+              `${big} aperture(s) over 0.45 m — the first ${dims}`);
+      }
+      if (sashes.length && sheets.length) {
+        /* the sash extrudes up its local z, turned aft by the builder, so its outer
+           face is position.x + depth; the sheet is an axis-aligned box, outer face
+           position.x + width/2. Both are children of the same stern group. */
+        const sashOut = Math.min(...sashes.map(o =>
+          o.position.x + (o.geometry.parameters.options.depth || 0)));
+        const glassOut = Math.max(...sheets.map(o =>
+          o.position.x + o.geometry.parameters.width / 2));
+        if (glassOut > sashOut - 0.005)
+          say(v.id, 'glazing proud of its own sash',
+              `glass face at x ${glassOut.toFixed(3)}, sash face at `
+              + `${sashOut.toFixed(3)} — panes sit in a rebate behind their bars`);
+      } else if (sashes.length && !sheets.length)
+        say(v.id, 'a sash with no glass behind it', 'no glazing sheet in any tier');
+    }
+
+    /* ── THE CAPSTAN IS THE RECORD'S MACHINE, SIZED TO THE MEN WHO HEAVE IT (round 172).
+       Until r172 `timberShip && laidDeck` drew a Georgian bar capstan on 19 hulls — a
+       trireme and a Song junk among them — with parallel-box whelps floating clear of
+       deck and drumhead both, no pawls, and the bar plane at 0.132·B: 1.93 m over the
+       74's deck, 2.02 m over Wyoming's, 0.69 m over the galley's. Falconer 1769
+       (CAPSTERN, and pl. II fig 11 measured by row): whelps reach drumhead-to-deck
+       like buttresses enlarging the sweep; two iron pawls stand on deck in the whelp
+       intervals; men heave with their breasts against the bars. Parts are identified
+       STRUCTURALLY (a disc cylinder is the head, tall vertical timbers are whelps,
+       small horizontal boxes at deck are pawls) so a builder that never heard of the
+       naming still gets read; every number is geometry vertices and sibling-local
+       positions in the capstan group's own frame — no Box3, the r169 lesson. Arms:
+       V-WARRANT (capstan drawn, record silent — the drawing convicts, not the record),
+       V-COUNT (record arm — whelp and bar counts are the record's), V-REACH (whelps
+       touch deck and drumhead underside within 0.02·dia), V-FLARE (base sweep ≥ 1.08×
+       neck sweep; fig 11 measures 1.15–1.22), V-PAWL (two on deck), V-STATURE
+       (record-blind counter — no drumhead over 1.8 m, and height ≥ 0.55× drumhead dia:
+       the arm that survives a dragged drumDiaM). */
+    {
+      const capm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'capstan') capm.push(o); });
+      if (capm.length && !H.capstan)
+        say(v.id, 'a machine the record does not carry',
+            `${capm.length} capstan meshes drawn with no capstan field — this hull's `
+            + 'tradition attests other gear, and silence draws nothing');
+      if (H.capstan && !capm.length)
+        say(v.id, 'declared but not drawn', 'capstan');
+      /* ── THE MEDIEVAL SPILL IS THE RECOVERED TIMBER'S FORM (round 212).
+         The Bremen cog's Gangspill came up with the wreck (DSM Inv. I/11066/14, oak,
+         D 56 cm, H 176 cm) and the museum's description fixes it: the rope round the
+         LOWER cone, the handspikes through RECTANGULAR HOLES in the body above. Ellmers
+         stands it on the aftcastle's top. So a record that says form 'spill' is not
+         judged against Falconer's whelps and pawls — it is judged against its own
+         timber, structurally: the lowest vertical part must be a CONE wider at the foot
+         (S-CONE); a HEAD must stand above it, broader than the cone's neck, for the
+         holes to pass through (S-HEAD); every handspike must pass THROUGH the head — a
+         horizontal bar whose axis crosses the spindle's inside the head's height
+         (S-BARS); the foot must stand ON the deck the record names — the castle deck at
+         its station, read off the castle's own plank vertices (S-STAND); the cone's foot
+         and the whole height are the record's, within 15% and 12% (S-SIZE); and the
+         record-blind counter: the bars come 0.9–1.6 m over the foot, and the spindle is
+         no taller than 2.2 m — a man works it from the deck he stands on (S-STATURE),
+         the arm that survives a dragged heightM. */
+      if (H.capstan && capm.length && H.capstan.form === 'spill') {
+        const vr = o => {
+          const a = o.geometry.attributes.position; let y0 = 1e9, y1 = -1e9;
+          for (let i = 0; i < a.count; i++) { const yy = a.getY(i); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy); }
+          return [y0, y1];
+        };
+        const cgrp = capm[0].parent;
+        const isBar = o => Math.abs(o.rotation.z) > 0.1 || Math.abs(o.rotation.x) > 0.1;
+        const verts = capm.filter(o => !isBar(o)), bars = capm.filter(isBar);
+        /* every part read from its VERTICES — a non-indexed head carries no geometry
+           parameters, and the r173 lesson stands: key on class and the faithful builder's
+           own part vanishes from the candidate set */
+        const prof = o => {
+          const a = o.geometry.attributes.position;
+          const [y0, y1] = vr(o); let rB = 0, rT = 0, rMax = 0, rMin = 1e9;
+          for (let i = 0; i < a.count; i++) {
+            const r = Math.hypot(a.getX(i), a.getZ(i)), yy = a.getY(i);
+            rMax = Math.max(rMax, r); rMin = Math.min(rMin, r);
+            if (yy < y0 + 0.02) rB = Math.max(rB, r);
+            if (yy > y1 - 0.02) rT = Math.max(rT, r);
+          }
+          return { y0: o.position.y + y0, y1: o.position.y + y1, rB, rT, rMax, rMin,
+                   off: Math.hypot(o.position.x, o.position.z) };
+        };
+        const P = new Map(verts.map(o => [o, prof(o)]));
+        let cone = null, foot = 1e9, lowest = 1e9;
+        for (const o of verts) {
+          const q = P.get(o); lowest = Math.min(lowest, q.y0);
+          /* a cone is one body ON the axis (a vertex at the centre, not offset like a
+             whelp) that widens toward the deck */
+          if (q.off < 0.05 && q.rMin < 0.05 && q.rB >= 1.08 * q.rT && q.y0 < foot) {
+            foot = q.y0; cone = o;
+          }
+        }
+        if (!cone || foot > lowest + 0.02)
+          say(v.id, 'a spill with no cone to take the rope',
+              cone ? `the cone's foot ${(foot - lowest).toFixed(2)} m above the lowest part`
+                   : 'no body on the axis widens toward the deck — the museum: the rope ran round the lower cone');
+        else {
+          const cq = P.get(cone), coneTop = cq.y1;
+          let head = null, hq = null;
+          for (const o of verts) {
+            if (o === cone) continue;
+            const q = P.get(o);
+            if (q.off < 0.05 && (!hq || q.y1 > hq.y1)) { head = o; hq = q; }
+          }
+          const headBot = hq ? hq.y0 : 0, headTop = hq ? hq.y1 : 0, headR = hq ? hq.rMax : 0;
+          if (!head || headBot > coneTop + 0.05 || headR <= cq.rT)
+            say(v.id, 'a spill with no head for the handspikes',
+                head ? `head radius ${headR.toFixed(2)} m against a neck of ${cq.rT.toFixed(2)}, `
+                       + `standing ${(headBot - coneTop).toFixed(2)} m over the cone`
+                     : 'nothing stands above the cone');
+          else {
+            if (!bars.length)
+              say(v.id, 'a spill nobody shipped a handspike in', '0 bars drawn');
+            for (const b of bars) {
+              const off = Math.hypot(b.position.x, b.position.z);
+              if (off > 0.5 * headR || b.position.y < headBot || b.position.y > headTop)
+                say(v.id, 'a handspike that does not pass through the head',
+                    `bar ${off.toFixed(2)} m off the spindle's axis at ${b.position.y.toFixed(2)} m, `
+                    + `head ${headBot.toFixed(2)}–${headTop.toFixed(2)}`);
+            }
+            if (H.capstan.bars && bars.length !== H.capstan.bars)
+              say(v.id, "the spill off the record's count",
+                  `${bars.length} bars shipped, record says ${H.capstan.bars}`);
+            const footDia = 2 * cq.rB, Ht = headTop - foot;
+            if (H.capstan.diaM && Math.abs(footDia - H.capstan.diaM) > 0.15 * H.capstan.diaM)
+              say(v.id, "the spill off the record's diameter",
+                  `foot ${footDia.toFixed(2)} m, record says ${H.capstan.diaM}`);
+            if (H.capstan.heightM && Math.abs(Ht - H.capstan.heightM) > 0.12 * H.capstan.heightM)
+              say(v.id, "the spill off the record's height",
+                  `${Ht.toFixed(2)} m foot to head, record says ${H.capstan.heightM}`);
+            /* S-STAND: on the castle deck the record names, read off the castle's planks */
+            if (H.capstan.onCastle && H.castle) {
+              const sx = cgrp.position.x; let deckY = -1e9, seen = 0;
+              g.traverse(o => {
+                if (!o.isMesh || o.name !== 'castle-deck') return;
+                const a = o.geometry.attributes.position;
+                for (let i = 0; i < a.count; i++)
+                  if (Math.abs(a.getX(i) - sx) < 0.5) { deckY = Math.max(deckY, a.getY(i)); seen++; }
+              });
+              const footY = cgrp.position.y + foot;
+              if (!seen)
+                say(v.id, 'a spill on a castle that is not there',
+                    `no castle-deck vertex within 0.5 m of x ${sx.toFixed(2)}`);
+              else if (footY < deckY - 0.15 || footY > deckY + 0.05)
+                say(v.id, 'a spill standing off its deck',
+                    `foot ${footY.toFixed(2)} m, castle deck ${deckY.toFixed(2)} at its station`);
+            }
+            /* S-STATURE, record-blind */
+            for (const b of bars) {
+              const hb = b.position.y - foot;
+              if (hb < 0.9 || hb > 1.6)
+                say(v.id, 'a spill nobody could work',
+                    `handspike ${hb.toFixed(2)} m over the foot — a man pushes at chest height`);
+            }
+            if (Ht > 2.2 || Ht < 1.2)
+              say(v.id, 'a spill nobody built',
+                  `${Ht.toFixed(2)} m tall — the recovered timber is 1.76`);
+          }
+        }
+      }
+      if (H.capstan && capm.length && H.capstan.form !== 'spill') {
+        const vrange = o => {          // vertex extents in the mesh's own frame
+          const a = o.geometry.attributes.position;
+          let y0 = 1e9, y1 = -1e9;
+          for (let i = 0; i < a.count; i++) {
+            const yy = a.getY(i); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy);
+          }
+          return [y0, y1];
+        };
+        const radAt = (o, yq, tol) => { // outer radial extent near height yq
+          const a = o.geometry.attributes.position;
+          const off = Math.hypot(o.position.x, o.position.z);
+          let r = 0;
+          for (let i = 0; i < a.count; i++)
+            if (Math.abs(a.getY(i) - yq) < tol)
+              r = Math.max(r, Math.hypot(a.getX(i), a.getZ(i)));
+          return off + r;
+        };
+        let head = null, headDia = 0;
+        for (const o of capm) {
+          if (o.geometry.type !== 'CylinderGeometry') continue;
+          const p = o.geometry.parameters;
+          const dia = 2 * Math.max(p.radiusTop, p.radiusBottom);
+          if (p.height < dia / 2 && dia > headDia &&
+              Math.abs(o.rotation.z) < 0.1) { head = o; headDia = dia; }
+        }
+        if (!head) say(v.id, 'a capstan with no drumhead', 'no disc atop the barrel');
+        else {
+          const headT = head.geometry.parameters.height;
+          const headUnder = head.position.y - headT / 2;
+          const headTop = head.position.y + headT / 2;
+          let deckRef = 1e9;
+          for (const o of capm) {
+            if (Math.abs(o.rotation.z) > 0.1) continue;    // bars lie on their sides
+            deckRef = Math.min(deckRef, o.position.y + vrange(o)[0]);
+          }
+          const whelps = [], pawls = [];
+          let bars = 0;
+          for (const o of capm) {
+            if (o === head) continue;
+            if (Math.abs(o.rotation.z) > 0.1) { bars++; continue; }
+            const [y0, y1] = vrange(o);
+            if (o.geometry.type === 'BoxGeometry' &&
+                o.geometry.parameters.height <= 0.1 * headDia &&
+                o.position.y + y0 < deckRef + 0.1 * headDia) { pawls.push(o); continue; }
+            if ((o.geometry.type === 'BoxGeometry' ||
+                 o.geometry.type === 'ExtrudeGeometry') &&
+                (y1 - y0) >= 0.25 * headDia) whelps.push(o);
+          }
+          if (H.capstan.whelps && whelps.length !== H.capstan.whelps)
+            say(v.id, "the capstan off the record's count",
+                `${whelps.length} whelps drawn, record says ${H.capstan.whelps}`);
+          if (H.capstan.bars && bars !== H.capstan.bars)
+            say(v.id, "the capstan off the record's count",
+                `${bars} bars shipped, record says ${H.capstan.bars}`);
+          if (whelps.length) {
+            const tol = 0.05 * headDia;
+            let baseGap = 1e9, headGap = 1e9, flare = 0;
+            for (const o of whelps) {
+              const [y0, y1] = vrange(o);
+              baseGap = Math.min(baseGap, (o.position.y + y0) - deckRef);
+              headGap = Math.min(headGap, headUnder - (o.position.y + y1));
+              const rT = radAt(o, y1, tol), rB = radAt(o, y0, tol);
+              if (rT > 0) flare = Math.max(flare, rB / rT);
+            }
+            if (baseGap > 0.02 * headDia || headGap > 0.02 * headDia)
+              say(v.id, 'whelps that touch neither deck nor drumhead',
+                  `gap to deck ${baseGap.toFixed(3)} m, to drumhead `
+                  + `${headGap.toFixed(3)} m — Falconer: drum-head to the deck, both`);
+            if (flare < 1.08)
+              say(v.id, 'whelps with no sweep to enlarge',
+                  `base/neck ${flare.toFixed(2)} — buttresses flare; fig 11 reads `
+                  + '1.15–1.22');
+          }
+          if (pawls.length < 2)
+            say(v.id, 'a capstan that would recoil through its crew',
+                `${pawls.length} pawl(s) on deck — Falconer bolts two`);
+          const Habove = headTop - deckRef;
+          if (headDia > 1.8 || Habove / headDia < 0.55)
+            say(v.id, 'a capstan nobody built',
+                `drumhead ${headDia.toFixed(2)} m dia, ${Habove.toFixed(2)} m tall — `
+                + 'over 1.8 m or squatter than 0.55 of its own drum');
+        }
+      }
+    }
+
+    /* ── THE WINDLASS IS THE RECORD'S MACHINE, LYING WHERE MEN CAN LEVER IT (round 173).
+       The Bremen cog's wreck-attested gear: a heavy windlass athwartships at the
+       aftcastle (Ellmers — the tillerman stood BEHIND it), barrel 4.5 × 0.60 m (the Kiel
+       replica's build record to the DSM plans, Baykowski 1991). Falconer's WINDLASS is
+       the class mechanism: a timber "supported at the two ends by two frames of wood",
+       handspikes thrust into holes bored through the body, lower part about a foot over
+       the deck. Parts identified STRUCTURALLY from LOCAL VERTEX EXTENTS — the barrel is
+       the longest round timber, ≥ 2.5× its own cross dimension — not from geometry
+       class or .parameters: the first draft keyed on CylinderGeometry and the faithful
+       builder's own toNonIndexed() barrel (flat-shaded eight-square) vanished from the
+       candidate set, so the rule convicted a handspike as an undersized barrel. Read
+       the vertices and a builder using raw buffers is still read. Sibling-local
+       positions, no Box3 (the r169 lesson). Arms: V-WARRANT (drawn,
+       record silent), V-AXIS (horizontal and athwartships — a vertical barrel is a
+       capstan wearing the wrong name), V-SPAN (record length, AND inside the planking
+       at its own station), V-DIA (record diameter), V-STANDARD (both ends carried),
+       V-BREAST (record-blind: axis 0.45–0.90 m over the deck the standards stand on —
+       the handspike is levered by a standing man, and no dragged record may move the
+       work out of his reach). */
+    {
+      const wm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'windlass') wm.push(o); });
+      if (wm.length && !H.windlass)
+        say(v.id, 'a machine the record does not carry',
+            `${wm.length} windlass meshes drawn with no windlass field — this hull's `
+            + 'record is silent, and silence draws nothing');
+      if (H.windlass && !wm.length)
+        say(v.id, 'declared but not drawn', 'windlass');
+      if (H.windlass && wm.length) {
+        const R = H.windlass;
+        const ext = o => {              // local AABB of the mesh's own vertices
+          const a = o.geometry.attributes.position;
+          const lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+          for (let i = 0; i < a.count; i++) {
+            const p = [a.getX(i), a.getY(i), a.getZ(i)];
+            for (let k = 0; k < 3; k++) {
+              lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]);
+            }
+          }
+          return [hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]];
+        };
+        let bar = null, barLen = 0, barDia = 0, barK = 1;
+        for (const o of wm) {
+          if (o.geometry.type === 'BoxGeometry') continue;   // standards are boxes
+          const e = ext(o);
+          const k = e[0] > e[1] ? (e[0] > e[2] ? 0 : 2) : (e[1] > e[2] ? 1 : 2);
+          const dia = (e[(k + 1) % 3] + e[(k + 2) % 3]) / 2;
+          if (e[k] >= 2.5 * dia && e[k] > barLen) {
+            bar = o; barLen = e[k]; barDia = dia; barK = k;
+          }
+        }
+        if (!bar)
+          say(v.id, 'a windlass with no barrel',
+              'no round timber at least 2.5× its own cross dimension in the group');
+        else {
+          const ax = new THREE.Vector3(barK === 0 ? 1 : 0, barK === 1 ? 1 : 0,
+                                       barK === 2 ? 1 : 0).applyEuler(bar.rotation);
+          if (Math.abs(ax.y) >= 0.1 || Math.abs(ax.z) <= 0.95)
+            say(v.id, 'a windlass stood on end',
+                `barrel axis (${ax.x.toFixed(2)}, ${ax.y.toFixed(2)}, `
+                + `${ax.z.toFixed(2)}) — the machine lies athwartships or it is `
+                + 'a capstan wearing the wrong name');
+          if (R.barrelLenM && Math.abs(barLen - R.barrelLenM) > 0.12 * R.barrelLenM)
+            say(v.id, "the windlass off the record's length",
+                `barrel ${barLen.toFixed(2)} m, record says ${R.barrelLenM}`);
+          if (R.barrelDiaM && Math.abs(barDia - R.barrelDiaM) > 0.15 * R.barrelDiaM)
+            say(v.id, "the windlass off the record's diameter",
+                `barrel ${barDia.toFixed(2)} m, record says ${R.barrelDiaM}`);
+          /* the barrel must fit inside the planking at its own station — asked of the
+             shell itself, in hull frame: the windlass group is a direct child of the
+             ship group, so its x IS the station */
+          let wgrp = bar; while (wgrp.parent && wgrp.parent !== g) wgrp = wgrp.parent;
+          const stationX = wgrp.position.x;
+          let plank = null;
+          g.traverse(o => { const p = tagOf(o);
+            if (!plank && o.isMesh && p && p.key === 'planking') plank = o; });
+          if (plank) {
+            const a = plank.geometry.attributes.position;
+            let zmax = 0;
+            for (let i = 0; i < a.count; i++)
+              if (Math.abs(a.getX(i) - stationX) < 0.6)
+                zmax = Math.max(zmax, Math.abs(a.getZ(i)));
+            if (zmax > 0 && barLen / 2 > 0.95 * zmax)
+              say(v.id, 'a windlass through the planking',
+                  `barrel ${barLen.toFixed(2)} m across a deck `
+                  + `${(2 * zmax).toFixed(2)} m wide at its station`);
+          }
+          const stands = wm.filter(o => o.geometry.type === 'BoxGeometry' &&
+            o.geometry.parameters.height > o.geometry.parameters.width);
+          for (const sg of [1, -1]) {
+            const zEnd = bar.position.z + sg * barLen / 2;
+            if (!stands.some(s => Math.abs(s.position.z - zEnd) < 0.35))
+              say(v.id, 'a windlass end carried by nothing',
+                  `barrel end at z ${zEnd.toFixed(2)} with no standard within 0.35 m — `
+                  + 'Falconer supports it at the two ends by two frames of wood');
+          }
+          if (stands.length) {
+            let deckRef = 1e9;
+            for (const s of stands)
+              deckRef = Math.min(deckRef,
+                                 s.position.y - s.geometry.parameters.height / 2);
+            const over = bar.position.y - deckRef;
+            /* record-blind, all three: the axis where a standing man levers, a barrel
+               a man can bore a handspike hole through, and room for the cable to pass
+               beneath. The builder's own clamp caps the axis at 0.90, so a dragged
+               diameter shows up in the barrel itself and in the vanished clearance —
+               the arms that survive a lying record. */
+            if (!(over >= 0.45 && over <= 0.90))
+              say(v.id, 'a windlass nobody could heave',
+                  `axis ${over.toFixed(2)} m over the deck — the handspike is levered `
+                  + 'by a standing man');
+            if (barDia > 0.9)
+              say(v.id, 'a windlass nobody bored',
+                  `barrel ${barDia.toFixed(2)} m thick — no handspike reaches through it`);
+            if (over - barDia / 2 < 0.12)
+              say(v.id, 'a windlass the cable cannot pass under',
+                  `${(over - barDia / 2).toFixed(2)} m under the barrel`);
+          }
+          /* V-THROUGH (r175): the Korean horong's record says its bars pass THROUGH
+             the drum — so every long thin round timber in the group must straddle the
+             axis: centre within 0.25 m of the barrel's axis in the plane the bars
+             swing in. A single-ended Falconer spike rides its centre 0.63 m out along
+             its own shaft and convicts. Bars found by the same local-vertex-extent
+             read as the barrel (length >= 1.2 m keeps the 0.32 m journals out; cross
+             <= 0.15 m keeps the barrel out). */
+          if (R.throughBars) {
+            for (const o of wm) {
+              if (o === bar || o.geometry.type === 'BoxGeometry') continue;
+              const e = ext(o);
+              const k2 = e[0] > e[1] ? (e[0] > e[2] ? 0 : 2)
+                                     : (e[1] > e[2] ? 1 : 2);
+              const d2 = (e[(k2 + 1) % 3] + e[(k2 + 2) % 3]) / 2;
+              if (e[k2] < 1.2 || d2 > 0.15 || e[k2] < 2.5 * d2) continue;
+              const off = Math.hypot(o.position.x - bar.position.x,
+                                     o.position.y - bar.position.y);
+              if (off > 0.25)
+                say(v.id, 'a bar the record says passes through the drum',
+                    `bar centre ${off.toFixed(2)} m off the axis — the horong's bars `
+                    + 'pass clean through, a man at each of the four ends');
+            }
+          }
+        }
+      }
+    }
+
+    /* ── THE GRAPNEL IS THE RECORD'S ANCHOR, RESTING ON THE DECK (round 182).
+       The Belitung wreck's own composite grapnel — the fleet's one ground tackle lifted
+       from its own ship's wreck (Flecker 2001; Flecker in Krahl et al. 2010, figs.
+       84–85). V-WARRANT both ways: meshes with no grapnel record convict (silence draws
+       nothing — the r172 lesson generalised), a record with no meshes convicts.
+       V-ARMS: the record's anchor carries four arms crossing at two levels, so four
+       swollen tips must be drawn — tips found STRUCTURALLY as the group's spheres, not
+       by name. V-SPAN: opposite tips of a pair sit one span apart in ANY stow attitude,
+       so the greatest pairwise tip distance reads the record's tip-to-tip span — a box
+       read cannot, because the stowed anchor lies spun 45° with two arms up.
+       V-REST: a dumped anchor neither floats nor stabs through the planking — the
+       group's lowest drawn point sits on the deck at its own station, asked of the
+       surface itself (ray straight down, first non-anchor hit — the r185 form;
+       until r193 this comment claimed the ray while the code read the sheer
+       FUNCTION, which answers at every (u, z) even where no ship exists — blind
+       to an anchor over the side, blind to a raised stow, and never able to say
+       "nothing is under it"). */
+    {
+      const gm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'grapnel') gm.push(o); });
+      if (gm.length && !H.grapnel)
+        say(v.id, 'an anchor the record does not carry',
+            `${gm.length} grapnel meshes drawn with no grapnel field — this hull's `
+            + 'record is silent, and silence draws nothing');
+      if (H.grapnel && !gm.length)
+        say(v.id, 'declared but not drawn', 'grapnel');
+      if (H.grapnel && gm.length) {
+        const R = H.grapnel;
+        const tips = gm.filter(o => o.geometry.type === 'SphereGeometry');
+        if (tips.length !== 4)
+          say(v.id, 'a grapnel without its four arms',
+              `${tips.length} arm tips drawn — the record's anchor crosses two pairs`);
+        if (R.spanM && tips.length >= 2) {
+          const cs = tips.map(o => o.getWorldPosition(new THREE.Vector3()));
+          let span = 0;
+          for (let i = 0; i < cs.length; i++)
+            for (let j = i + 1; j < cs.length; j++)
+              span = Math.max(span, cs[i].distanceTo(cs[j]));
+          if (Math.abs(span - R.spanM) > 0.10 * R.spanM)
+            say(v.id, "the grapnel off the record's span",
+                `arms ${span.toFixed(2)} m tip to tip, record says ${R.spanM}`);
+        }
+        /* the box excludes the coil and cable: cordage rests at its own stations
+           by its own settle, and the question here is whether the IRON is seated */
+        const bb = new THREE.Box3();
+        for (const o of gm) if (o.name !== 'grap-coil' && o.name !== 'grap-cable')
+          bb.union(new THREE.Box3().setFromObject(o));
+        const ug = Math.max(0, Math.min(1,
+          ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const rayG = new THREE.Raycaster();
+        rayG.set(new THREE.Vector3((bb.min.x + bb.max.x) / 2, bb.max.y + 0.5,
+                                   (bb.min.z + bb.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underG = rayG.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'grapnel' || NONBEARING.has(p.key))); });
+        if (!underG.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${ug.toFixed(2)}`);
+        else {
+          const gapG = bb.min.y - underG[0].point.y;
+          if (gapG > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapG.toFixed(2)} m above the surface under it at u ${ug.toFixed(2)}`);
+          if (gapG < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapG).toFixed(2)} m into the surface under it at u ${ug.toFixed(2)}`);
+        }
+      }
+    }
+
+    /* (r183; r199 the excavated form) THE STONE ANCHOR THE EYEWITNESS DESCRIBES.
+       Xu Jing 1124: the anchor-stone hangs at the bow, two wooden hooks clamping
+       its sides, on the windlass's own rattan cable — drawn since r199 as the
+       two-shank stone-insert form the 2017 마도해역 시굴조사 보고서 recovers, the
+       마도해역-212 pair raised still articulated. V-WARRANT both ways, as the
+       grapnel rule. V-STONE: one stone bar, its longest drawn dimension the
+       record's stoneLenM — read from the box's own PARAMETERS through its world
+       matrix's basis columns (r199: the repose stow rolls the stone off every
+       world axis, and an AABB shortens a diagonal — the r196 lesson applied
+       before it bit). V-WCHEEK (r199): the cheek run — every st-cheek/st-tip
+       corner projected on the assembly's own shank axis, asked of the built
+       group's world matrix (the r189 form) — against armLenM, the 마도해역-212
+       arm measured off its own 1/10 drawing; ±10%. V-HOOKS: two fluke points,
+       found STRUCTURALLY as the group's cones, not by name. V-REST: the
+       recovered anchor is taken in (收之) and lies on the foredeck — the
+       assembly's lowest point sits ON the deck at its own station, asked of the
+       surface itself, as the grapnel rule asks (ray straight down, first
+       non-anchor hit — the r185 form; until r193 the code here read the sheer
+       FUNCTION instead, the same claim unhonoured as the grapnel rule's);
+       floating and stabbed-through both convict. V-CABLE: the text's one
+       sentence carries wheel, cable and stone together — a drawn stone with no
+       cable convicts. */
+    {
+      const am = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'stoneAnchor') am.push(o); });
+      if (am.length && !H.stoneAnchor)
+        say(v.id, 'an anchor the record does not carry',
+            `${am.length} stone-anchor meshes drawn with no stoneAnchor field — this `
+            + "hull's record is silent, and silence draws nothing");
+      if (H.stoneAnchor && !am.length)
+        say(v.id, 'declared but not drawn', 'stoneAnchor');
+      if (H.stoneAnchor && am.length) {
+        const R = H.stoneAnchor;
+        const stones = am.filter(o => o.name === 'st-stone');
+        if (stones.length !== 1)
+          say(v.id, 'a stone anchor without its stone',
+              `${stones.length} stone bars drawn — the record hangs one`);
+        else if (R.stoneLenM) {
+          const s = stones[0];
+          s.updateWorldMatrix(true, false);
+          const e = s.matrixWorld.elements, gp = s.geometry.parameters;
+          const lg = Math.max(
+            Math.hypot(e[0], e[1], e[2]) * (gp.width || 0),
+            Math.hypot(e[4], e[5], e[6]) * (gp.height || 0),
+            Math.hypot(e[8], e[9], e[10]) * (gp.depth || 0));
+          if (Math.abs(lg - R.stoneLenM) > 0.10 * R.stoneLenM)
+            say(v.id, "the stone off the record's length",
+                `bar ${lg.toFixed(2)} m, record says ${R.stoneLenM}`);
+        }
+        const tips = am.filter(o => o.geometry.type === 'ConeGeometry');
+        if (tips.length !== 2)
+          say(v.id, 'a stone anchor without its two hooks',
+              `${tips.length} hook points drawn — the text clamps the stone with two`);
+        /* (r199) V-WCHEEK: the cheek run against the measured 마도해역-212 arm */
+        if (R.armLenM) {
+          const cheeks = am.filter(o => o.name === 'st-cheek' || o.name === 'st-tip');
+          if (cheeks.length) {
+            const par = cheeks[0].parent;
+            par.updateWorldMatrix(true, false);
+            const ax = new THREE.Vector3(0, 1, 0).transformDirection(par.matrixWorld);
+            let lo = Infinity, hi = -Infinity;
+            const c = new THREE.Vector3();
+            for (const o of cheeks) {
+              o.updateWorldMatrix(true, false);
+              if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+              const b = o.geometry.boundingBox;
+              for (const cx of [b.min.x, b.max.x])
+                for (const cy of [b.min.y, b.max.y])
+                  for (const cz of [b.min.z, b.max.z]) {
+                    const d = c.set(cx, cy, cz).applyMatrix4(o.matrixWorld).dot(ax);
+                    if (d < lo) lo = d;
+                    if (d > hi) hi = d;
+                  }
+            }
+            const run = hi - lo;
+            if (Math.abs(run - R.armLenM) > 0.10 * R.armLenM)
+              say(v.id, "the cheek timbers off the record's run",
+                  `arm run ${run.toFixed(2)} m tip to butt — the articulated `
+                  + `마도해역-212 arm measures ${R.armLenM}`);
+          }
+        }
+        const bb = new THREE.Box3();
+        for (const o of am) if (o.name !== 'st-cable')
+          bb.union(new THREE.Box3().setFromObject(o));
+        const ua = Math.max(0, Math.min(1,
+          ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const rayS = new THREE.Raycaster();
+        rayS.set(new THREE.Vector3((bb.min.x + bb.max.x) / 2, bb.max.y + 0.5,
+                                   (bb.min.z + bb.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underS = rayS.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'stoneAnchor' || NONBEARING.has(p.key))); });
+        if (!underS.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${ua.toFixed(2)}`);
+        else {
+          const gapS = bb.min.y - underS[0].point.y;
+          if (gapS > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapS.toFixed(2)} m above the surface under it at u ${ua.toFixed(2)}`);
+          if (gapS < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapS).toFixed(2)} m into the surface under it at u ${ua.toFixed(2)}`);
+        }
+        if (!am.some(o => o.name === 'st-cable'))
+          say(v.id, 'a stone anchor with no cable',
+              "the text's sentence carries wheel, cable and stone together — "
+              + 'nothing drawn holds this anchor to the ship');
+      }
+    }
+
+    /* (r184) THE FOUR-CLAW IRON ANCHORS THE TWO TGK CHAPTERS CARRY. 錘鍛 forges the
+       form (four claws joined to a shank, fetched whole r184); 舟車 counts the
+       inventory (five or six, the 500-catty sheet anchor, two at the head).
+       V-WARRANT both ways, as the grapnel and stone rules. V-COUNT: drawn anchor
+       assemblies, found STRUCTURALLY as the group's ring tori, equal what the record
+       draws (sheet + head pair + stern pair where the record stows one, r185).
+       V-CLAWS: four cone points per anchor — the forging text's own count. V-LEN
+       (r188; r189 adds the crown): each anchor's 全長 — crown BOTTOM to ring top,
+       the span the find convention measures — crown, shank and head-ring extents
+       projected on the shank's own world axis, geometry through the world matrix
+       (the r186 lesson), sorted against the record's full lengths, which are
+       CALIBRATED from the Penglai find (2.15 m, 456 kg; Matsui 2013 fig. 3).
+       V-SWEEP (r189): each anchor's claw reach — tip-cone apexes' radial distance
+       from the shank's own world axis — against the proportion measured from the
+       same find's drawing, 0.339 of the record's 全長 (fig. 3a self-scaled,
+       322.8 px/m). An anchor with no tips is V-CLAWS's conviction, so V-SWEEP
+       passes over it. V-MASS (r190): each anchor's iron INTEGRATED from the
+       built scene — every member's analytic volume (frustum, cone, ball, torus
+       from its geometry parameters) through its own world matrix's DETERMINANT,
+       exact under any linear map — × 7850 kg/m³ against the record's weight
+       slot (sheetKg 295 RECORDED, the 舟車 text's own 500 catties; the pair's
+       300-catty inference), 12% band; {len, sweep, kg} measured in ONE pass and
+       sorted together (the r189 slot lesson). An anchor with missing members is
+       V-COUNT's fault and V-MASS passes over it. V-REST (r185): each assembly asked of the
+       SURFACE ITSELF — a ray straight down from over the assembly, first non-anchor
+       hit is the surface it must rest on. Sheer-only V-REST would convict any
+       poop-stowed stern anchor as floating, and could never see a missing roof.
+       V-CABLE: one cable per anchor — the 舟車 sentence carries anchor, cable,
+       posts and winch together; a loose anchor convicts. */
+    {
+      const im = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'ironAnchors') im.push(o); });
+      if (im.length && !H.ironAnchors)
+        say(v.id, 'an anchor the record does not carry',
+            `${im.length} iron-anchor meshes drawn with no ironAnchors field — this `
+            + "hull's record is silent, and silence draws nothing");
+      if (H.ironAnchors && !im.length)
+        say(v.id, 'declared but not drawn', 'ironAnchors');
+      if (H.ironAnchors && im.length) {
+        const R = H.ironAnchors;
+        const want = (R.sheetLenM !== 0 ? 1 : 0) + (R.bowerLenM !== 0 ? 2 : 0)
+          + (R.sternAtU != null && R.sternLenM !== 0 ? 2 : 0);
+        const rings = im.filter(o => o.geometry.type === 'TorusGeometry');
+        if (rings.length !== want)
+          say(v.id, "the anchors off the record's count",
+              `${rings.length} head rings drawn — the record's drawn set is ${want}`);
+        const tips = im.filter(o => o.geometry.type === 'ConeGeometry');
+        if (tips.length !== want * 4)
+          say(v.id, 'an iron anchor without its four claws',
+              `${tips.length} claw points drawn for ${want} anchors — the forging text `
+              + 'makes four claws first');
+        const grps = [];
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isGroup && o.name === 'ia-grp' && p && p.key === 'ironAnchors')
+            grps.push(o); });
+        /* full length per anchor — 全長, crown bottom to ring top: crown, shank
+           and head-ring extents projected on the shank's own world axis — geometry
+           through the world matrix (the r186 lesson: a world AABB cannot read the
+           45° stow). Sweep is measured on the SAME pass and the pair {len, sweep}
+           stays together, sorted by length — the first sever run proved that
+           sorting sweeps separately slides the survivors against the wrong record
+           slots and convicts an innocent anchor. */
+        const volOf = (o) => {
+          /* analytic member volume through the world matrix's determinant —
+             exact under any linear map, so a stretched or thinned member
+             weighs as drawn (r190) */
+          o.updateMatrixWorld(true);
+          const e = o.matrixWorld.elements;
+          const det = Math.abs(
+            e[0] * (e[5] * e[10] - e[6] * e[9])
+            - e[4] * (e[1] * e[10] - e[2] * e[9])
+            + e[8] * (e[1] * e[6] - e[2] * e[5]));
+          const pg = o.geometry.parameters;
+          if (o.geometry.type === 'ConeGeometry')
+            return det * Math.PI * pg.radius * pg.radius * pg.height / 3;
+          if (o.geometry.type === 'CylinderGeometry')
+            return det * Math.PI * pg.height / 3
+              * (pg.radiusTop * pg.radiusTop + pg.radiusTop * pg.radiusBottom
+                 + pg.radiusBottom * pg.radiusBottom);
+          if (o.geometry.type === 'SphereGeometry')
+            return det * 4 / 3 * Math.PI * Math.pow(pg.radius, 3);
+          if (o.geometry.type === 'TorusGeometry')
+            return det * 2 * Math.PI * Math.PI * pg.radius * pg.tube * pg.tube;
+          return 0;
+        };
+        const per = grps.map(gr => {
+          let shk = null, rng = null, crn = null;
+          const tps = [], mem = [];
+          gr.traverse(o => { if (o.isMesh) mem.push(o);
+            if (o.name === 'ia-shank') shk = o;
+            else if (o.name === 'ia-ring') rng = o;
+            else if (o.name === 'ia-crown') crn = o;
+            else if (o.name === 'ia-tip') tps.push(o); });
+          if (!shk || !rng || !crn) return { len: 0, sweep: null, kg: null };
+          let lo = Infinity, hi = -Infinity;
+          const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+          for (const o of [shk, rng, crn]) {
+            o.geometry.computeBoundingBox();
+            o.updateMatrixWorld(true);
+            const lb2 = o.geometry.boundingBox;
+            for (const yy of [lb2.min.y, lb2.max.y]) {
+              const t = new THREE.Vector3(0, yy, 0).applyMatrix4(o.matrixWorld).dot(ax);
+              if (t < lo) lo = t; if (t > hi) hi = t;
+            }
+          }
+          /* V-SWEEP (r189): apex of each tip cone through its world matrix;
+             radial distance from the line through the shank along its own axis.
+             Null (no tips) is V-CLAWS's fault, not this rule's. */
+          let mx = null;
+          const p0 = new THREE.Vector3().setFromMatrixPosition(shk.matrixWorld);
+          for (const t of tps) {
+            t.updateMatrixWorld(true);
+            const apex = new THREE.Vector3(0, t.geometry.parameters.height / 2, 0)
+              .applyMatrix4(t.matrixWorld);
+            const d = apex.sub(p0);
+            const rad = d.sub(ax.clone().multiplyScalar(d.dot(ax))).length();
+            if (mx == null || rad > mx) mx = rad;
+          }
+          const kg = 7850 * mem.reduce((s2, o) => s2 + volOf(o), 0);
+          return { len: hi - lo, sweep: mx, kg };
+        }).sort((a, b2) => b2.len - a.len);
+        const wantLn = [];
+        if (R.sheetLenM !== 0)
+          wantLn.push({ ln: R.sheetLenM || 1.86, kg: R.sheetKg || 295 });
+        if (R.bowerLenM !== 0)
+          for (let k2 = 0; k2 < 2; k2++)
+            wantLn.push({ ln: R.bowerLenM || 1.57, kg: R.bowerKg || 177 });
+        if (R.sternAtU != null && R.sternLenM !== 0)
+          for (let k2 = 0; k2 < 2; k2++)
+            wantLn.push({ ln: R.sternLenM || 1.57, kg: R.sternKg || 177 });
+        wantLn.sort((a, b2) => b2.ln - a.ln);
+        for (let i = 0; i < Math.min(per.length, wantLn.length); i++) {
+          if (Math.abs(per[i].len - wantLn[i].ln) > 0.12 * wantLn[i].ln)
+            say(v.id, "an anchor off the record's length",
+                `crown to ring head ${per[i].len.toFixed(2)} m along the shank's own `
+                + `axis — the record's full length is ${wantLn[i].ln}`);
+          if (per[i].sweep != null
+              && Math.abs(per[i].sweep - 0.339 * wantLn[i].ln)
+                 > 0.12 * 0.339 * wantLn[i].ln)
+            say(v.id, "a claw sweep off the find's proportion",
+                `claw reach ${per[i].sweep.toFixed(2)} m from the shank's own axis — `
+                + `the Penglai proportion gives ${(0.339 * wantLn[i].ln).toFixed(2)}`);
+          if (per[i].kg != null
+              && Math.abs(per[i].kg - wantLn[i].kg) > 0.12 * wantLn[i].kg)
+            say(v.id, "an anchor off the record's weight",
+                `${per[i].kg.toFixed(0)} kg of drawn iron integrated from the scene — `
+                + `the record's weight is ${wantLn[i].kg}`);
+        }
+        const rayR = new THREE.Raycaster();
+        for (const gr of grps) {
+          const bb = new THREE.Box3().setFromObject(gr);
+          const ui = Math.max(0, Math.min(1,
+            ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+          /* ask the surface itself: from just over the assembly straight down, the
+             first hit that is not the anchor's own iron or cordage is the surface
+             it rests on — foredeck for the bow set, poop roof for the stern pair */
+          rayR.set(new THREE.Vector3((bb.min.x + bb.max.x) / 2, bb.max.y + 0.5,
+                                     (bb.min.z + bb.max.z) / 2),
+                   new THREE.Vector3(0, -1, 0));
+          const under = rayR.intersectObject(g, true).filter(h => {
+            const p = tagOf(h.object);
+            return !(p && (p.key === 'ironAnchors' || NONBEARING.has(p.key))); });
+          if (!under.length) {
+            say(v.id, 'an anchor resting on nothing',
+                `no surface under the assembly at u ${ui.toFixed(2)}`);
+            continue;
+          }
+          const gap = bb.min.y - under[0].point.y;
+          if (gap > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gap.toFixed(2)} m above the surface under it at u ${ui.toFixed(2)}`);
+          if (gap < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gap).toFixed(2)} m into the surface under it at u ${ui.toFixed(2)}`);
+        }
+        const cables = im.filter(o => o.name === 'ia-cable');
+        if (cables.length !== want)
+          say(v.id, 'an iron anchor with no cable',
+              `${cables.length} cables for ${want} anchors — the 舟車 sentence gives `
+              + 'every anchor its cable');
+      }
+    }
+
+    /* (r186) THE KOREAN WOODEN ANCHOR AND ITS STONE. The warship plate of her own
+       navy's album draws the anchor; the form is the West Sea composite — oak shank,
+       hook-arms both sides, a long grooved stone lashed on to sink the frame, the
+       stone serving as the stock (석제 닻장, the 2023 report's own term). V-WARRANT
+       both ways, as every anchor rule. V-ARMS: the record's arm count of hook
+       points, found STRUCTURALLY as the group's cones; class default TWO since
+       r196 — every stock-anchor the form study draws carries two (그림 16 A–D,
+       그림 17, all six artifact reconstructions), and the dictionary's four-hook
+       gloss belongs to the STOCKLESS form (the study's E; its 그림 18 analogue is
+       a modern grapnel). The pre-r196 drawn four convicts. V-WSPLAY (r196): each
+       arm timber's axis against the shank's, both read in world space so the
+       angle tests the frame and not the stow — the plates splay 0.38 rad (six
+       limb chords, 17–27°, 그림 16 A/C and the institute figure); builder and
+       rule share the constant, never vacuous, and the pre-r196 drawn 0.78 — twice
+       any plate — convicts. V-WARM (r197): each arm timber's drawn run and
+       section against the record's own arm — 진도-641, 190 × 19.6 cm, the one
+       recovered arm published with dimensions (Myeongnyang Ⅰ 2015, p. 467);
+       the pre-r197 drawn defaults (hook limb 1.2, section 0.12) convict on
+       both forms. V-STONE: one stone, its
+       longest dimension read THROUGH the stow transform (sorted world extents — a
+       box axis cannot read a 45° roll) against the record's stoneLenM.
+       V-WSHANK (r195): the shank's drawn length vs the record's shankM, or — no
+       shankM given — vs stoneLenM / 0.51, the institute figure's own stone/shank
+       ratio, the long shank the form study explains by oak's buoyancy (홍광희 2013,
+       해양문화재 6); builder and rule share ST_RATIO, never vacuous, and the
+       pre-r195 drawn default (3.2 m on the 2.0 m stone, ratio 0.625) convicts.
+       V-WSTOCK (r195): no timber member may cross the shank between the stone's
+       top and the head — Hong 2013's survey puts the traditional wooden stock at
+       the ARMS' top height and calls one redundant beside a stone stock; a bar at
+       the cable end is the MODERN station, and the pre-r195 form drew exactly
+       that. Rope is exempt by name (wa-seize is the cable's own whipped bend,
+       wa-band the frapping). CONTESTED, named in the record: the study's footnote
+       8 carries the counter-argument that stock and stone were sometimes fitted
+       together so the stone could not spin on a round shank — not drawn.
+       V-WSTATION (r194, re-anchored r195): the stone's centre along the shank's
+       own axis, as a fraction above the foot — the record's reconstruction lashes
+       the plank-form stone at the shank's MIDDLE (『한국의 닻돌』 2023 method ①;
+       표민대화 닻채 중앙부; the institute's figure reads 0.57); builder and rule
+       share the constant (0.55, ±0.12), never vacuous. The foot is told from the
+       head by the hook points' own centroid (the crossbar that used to tell it is
+       gone with the form). V-REST: the recovered anchor lies on the foredeck,
+       asked of the surface itself (ray straight down, first non-anchor hit — the
+       r185 form); floating and stabbed-through both convict. V-CABLE: the horong
+       turns this anchor's cable — a drawn anchor with nothing led to the machine
+       convicts. */
+    {
+      const wm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'woodAnchor') wm.push(o); });
+      if (wm.length && !H.woodAnchor)
+        say(v.id, 'an anchor the record does not carry',
+            `${wm.length} wooden-anchor meshes drawn with no woodAnchor field — this `
+            + "hull's record is silent, and silence draws nothing");
+      if (H.woodAnchor && !wm.length)
+        say(v.id, 'declared but not drawn', 'woodAnchor');
+      if (H.woodAnchor && wm.length) {
+        const R = H.woodAnchor;
+        const tips = wm.filter(o => o.geometry.type === 'ConeGeometry');
+        const wantArms = R.arms || 2;
+        if (tips.length !== wantArms)
+          say(v.id, 'a wooden anchor off its arm count',
+              `${tips.length} hook points drawn — ` + (R.arms
+                ? `the record hangs ${R.arms}`
+                : "the form study's stock anchor carries 2 (그림 16/17)"));
+        const stones = wm.filter(o => o.name === 'wa-stone');
+        if (stones.length !== 1)
+          say(v.id, 'a wooden anchor without its stone',
+              `${stones.length} anchor-stones drawn — the record lashes one on, and `
+              + 'an oak frame without it will not sink');
+        else if (R.stoneLenM) {
+          /* a world AABB cannot read a box rolled 45° (the r182 span lesson) — read
+             the stone's own geometry extents through the world matrix's scale, which
+             a rigid stow cannot shrink and a scale cheat cannot hide from */
+          const sg2 = stones[0];
+          sg2.geometry.computeBoundingBox();
+          sg2.updateMatrixWorld(true);
+          const lb = sg2.geometry.boundingBox, me = sg2.matrixWorld.elements;
+          const scl = [Math.hypot(me[0], me[1], me[2]),
+                       Math.hypot(me[4], me[5], me[6]),
+                       Math.hypot(me[8], me[9], me[10])];
+          const ext = [(lb.max.x - lb.min.x) * scl[0],
+                       (lb.max.y - lb.min.y) * scl[1],
+                       (lb.max.z - lb.min.z) * scl[2]].sort((a, b2) => b2 - a);
+          if (Math.abs(ext[0] - R.stoneLenM) > 0.10 * R.stoneLenM)
+            say(v.id, "the stone off the record's length",
+                `stone ${ext[0].toFixed(2)} m through the stow transform, `
+                + `record says ${R.stoneLenM}`);
+        }
+        const shk = wm.find(o => o.name === 'wa-shank');
+        /* V-WSHANK (r195): the drawn shank vs the length its own stone implies —
+           the figure's stone/shank ST_RATIO 0.51, shared with the builder; a
+           record shankM outranks the derivation. The pre-r195 default (3.2 m on
+           the 2.0 m stone) is 18% short and convicts. */
+        if (shk) {
+          shk.updateMatrixWorld(true);
+          shk.geometry.computeBoundingBox();
+          const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
+          const sclSY = Math.hypot(meS[4], meS[5], meS[6]);
+          const lenS = (gbS.max.y - gbS.min.y) * sclSY;
+          const wantS = R.shankM || (R.stoneLenM || 2.0) / 0.51;
+          if (Math.abs(lenS - wantS) > 0.12 * wantS)
+            say(v.id, "a shank off its stone's proportion",
+                `shank ${lenS.toFixed(2)} m drawn — the figure's stone/shank 0.51 `
+                + `puts ${wantS.toFixed(2)} m on this stone, the long shank the `
+                + "form study explains by oak's buoyancy");
+        }
+        /* V-WSPLAY (r196): each arm timber's axis against the shank's, both read
+           through their own world matrices — the two axes ride the same stow
+           transforms, so the angle tests the frame itself, not the stow (the
+           r195 lesson: a rule that borrows a movable feature tests the feature,
+           not the claim; an axis pair moves together). The plates splay 0.38 rad
+           — six limb chords, tip to root, 그림 16 (A) 22°/27°, (C) 19°/26°, the
+           institute figure ~19°/17° — and the band ±0.12 carries their 17–27°
+           spread. Shared with the builder's TH, never vacuous; the pre-r196
+           drawn 0.78, twice any plate, convicts. */
+        if (shk) {
+          const WSPLAY = 0.38, WSPLAY_TOL = 0.12;
+          const axSh = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+          let worstA = null;
+          for (const o of wm) {
+            if (o.name !== 'wa-arm') continue;
+            o.updateMatrixWorld(true);
+            const axA = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+            const angA = Math.acos(Math.min(1, Math.abs(axA.dot(axSh))));
+            if (worstA === null
+                || Math.abs(angA - WSPLAY) > Math.abs(worstA - WSPLAY)) worstA = angA;
+          }
+          if (worstA !== null && Math.abs(worstA - WSPLAY) > WSPLAY_TOL)
+            say(v.id, "arms off the plates' splay",
+                `an arm timber at ${worstA.toFixed(2)} rad off the shank — the form `
+                + "study's plates splay 0.38±0.12 (six limb chords, 그림 16/17 "
+                + "and the institute's own figure)");
+        }
+        /* V-WARM (r197): each arm timber against the record's own arm —
+           진도-641, the one recovered arm published with dimensions
+           (『진도 명량대첩로 해역 수중발굴조사 보고서 Ⅰ』 2015, p. 467:
+           190 × 19.6 cm, oak; the catalogue drawing reproduces those numbers
+           against its own 1 m bar, r197). LENGTH: the timber's drawn run vs
+           the record less the tip cone's reach (1.1·armD, as the builder
+           places the point) — skipped when a record armM overrides the hook
+           limb, since the blunt limb is a derivation this rule does not
+           re-derive. SECTION: the widest drawn diameter vs 1.1 × the record
+           section (the builder tapers 0.45/0.55 radii). Both ±12%, constants
+           shared with the builder, never vacuous; the pre-r197 section (0.12
+           drawn against the 0.196 record) convicts, and the pre-r197 hook
+           limb (1.2, pushing the run to 1.99) convicts the length. Worst
+           timber speaks once per form. */
+        {
+          const ARM_LEN = 1.90, ARM_SEC = 0.196;
+          const secW = 1.1 * (R.armSecM || ARM_SEC);
+          const lenW = R.armM ? null : ARM_LEN - secW;
+          let worstL = null, worstD = null;
+          for (const o of wm) {
+            if (o.name !== 'wa-arm') continue;
+            o.updateMatrixWorld(true);
+            o.geometry.computeBoundingBox();
+            const gbA = o.geometry.boundingBox, meA = o.matrixWorld.elements;
+            const sA = [Math.hypot(meA[0], meA[1], meA[2]),
+                        Math.hypot(meA[4], meA[5], meA[6]),
+                        Math.hypot(meA[8], meA[9], meA[10])];
+            const lenA = (gbA.max.y - gbA.min.y) * sA[1];
+            const diaA = Math.max((gbA.max.x - gbA.min.x) * sA[0],
+                                  (gbA.max.z - gbA.min.z) * sA[2]);
+            if (lenW && (worstL === null
+                || Math.abs(lenA - lenW) > Math.abs(worstL - lenW))) worstL = lenA;
+            if (worstD === null
+                || Math.abs(diaA - secW) > Math.abs(worstD - secW)) worstD = diaA;
+          }
+          if (lenW && worstL !== null && Math.abs(worstL - lenW) > 0.12 * lenW)
+            say(v.id, "an arm timber off its record's length",
+                `an arm timber runs ${worstL.toFixed(2)} m — 진도-641, the one `
+                + 'arm published with dimensions, is 1.90 m root to point '
+                + `(Myeongnyang Ⅰ 2015, p. 467), ${lenW.toFixed(2)} m of it the `
+                + 'timber once the point\'s cone takes its reach');
+          if (worstD !== null && Math.abs(worstD - secW) > 0.12 * secW)
+            say(v.id, "an arm timber off its record's section",
+                `an arm timber ${worstD.toFixed(2)} m through — 진도-641's `
+                + `section is 19.6 cm, ${secW.toFixed(2)} m at the builder's `
+                + 'own taper');
+        }
+        /* V-WSTATION (r194, re-anchored r195): the stone's station on the shank,
+           read through the stow transforms — foot told from head by the hook
+           points' own centroid (the tips cluster at the foot end; the crossbar
+           that used to tell it is gone with the form). The pre-r194 form (0.28,
+           at the crown) convicts under this rule.
+           V-WSTOCK (r195): no timber crosses the shank between the stone's top
+           and the head — a bar at the cable end is the modern station, not the
+           tradition's (Hong 2013 p.132); rope is exempt by name. The pre-r195
+           crossbar (frac 0.91) convicts. */
+        if (shk && stones.length === 1 && tips.length) {
+          shk.updateMatrixWorld(true);
+          shk.geometry.computeBoundingBox();
+          const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
+          const sclSY = Math.hypot(meS[4], meS[5], meS[6]);
+          const lenS = (gbS.max.y - gbS.min.y) * sclSY;
+          const axS2 = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+          const cS2 = new THREE.Box3().setFromObject(shk).getCenter(new THREE.Vector3());
+          const cT2 = new THREE.Vector3();
+          for (const t of tips)
+            cT2.add(new THREE.Box3().setFromObject(t).getCenter(new THREE.Vector3()));
+          cT2.multiplyScalar(1 / tips.length);
+          const eA = cS2.clone().addScaledVector(axS2, lenS / 2);
+          const eB = cS2.clone().addScaledVector(axS2, -lenS / 2);
+          const foot = (eA.distanceTo(cT2) < eB.distanceTo(cT2)) ? eA : eB;
+          const head2 = (foot === eA) ? eB : eA;
+          const axUp = head2.clone().sub(foot).normalize();
+          const cSt2 = new THREE.Box3().setFromObject(stones[0])
+            .getCenter(new THREE.Vector3());
+          const fracW = cSt2.clone().sub(foot).dot(axUp) / lenS;
+          if (Math.abs(fracW - 0.55) > 0.12)
+            say(v.id, 'the stone off its shank station',
+                `stone centre at ${fracW.toFixed(2)} of the shank above the foot — `
+                + "the record's reconstruction lashes it at the middle, 0.55±0.12");
+          /* the span the rule owns is the HEAD's — the modern stock station Hong
+             2013 distinguishes from the tradition's. HEAD_SPAN 0.75 sits clear
+             above the stone's own band (0.55+0.12) and the arm tops, so the rule
+             tests its claim, not the stone's drawn station (the first draft
+             hung the span off the stone and the station injection dragged it
+             onto the arms — r195's own miss, recorded). */
+          const ROPE = new Set(['wa-seize', 'wa-band', 'wa-whip', 'wa-cable']);
+          const HEAD_SPAN = 0.75;
+          for (const o of wm) {
+            if (o === shk || o === stones[0] || ROPE.has(o.name)) continue;
+            const fo = new THREE.Box3().setFromObject(o)
+              .getCenter(new THREE.Vector3()).sub(foot).dot(axUp) / lenS;
+            if (fo > HEAD_SPAN)
+              say(v.id, 'a stock at the cable end',
+                  `'${o.name}' crosses the shank at ${fo.toFixed(2)} above the `
+                  + 'foot — the stone is this anchor\'s 닻장, and the traditional '
+                  + "wooden stock sat at the arms' height, never at the cable end "
+                  + '(Hong 2013)');
+          }
+        }
+        const bbW = new THREE.Box3();
+        for (const o of wm) if (o.name !== 'wa-cable')
+          bbW.union(new THREE.Box3().setFromObject(o));
+        const uw = Math.max(0, Math.min(1,
+          ((bbW.min.x + bbW.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const rayW = new THREE.Raycaster();
+        rayW.set(new THREE.Vector3((bbW.min.x + bbW.max.x) / 2, bbW.max.y + 0.5,
+                                   (bbW.min.z + bbW.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underW = rayW.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'woodAnchor' || NONBEARING.has(p.key))); });
+        if (!underW.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${uw.toFixed(2)}`);
+        else {
+          const gapW = bbW.min.y - underW[0].point.y;
+          if (gapW > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapW.toFixed(2)} m above the surface under it at u ${uw.toFixed(2)}`);
+          if (gapW < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapW).toFixed(2)} m into the surface under it at u ${uw.toFixed(2)}`);
+        }
+        if (!wm.some(o => o.name === 'wa-cable'))
+          say(v.id, 'a wooden anchor with no cable',
+              'the horong turns this anchor\'s cable — nothing drawn holds it to the ship');
+      }
+    }
+
+    /* (r187) THE JAPANESE FOUR-CLAW IRON ANCHOR. Her own plate draws the recurved-
+       claw anchor at the anchored barrier's cable-end (Busan 1593); the form is the
+       wasen tradition's 四爪碇 — square-bar shank split into four claws, elongated
+       head ring, free accessory ring the cable bends to. V-WARRANT both ways, as
+       every anchor rule. V-YARMS: four fluke tips, found STRUCTURALLY as cones.
+       V-YRING: exactly TWO ring tori — the head ring and the accessory ring through
+       it; one is a lost cable-bend, three is an invented fitting. V-YLEN: the
+       assembly's longest extent read from each mesh's own geometry through the world
+       matrix scale (the r186 lesson — a world AABB cannot read a 45° roll) against
+       the record's lenM. V-YMASS (r191): the anchor's iron INTEGRATED from the
+       built scene — analytic member volumes through each world matrix's
+       DETERMINANT, with the 4-segment cylinders and cones read as the SQUARE bars
+       they are (area 2r², not πr²) — × 7850 kg/m³ against the record's kg, whose
+       default is the corpus's one weighed anchor cube-scaled (Kozushima, 2.8 m,
+       330–340 kg by forklift; Matsui 2013), 12% band. Arm and ring sections are
+       the corpus's own (表1); the shank is solved from the mass, so this rule
+       closes the loop the solve opens. Missing members are V-YARMS/V-YRING's
+       fault and this rule passes over them. V-YREST: the recovered anchor lies on
+       the foredeck, asked
+       of the surface itself (ray straight down, first non-anchor hit — the r185
+       form); floating and stabbed-through both convict. V-YCABLE: no machine and no
+       belay is attested — the cable is flaked in a coil beside the head, so a drawn
+       anchor with no cable or no coil convicts. */
+    {
+      const ym = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'yotsumeAnchor') ym.push(o); });
+      if (ym.length && !H.yotsumeAnchor)
+        say(v.id, 'an anchor the record does not carry',
+            `${ym.length} yotsume-anchor meshes drawn with no yotsumeAnchor field — `
+            + "this hull's record is silent, and silence draws nothing");
+      if (H.yotsumeAnchor && !ym.length)
+        say(v.id, 'declared but not drawn', 'yotsumeAnchor');
+      if (H.yotsumeAnchor && ym.length) {
+        const R = H.yotsumeAnchor;
+        const tips = ym.filter(o => o.geometry.type === 'ConeGeometry');
+        if (tips.length !== 4)
+          say(v.id, 'a four-claw anchor off its claw count',
+              `${tips.length} fluke tips drawn — the name itself says four`);
+        const tori = ym.filter(o => o.geometry.type === 'TorusGeometry');
+        if (tori.length !== 2)
+          say(v.id, 'a yotsume off its rings',
+              `${tori.length} ring tori drawn — the head ring carries the free ring `
+              + 'the cable bends to: exactly two');
+        /* the length through the stow transform: per-mesh geometry extents through
+           world scale, assembled — a rigid stow cannot shrink it, a scale cheat
+           cannot hide from it */
+        const lenR = R.lenM || 2.0;
+        let lo = Infinity, hi = -Infinity;
+        /* the shank is pieces since r192 (two boss frustums and the upper-bar
+           prism, all named ya-shank) — collect them all */
+        const shks = ym.filter(o => o.name === 'ya-shank');
+        const rng = ym.find(o => o.name === 'ya-ring');
+        if (shks.length && rng) {
+          const ax = new THREE.Vector3(0, 1, 0).transformDirection(shks[0].matrixWorld);
+          for (const o of [...shks, rng]) {
+            o.geometry.computeBoundingBox();
+            o.updateMatrixWorld(true);
+            const lb2 = o.geometry.boundingBox;
+            for (const yy of [lb2.min.y, lb2.max.y]) {
+              const p2 = new THREE.Vector3(0, yy, 0).applyMatrix4(o.matrixWorld);
+              /* project onto the shank's own world axis */
+              const t = p2.dot(ax);
+              if (t < lo) lo = t; if (t > hi) hi = t;
+            }
+          }
+          const drawnLen = hi - lo;
+          if (Math.abs(drawnLen - lenR) > 0.12 * lenR)
+            say(v.id, "a yotsume off the record's length",
+                `crown to ring head ${drawnLen.toFixed(2)} m along the shank's own `
+                + `axis — the record says ${lenR}`);
+          /* V-YMASS (r191): integrate the drawn iron. Every yotsume member is a
+             4-segment cylinder (square bar), a 4-segment cone (blade point) or a
+             torus; volumes analytic, × each world matrix's determinant — exact
+             under any linear map, so a stretched shank or thinned bar weighs as
+             drawn. The record's kg defaults by the weighed-anchor cube-law. */
+          const kgR = R.kg || Math.round(335 * Math.pow(lenR / 2.8, 3));
+          let vSum = 0;
+          for (const o of ym) {
+            if (o.name === 'ya-cable' || o.name === 'ya-coil') continue;
+            o.updateMatrixWorld(true);
+            const e = o.matrixWorld.elements;
+            const det = Math.abs(
+              e[0] * (e[5] * e[10] - e[6] * e[9])
+              - e[4] * (e[1] * e[10] - e[2] * e[9])
+              + e[8] * (e[1] * e[6] - e[2] * e[5]));
+            const pg = o.geometry.parameters;
+            if (o.geometry.type === 'CylinderGeometry') {
+              const f = (pg.radialSegments === 4) ? 2 : Math.PI;
+              vSum += det * f * pg.height / 3
+                * (pg.radiusTop * pg.radiusTop + pg.radiusTop * pg.radiusBottom
+                   + pg.radiusBottom * pg.radiusBottom);
+            } else if (o.geometry.type === 'ConeGeometry') {
+              const f = (pg.radialSegments === 4) ? 2 : Math.PI;
+              vSum += det * f * pg.radius * pg.radius * pg.height / 3;
+            } else if (o.geometry.type === 'TorusGeometry') {
+              vSum += det * 2 * Math.PI * Math.PI * pg.radius * pg.tube * pg.tube;
+            }
+          }
+          const kgD = 7850 * vSum;
+          if (Math.abs(kgD - kgR) > 0.12 * kgR)
+            say(v.id, "a yotsume off the record's weight",
+                `${kgD.toFixed(0)} kg of drawn iron integrated from the scene — `
+                + `the record's weight is ${kgR}`);
+          /* V-YSHANK (r192): the drawn shank's END SECTIONS against the
+             calipered stations — 表3 of the Pacific survey (二宮 2014,
+             東京海洋大学) records the shank at the root boss and the clean
+             upper bar; the class draws those stations and solves only the
+             knee between them. Read each piece's two geometry ends through
+             its world matrix (width = radius·√2 × world z-scale, thickness
+             = × world x-scale), take the section at the globally lowest end
+             (the crown) and highest (the head), compare SORTED against the
+             same named corpus means the builder draws by — the V-YMASS
+             shared-constants precedent, never vacuous. One conviction per
+             anchor, both stations in the message. 12% band. */
+          const YS = { rw: 0.0491, rt: 0.0764, mw: 0.0214, mt: 0.0303 };
+          let loE = null, hiE = null;
+          for (const o of shks) {
+            if (o.geometry.type !== 'CylinderGeometry') continue;
+            const pg2 = o.geometry.parameters;
+            const eW = o.matrixWorld.elements;
+            const sx = Math.hypot(eW[0], eW[1], eW[2]);
+            const sz = Math.hypot(eW[8], eW[9], eW[10]);
+            for (const [sgn, rad] of [[-1, pg2.radiusBottom], [1, pg2.radiusTop]]) {
+              const p3 = new THREE.Vector3(0, sgn * pg2.height / 2, 0)
+                .applyMatrix4(o.matrixWorld);
+              const end = { t: p3.dot(ax),
+                            sec: [rad * Math.SQRT2 * sz, rad * Math.SQRT2 * sx] };
+              if (!loE || end.t < loE.t) loE = end;
+              if (!hiE || end.t > hiE.t) hiE = end;
+            }
+          }
+          if (loE && hiE) {
+            const badS = [];
+            const chkS = (sec, fw, ft, where) => {
+              const a = Math.min(sec[0], sec[1]), b = Math.max(sec[0], sec[1]);
+              const ra = fw * lenR, rb = ft * lenR;
+              if (Math.abs(a - ra) > 0.12 * ra || Math.abs(b - rb) > 0.12 * rb)
+                badS.push(`${where} ${(a * 100).toFixed(1)}×${(b * 100).toFixed(1)} cm `
+                  + `drawn against the station's ${(ra * 100).toFixed(1)}×${(rb * 100).toFixed(1)}`);
+            };
+            chkS(loE.sec, YS.rw, YS.rt, 'crown');
+            chkS(hiE.sec, YS.mw, YS.mt, 'head');
+            if (badS.length)
+              say(v.id, 'a shank off its calipered stations', badS.join('; '));
+          }
+        }
+        const bbY = new THREE.Box3();
+        for (const o of ym) if (o.name !== 'ya-cable' && o.name !== 'ya-coil')
+          bbY.union(new THREE.Box3().setFromObject(o));
+        const uy = Math.max(0, Math.min(1,
+          ((bbY.min.x + bbY.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const rayY = new THREE.Raycaster();
+        rayY.set(new THREE.Vector3((bbY.min.x + bbY.max.x) / 2, bbY.max.y + 0.5,
+                                   (bbY.min.z + bbY.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underY = rayY.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'yotsumeAnchor' || NONBEARING.has(p.key))); });
+        if (!underY.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${uy.toFixed(2)}`);
+        else {
+          const gapY = bbY.min.y - underY[0].point.y;
+          if (gapY > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapY.toFixed(2)} m above the surface under it at u ${uy.toFixed(2)}`);
+          if (gapY < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapY).toFixed(2)} m into the surface under it at u ${uy.toFixed(2)}`);
+        }
+        if (!ym.some(o => o.name === 'ya-cable'))
+          say(v.id, 'a yotsume with no cable',
+              'nothing drawn holds this anchor to the ship');
+        else if (!ym.some(o => o.name === 'ya-coil'))
+          say(v.id, 'a cable with no coil',
+              'no machine and no belay is attested — the cable is flaked beside the '
+              + 'head, and a cable ending in air is a part attached to nothing');
+      }
+    }
+
+    /* declared screws must be drawn, and a screw lives under water */
+    if (H.screws) {
+      if (!part.screw) say(v.id, 'declared but not drawn', 'screws');
+      else if (part.screw.y[1] > 0)
+        say(v.id, 'screws out of the water', `top at ${part.screw.y[1].toFixed(1)} m`);
+    }
+
+    /* (r101) A BUILD KEY NAMES A TRADITION THE TABLE KNOWS. Endurance shipped with
+       build: 'wood' — no such entry — and the undefined lookup threw inside swAdoptShip,
+       killing __FRAME_READY for the whole Shipwright deep-link. The view now degrades to
+       the default tradition, so only this rule reports the bad field. TRADITION is read
+       from the page's own global scope so this list cannot drift from the real table. */
+    if (H.build && typeof TRADITION !== 'undefined' && !TRADITION[H.build])
+      say(v.id, 'build tradition unknown',
+          `build: '${H.build}' names no entry in the tradition table`);
+
+    /* ── THE SCHOONER'S RIG IS THE RECORD'S RIG (round 42, Wyoming). Four rules from one
+       survey. (1) THE SPANKER IS NOT THE SHORTEST SPAR ON THE SHIP: the aftermost boom's
+       obstruction fallback was a station just abaft midships, so gapAft went negative and
+       the boom collapsed to its floor — Wyoming's spanker drew 6.7 m against 12.9 for her
+       sisters, on the one mast whose boom the photographs show as the LONGEST, standing out
+       over the counter. Skipped when funnels are declared: a stack abaft the aftermost mast
+       legitimately clamps that boom. */
+    const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff');
+    if (!H.funnels && gaffMasts.length >= 2 &&
+        gaffMasts.length === (H.masts || []).length) {
+      const booms = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Boom') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: Math.hypot(bbx.max.x - bbx.min.x, bbx.max.y - bbx.min.y) });   // r275: along the cocked line
+      } });
+      if (booms.length >= 2) {
+        booms.sort((a, b) => a.cx - b.cx);
+        const aft = booms[booms.length - 1];
+        const longestFwd = Math.max(...booms.slice(0, -1).map(b => b.len));
+        if (aft.len < longestFwd * 0.9)
+          say(v.id, 'spanker boom collapsed',
+              `aftermost boom ${aft.len.toFixed(1)} m against ${longestFwd.toFixed(1)} m ` +
+              'forward of it — the one boom with nothing abaft it to hit');
+      }
+    }
+
+    /* (r101) THE OPEN AFTERMOST BOOM DRAWS ITS SAIL PLAN, NOT THE HULL'S LEFTOVERS.
+       Twice now a spanker boom was clamped by something that is not there: a virtual stern
+       station discounted for swing clearance (the 74's driver at 7.6 m against Steel's
+       13–17), and a phantom funnel slot no funnel occupies (the steamer's at 5.4 m). The
+       rule pins the agreed entitlement — the 0.62 share of the lower mast, bounded by
+       gapAft * 1.6, the calibrated taffrail-overhang limit — and fires BOTH ways, because
+       an unclamped boom running to 0.62 of a pole mast is the Endurance fault in reverse.
+       Obstruction is decided by GEOMETRY: a drawn funnel mesh abaft the mast station makes
+       the clamp legitimate and the rule stands down, whatever the spec declares. */
+    (() => {
+      const masts = H.masts || [];
+      const mk = masts[masts.length - 1];
+      if (!mk || !(mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker))) return;
+      const L = H.lwl, mastX = (mk.at - 0.5) * L;
+      let funnelAbaft = false;
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.key === 'funnel') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if ((bbx.min.x + bbx.max.x) / 2 > mastX) funnelAbaft = true;
+      } });
+      if (funnelAbaft) return;
+      const lower = lowerOf(mk);
+      const want = Math.max(lower * 0.16,
+                            Math.min(lower * 0.62, (1.04 - mk.at) * L * 1.6));
+      const booms = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Boom') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: Math.hypot(bbx.max.x - bbx.min.x, bbx.max.y - bbx.min.y) });   // r275: along the cocked line
+      } });
+      if (!booms.length) return;
+      booms.sort((a, b) => a.cx - b.cx);
+      const aft = booms[booms.length - 1];
+      if (aft.cx < mastX - L * 0.02) return;   // no boom on the aftermost mast itself
+      if (aft.len < want * 0.93 || aft.len > want * 1.15)
+        say(v.id, 'open boom off its sail plan',
+            `aftermost boom ${aft.len.toFixed(1)} m against an entitlement of ` +
+            `${want.toFixed(1)} m with nothing drawn abaft the mast`);
+    })();
+
+    /* (2) DECLARED HEADSAILS ARE DRAWN, FORWARD OF THE FOREMAST. `headsails: n` is the
+       record's suit on the bowsprit stays; a jib that silently stops being built leaves a
+       bare spar and a schooner with no front to her silhouette, and 'declared but not
+       drawn' cannot see it because SOME sail is drawn. Every sail wholly forward of the
+       foremast station is a headsail; the count must match the record.
+       ⚠ THE SEVENTH STRIKE OF THE STATION-GATE CLASS (round 51, clipper): her foremast
+       rakes FORWARD (−1°), so the fore royal — a small square high on the raked spar —
+       stood wholly forward of the bare station and was counted into the jib suit. Same
+       fix as rule 6's fifth strike: a headsail is a TRI cloth, square canvas cannot
+       masquerade, and the gate scales with the hull. */
+    if (H.headsails && (H.masts || []).length) {
+      const fmx = (H.masts[0].at - 0.5) * H.lwl;
+      let jibs = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'tri' &&
+                            o.userData.part && o.userData.part.key === 'sail') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.max.x < fmx + H.lwl * 0.03) jibs++;
+      } });
+      if (jibs !== H.headsails)
+        say(v.id, 'headsail suit miscounted',
+            `${H.headsails} in the record, ${jibs} drawn forward of the foremast`);
+    }
+
+    /* (3) A DECLARED TOPSAIL FLIES ABOVE ITS OWN GAFF. `topsail` on a gaff mast is the
+       record saying the topmast carries canvas — Wyoming's 22 sails include six of these,
+       while Great Eastern's reference model shows bare topmasts and declares none. The
+       lower gaff sail's foot starts at a tenth of the mast, so canvas whose BOTTOM stands
+       above three quarters of the lower mast, at that mast's own station, can only be the
+       topsail. */
+    for (const mk of (H.masts || [])) {
+      if (mk.rig !== 'gaff' || !mk.topsail) continue;
+      const mx = (mk.at - 0.5) * H.lwl;
+      const HSt = SHIPS_HULL.hullSurface(H);
+      const lower = lowerOf(mk);
+      const floorY = HSt.deck(mk.at) + lower * 0.75;   // the heel stands on the deck (r215/r221)
+      /* ⚠ THE EIGHTH STRIKE OF THE STATION-GATE CLASS (round 252, steamer): the gate was
+         ±1 m about the DECK station, and a gaff mast raked 3° stands 1.1 m abaft that at the
+         topsail's foot once the luff rides the mast (r252). The station aloft is the mast's
+         axis at the cloth's own height: deck station + sin(rake)·(height − deck). */
+      const rakeR = (mk.rake || 0) * Math.PI / 180, deckY = HSt.deck(mk.at);
+      let found = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        const ax = mx + Math.sin(rakeR) * (bbx.min.y - deckY);
+        if (bbx.min.y > floorY && bbx.min.x < ax + 1.0 && bbx.max.x > ax - 1.0) found++;
+      } });
+      if (!found)
+        say(v.id, 'topsail not set',
+            `mast at u=${mk.at} declares a topsail and no canvas stands above ` +
+            `${floorY.toFixed(0)} m at its station`);
+    }
+
+    /* R-SAIL-AREA (round 234): a single-yard square mast whose record attests its sail
+       (`sail.areaM2`, plus `bonnetsM2` — the loft draws full sail) must set that canvas within
+       10%. The width is read off the built YARD (its length along its own axis, the plan
+       extent of a spar braced round by TRIM) less the 4% the cloth leaves at the arms; the
+       depth off the sail mesh's height. The sail's own plan extent is not used: a bellied
+       cloth's bounding box overstates the width by a fifth. */
+    for (const mk of (H.masts || [])) {
+      if (!(mk.sail && mk.sail.areaM2) || mk.rig !== 'square' || mk.only !== 1) continue;
+      const want = mk.sail.areaM2 + (mk.sail.bonnetsM2 || []).reduce((a, b) => a + b, 0);
+      const mx = (mk.at - 0.5) * H.lwl;
+      let yardLen = 0, sailH = 0;
+      g.traverse(o => { if (!o.isMesh || !o.userData.part) return;
+        const k = o.userData.part.key;
+        if (k !== 'yard' && k !== 'sail') return;
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (Math.abs((bbx.min.x + bbx.max.x) / 2 - mx) > H.lwl * 0.12) return;
+        if (k === 'yard') yardLen = Math.max(yardLen, Math.hypot(bbx.max.x - bbx.min.x, bbx.max.z - bbx.min.z));
+        else sailH = Math.max(sailH, bbx.max.y - bbx.min.y);
+      });
+      if (!yardLen || !sailH)
+        say(v.id, 'attested sail not set', `yard ${yardLen.toFixed(1)} m, sail depth ${sailH.toFixed(1)} m at u=${mk.at}`);
+      else {
+        const built = yardLen * 0.96 * sailH;
+        if (Math.abs(built - want) > want * 0.10)
+          say(v.id, 'a sail off its attested area',
+              `${(yardLen * 0.96).toFixed(1)} x ${sailH.toFixed(1)} m = ${built.toFixed(0)} m² built ` +
+              `against ${want} m² on the record (${mk.sail.areaM2} + bonnets) at u=${mk.at}`);
+      }
+    }
+
+    /* R-TOP-BASKET (round 235): a mast whose record attests a basket top (`top.form
+       'basket'` — the cog's Mastkorb: the Elbing seal's battlemented masthead, the Ubena's
+       staved bucket) must carry ONE group keyed 'top' and named 'Basket top' at its station,
+       as wide across as the record's rim within 10% (the battlements lean out with the wall
+       and add a few centimetres), with its floor standing the record's height and pole under
+       the truck (+-0.3 m; the truck is the top of the mast-tagged meshes at the station, as
+       the r155 flag-button rule reads it). A record without the field must carry no basket —
+       the class platform stays what it was. The cross at the truck (`top.cross`) is read the
+       same two ways: a group keyed 'cross' whose foot stands on the truck, and none where
+       the record attests none. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.rig !== 'square') return;
+      const spec = mk.top && mk.top.form === 'basket' ? mk.top : null;
+      const mx = (mk.at - 0.5) * H.lwl, win = H.lwl * 0.12;
+      const near = b => Math.abs((b.min.x + b.max.x) / 2 - mx) < win;
+      const baskets = [], crosses = [];
+      let truck = -1e9;
+      g.traverse(o => {
+        const p = o.userData && o.userData.part;
+        if (!p) return;
+        if (!o.isMesh && p.key === 'top' && p.name === 'Basket top') {
+          const b = new THREE.Box3().setFromObject(o); if (near(b)) baskets.push(b);
+        } else if (!o.isMesh && p.key === 'cross') {
+          const b = new THREE.Box3().setFromObject(o); if (near(b)) crosses.push(b);
+        } else if (o.isMesh && p.key === 'mast') {
+          const b = new THREE.Box3().setFromObject(o); if (near(b)) truck = Math.max(truck, b.max.y);
+        }
+      });
+      if (spec) {
+        if (!baskets.length)
+          say(v.id, 'declared but not drawn', `the basket top on mast ${i} (top.form 'basket' at u=${mk.at})`);
+        else {
+          const b = baskets[0], w = b.max.z - b.min.z;
+          if (Math.abs(w - spec.rimDiaM) > spec.rimDiaM * 0.10)
+            say(v.id, 'a basket top off its attested breadth',
+                `${w.toFixed(2)} m across against ${spec.rimDiaM} m on the record, mast ${i}`);
+          const pole = spec.poleAboveRimM !== undefined ? spec.poleAboveRimM : 0.55;
+          const wantFloor = truck - pole - spec.heightM;
+          if (truck > -1e8 && Math.abs(b.min.y - wantFloor) > 0.3)
+            say(v.id, 'a basket top adrift on the mast',
+                `floor at ${b.min.y.toFixed(2)} m against ${wantFloor.toFixed(2)} ` +
+                `(truck ${truck.toFixed(2)} less ${pole} m of pole less ${spec.heightM} m of basket), mast ${i}`);
+          if (baskets.length > 1)
+            say(v.id, 'two baskets on one masthead', `${baskets.length} basket tops at u=${mk.at}`);
+        }
+        if (spec.cross && !crosses.length)
+          say(v.id, 'declared but not drawn', `the cross at the truck of mast ${i}`);
+        if (spec.cross && crosses.length && truck > -1e8 && Math.abs(crosses[0].min.y - truck) > 0.3)
+          say(v.id, 'a cross adrift of the truck',
+              `cross foot at ${crosses[0].min.y.toFixed(2)} m, truck at ${truck.toFixed(2)} m, mast ${i}`);
+      } else if (baskets.length)
+        say(v.id, 'a basket top nobody attested',
+            `${baskets.length} basket top(s) at u=${mk.at} on a record without top.form 'basket'`);
+      if (!(spec && spec.cross) && crosses.length)
+        say(v.id, 'a cross nobody attested',
+            `${crosses.length} cross group(s) at u=${mk.at} on a record without top.cross`);
+    });
+
+    /* R-SHROUD-FIXING (round 236): a mast whose record names where its shrouds set up
+       (`shroudFixing.stationsFromHeelM` — the Bremen cog's channel wale abaft the mast,
+       Lahn Blatt 1 and Tanner 2021 App. H) must carry TWO groups keyed 'channelWale', one a
+       side, each with as many 'channel-wale-stanchion' meshes as the record has stations,
+       every stanchion within 0.3 m of its station forward of the built hull's own heel (the
+       Sternpost part's lowest-aftmost vertex, as D-BEAM-HEEL reads it); and the shrouds'
+       lower ends must lie within the stanchions' span, not at the mast — the class channel
+       there is what this rule exists to convict. A record without the field must carry no
+       channel wale. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.rig !== 'square') return;
+      const F = mk.shroudFixing && mk.shroudFixing.stationsFromHeelM ? mk.shroudFixing : null;
+      const wales = [];
+      g.traverse(o => { const p = o.userData && o.userData.part;
+                        if (p && !o.isMesh && p.key === 'channelWale') wales.push(o); });
+      if (!F) {
+        if (wales.length) say(v.id, 'a channel wale nobody attested',
+                              `${wales.length} channel-wale group(s) on a record without mast.shroudFixing`);
+        return;
+      }
+      if (wales.length !== 2) {
+        say(v.id, 'declared but not drawn', `the channel wale the shrouds of mast ${i} set up in (${wales.length} of 2 sides drawn)`);
+        return;
+      }
+      const wv = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let k = 0; k < a.count; k++) { vv.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      let post = null;
+      g.traverse(o => { if (!post && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) post = o; });
+      if (!post) { say(v.id, 'a channel wale with no heel to measure from', 'no Sternpost mesh'); return; }
+      const pv = wv(post); let yMin = 1e9, heelX = -1e9;
+      for (const q of pv) yMin = Math.min(yMin, q[1]);
+      for (const q of pv) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+      heelX -= ((v.hull.sternpost && v.hull.sternpost.form === 'straight' && v.hull.sternpost.footAbaftStationDatumM) || 0);   // the datum, not the foot (round 237)
+      const want = F.stationsFromHeelM.slice().sort((a, b) => a - b);
+      for (const w of wales) {
+        const st = []; w.traverse(o => { if (o.isMesh && o.name === 'channel-wale-stanchion') st.push(new THREE.Box3().setFromObject(o)); });
+        if (st.length !== want.length)
+          say(v.id, 'shroud stanchions miscounted', `${st.length} drawn on the ${w.userData.part.name.toLowerCase()}, the plate draws ${want.length}`);
+        const got = st.map(b => heelX - (b.min.x + b.max.x) / 2).sort((a, b) => a - b);
+        for (let k = 0; k < Math.min(got.length, want.length); k++)
+          if (Math.abs(got[k] - want[k]) > 0.3)
+            say(v.id, "a shroud stanchion off the plate's station",
+                `${got[k].toFixed(2)} m forward of the heel against ${want[k]} on the ${w.userData.part.name.toLowerCase()}, mast ${i}`);
+      }
+      const xLo = heelX - Math.max(...want) - 0.4, xHi = heelX - Math.min(...want) + 0.4;
+      let feet = 0, astray = 0, firstX = 0;
+      g.traverse(o => {
+        const p = o.userData && o.userData.part;
+        if (!(o.isMesh && p && p.key === 'shroud' && p.name === 'Shrouds')) return;
+        const pts = wv(o); let lo = 1e9; for (const q of pts) lo = Math.min(lo, q[1]);
+        for (const q of pts) if (q[1] < lo + 0.5) { feet++; if (q[0] < xLo || q[0] > xHi) { astray++; if (astray === 1) firstX = q[0]; } }
+      });
+      if (feet && astray)
+        say(v.id, 'shrouds set up off their attested station',
+            `${astray} of ${feet} lower-end vertices outside the channel wale's span x ${xLo.toFixed(2)}–${xHi.toFixed(2)} (first at x ${firstX.toFixed(2)}; the mast stands at x ${((mk.at - 0.5) * H.lwl).toFixed(2)}), mast ${i}`);
+    });
+
+    /* (4) DECLARED DECKHOUSES STAND ON THE DECK, INSIDE THE RAIL — and the wheel likewise.
+       The class of every fitting rule since round 36: right count, on its support, inside
+       the ship. A house is walls sunk into a SHEERED deck, so its bottom sits below the
+       sheer and its roof well above it. */
+    if (H.deckhouses && H.deckhouses.length) {
+      const HSd = SHIPS_HULL.hullSurface(H);
+      const houses = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part &&
+                            o.userData.part.key === 'deckhouse')
+                          houses.push(new THREE.Box3().setFromObject(o)); });
+      if (houses.length !== H.deckhouses.length)
+        say(v.id, 'deckhouses miscounted',
+            `${H.deckhouses.length} in the record, ${houses.length} drawn`);
+      for (const hbx of houses) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hbx.min.x + hbx.max.x) / 2) / H.lwl));
+        const d = HSd.deck(uu);                    // the DECK the builder stands it on (r222)
+        if (hbx.min.y > d + 0.3 || hbx.max.y < d + 1.0)
+          say(v.id, 'deckhouse off the deck',
+              `house spans ${hbx.min.y.toFixed(1)}–${hbx.max.y.toFixed(1)} m, deck there ${d.toFixed(1)} m`);
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSd, uu, 1.0)[2]);
+        if (Math.max(-hbx.min.z, hbx.max.z) > half + 0.4)
+          say(v.id, 'deckhouse over the side',
+              `reaches ${Math.max(-hbx.min.z, hbx.max.z).toFixed(1)} m off centre, hull side ${half.toFixed(1)} m`);
+      }
+    }
+    if (H.helmAt !== undefined) {
+      if (!part.helm) say(v.id, 'declared but not drawn', 'the wheel');
+      else {
+        const HSw = SHIPS_HULL.hullSurface(H);
+        if (Math.abs(part.helm.y[0] - HSw.deck(H.helmAt)) > 1.2)   // the deck, r222
+          say(v.id, 'wheel stands on nothing',
+              `base at ${part.helm.y[0].toFixed(1)} m, deck there ${HSw.deck(H.helmAt).toFixed(1)} m`);
+      }
+    }
+
+    /* ── A-HEAD-ATTESTED (round 271, Endurance): THE HEAD IS THE RECORD'S, AND THE RECORD SAYS
+       WHERE IT GOT IT. `head` draws a knee of the head standing before the stem, one or two
+       headrails a side and three turns of rope gammoning — the beakhead of the sixteenth to
+       nineteenth centuries — and six records carried it, one of them a 1912 polar barquentine
+       whose builder's section and whose plates show a plain raked stem with the bowsprit
+       rising from the stemhead. Nothing in the geometry can tell a head that belongs from
+       one that does not; only the record can, so the rule is the r108 pattern and convicts
+       SILENCE: a head with no headProvenance. With it, the two builder-record mismatches
+       the meshes can see — a head drawn where the record has none, a head declared and not
+       drawn. */
+    if (H.head) {
+      if (!H.headProvenance)
+        say(v.id, 'a head with no provenance',
+            `hull.head ${H.head} declared, hull.headProvenance absent — a knee, ${H.head >= 2 ? 'two rails' : 'a rail'} a side and gammoning drawn on no stated ground`);
+      if (!part.head) say(v.id, 'declared but not drawn', 'the head');
+    } else if (part.head) {
+      say(v.id, 'a head the record denies',
+          `${part.head.n} head mesh(es) drawn, x ${part.head.x[0].toFixed(1)}..${part.head.x[1].toFixed(1)} m; hull.head ${H.head === undefined ? 'absent' : H.head}`);
+    }
+
+    /* ── A-AFT-PLATFORM (round 273, Endurance): THE PLATFORM AT THE STERN IS THE RECORD'S, STANDS
+       WHERE THE RECORD PUTS IT, AND THE BOOM CLEARS IT. Hurley's a090007 shows a lattice-framed
+       platform with a hooded box standing over the cap at Endurance's stern; `aftPlatform`
+       declares it (station, floor height over the deck, frame width, the box). The r108 pattern
+       first: a platform with no provenance is convicted for the silence. Then what the meshes
+       can see — a platform declared and not drawn, a platform drawn on a record without one,
+       a platform off its station, a floor off the record's height over the deck at that
+       station, and a boom running through it (the rig lifts the aftermost boom over the box
+       from the same record; a rig that did not read it would draw the boom through the box,
+       and no other rule looks). The legs' contact with the DECK is the fittings rule's, which
+       now reads the platform by name. */
+    {
+      const AP = H.aftPlatform;
+      const pm = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.name === 'Compass platform') pm.push(o); });
+      if (AP && AP.u != null) {
+        if (!AP.provenance)
+          say(v.id, 'a platform with no provenance',
+              `hull.aftPlatform at u ${AP.u} declared, aftPlatform.provenance absent — a lattice tower and a box drawn aft on no stated ground`);
+        if (!pm.length) say(v.id, 'declared but not drawn', 'the aft platform');
+        else {
+          const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+          const wv = o => { const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+            o.updateMatrixWorld(true);
+            for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+            return out; };
+          const all = [].concat(...pm.map(wv));
+          let y0 = 1e9, y1 = -1e9, xs = 0, x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+          for (const q of all) { y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); xs += q[0]; x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); z0 = Math.min(z0, q[2]); z1 = Math.max(z1, q[2]); }
+          xs /= all.length;
+          const xRec = (AP.u - 0.5) * H.lwl;
+          if (Math.abs(xs - xRec) > 1.5)
+            say(v.id, 'a platform off its station',
+                `Compass platform centred at x ${xs.toFixed(1)} m; the record's u ${AP.u} is x ${xRec.toFixed(1)} (${Math.abs(xs - xRec).toFixed(1)} m off, 1.5 allowed)`);
+          /* the floor's top is the box's bottom: the highest mesh is the box, boxHM tall */
+          const boxH = AP.boxHM || 1.0, floorTop = y1 - boxH;
+          const dm = []; g.traverse(o => { const p = tagOf(o);
+            if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) dm.push(o); });
+          const dv = [].concat(...dm.map(wv));
+          let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - xs);
+            if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); }
+          if (e < 1e8 && Math.abs(floorTop - (e + (AP.floorM || 3.0))) > 0.3)
+            say(v.id, 'a platform floor off the record\'s height',
+                `floor top ${floorTop.toFixed(2)} m, ${(floorTop - e).toFixed(2)} over the deck's edge ${e.toFixed(2)} at x ${xs.toFixed(1)}; the record says ${AP.floorM} (0.3 allowed)`);
+          /* the boom */
+          const pb = new THREE.Box3(new THREE.Vector3(x0, y0, z0), new THREE.Vector3(x1, y1, z1));
+          g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && p.name === 'Boom')) return;
+            if (o.userData.gaffBoom) return;   // r275: a cocked boom's box always overlaps; A-BOOM-COCK reads it along its line
+            const w = wv(o); if (!w.length) return;
+            const bb = new THREE.Box3(); for (const q of w) bb.expandByPoint(new THREE.Vector3(q[0], q[1], q[2]));
+            if (bb.intersectsBox(pb))
+              say(v.id, 'a boom through the platform',
+                  `a Boom spans y ${bb.min.y.toFixed(2)}..${bb.max.y.toFixed(2)} over x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)}; the Compass platform stands y ${y0.toFixed(2)}..${y1.toFixed(2)} at x ${x0.toFixed(1)}..${x1.toFixed(1)}`); });
+        }
+      } else if (pm.length) {
+        say(v.id, 'a platform the record does not declare', `${pm.length} Compass platform mesh(es) drawn; hull.aftPlatform absent`);
+      }
+    }
+
+    /* ── A-BOOM-COCK (round 275, 0y⁶³): THE GAFF BOOM RISES AFT, AND SOMETHING HOLDS IT UP.
+       Seventeen booms on seven hulls lay LEVEL from their jaws, every one, with nothing drawn
+       at the outer end; r273 cleared Endurance's compass platform by lifting the whole level
+       spar, jaws and all, 0.9 m over the plate's gooseneck. A gaff boom hangs from its jaws
+       and from a topping lift at its outer end, and rises aft. Read from the BUILT scene, set
+       and furled: every 'Boom' mesh carrying userData.gaffBoom gives its axis by principal
+       component; its angle over the aft-horizontal must be at least 1° (a level boom is the
+       class fault) and within 0.5° of what the builder says it drew (cockDeg — a builder that
+       writes one angle and draws another); a record that states the foot (boomFootM) must
+       carry its provenance, and the built jaws must stand at that height over the deck read
+       off the deck meshes at the mast (0.5 m: the plate's ±0.4 and a deck-edge read); a
+       'Topping lift' mesh must end within 0.25 m of the boom's outer end and its head within
+       0.3 m of where the builder says the lift is led; and where the builder says the boom
+       passes over the platform, the boom's line at the box's near face must stand over the
+       platform's highest mesh by at least a hand's breadth less the spar's radius. Every gaff
+       or spanker mast must have such a boom. */
+    const boomRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const axisOf = P => {
+        const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of P) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+          xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        const d = new THREE.Vector3(1, 0, 0);
+        for (let it = 0; it < 60; it++)
+          d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.x < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9, rMax = 0;
+        for (const q of P) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t);
+          rMax = Math.max(rMax, Math.abs(q.z - c.z)); }
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, r: rMax };
+      };
+      const booms = [], lifts = [], deckM = [], platM = [];
+      G.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.name === 'Boom' && o.userData.gaffBoom) booms.push({ o, rec: o.userData.gaffBoom });
+        if (p.key === 'toppingLift') lifts.push(o);
+        if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o);
+        if (p.name === 'Compass platform') platM.push(o); });
+      const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker));
+      /* r306: a brailed sail is loose-footed and has no boom (A-BRAILED convicts a boom on one) */
+      const boomed = gaffMasts.filter(mk => mk.gaffStow !== 'brailed');
+      if (boomed.length && booms.length < boomed.length)
+        say(v.id, 'a gaff mast with no boom', `${boomed.length} gaff or spanker masts with a boomed sail in the record, ${booms.length} Boom mesh(es) carrying a gaffBoom read${SB}`);
+      if (!booms.length) return;
+      const liftPts = lifts.map(pts);
+      let platTop = null;
+      if (platM.length) { platTop = -1e9; for (const m of platM) for (const q of pts(m)) platTop = Math.max(platTop, q.y); }
+      let deckPts = null;
+      const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+        let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+          if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+      for (const { o, rec } of booms) {
+        const P = pts(o), ax = axisOf(P);
+        let lo = ax.foot, hi = ax.head; if (lo.x > hi.x) [lo, hi] = [hi, lo];
+        const built = Math.atan2(hi.y - lo.y, hi.x - lo.x) * 180 / Math.PI;
+        const at = `the boom on the mast at station ${rec.at} (jaws x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}; end x ${hi.x.toFixed(2)}, y ${hi.y.toFixed(2)})`;
+        if (built < 1)
+          say(v.id, 'a boom lying level', `${at} rises ${built.toFixed(2)}° aft${SB}; a gaff boom hangs from its topping lift and rises aft (the class minimum is ${rec.cockMinDeg}°)`);
+        if (Math.abs(built - rec.cockDeg) > 0.5)
+          say(v.id, 'a boom off its own stated cock', `${at} is built at ${built.toFixed(2)}° where its builder says ${rec.cockDeg}° (${rec.cockFrom})${SB}`);
+        /* the record's foot */
+        let mk = null, bd = 1e9;
+        for (const m of gaffMasts) { const dd = Math.abs(m.at - rec.at); if (dd < bd) { bd = dd; mk = m; } }
+        if (mk && mk.boomFootM != null) {
+          if (!mk.boomFootProvenance && STATE === 'set')
+            say(v.id, 'a boom foot with no provenance', `masts[${(H.masts || []).indexOf(mk)}].boomFootM ${mk.boomFootM} declared, boomFootProvenance absent`);
+          const e = deckAtX(lo.x);
+          if (e < 1e8 && Math.abs((lo.y - e) - mk.boomFootM) > 0.5)
+            say(v.id, "a boom foot off the record's height", `${at}: jaws ${(lo.y - e).toFixed(2)} m over the deck's edge at x ${lo.x.toFixed(1)} (${e.toFixed(2)}); the record says ${mk.boomFootM} (0.5 allowed)${SB}`);
+        }
+        /* the lift */
+        let near = -1, dmin = 1e9;
+        liftPts.forEach((Q, i) => { for (const q of Q) { const d = Math.hypot(q.x - hi.x, q.y - hi.y, q.z - hi.z); if (d < dmin) { dmin = d; near = i; } } });
+        if (near < 0 || dmin > 0.25)
+          say(v.id, 'a boom held up by nothing', `${at}: no Topping lift ends within 0.25 m of the boom's outer end (nearest ${near < 0 ? 'none drawn' : dmin.toFixed(2) + ' m'})${SB}`);
+        else {
+          let top = liftPts[near][0]; for (const q of liftPts[near]) if (q.y > top.y) top = q;
+          const dh = Math.hypot(top.x - rec.liftHead[0], top.y - rec.liftHead[1]);
+          if (dh > 0.3) say(v.id, 'a topping lift led to the wrong place', `${at}: the lift's head at (${top.x.toFixed(2)}, ${top.y.toFixed(2)}) is ${dh.toFixed(2)} m from the lower masthead the builder names (${rec.liftHead[0]}, ${rec.liftHead[1]})${SB}`);
+        }
+        /* the platform, along the boom's own line */
+        if (H.aftPlatform && H.aftPlatform.u != null && platTop != null) {
+          const AP = H.aftPlatform, xN = (AP.u - 0.5) * H.lwl - (AP.boxWM || 0.8) / 2;
+          const xF = (AP.u - 0.5) * H.lwl + (AP.wM || 1.5) / 2;
+          const x0 = Math.max(xN, lo.x);                     // where the boom first stands over the platform
+          const yAt = lo.y + (hi.y - lo.y) * (x0 - lo.x) / Math.max(1e-6, hi.x - lo.x);
+          const under = yAt - ax.r;
+          if (hi.x >= xN && lo.x <= xF && under < platTop + 0.10)
+            say(v.id, 'a boom too low over the platform', `${at}: its underside stands ${(under - platTop).toFixed(2)} m over the platform's top (${platTop.toFixed(2)}) at the box's near face x ${xN.toFixed(2)}; a hand's breadth (0.10) is the least${SB}`);
+        }
+      }
+    };
+    boomRead(g, 'set');
+
+    /* ── A-GAFF-READ, A-BRAILED, A-CLOTH-FUNNEL (round 306, 0y¹³²) ──────────────────────────────
+       Endurance's main gaff was 3.1 m: the class cut it to 0.72 of a boom that is itself cut short
+       by the funnel 5.5 m abaft the mast, though the gaff swings far over the stack. Hurley's beset
+       broadside draws it at 0.55 of the lower mast, as long as the mizzen's, with the main sail
+       brailed to the mast and no boom. Three rules, read from the BUILT scene, set and furled.
+       A-GAFF-READ: a record that carries gaffFrac or throatFrac carries both and a gaffRead whose
+       pixel figures give each share within 0.01, with a provenance; the built Gaff near the mast
+       is gaffFrac of the built lower mast (segment 0's own foot to head) within 0.05 m, and its
+       jaws stand at throatFrac of it within 0.10 m. A-BRAILED: gaffStow 'brailed' carries a
+       provenance; no Boom stands on that mast; no set cloth names that mast; one 'Brailed sail'
+       bundle lies along the mast's after side, every vertex within 1 m of the axis, from no lower
+       than the deck to no higher than the gaff's jaws; and the gaff stands at its working angle
+       (over 20°) in both builds. A-CLOTH-FUNNEL, the class: no vertex of any sail, set or stowed,
+       and none of any yard, gaff or boom, stands inside a drawn funnel stack, read as the stack's
+       own vertices within 0.4 m of that height. Before r306 no rule could see canvas through a
+       funnel, and a 10 m gaff over a funnel-cut 4 m boom puts the leech through Endurance's.
+       r308 (0y¹³⁴), A-BRAILED OVER A BOOM: furlStow 'brailed' is a sail set on gaff and boom and
+       stowed by its brails. RECORD: the value is 'brailed' and it carries furlStowProvenance.
+       SET build: a set cloth names the mast and no Brailed sail bundle does. FURLED build: the
+       same bundle tests as gaffStow 'brailed' (one bundle, along the after side, deck to jaws,
+       gaff over 20°), and the boom STAYS: exactly one Boom on the mast, and no furl roll lies
+       along it (a roll whose centre is within the boom's run and 1.2 m of its line). Before
+       r308 every furled gaff sail lowered its gaff onto a roll on the boom, and no rule could
+       tell that from a plate that shows the gaff aloft.
+       r310 (0y¹³⁸), A-LOWERED and A-STOW-SILENCE: furlStow 'lowered' is the read of a plate that shows
+       no gaff aloft on a furled ship. RECORD: furlStow is 'brailed' or 'lowered' and carries
+       furlStowProvenance. FURLED build of a 'lowered' mast: exactly one Boom; the mast's Gaff is in
+       its lowered state, its jaws within 1.5 m of the boom's foot; one furl roll lies along the
+       boom; no Brailed sail bundle names the mast. SILENCE: every gaff sail and every spanker in
+       the fleet carries furlStow, gaffStow 'brailed', or a furlStowProvenance that opens 'UNREAD'
+       naming the builder's default. Before r310 the 74, the clipper, Great Eastern, Wyoming,
+       Preussen and the steamer lowered their gaffs with nothing in the record to say whether a
+       plate had been read for it.
+       r312 (0y¹³⁸), A-STOW-READ: 'brailed' over a furlStowProvenance that opens UNREAD is convicted, as
+       'lowered' was in r310. The 74's spanker is the first square mast to carry 'brailed', so the
+       r308 rules (one boom, no roll on it, one bundle on the mast's after side between the deck
+       and the jaws, the gaff above 20°) now run on a square mast as well as on Endurance's mizzen. */
+    const gaffSailRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const segs = [], gaffs = [], booms = [], cloth = [], spars = [], stacks = [];
+      G.traverse(o => {
+        if (!o.isMesh) return;
+        if (o.userData.seg && o.userData.seg.si === 0) segs.push(o.userData.seg);
+        const p = tagOf(o);
+        if (o.userData.kind) cloth.push(o);
+        if (!p) return;
+        if (p.key === 'yard') spars.push(o);
+        if (p.key === 'yard' && p.name === 'Gaff' && o.userData.gaff) gaffs.push(o);
+        if (p.name === 'Boom' && o.userData.gaffBoom) booms.push(o);
+        if (p.name === 'Funnel') stacks.push(pts(o));
+      });
+      (H.masts || []).forEach((mk, mi) => {
+        if (!(mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker))) return;
+        const seg = segs.find(q => q.mi === mi);
+        const xm = (mk.at - 0.5) * H.lwl;
+        let gf = null, bd = 1e9;
+        for (const o of gaffs) { const d = Math.abs(o.userData.gaff.origin[0] - xm); if (d < bd) { bd = d; gf = o; } }
+        if (bd > 3) gf = null;
+        const at = `mast ${mi} (station ${mk.at})`;
+        const hasF = mk.gaffFrac != null, hasT = mk.throatFrac != null;
+        if (hasF || hasT) {
+          const R = mk.gaffRead;
+          if (STATE === 'set') {
+            if (!(hasF && hasT)) say(v.id, 'a gaff read with half its shares', `${at}: gaffFrac ${mk.gaffFrac}, throatFrac ${mk.throatFrac}`);
+            if (!R || !R.provenance) say(v.id, 'a gaff read with no provenance', `${at}: gaffFrac/throatFrac declared, gaffRead.provenance absent`);
+            else {
+              if (hasF && Math.abs(R.lengthPx / R.capOverDeckPx - mk.gaffFrac) > 0.01)
+                say(v.id, 'a gaff share off its plate read', `${at}: ${R.lengthPx}/${R.capOverDeckPx} px = ${(R.lengthPx / R.capOverDeckPx).toFixed(3)} against gaffFrac ${mk.gaffFrac}`);
+              if (hasT && Math.abs(R.throatOverDeckPx / R.capOverDeckPx - mk.throatFrac) > 0.01)
+                say(v.id, 'a throat share off its plate read', `${at}: ${R.throatOverDeckPx}/${R.capOverDeckPx} px = ${(R.throatOverDeckPx / R.capOverDeckPx).toFixed(3)} against throatFrac ${mk.throatFrac}`);
+            }
+          }
+          if (!gf || !seg) say(v.id, 'a recorded gaff not built', `${at}: ${gf ? '' : 'no Gaff mesh within 3 m of the station'}${seg ? '' : ' no lower mast segment'}${SB}`);
+          else {
+            const lower = seg.headY - seg.footY, P = pts(gf);
+            let lo = P[0], hi = P[0];
+            for (const q of P) { if (q.x < lo.x) lo = q; if (q.x > hi.x) hi = q; }
+            const gL = gf.userData.gaff.lengthM, ox = gf.userData.gaff.origin;
+            /* the cylinder's own span along its line: project every vertex on the builder's stated angle */
+            const a = gf.userData.gaff.deg * Math.PI / 180, cx = Math.cos(a), cy = Math.sin(a);
+            let t0 = 1e9, t1 = -1e9; for (const q of P) { const t = (q.x - ox[0]) * cx + (q.y - ox[1]) * cy; t0 = Math.min(t0, t); t1 = Math.max(t1, t); }
+            const built = t1 - t0, jawsY = ox[1] + t0 * cy;
+            if (hasF && Math.abs(built - lower * mk.gaffFrac) > 0.05)
+              say(v.id, 'a gaff off its recorded length', `${at}: built ${built.toFixed(2)} m, gaffFrac ${mk.gaffFrac} of the ${lower.toFixed(2)} m lower mast is ${(lower * mk.gaffFrac).toFixed(2)}${SB}`);
+            if (hasT && gf.userData.gaff.state !== 'furled' && Math.abs(jawsY - (seg.footY + lower * mk.throatFrac)) > 0.10)   // a furled boomed sail's gaff is lowered onto the roll
+              say(v.id, 'a gaff throat off its recorded height', `${at}: jaws at y ${jawsY.toFixed(2)}, throatFrac ${mk.throatFrac} puts them at ${(seg.footY + lower * mk.throatFrac).toFixed(2)}${SB}`);
+          }
+        }
+        if (STATE === 'set' && mk.furlStow == null && mk.gaffStow !== 'brailed' && !/^UNREAD/.test(mk.furlStowProvenance || ''))
+          say(v.id, 'a furled stowage with no read and no named silence', `${at}: no furlStow, and furlStowProvenance ${mk.furlStowProvenance ? 'does not open UNREAD' : 'absent'}; the builder lowers the gaff by default`);
+        if (mk.furlStow === 'lowered' && STATE === 'set') {
+          if (!mk.furlStowProvenance || /^UNREAD/.test(mk.furlStowProvenance)) say(v.id, 'a lowered stowage with no read', `${at}: furlStow 'lowered', furlStowProvenance ${mk.furlStowProvenance ? 'opens UNREAD' : 'absent'}`);
+        } else if (mk.furlStow === 'lowered') {
+          const bm = booms.filter(o => Math.abs(o.userData.gaffBoom.at - mk.at) < 1e-6);
+          if (bm.length !== 1) say(v.id, 'a lowered spanker without its boom', `${at}: ${bm.length} Boom mesh(es); a lowered gaff rests on the roll along the boom${SB}`);
+          if (!gf) say(v.id, 'a lowered gaff not built', `${at}: no Gaff mesh within 3 m of the station${SB}`);
+          else if (gf.userData.gaff.state !== 'furled') say(v.id, 'a lowered gaff standing aloft', `${at}: the Gaff is in state '${gf.userData.gaff.state}', the record reads it lowered${SB}`);
+          else if (bm.length === 1 && Math.abs(gf.userData.gaff.origin[1] - bm[0].userData.gaffBoom.foot[1]) > 1.5)
+            say(v.id, 'a lowered gaff off its boom', `${at}: jaws at y ${gf.userData.gaff.origin[1]}, the boom's foot at y ${bm[0].userData.gaffBoom.foot[1]}${SB}`);
+          for (const b of bm) {
+            const f = b.userData.gaffBoom.foot, c = b.userData.gaffBoom.clew;
+            const dx = c[0] - f[0], dy = c[1] - f[1], L2 = Math.hypot(dx, dy);
+            const rolls = cloth.filter(o => {
+              if (o.userData.kind !== 'furl' || o.userData.brailed) return false;
+              const P = pts(o); let cx = 0, cy = 0; for (const q of P) { cx += q.x; cy += q.y; } cx /= P.length; cy /= P.length;
+              const t = ((cx - f[0]) * dx + (cy - f[1]) * dy) / (L2 * L2);
+              const d = Math.abs((cx - f[0]) * dy - (cy - f[1]) * dx) / L2;
+              return t > 0 && t < 1 && d < 1.2;
+            });
+            if (rolls.length !== 1) say(v.id, 'a lowered sail not rolled on its boom', `${at}: ${rolls.length} furl roll(s) along the boom of a sail the record stows lowered${SB}`);
+          }
+          const brL = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);
+          if (brL.length) say(v.id, 'a lowered sail drawn brailed', `${at}: ${brL.length} Brailed sail bundle(s) on a mast whose sail the record stows lowered${SB}`);
+        }
+        if (mk.furlStow != null) {
+          if (STATE === 'set') {
+            if (mk.furlStow !== 'brailed' && mk.furlStow !== 'lowered') say(v.id, 'a furl stowage the builder does not know', `${at}: furlStow '${mk.furlStow}'`);
+            if (!mk.furlStowProvenance) say(v.id, 'a furl stowage with no provenance', `${at}: furlStow '${mk.furlStow}', furlStowProvenance absent`);
+            /* r312: A-STOW-READ. r310 convicted a 'lowered' stowage over an UNREAD provenance and let a
+               'brailed' one through; either value is a claim that a plate was read. */
+            else if (mk.furlStow === 'brailed' && /^UNREAD/.test(mk.furlStowProvenance)) say(v.id, 'a brailed stowage with no read', `${at}: furlStow 'brailed', furlStowProvenance opens UNREAD`);
+            const set = cloth.filter(o => o.userData.kind !== 'furl' && o.userData.mastX != null && Math.abs(o.userData.mastX - xm) < 1.5);
+            if (!set.length) say(v.id, 'a sail stowed by brails not drawn set', `${at}: no set cloth names this mast in the set build`);
+            const brS = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);
+            if (brS.length) say(v.id, 'a brailed bundle in the set build', `${at}: ${brS.length} Brailed sail bundle(s) on a mast whose sail is set`);
+          } else if (mk.furlStow === 'brailed') {
+            const bm = booms.filter(o => Math.abs(o.userData.gaffBoom.at - mk.at) < 1e-6);
+            if (bm.length !== 1) say(v.id, 'a brailed spanker without its boom', `${at}: ${bm.length} Boom mesh(es); the sail is brailed to the mast and the boom stays${SB}`);
+            for (const b of bm) {
+              const f = b.userData.gaffBoom.foot, c = b.userData.gaffBoom.clew;
+              const dx = c[0] - f[0], dy = c[1] - f[1], L2 = Math.hypot(dx, dy);
+              const rolls = cloth.filter(o => {
+                if (o.userData.kind !== 'furl' || o.userData.brailed) return false;
+                const P = pts(o); let cx = 0, cy = 0; for (const q of P) { cx += q.x; cy += q.y; } cx /= P.length; cy /= P.length;
+                const t = ((cx - f[0]) * dx + (cy - f[1]) * dy) / (L2 * L2);
+                const d = Math.abs((cx - f[0]) * dy - (cy - f[1]) * dx) / L2;
+                return t > 0 && t < 1 && d < 1.2;
+              });
+              if (rolls.length) say(v.id, 'a brailed sail rolled on its boom', `${at}: ${rolls.length} furl roll(s) along the boom of a sail the record stows by its brails${SB}`);
+            }
+          }
+        }
+        if (mk.gaffStow === 'brailed' || (STATE === 'furled' && mk.furlStow === 'brailed')) {
+          if (STATE === 'set' && mk.gaffStow === 'brailed' && !mk.gaffStowProvenance) say(v.id, 'a brailed sail with no provenance', `${at}: gaffStow 'brailed', gaffStowProvenance absent`);
+          const bm = booms.filter(o => Math.abs(o.userData.gaffBoom.at - mk.at) < 1e-6);
+          if (bm.length && mk.gaffStow === 'brailed') say(v.id, 'a boom under a brailed sail', `${at}: ${bm.length} Boom mesh(es) on a mast whose sail is loose-footed and brailed${SB}`);
+          const set = cloth.filter(o => o.userData.kind !== 'furl' && o.userData.mastX != null && Math.abs(o.userData.mastX - xm) < 1.5);
+          if (set.length) say(v.id, 'a brailed sail drawn set', `${at}: ${set.length} set cloth mesh(es) name this mast${SB}`);
+          const br = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);
+          if (br.length !== 1) say(v.id, 'a brailed sail not drawn', `${at}: ${br.length} Brailed sail bundle(s)${SB}`);
+          else if (seg && gf) {
+            const P = pts(br[0]), jy = gf.userData.gaff.origin[1];
+            let off = 0, lo = 1e9, hi = -1e9, fwd = 0;
+            for (const q of P) {
+              const t = (q.y - seg.footY) / Math.max(1e-6, seg.headY - seg.footY);
+              const ax = seg.footX + (seg.headX - seg.footX) * t;
+              off = Math.max(off, Math.hypot(q.x - ax, q.z)); lo = Math.min(lo, q.y); hi = Math.max(hi, q.y);
+              fwd = Math.max(fwd, ax - q.x);
+            }
+            if (off > 1.0) say(v.id, 'a brailed bundle off its mast', `${at}: a vertex ${off.toFixed(2)} m from the mast's axis (1.0 allowed)${SB}`);
+            if (lo < seg.footY - 0.05 || hi > jy + 0.05) say(v.id, 'a brailed bundle past the luff', `${at}: the bundle spans y ${lo.toFixed(2)}–${hi.toFixed(2)}; the deck is ${seg.footY.toFixed(2)} and the jaws ${jy.toFixed(2)}${SB}`);
+            if (fwd > 0.05) say(v.id, 'a brailed bundle forward of its mast', `${at}: a vertex ${fwd.toFixed(2)} m forward of the axis; the sail stows on the after side${SB}`);
+          }
+          if (gf && gf.userData.gaff.deg < 20) say(v.id, 'a brailed gaff lowered', `${at}: the gaff lies at ${gf.userData.gaff.deg}°; a brailed sail's gaff stays aloft${SB}`);
+        }
+      });
+      /* the class: canvas and spars stay out of the funnels */
+      if (!stacks.length) return;
+      /* each stack as horizontal slices 0.2 m deep, each slice the ellipse of the stack's own
+         vertices within 0.4 m of its height (a sheared stack moves its centre slice by slice) */
+      const bands = stacks.map(S => {
+        let y0 = 1e9, y1 = -1e9, xa = 1e9, xb = -1e9;
+        for (const q of S) { y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); xa = Math.min(xa, q.x); xb = Math.max(xb, q.x); }
+        const sl = new Map();
+        for (let k = Math.floor(y0 / 0.2); k <= Math.floor(y1 / 0.2); k++) {
+          const yc = (k + 0.5) * 0.2;
+          let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9, n = 0;
+          for (const r of S) if (Math.abs(r.y - yc) <= 0.4) { n++; x0 = Math.min(x0, r.x); x1 = Math.max(x1, r.x); z0 = Math.min(z0, r.z); z1 = Math.max(z1, r.z); }
+          if (n >= 6) sl.set(k, { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, hx: (x1 - x0) / 2, hz: (z1 - z0) / 2 });
+        }
+        return { y0, y1, xa, xb, sl };
+      });
+      const inside = q => {
+        for (const b of bands) {
+          if (q.y < b.y0 || q.y > b.y1 || q.x < b.xa || q.x > b.xb) continue;
+          const e = b.sl.get(Math.floor(q.y / 0.2));
+          if (e && e.hx > 0 && e.hz > 0 && ((q.x - e.cx) / e.hx) ** 2 + ((q.z - e.cz) / e.hz) ** 2 < 1) return true;
+        }
+        return false;
+      };
+      const xs0 = Math.min(...bands.map(b => b.xa)) - 0.5, xs1 = Math.max(...bands.map(b => b.xb)) + 0.5;
+      const yTop = Math.max(...bands.map(b => b.y1));
+      for (const o of [...cloth, ...spars]) {
+        const P = pts(o); let hit = 0, ex = null;
+        for (const q of P) { if (q.x < xs0 || q.x > xs1 || q.y > yTop) continue; if (inside(q)) { hit++; ex = ex || q; } }
+        if (hit) { const p = tagOf(o);
+          say(v.id, 'canvas or a spar through a funnel', `${p ? p.name : o.userData.kind} (${o.userData.kind || 'spar'}): ${hit} vertices inside a funnel stack, e.g. (${ex.x.toFixed(2)}, ${ex.y.toFixed(2)}, ${ex.z.toFixed(2)})${SB}`); }
+      }
+    };
+    gaffSailRead(g, 'set');
+
+    /* ── A-GAFF-HALYARD (round 279, 0y⁷²): THE GAFF HANGS FROM ITS HALYARDS. Eighteen gaffs on
+       seven hulls stood at their angle with nothing drawn holding them, set and furled — the boom
+       got its topping lift in r275 and the gaff got nothing. A gaff is hoisted by a THROAT halyard
+       (a tackle between its jaws and a block under the lower masthead) and a PEAK halyard (spans on
+       the spar to blocks on the masthead), and both falls come down to the deck. Read from the BUILT
+       scene, set and furled: for every gaff or spanker mast in the record there must be a 'Gaff'
+       mesh near its station and one 'Throat halyard' and one 'Peak halyard' mesh naming that mast
+       (userData.gaffHal.mast) — the silence is the r278 state ('a gaff hoisted by nothing'). The
+       throat halyard's rope must start ON the gaff at its jaws — a vertex within 0.15 m of the
+       spar's line in the first 0.15 of its length from the forward end (the jaws block sits a hand
+       abaft the mast's after face, and a mast can be half a metre thick) — and must have a vertex at the mast (within 0.8 m of a mast segment's axis, a strop and
+       a block) at least 0.3 m over the jaws. The peak halyard's rope must meet the gaff's own line
+       (0.12) at two separate stations above the throat and likewise have a vertex at the mast at
+       least 0.3 m over the jaws — its HIGHEST vertex may be the outer span, because a long gaff
+       peaks above the lower masthead. Each fall's lowest vertex must
+       lie between the deck's edge and 1.6 m over it (a fall that ends aloft is a rope to nowhere);
+       on a hull with pins each mesh must record a belay (A-BELAY reads the pin). Every turn the
+       builder records (throatBlock, jawsBlock, peakBlocks, spans) must have a 'Blocks' vertex within
+       0.25 m and the rope's own vertex within 0.10 m in the spar's plane — a builder that records a
+       block and draws the rope elsewhere is convicted, as is a rope turning in the air. A hull with
+       no gaff mast must carry no gaff halyard. */
+    const halRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const axisOf = P => {
+        const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of P) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+          xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        const d = new THREE.Vector3(1, 0, 0);
+        for (let it = 0; it < 60; it++)
+          d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.x < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9;
+        for (const q of P) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax) };
+      };
+      const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker));
+      const gaffs = [], thr = [], pk = [], blocks = [], mastM = [], deckM = [], pinsM = [];
+      G.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'yard' && p.name === 'Gaff') gaffs.push(o);
+        else if (p.key === 'throatHalyard') thr.push(o);
+        else if (p.key === 'peakHalyard') pk.push(o);
+        else if (p.key === 'block') blocks.push(o);
+        else if (p.key === 'mast') mastM.push(o);
+        else if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+        else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+      if (!gaffMasts.length) {
+        if (thr.length || pk.length || blocks.length)
+          say(v.id, 'a gaff halyard on a hull with no gaff', `${thr.length} Throat halyard, ${pk.length} Peak halyard and ${blocks.length} Blocks mesh(es) and no gaff or spanker mast in the record${SB}`);
+        return;
+      }
+      const BV = [].concat(...blocks.map(pts));
+      /* the masts' axes (a cylinder's vertices are at its ends, so a distance to a vertex is not a distance to the mast) */
+      const axes = mastM.map(o => axisOf(pts(o))).filter(a => a.head.distanceTo(a.foot) >= 0.5);
+      const mastDist = q => { let d = 1e9;
+        for (const a of axes) { const dx = a.head.x - a.foot.x, dy = a.head.y - a.foot.y, L2 = dx * dx + dy * dy;
+          const t = L2 > 0 ? Math.max(0, Math.min(1, ((q.x - a.foot.x) * dx + (q.y - a.foot.y) * dy) / L2)) : 0;
+          d = Math.min(d, Math.hypot(q.x - (a.foot.x + dx * t), q.y - (a.foot.y + dy * t))); }
+        return d; };
+      const topAtMast = Q => { let top = null; for (const q of Q) if (mastDist(q) < 0.8 && (!top || q.y > top.y)) top = q; return top; };
+      let deckPts = null;
+      const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+        let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+          if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+      const gaffAxes = gaffs.map(o => { const ax = axisOf(pts(o)); let lo = ax.foot, hi = ax.head; if (lo.x > hi.x) [lo, hi] = [hi, lo]; return { lo, hi, o }; });
+      for (const mk of gaffMasts) {
+        const mi = (H.masts || []).indexOf(mk), xm = (mk.at - 0.5) * H.lwl;
+        const at = `mast ${mi} (station ${mk.at})`;
+        let gf = null, bd = 1e9; for (const ga of gaffAxes) { const d = Math.abs(ga.lo.x - xm); if (d < bd) { bd = d; gf = ga; } }
+        if (!gf || bd > 3.0) { say(v.id, 'a gaff mast with no gaff', `${at}: no Gaff mesh has its forward end within 3 m of the mast's station (nearest ${gf ? bd.toFixed(2) + ' m' : 'none'})${SB}`); continue; }
+        const T = thr.filter(o => o.userData.gaffHal && o.userData.gaffHal.mast === mi);
+        const P = pk.filter(o => o.userData.gaffHal && o.userData.gaffHal.mast === mi);
+        if (T.length !== 1 || P.length !== 1) {
+          say(v.id, 'a gaff hoisted by nothing', `${at}: ${T.length} Throat halyard and ${P.length} Peak halyard mesh(es) name this mast${SB} — the gaff stands at its angle with nothing drawn holding it`);
+          continue;
+        }
+        const gL = Math.hypot(gf.hi.x - gf.lo.x, gf.hi.y - gf.lo.y);
+        const along = q => ((q.x - gf.lo.x) * (gf.hi.x - gf.lo.x) + (q.y - gf.lo.y) * (gf.hi.y - gf.lo.y)) / (gL * gL);
+        const offLine = q => { const t = Math.max(0, Math.min(1, along(q)));
+          return Math.hypot(q.x - (gf.lo.x + (gf.hi.x - gf.lo.x) * t), q.y - (gf.lo.y + (gf.hi.y - gf.lo.y) * t)); };
+        const jaws = `(${gf.lo.x.toFixed(2)}, ${gf.lo.y.toFixed(2)})`;
+        /* the throat */
+        { const Q = pts(T[0]);
+          let best = null, bo = 1e9; for (const q of Q) { const o2 = offLine(q); if (o2 < bo) { bo = o2; best = q; } }
+          const al = best ? along(best) : 1e9;
+          if (bo > 0.15 || al > 0.15) say(v.id, 'a throat halyard off the jaws', `${at}: the rope's nearest vertex to the gaff's line is ${bo.toFixed(2)} m off it, ${(al * gL).toFixed(2)} m along the ${gL.toFixed(1)} m spar from the jaws ${jaws} (0.15 off and the first 0.15 of the spar allowed)${SB}`);
+          const top = topAtMast(Q);
+          if (!top) say(v.id, "a throat halyard's block off the mast", `${at}: no vertex of the rope lies within 0.8 m of a mast's axis${SB}`);
+          else if (top.y < gf.lo.y + 0.3) say(v.id, 'a throat halyard with no hoist in it', `${at}: its highest vertex at the mast, y ${top.y.toFixed(2)}, stands ${(top.y - gf.lo.y).toFixed(2)} m over the jaws ${jaws}${SB}`); }
+        /* the peak */
+        { const Q = pts(P[0]);
+          const ts = []; for (const q of Q) if (offLine(q) < 0.12) ts.push(along(q));
+          ts.sort((a, b) => a - b);
+          const groups = []; for (const t of ts) { if (!groups.length || t - groups[groups.length - 1].max > 0.08) groups.push({ min: t, max: t }); else groups[groups.length - 1].max = t; }
+          const spans = groups.filter(gp => gp.min > 0.2);
+          if (spans.length < 2) say(v.id, 'a peak halyard off its gaff', `${at}: the rope meets the gaff's line (0.12) at ${spans.length} station(s) above the throat; a peak halyard spans the spar at two${SB}`);
+          const top = topAtMast(Q);
+          if (!top) say(v.id, "a peak halyard's block off the mast", `${at}: no vertex of the rope lies within 0.8 m of a mast's axis${SB}`);
+          else if (top.y < gf.lo.y + 0.3) say(v.id, 'a peak halyard with no hoist in it', `${at}: its highest vertex at the mast, y ${top.y.toFixed(2)}, stands ${(top.y - gf.lo.y).toFixed(2)} m over the jaws ${jaws}${SB}`); }
+        /* the falls */
+        for (const o of [T[0], P[0]]) { const Q = pts(o), nm = tagOf(o).name;
+          let lo = Q[0]; for (const q of Q) if (q.y < lo.y) lo = q;
+          const e = deckAtX(lo.x);
+          if (e < 1e8 && (lo.y > e + 1.6 || lo.y < e - 0.1))
+            say(v.id, 'a gaff halyard fall ending in the air', `${at}: the ${nm}'s lowest vertex y ${lo.y.toFixed(2)} at x ${lo.x.toFixed(2)} stands ${(lo.y - e).toFixed(2)} m over the deck's edge (${e.toFixed(2)})${SB}`);
+          if (pinsM.length && !(o.userData.belays || []).length)
+            say(v.id, 'a gaff halyard belayed nowhere', `${at}: the ${nm} on a hull with pins records no belay${SB}`); }
+        /* the turns */
+        const rT = T[0].userData.gaffHal, rP = P[0].userData.gaffHal;
+        const turns = [['throat block', rT.throatBlock, T[0]], ['jaws block', rT.jawsBlock, T[0]],
+                       ['lower peak block', (rP.peakBlocks || [])[0], P[0]], ['upper peak block', (rP.peakBlocks || [])[1], P[0]],
+                       ['inner span', (rP.spans || [])[0], P[0]], ['outer span', (rP.spans || [])[1], P[0]]];
+        for (const [name, b, o] of turns) {
+          if (!b) { say(v.id, 'a halyard turn with no record', `${at}: the builder records no ${name}${SB}`); continue; }
+          let db = 1e9; for (const q of BV) db = Math.min(db, Math.hypot(q.x - b[0], q.y - b[1], q.z - b[2]));
+          if (db > 0.25) say(v.id, 'a halyard turning on no block', `${at}: no Blocks vertex within 0.25 m of the ${name} recorded at [${b}] (nearest ${db < 1e8 ? db.toFixed(2) + ' m' : 'none drawn'})${SB}`);
+          let dr = 1e9; for (const q of pts(o)) dr = Math.min(dr, Math.hypot(q.x - b[0], q.y - b[1]));
+          if (dr > 0.10) say(v.id, 'a halyard that does not reach its block', `${at}: the ${tagOf(o).name}'s nearest vertex is ${dr.toFixed(2)} m (in the spar's plane) from the ${name} recorded at [${b}]${SB}`);
+        }
+      }
+    };
+    halRead(g, 'set');
+
+    /* ── A-BULWARK-FURNITURE (round 276, 0y⁶⁰): A WOODEN BULWARK IS PLANKED ON STANCHIONS, AND
+       THE PIN RAIL RUNS ALONG THEM. On every hull whose deck lies below the sheer (deck.
+       belowSheerM > 0.3) and whose recorded frames are not drawn as timbers to the head (frames.
+       roomAndSpaceM: the cog's futtocks already stand in her wall, r217), the inside of the
+       bulwark was the planking's bare inner face. Read from the BUILT scene: there must be
+       'Bulwark stanchion' meshes; each one's foot must stand on the deck read off the deck
+       meshes at its x (0.12 allowed), its head under the capping rail's underside at that x
+       and no more than 0.25 below it, its outer face inside the rail's outer edge (the rail
+       rides the skin's top, so a stanchion outside it is outside the planking); the stanchions
+       of a side must stand at the pitch the builder says it used (the median gap within 10%).
+       A hull depicted from 1600 must carry a 'Pin rail' mesh, and one depicted before 1600
+       must not (belaying pins are a sixteenth-century fitting); the rail must stand at the
+       builder's stated height over the deck (0.12), every point of it inboard of the nearest
+       stanchion's inner face at its height (a rail in the wall), and there must be pins on it.
+       A hull with no such bulwark, or with her frames drawn to the head, must carry none of
+       this — a second timber at a futtock's station is the r217 double-timber flicker. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const deep = !!(H.deck && H.deck.belowSheerM > 0.3), timbers = !!(H.frames && H.frames.roomAndSpaceM);
+      const stM = [], railM = [], pinsM = [], capM = [], deckM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'bulwarkStanchion') stM.push(o);
+        else if (p.key === 'pinRail' && p.name === 'Pin rail') railM.push(o);
+        else if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+        else if (p.key === 'rail') capM.push(o);
+        else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+      /* r291: a steel or iron ship's bulwark is plating on stays; the builder gives her none of the wooden
+         class's timbers (bulwarkFurnitureSpec returns null), and the record names the stays as not drawn */
+      const steel = H.build === 'steel' || H.build === 'iron';
+      const want = deep && !timbers && !steel;
+      if (!want) {
+        if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.length} Bulwark stanchion mesh(es) on a hull ${!deep ? 'with no deck below the sheer' : steel ? 'built of steel or iron, whose bulwark is plating on stays' : 'whose frames are drawn to the head (frames.roomAndSpaceM)'}`);
+        if (railM.length) say(v.id, 'a pin rail in a bulwark that is not there', `${railM.length} Pin rail mesh(es) on a hull ${deep ? 'whose frames are drawn to the head' : 'with no deck below the sheer'}`);
+      } else {
+        let deckPts = null, capPts = null;
+        const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+          let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+            if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+        const capAtX = (xq, sgn) => { if (!capPts) capPts = [].concat(...capM.map(pts));
+          let under = 1e9, outer = 0, n = 0; for (const q of capPts) { if (Math.sign(q.z) !== sgn || Math.abs(q.x - xq) > 0.35) continue;
+            under = Math.min(under, q.y); outer = Math.max(outer, Math.abs(q.z)); n++; } return n ? { under, outer } : null; };
+        const year = H.year || 0, pinsDue = year >= 1600;
+        if (!stM.length) say(v.id, 'a bulwark with no stanchions', `deck.belowSheerM ${H.deck.belowSheerM}, frames not drawn as timbers, and no Bulwark stanchion mesh: the wall is the planking's bare inner face`);
+        const rec = stM.length ? stM[0].userData.bulwarkFurniture : null;
+        const bySide = { 1: [], '-1': [] };
+        for (const o of stM) {
+          const P = pts(o); let yF = 1e9, yH = -1e9, x = 0, zOut = 0, sgn = 0;
+          for (const q of P) { yF = Math.min(yF, q.y); yH = Math.max(yH, q.y); x += q.x; zOut = Math.max(zOut, Math.abs(q.z)); sgn += q.z; }
+          x /= P.length; sgn = sgn > 0 ? 1 : -1;
+          const at = `the ${sideOf(sgn)} stanchion at x ${x.toFixed(2)}`;
+          const e = deckAtX(x);
+          if (e < 1e8 && Math.abs(yF - e) > 0.12) say(v.id, 'a stanchion off the deck', `${at}: its foot at y ${yF.toFixed(2)} stands ${(yF - e).toFixed(2)} m from the deck's edge (${e.toFixed(2)}) at that x (0.12 allowed)`);
+          const c = capAtX(x, sgn);
+          if (!c) say(v.id, 'a stanchion under no cap', `${at}: no capping rail mesh within 0.35 m of its x on its side`);
+          else {
+            if (yH > c.under + 0.02) say(v.id, 'a stanchion through the cap', `${at}: its head at y ${yH.toFixed(2)} stands ${(yH - c.under).toFixed(2)} m above the cap's underside (${c.under.toFixed(2)})`);
+            if (yH < c.under - 0.25) say(v.id, 'a stanchion short of the cap', `${at}: its head at y ${yH.toFixed(2)} stops ${(c.under - yH).toFixed(2)} m under the cap's underside (${c.under.toFixed(2)}); a hand is the most`);
+            if (zOut > c.outer + 0.01) say(v.id, 'a stanchion outside the planking', `${at}: its outer face at |z| ${zOut.toFixed(3)} stands ${(zOut - c.outer).toFixed(3)} m outside the cap's outer edge (${c.outer.toFixed(3)})`);
+          }
+          bySide[sgn].push({ x, yF, yH, P });
+        }
+        if (rec) for (const sgn of [1, -1]) {
+          const xs = bySide[sgn].map(q => q.x).sort((a, b) => a - b);
+          if (xs.length < 3) continue;
+          const gaps = xs.slice(1).map((x, i) => x - xs[i]).sort((a, b) => a - b), med = gaps[Math.floor(gaps.length / 2)];
+          if (Math.abs(med - rec.pitchM) > 0.1 * rec.pitchM) say(v.id, 'stanchions off their pitch', `the ${sideOf(sgn)} stanchions stand a median ${med.toFixed(2)} m apart where the builder says ${rec.pitchM} (${rec.pitchFrom})`);
+        }
+        if (pinsDue && !railM.length) say(v.id, 'a bulwark with no pin rail', `year ${year}, a bulwark ${H.deck.belowSheerM} m deep, and no Pin rail mesh: the running rigging has nothing to belay to`);
+        if (!pinsDue && railM.length) say(v.id, 'a pin rail before belaying pins', `year ${year}: a Pin rail mesh on a hull depicted before 1600`);
+        if (railM.length && !pinsM.length) say(v.id, 'a pin rail with no pins', `${railM.length} Pin rail mesh(es), no Belaying pins mesh`);
+        for (const o of railM) {
+          const P = pts(o); const rr = o.userData.bulwarkFurniture || rec;
+          for (const sgn of [1, -1]) {
+            const Q = P.filter(q => Math.sign(q.z) === sgn); if (!Q.length) continue;
+            /* the deck follows the sheer, so the height is read POINT BY POINT against the deck at
+               each point's own x, and the median of those reads is the rail's height */
+            const hs = []; for (let k = 0; k < Q.length; k += 8) { const e = deckAtX(Q[k].x); if (e < 1e8) hs.push(Q[k].y - e); }
+            hs.sort((a, b) => a - b); const hMed = hs.length ? hs[Math.floor(hs.length / 2)] : null;
+            if (rr && rr.pinRailM != null && hMed != null && Math.abs(hMed - rr.pinRailM) > 0.12)
+              say(v.id, 'a pin rail off its height', `the ${sideOf(sgn)} pin rail stands a median ${hMed.toFixed(2)} m over the deck's edge at its own stations (${hs.length} reads, ${hs[0].toFixed(2)}–${hs[hs.length - 1].toFixed(2)}) where the builder says ${rr.pinRailM} (${rr.pinRailFrom})`);
+            /* every rail point inboard of the nearest stanchion's inner face at the rail's height */
+            let worst = -1e9, wq = null;
+            for (let k = 0; k < Q.length; k += 4) { const q = Q[k];
+              let st = null, bd = 1e9; for (const c of bySide[sgn]) { const d = Math.abs(c.x - q.x); if (d < bd) { bd = d; st = c; } }
+              if (!st || bd > 1.5) continue;
+              let inner = 1e9; for (const r of st.P) if (Math.abs(r.y - q.y) < 0.35) inner = Math.min(inner, Math.abs(r.z));
+              if (inner > 1e8) continue;
+              const over = Math.abs(q.z) - inner; if (over > worst) { worst = over; wq = q; } }
+            if (wq && worst > 0.03) say(v.id, 'a pin rail in the wall', `the ${sideOf(sgn)} pin rail at x ${wq.x.toFixed(2)} stands ${worst.toFixed(3)} m outside the nearest stanchion's inner face`);
+          }
+        }
+      }
+    }
+
+    /* ── A-FIFE-RAIL (round 280, 0y⁷²): THE JEERS ARE MADE FAST TO A FIFE RAIL, NOT TO THE DECK.
+       Through r279 the jeers' falls came down the mast and ended on the deck beside it on the one
+       hull that carries pins. A square-rigged mast on a hull with a pin rail carries a FIFE RAIL at
+       its foot. Read from the BUILT scene, on the set build: where a 'Belaying pins' mesh stands,
+       every square mast in the record must have a 'Fife rail' mesh recording that mast
+       (userData.fifeRail.mast) — the silence convicts ('a square mast with no fife rail', the r279
+       state) — whose timber straddles the mast (vertices before and abaft the mast's station and
+       beyond its radius to both sides), whose rail stands 0.9–1.3 m over the deck at the mast, and
+       a 'Fife rail pins' mesh for it recording at least six pin centres, each with a vertex of its
+       own within 0.05. The Jeers mesh must record belays ('jeers belayed nowhere'), every one on a
+       pin of the fife rail (rail 'fife', the pin within 0.05 of a recorded centre), and its lowest
+       vertex must stand at least 0.5 m over the deck ('jeers ending on the deck'). The record must
+       answer for the rail (hull.fifeRail, figures or a provenance) on a hull with pins and a square
+       mast — a class figure drawn in silence is convicted, as the r108 rule has it. A hull with no
+       pins may carry no fife rail; the pins and the belays are read again by A-BELAY. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const pinsM = [], fifeM = [], fifePinsM = [], jeersM = [], deckM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+        else if (p.key === 'fifeRail' && p.name === 'Fife rail') fifeM.push(o);
+        else if (p.key === 'fifeRail' && p.name === 'Fife rail pins') fifePinsM.push(o);
+        else if (p.key === 'jeers') jeersM.push(o);
+        else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+      const L = H.lwl || H.loa;
+      const sq = (H.masts || []).map((m, i) => ({ m, i })).filter(x => x.m.rig === 'square');
+      if (!pinsM.length) {
+        if (fifeM.length || fifePinsM.length) say(v.id, 'a fife rail on a hull with no pin rail', `${fifeM.length} Fife rail and ${fifePinsM.length} Fife rail pins mesh(es) and no Belaying pins mesh`);
+      } else if (sq.length) {
+        if (!H.fifeRail) say(v.id, 'a fife rail with no answer', `a hull with pins and ${sq.length} square mast(s) whose record says nothing of the fife rail (hull.fifeRail: figures, or a provenance naming the plates read)`);
+        let deckPts = null;
+        const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+          let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+            if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+        const fifePins = [];
+        for (const { m, i } of sq) {
+          const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+          const rails = fifeM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
+          if (!rails.length) { say(v.id, 'a square mast with no fife rail', `${at}: ${pinsM.length ? 'a pin rail' : 'pins'} and no Fife rail mesh records this mast — nothing that comes down the mast can be made fast at its foot`); continue; }
+          if (rails.length > 1) say(v.id, 'two fife rails on one mast', `${at}: ${rails.length} Fife rail meshes record it`);
+          const fr = rails[0].userData.fifeRail, P = pts(rails[0]);
+          let xMin = 1e9, xMax = -1e9, zMax = 0, yMax = -1e9; for (const q of P) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); zMax = Math.max(zMax, Math.abs(q.z)); yMax = Math.max(yMax, q.y); }
+          const rM = fr.mastR || 0;
+          if (!(xMin < xm - rM - 0.2 && xMax > xm + rM + 0.2 && zMax > rM + 0.3))
+            say(v.id, 'a fife rail that does not stand round its mast', `${at}: the timber spans x ${xMin.toFixed(2)}..${xMax.toFixed(2)}, |z| to ${zMax.toFixed(2)} against the mast at x ${xm.toFixed(2)}, radius ${rM.toFixed(2)}`);
+          const e = deckAtX(xm), over = yMax - e;
+          if (e < 1e8 && (over < 0.9 || over > 1.3)) say(v.id, 'a fife rail off its height', `${at}: the rail's top stands ${over.toFixed(2)} m over the deck at the mast (0.9–1.3 wanted)`);
+          const pm = fifePinsM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
+          if (!pm.length) { say(v.id, 'a fife rail with no pins', `${at}: a Fife rail mesh and no Fife rail pins mesh for it`); continue; }
+          const rec = pm[0].userData.pins || [];
+          if (rec.length < 6) say(v.id, 'a fife rail short of pins', `${at}: ${rec.length} pin centre(s) recorded (six or more wanted along three rails)`);
+          const PV = pts(pm[0]);
+          for (const c of rec) { let d = 1e9; for (const q of PV) if (Math.abs(q.y - c[1]) < 0.30) d = Math.min(d, Math.hypot(q.x - c[0], q.z - c[2]));
+            if (d > 0.05) { say(v.id, 'a fife rail pin drawn elsewhere', `${at}: the recorded pin at [${c}] has no Fife rail pins vertex within 0.05 in plan (nearest ${d < 1e8 ? d.toFixed(3) : 'none within the pin\'s length'})`); break; } }
+          fifePins.push(...rec);
+        }
+        for (const o of jeersM) {
+          const bl = o.userData.belays || [];
+          if (!bl.length) { say(v.id, 'jeers belayed nowhere', `a Jeers mesh on a hull with pins records no belay — the falls end on the deck beside the mast`); continue; }
+          for (const b of bl) {
+            let d = 1e9; for (const c of fifePins) d = Math.min(d, Math.hypot(c[0] - b.pin[0], c[1] - b.pin[1], c[2] - b.pin[2]));
+            if (b.rail !== 'fife' || d > 0.05) say(v.id, 'jeers made fast off the fife rail', `the ${b.side} jeers of mast ${b.mast}: belayed on rail '${b.rail}', its pin [${b.pin}] ${d < 1e8 ? d.toFixed(3) + ' m' : 'far'} from the nearest fife rail pin`);
+          }
+          const P = pts(o); let lo = P[0]; for (const q of P) if (q.y < lo.y) lo = q;
+          const e = deckAtX(lo.x);
+          if (e < 1e8 && lo.y < e + 0.5) say(v.id, 'jeers ending on the deck', `the Jeers mesh's lowest vertex y ${lo.y.toFixed(2)} at x ${lo.x.toFixed(2)} lies ${(lo.y - e).toFixed(2)} m over the deck — a fall made fast to the planking`);
+        }
+      }
+    }
+
+    /* ── A-COURSE-GEAR (round 281, 0y⁸¹): THE COURSE'S CLEWLINES AND BUNTLINES ARE DRAWN, AND MADE FAST
+       TO THE FIFE RAIL. r280 built the fife rail and nothing belayed to it: the falls that belong there
+       — the clew garnets and the buntlines of the course — were not drawn by any builder. Read from the
+       BUILT scene, on the set build: where a 'Fife rail pins' mesh stands, every square mast in the
+       record whose yards include a course must carry a 'Clewlines' mesh and a 'Buntlines' mesh recording
+       that mast (userData.courseGear.mast) — the silence convicts ('a course with no clewlines', 'a
+       course with no buntlines', the r280 state). Each recorded clew garnet must START AT THE CLEW (its
+       recorded clew within 0.10 of the Sheets mesh's recorded `from` on the same side — the sheet and the
+       garnet leave the same corner), its block must hang on the course yard's line (read off the lowest
+       'Yard' mesh within 1.5 m of the mast's station, by principal axis: within the yard's radius + 0.20
+       of the axis and between 0.30 and 0.70 of the half-yard out from the slings — a garnet block at the
+       yardarm would be a sheet block), and its mast lead must stand at the mast (within 0.6 in plan of
+       the station). Each recorded buntline must start at the FOOT (its foot between 0.55 and 1.05 of the
+       clew's drop under the yard's height) and rise to a block ABOVE the yard within 0.8 in plan of the
+       mast's station; there must be at least two a side. Every recorded point (clew, block, mast lead,
+       foot, top) must have a vertex of its own rope mesh within 0.10 ('course gear drawn elsewhere'), a
+       'Blocks' mesh must record a block within 0.05 of every turn ('a turn with no block'), every belay
+       of both meshes must be on rail 'fife' ('course gear made fast off the fife rail'), and the record
+       must answer for the figures (masts[i].courseGear: figures or a provenance — a class figure drawn in
+       silence is convicted, the r108 rule). A hull with no fife rail may carry no clewline or buntline
+       mesh (their falls would have nowhere to end). A-BELAY reads the falls themselves: the pin, the
+       head, the coil, no shared pin. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const fifePinsM = [], clewM = [], buntM = [], sheetM = [], blockM = [], yardM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'fifeRail' && p.name === 'Fife rail pins') fifePinsM.push(o);
+        else if (p.key === 'clewline') clewM.push(o);
+        else if (p.key === 'buntline') buntM.push(o);
+        else if (p.key === 'sheet') sheetM.push(o);
+        else if (p.key === 'block') blockM.push(o);
+        else if (p.key === 'yard' && p.name === 'Yard') yardM.push(o); });
+      const L = H.lwl || H.loa;
+      const D3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+      const near = (P, c) => { let d = 1e9; for (const q of P) d = Math.min(d, Math.hypot(q.x - c[0], q.y - c[1], q.z - c[2])); return d; };
+      if (!fifePinsM.length) {
+        if (clewM.length || buntM.length) say(v.id, 'course gear on a hull with no fife rail', `${clewM.length} Clewlines and ${buntM.length} Buntlines mesh(es) and no Fife rail pins mesh — falls with nowhere to end`);
+      } else {
+        const blocks = [].concat(...blockM.map(o => o.userData.blocks || []));
+        const axisOf = P => { const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+          let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0; for (const q of P) { const a = q.x - c.x, b = q.y - c.y, e = q.z - c.z; xx += a * a; xy += a * b; xz += a * e; yy += b * b; yz += b * e; zz += e * e; }
+          let d = new THREE.Vector3(1, 0, 0); for (let it = 0; it < 30; it++) { d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize(); }
+          let tMin = 1e9, tMax = -1e9; for (const q of P) { const t = q.clone().sub(c).dot(d); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+          let rMax = 0; for (const q of P) { const w = q.clone().sub(c); const t = w.dot(d); if (Math.abs(t) < (tMax - tMin) * 0.1) rMax = Math.max(rMax, w.sub(d.clone().multiplyScalar(t)).length()); }
+          return { c, d, half: (tMax - tMin) / 2, r: rMax }; };
+        const yards = yardM.map(o => axisOf(pts(o))).filter(y => Math.abs(y.c.z) < 0.3 && Math.abs(y.d.z) >= 0.85);
+        for (let i = 0; i < (H.masts || []).length; i++) {
+          const m = H.masts[i]; if (m.rig !== 'square' || !(m.yards || []).includes('course')) continue;
+          const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+          const cm = clewM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+          const bm = buntM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+          if (!cm.length) say(v.id, 'a course with no clewlines', `${at}: a fife rail and a course, and no Clewlines mesh records this mast — the clews cannot be hauled up to the yard`);
+          if (!bm.length) say(v.id, 'a course with no buntlines', `${at}: a fife rail and a course, and no Buntlines mesh records this mast — the foot cannot be lifted to the yard`);
+          if (!cm.length && !bm.length) continue;
+          if (!m.courseGear) say(v.id, 'course gear with no answer', `${at}: clewlines and buntlines drawn and masts[${i}] says nothing of them (courseGear: figures, or a provenance naming the plate read)`);
+          const cand = yards.filter(y => Math.abs(y.c.x - xm) < 1.5).sort((a, b) => a.c.y - b.c.y);
+          const yd = cand[0] || null;
+          if (!yd) say(v.id, 'course gear with no yard', `${at}: no Yard mesh within 1.5 m of the station to read the garnet blocks against`);
+          const sheetFrom = [].concat(...sheetM.map(o => (o.userData.belays || []).filter(b => b.mast === i).map(b => ({ side: b.side, from: b.from }))));
+          for (const o of cm) {
+            const rec = o.userData.courseGear, P = pts(o), bl = o.userData.belays || [];
+            if (!rec.clews || rec.clews.length < 2) { say(v.id, 'a clewline a side wanted', `${at}: ${rec.clews ? rec.clews.length : 0} clew garnet(s) recorded`); }
+            for (const c of rec.clews || []) {
+              const sf = sheetFrom.filter(q => q.side === c.side);
+              const dS = sf.length ? Math.min(...sf.map(q => D3(q.from, c.clew))) : 1e9;
+              if (dS > 0.10) say(v.id, 'a clewline that does not start at the clew', `${at}, ${c.side}: the garnet's recorded clew [${c.clew}] is ${dS < 1e8 ? dS.toFixed(3) + ' m' : 'far'} from the sheet's clew${sf.length ? '' : ' (no sheet belay recorded on this side)'}`);
+              for (const [nm, q] of [['clew', c.clew], ['block', c.block], ['mast lead', c.mastBlock]]) { const d = near(P, q); if (d > 0.10) say(v.id, 'course gear drawn elsewhere', `${at}, the ${c.side} clew garnet's ${nm} [${q}]: nearest Clewlines vertex ${d.toFixed(3)} m away`); }
+              if (yd) { const w = new THREE.Vector3(c.block[0] - yd.c.x, c.block[1] - yd.c.y, c.block[2] - yd.c.z); const t = w.dot(yd.d); const off = w.clone().sub(yd.d.clone().multiplyScalar(t)).length(); const frac = Math.abs(t) / yd.half;
+                if (off > yd.r + 0.20 || frac < 0.30 || frac > 0.70) say(v.id, 'a clew garnet block off the yard\'s quarter', `${at}, ${c.side}: the block [${c.block}] stands ${off.toFixed(2)} m off the course yard's axis (radius ${yd.r.toFixed(2)}) at ${frac.toFixed(2)} of the half-yard (0.30–0.70 wanted)`); }
+              if (Math.hypot(c.mastBlock[0] - xm, c.mastBlock[2]) > 0.6) say(v.id, 'a clew garnet lead off the mast', `${at}, ${c.side}: the lead block [${c.mastBlock}] is ${Math.hypot(c.mastBlock[0] - xm, c.mastBlock[2]).toFixed(2)} m from the mast's station in plan`);
+              for (const q of [c.block, c.mastBlock]) if (!blocks.some(b => D3(b.at, q) < 0.05)) say(v.id, 'a turn with no block', `${at}, the ${c.side} clew garnet turns at [${q}] and no Blocks mesh records a block there`);
+            }
+            for (const b of bl) if (!(b.tier > 0) && b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} clewline belays on rail '${b.rail}'`);   // r283: the upper tiers' belays are read by A-UPPER-GEAR
+            if (!bl.length) say(v.id, 'clewlines belayed nowhere', `${at}: a Clewlines mesh on a hull with a fife rail records no belay`);
+          }
+          for (const o of bm) {
+            const rec = o.userData.courseGear, P = pts(o), bl = o.userData.belays || [];
+            const bunts = rec.bunts || [];
+            for (const side of ['port', 'starboard']) { const nS = bunts.filter(b => b.side === side).length; if (nS < 2) say(v.id, 'too few buntlines', `${at}: ${nS} buntline(s) on the ${side} side (two or more wanted)`); }
+            const clewY = (rec.clews && rec.clews.length ? rec.clews : (cm[0] && cm[0].userData.courseGear.clews) || []).map(c => c.clew[1]);
+            for (const b of bunts) {
+              for (const [nm, q] of [['foot', b.foot], ['top block', b.top]]) { const d = near(P, q); if (d > 0.10) say(v.id, 'course gear drawn elsewhere', `${at}, the ${b.side} buntline at ${b.at}: its ${nm} [${q}] has its nearest Buntlines vertex ${d.toFixed(3)} m away`); }
+              if (yd && clewY.length) { const drop = yd.c.y - Math.min(...clewY), under = (yd.c.y - b.foot[1]) / drop;
+                if (under < 0.55 || under > 1.05) say(v.id, 'a buntline that does not start at the foot', `${at}, the ${b.side} buntline at ${b.at}: its foot [${b.foot}] hangs ${under.toFixed(2)} of the clew's drop under the yard (0.55–1.05 wanted)`); }
+              if (yd && b.top[1] < yd.c.y + 0.5) say(v.id, 'a buntline block under the yard', `${at}, the ${b.side} buntline at ${b.at}: its top block [${b.top}] stands ${(b.top[1] - yd.c.y).toFixed(2)} m over the yard (0.5 or more wanted, under the top)`);
+              if (Math.hypot(b.top[0] - xm, b.top[2]) > 0.8) say(v.id, 'a buntline block off the mast', `${at}, the ${b.side} buntline at ${b.at}: its top block is ${Math.hypot(b.top[0] - xm, b.top[2]).toFixed(2)} m from the mast's station in plan`);
+              if (!blocks.some(q => D3(q.at, b.top) < 0.05)) say(v.id, 'a turn with no block', `${at}, the ${b.side} buntline at ${b.at} turns at [${b.top}] and no Blocks mesh records a block there`);
+            }
+            for (const b of bl) if (!(b.tier > 0) && b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} buntline belays on rail '${b.rail}'`);   // r283
+            if (bl.filter(b => !(b.tier > 0)).length < bunts.length) say(v.id, 'buntlines belayed nowhere', `${at}: ${bunts.length} course buntlines recorded and ${bl.filter(b => !(b.tier > 0)).length} belay(s) on the course tier`);
+          }
+        }
+      }
+    }
+
+    /* ── A-UPPER-GEAR (round 283, 0y⁸⁶): THE UPPER SQUARE SAILS' CLEWLINES AND BUNTLINES ARE DRAWN,
+       AND MADE FAST. r281 drew the course's and left every tier above it bare, with the fife rail's pins
+       standing empty. Read from the BUILT scene: where a 'Fife rail pins' mesh stands, every square mast
+       whose record lists more than one yard must carry, in its Clewlines and Buntlines meshes' record
+       (userData.courseGear.tiers), a tier for every yard above the course — the silence convicts ('an upper
+       sail with no clewlines', 'an upper sail with no buntlines', the r282 state) — and the record must answer
+       for the figures (masts[i].upperGear: figures per tier or a provenance naming the plate read; a class
+       figure drawn in silence is convicted, the r108 rule). For each upper tier: the yard is the k-th 'Yard'
+       mesh up the mast (within 1.5 m of the station, by principal axis); each clewline must START AT THE
+       CLEW (a Sheets-mesh vertex within 0.10 — the sheet leaves the same corner), its block must hang on
+       that yard's line (within radius + 0.20 of the axis) at the QUARTER (0.03–0.35 of the half-yard out
+       from the slings — a block half-way out would be a course's garnet, at the arm a sheet block), and its
+       mast lead must stand at the mast (within 0.6 in plan of the station); each buntline must start at the
+       FOOT (0.55–1.05 of the tier's clew drop under its yard), rise to a block under ITS OWN yard within
+       0.30 of the half of the slings, and lead to the mast; there must be at least one a side. Where a tier
+       stands above the top, every fall's leads over and under the top's after rim must be recorded and
+       drawn, the rim lead abaft the mast's station and over the top's platform and the under lead beneath it.
+       Every recorded point must have a vertex of its own rope mesh within 0.10 ('upper gear drawn
+       elsewhere'), a 'Blocks' mesh must record a block within 0.05 of every turn ('a turn with no block'),
+       and every fall must be belayed — on the fife rail or, when it is full, the bulwark's pin rail
+       ('upper gear belayed nowhere'); A-BELAY reads the pin, the head and the coil. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const fifePinsM = [], clewM = [], buntM = [], sheetM = [], blockM = [], yardM = [], topG = [];
+      g.traverse(o => { const p = tagOf(o); if (!p) return;
+        if (!o.isMesh) { if (p.key === 'top' && p.name === 'Top') topG.push(new THREE.Box3().setFromObject(o)); return; }
+        if (p.key === 'fifeRail' && p.name === 'Fife rail pins') fifePinsM.push(o);
+        else if (p.key === 'clewline') clewM.push(o);
+        else if (p.key === 'buntline') buntM.push(o);
+        else if (p.key === 'sheet') sheetM.push(o);
+        else if (p.key === 'block') blockM.push(o);
+        else if (p.key === 'yard' && p.name === 'Yard') yardM.push(o); });
+      if (fifePinsM.length) {
+        const L = H.lwl || H.loa;
+        const D3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+        const near = (P, c) => { let d = 1e9; for (const q of P) d = Math.min(d, Math.hypot(q.x - c[0], q.y - c[1], q.z - c[2])); return d; };
+        const blocks = [].concat(...blockM.map(o => o.userData.blocks || []));
+        const sheetP = [].concat(...sheetM.map(pts));
+        const axisOf = P => { const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+          let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0; for (const q of P) { const a = q.x - c.x, b = q.y - c.y, e = q.z - c.z; xx += a * a; xy += a * b; xz += a * e; yy += b * b; yz += b * e; zz += e * e; }
+          let d = new THREE.Vector3(1, 0, 0); for (let it = 0; it < 30; it++) { d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize(); }
+          let tMin = 1e9, tMax = -1e9; for (const q of P) { const t = q.clone().sub(c).dot(d); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+          let rMax = 0; for (const q of P) { const w = q.clone().sub(c); const t = w.dot(d); if (Math.abs(t) < (tMax - tMin) * 0.1) rMax = Math.max(rMax, w.sub(d.clone().multiplyScalar(t)).length()); }
+          return { c, d, half: (tMax - tMin) / 2, r: rMax }; };
+        const yards = yardM.map(o => axisOf(pts(o))).filter(y => Math.abs(y.c.z) < 0.3 && Math.abs(y.d.z) >= 0.85);
+        const onYard = (q, yd) => { const w = new THREE.Vector3(q[0] - yd.c.x, q[1] - yd.c.y, q[2] - yd.c.z); const t = w.dot(yd.d); return { off: w.clone().sub(yd.d.clone().multiplyScalar(t)).length(), frac: Math.abs(t) / yd.half }; };
+        for (let i = 0; i < (H.masts || []).length; i++) {
+          const m = H.masts[i]; if (m.rig !== 'square' || !(m.yards || []).length || m.yards.length < 2) continue;
+          const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+          const cm = clewM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+          const bm = buntM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+          const tiers = (cm[0] && cm[0].userData.courseGear.tiers) || (bm[0] && bm[0].userData.courseGear.tiers) || [];
+          const cand = yards.filter(y => Math.abs(y.c.x - xm) < 1.5).sort((a, b) => a.c.y - b.c.y);
+          const top = topG.filter(b => Math.abs((b.min.x + b.max.x) / 2 - xm) < 2.0).sort((a, b) => a.min.y - b.min.y)[0] || null;
+          let anyUpper = false;
+          for (let k = 1; k < m.yards.length; k++) {
+            const name = m.yards[k], tk = `${at}, tier ${k} (${name})`;
+            const t = tiers.find(q => q.k === k);
+            if (!t || !t.clews || !t.clews.length) { say(v.id, 'an upper sail with no clewlines', `${tk}: a fife rail and ${m.yards.length} yards, and no clewline is recorded for this tier — its clews cannot be hauled up to the yard`); }
+            if (!t || !t.bunts || !t.bunts.length) { say(v.id, 'an upper sail with no buntlines', `${tk}: a fife rail and ${m.yards.length} yards, and no buntline is recorded for this tier — its foot cannot be lifted to the yard`); }
+            if (!t) continue;
+            anyUpper = true;
+            const yd = cand[k] || null;
+            if (!yd) { say(v.id, 'upper gear with no yard', `${tk}: no ${k + 1}th Yard mesh within 1.5 m of the station to read the blocks against`); continue; }
+            const cP = [].concat(...cm.map(pts)), bP = [].concat(...bm.map(pts));
+            for (const c of t.clews || []) {
+              const dS = near(sheetP, c.clew);
+              if (dS > 0.10) say(v.id, 'an upper clewline that does not start at the clew', `${tk}, ${c.side}: the recorded clew [${c.clew}] is ${dS.toFixed(3)} m from the nearest Sheets vertex`);
+              for (const [nm, q] of [['clew', c.clew], ['block', c.block], ['mast lead', c.mastBlock]]) { const d = near(cP, q); if (d > 0.10) say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${c.side} clewline's ${nm} [${q}]: nearest Clewlines vertex ${d.toFixed(3)} m away`); }
+              const oy = onYard(c.block, yd);
+              if (oy.off > yd.r + 0.20 || oy.frac < 0.03 || oy.frac > 0.35) say(v.id, 'an upper clewline block off the yard\'s quarter', `${tk}, ${c.side}: the block [${c.block}] stands ${oy.off.toFixed(2)} m off the yard's axis (radius ${yd.r.toFixed(2)}) at ${oy.frac.toFixed(2)} of the half-yard (0.03–0.35 wanted)`);
+              if (Math.hypot(c.mastBlock[0] - yd.c.x, c.mastBlock[2]) > 0.6) say(v.id, 'an upper clewline lead off the mast', `${tk}, ${c.side}: the lead block [${c.mastBlock}] is ${Math.hypot(c.mastBlock[0] - yd.c.x, c.mastBlock[2]).toFixed(2)} m from the yard's slings in plan (the raked axis at this height, not the foot's station)`);
+              for (const q of [c.block, c.mastBlock]) if (!blocks.some(b => D3(b.at, q) < 0.05)) say(v.id, 'a turn with no block', `${tk}, the ${c.side} clewline turns at [${q}] and no Blocks mesh records a block there`);
+            }
+            const clewY = (t.clews || []).map(c => c.clew[1]);
+            for (const side of ['port', 'starboard']) { const nS = (t.bunts || []).filter(b => b.side === side).length; if (nS < 1) say(v.id, 'too few upper buntlines', `${tk}: no buntline on the ${side} side (one or more wanted)`); }
+            for (const b of t.bunts || []) {
+              for (const [nm, q] of [['foot', b.foot], ['yard block', b.top], ['mast lead', b.mastBlock]]) { if (!q) { say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${b.side} buntline at ${b.at}: no ${nm} recorded`); continue; } const d = near(bP, q); if (d > 0.10) say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${b.side} buntline at ${b.at}: its ${nm} [${q}] has its nearest Buntlines vertex ${d.toFixed(3)} m away`); }
+              if (clewY.length) { const drop = yd.c.y - Math.min(...clewY), under = (yd.c.y - b.foot[1]) / drop;
+                if (under < 0.55 || under > 1.05) say(v.id, 'an upper buntline that does not start at the foot', `${tk}, the ${b.side} buntline at ${b.at}: its foot [${b.foot}] hangs ${under.toFixed(2)} of the clew's drop under the yard (0.55–1.05 wanted)`); }
+              const oy = onYard(b.top, yd);
+              if (oy.off > yd.r + 0.20 || oy.frac > 0.30) say(v.id, 'an upper buntline block off its yard', `${tk}, the ${b.side} buntline at ${b.at}: its block [${b.top}] stands ${oy.off.toFixed(2)} m off the yard's axis at ${oy.frac.toFixed(2)} of the half-yard (on the yard within 0.30 of the slings wanted)`);
+              if (b.mastBlock && Math.hypot(b.mastBlock[0] - yd.c.x, b.mastBlock[2]) > 0.6) say(v.id, 'an upper buntline lead off the mast', `${tk}, the ${b.side} buntline at ${b.at}: its lead is ${Math.hypot(b.mastBlock[0] - yd.c.x, b.mastBlock[2]).toFixed(2)} m from the yard's slings in plan`);
+              for (const q of [b.top, b.mastBlock]) if (q && !blocks.some(r => D3(r.at, q) < 0.05)) say(v.id, 'a turn with no block', `${tk}, the ${b.side} buntline at ${b.at} turns at [${q}] and no Blocks mesh records a block there`);
+            }
+            /* over the top: every fall of a tier above the top is led over the rim and under it */
+            const wantLeads = (t.clews || []).length + (t.bunts || []).length;
+            if (top && yd.c.y > top.max.y) {
+              if (!t.overTop || (t.leads || []).length < wantLeads) say(v.id, 'an upper fall through the top', `${tk}: the yard stands ${(yd.c.y - top.max.y).toFixed(2)} m over the top and ${(t.leads || []).length} of ${wantLeads} falls record a lead over its rim`);
+              for (const ld of t.leads || []) {
+                const P = ld.part === 'clewline' ? cP : bP;
+                for (const [nm, q] of [['rim lead', ld.rim], ['under lead', ld.under]]) { const d = near(P, q); if (d > 0.10) say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${ld.side} ${ld.part}'s ${nm} [${q}]: nearest vertex of its mesh ${d.toFixed(3)} m away`);
+                  if (!blocks.some(r => D3(r.at, q) < 0.05)) say(v.id, 'a turn with no block', `${tk}, the ${ld.side} ${ld.part} turns at its ${nm} [${q}] and no Blocks mesh records a block there`); }
+                if (ld.rim[1] < top.max.y || ld.rim[0] < top.max.x) say(v.id, 'a rim lead not over the top\'s after edge', `${tk}, the ${ld.side} ${ld.part}: its rim lead [${ld.rim}] is not over the top (top y ${top.min.y.toFixed(2)}–${top.max.y.toFixed(2)}, after edge x ${top.max.x.toFixed(2)})`);
+                if (ld.under[1] > top.min.y) say(v.id, 'an under lead not under the top', `${tk}, the ${ld.side} ${ld.part}: its under lead [${ld.under}] stands over the top's underside ${top.min.y.toFixed(2)}`);
+              }
+            }
+            /* every fall of the tier belayed, on either rail */
+            const belaysK = [].concat(...cm.map(o => (o.userData.belays || []).filter(b => b.tier === k)), ...bm.map(o => (o.userData.belays || []).filter(b => b.tier === k)));
+            if (belaysK.length < wantLeads) say(v.id, 'upper gear belayed nowhere', `${tk}: ${wantLeads} falls and ${belaysK.length} belay(s) recorded for the tier`);
+            for (const b of belaysK) if (b.rail !== 'fife' && b.rail !== 'pin') say(v.id, 'upper gear made fast off any rail', `${tk}: the ${b.side} ${b.part} belays on rail '${b.rail}'`);
+          }
+          if (anyUpper && !m.upperGear) say(v.id, 'upper gear with no answer', `${at}: clewlines and buntlines drawn on the tiers above the course and masts[${i}] says nothing of them (upperGear: figures per tier, or a provenance naming the plate read)`);
+        }
+      }
+    }
+
+    /* ── A-BELAY (round 277, 0y⁷¹): A FALL IS MADE FAST TO A PIN, AND THE PIN CARRIES ITS COIL.
+       r276 gave the bulwarked hull its pin rail and the running rigging went on ending at the deck
+       edge, a hand over the deck, through the rail. Read from the BUILT scene: where a 'Belaying
+       pins' mesh stands (its userData.pins are the built pins' centres), every sheet, tack and
+       halyard mesh's recorded belays (userData.belays, written by the rig builder) must each name
+       a built pin (0.05), reach it with the rope's own geometry (a vertex within 0.08 of the
+       recorded head), sit on the pin's upper half (the head 0.10–0.30 over the pin's centre), and
+       no two falls may share a pin; a square-rigged hull with pins must belay something; no fall
+       of those parts may end under the rail (the lowest vertex of each mesh at least 0.15 under
+       no pin's centre); and the coils: a 'Coils' mesh, one coil recorded per belay, each coil's
+       top 0.05–0.20 under its pin's centre (hung on the pin under the rail) and its bottom clear
+       of the deck. A hull with no pins must carry no belay record and no coil.
+       r278 (0y⁷²): the BRACES are falls too — the Braces mesh is read with the sheets, tacks and
+       halyards, and a hull with pins whose Braces mesh records no belay is convicted outright
+       ('braces belayed nowhere', the r277 state: eight braces ending in the air over the deck).
+       r279: the gaff halyards (Throat halyard, Peak halyard) are read here too; A-GAFF-HALYARD
+       convicts one on a hull with pins that records no belay. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const pinsM = [], ropeM = [], coilM = [], deckM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if ((p.key === 'pinRail' && p.name === 'Belaying pins') || (p.key === 'fifeRail' && p.name === 'Fife rail pins')) pinsM.push(o);   // r280: the fife rail's pins are pins
+        else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace'
+                 || p.key === 'throatHalyard' || p.key === 'peakHalyard' || p.key === 'jeers'
+                 || p.key === 'clewline' || p.key === 'buntline') ropeM.push(o);   // r279: the gaff halyards are falls too; r280: the jeers; r281: the course's clewlines and buntlines
+        else if (p.key === 'coil') coilM.push(o);
+        else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+      /* the pins' centres are the builder's record (userData.pins); a pins mesh with no record is
+         convicted, and its own vertices stand in for the centres so the falls are still read
+         against it — rule 8: the first draft of this rule read only the record and passed the
+         r276 builder, which draws pins and records none, in silence (PROOF B, r277) */
+      let pins = [].concat(...pinsM.map(o => o.userData.pins || []));
+      if (pinsM.length && !pins.length) {
+        say(v.id, 'belaying pins with no record of their centres', `${pinsM.length} Belaying pins mesh(es) and no userData.pins on any: the falls cannot be read against them except by their vertices`);
+        for (const o of pinsM) { const P = pts(o); for (let k = 0; k < P.length; k += 4) pins.push([P[k].x, P[k].y, P[k].z]); }
+      }
+      const belays = [].concat(...ropeM.map(o => (o.userData.belays || []).map(b => Object.assign({ mesh: o }, b))));
+      const squareMast = (H.masts || []).some(m => m.rig === 'square');
+      if (!pins.length) {
+        if (belays.length) say(v.id, 'a fall belayed on a hull with no pins', `${belays.length} belay record(s) on sheet/tack/halyard meshes and no Belaying pins mesh`);
+        if (coilM.length) say(v.id, 'a coil where there is no pin rail', `${coilM.length} Coils mesh(es) and no Belaying pins mesh`);
+      } else {
+        const near = q => { let bp = null, bd = 1e9; for (const p of pins) { const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); if (d < bd) { bd = d; bp = p; } } return { p: bp, d: bd }; };
+        if (squareMast && !belays.length) say(v.id, 'a pin rail with nothing belayed', `${pins.length} pins, a square-rigged mast, and no sheet, tack, halyard or brace made fast to any of them`);
+        const braceM = ropeM.filter(o => tagOf(o).key === 'brace');
+        if (braceM.length && !braceM.some(o => (o.userData.belays || []).length))
+          say(v.id, 'braces belayed nowhere', `${pins.length} pins and a Braces mesh with no belay record — the braces end in the air over the deck`);
+        const used = new Map();
+        for (const b of belays) {
+          const at = `the ${b.side} ${b.part} of mast ${b.mast}`;
+          const { d } = near(b.pin);
+          if (d > 0.05) say(v.id, 'a fall belayed to no pin', `${at}: its recorded pin [${b.pin}] is ${d.toFixed(3)} m from the nearest built pin`);
+          const key = b.pin.join(','); if (used.has(key)) say(v.id, 'two falls on one pin', `${at} and ${used.get(key)} share the pin at [${b.pin}]`); used.set(key, at);
+          const over = b.head[1] - b.pin[1];
+          if (over < 0.10 || over > 0.30) say(v.id, 'a fall made fast off the pin', `${at}: its head stands ${over.toFixed(3)} m over the pin's centre (0.10–0.30 is the pin's upper half)`);
+          const P = pts(b.mesh); let bd2 = 1e9; for (const q of P) bd2 = Math.min(bd2, Math.hypot(q.x - b.head[0], q.y - b.head[1], q.z - b.head[2]));
+          if (bd2 > 0.08) say(v.id, 'a fall that does not reach its pin', `${at}: the nearest vertex of its mesh is ${bd2.toFixed(3)} m from the recorded head [${b.head}]`);
+        }
+        for (const o of ropeM) {
+          const P = pts(o); if (!P.length) continue;
+          let lo = P[0]; for (const q of P) if (q.y < lo.y) lo = q;
+          const { p } = near([lo.x, lo.y, lo.z]);
+          if (p && lo.y < p[1] - 0.15) say(v.id, 'a fall ending under the pin rail', `${(tagOf(o).name || tagOf(o).key)}: its lowest vertex y ${lo.y.toFixed(2)} at x ${lo.x.toFixed(2)}, |z| ${Math.abs(lo.z).toFixed(2)} lies ${(p[1] - lo.y).toFixed(2)} m under the nearest pin's centre — a fall through the rail to the deck`);
+        }
+        if (belays.length && !coilM.length) say(v.id, 'belayed pins with no coils', `${belays.length} falls made fast and no Coils mesh`);
+        if (coilM.length) {
+          const C = [].concat(...coilM.map(pts));
+          let deckPts = null;
+          const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+            let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+              if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+          const nC = coilM.reduce((a, o) => a + (o.userData.coils || []).length, 0);
+          if (nC !== belays.length) say(v.id, 'coils and belays disagree', `${nC} coil(s) recorded on the Coils mesh, ${belays.length} fall(s) belayed`);
+          for (const b of belays) {
+            const at = `the coil of the ${b.side} ${b.part} of mast ${b.mast}`;
+            const Q = C.filter(q => Math.sign(q.z) === Math.sign(b.pin[2]) && Math.abs(q.x - b.pin[0]) < 0.16 && Math.abs(q.z - b.pin[2]) < 0.12);
+            if (!Q.length) { say(v.id, 'a belayed pin with no coil', `${at}: no Coils vertex within 0.16 m of the pin at [${b.pin}]`); continue; }
+            let top = -1e9, bot = 1e9; for (const q of Q) { top = Math.max(top, q.y); bot = Math.min(bot, q.y); }
+            const under = b.pin[1] - top;
+            if (under < 0.05 || under > 0.20) say(v.id, 'a coil off its pin', `${at}: its top at y ${top.toFixed(3)} hangs ${under.toFixed(3)} m under the pin's centre (0.05–0.20 wanted: on the pin, under the rail)`);
+            const e = deckAtX(b.pin[0]);
+            if (e < 1e8 && bot < e + 0.10) say(v.id, 'a coil on the deck', `${at}: its bottom at y ${bot.toFixed(3)} against the deck's edge at ${e.toFixed(3)}`);
+          }
+        }
+      }
+    }
+
+    /* ── D-FITTINGS-ON-DECK (round 272, Endurance): THE DECK'S FITTINGS STAND ON THE DECK,
+       AND THE DECK'S DEPTH SAYS WHERE IT WAS READ. Endurance carried hull.freeboard 2.0, the
+       height of her deck line, and the loft draws freeboard as the SKIN's top, so her solid
+       bulwark — the Framnaes section draws the cap rail 22–24 px over the deck line at 16.9
+       px/m, and every Hurley plate shows the wall — was never built: the deck lay at the
+       skin's top and the rail capped an open edge. The record now says the cap's height and
+       the deck's depth under it (deck.belowSheerM, the r215 class), and the r215 rules read
+       the built depth. Two things they do not read: (a) SILENCE — a depth with no
+       deck.provenance, the r108 pattern; (b) the fittings the cog has none of. A house, a
+       funnel, a wheel or a boat's skids reads the loft's deck(u); a builder that read the
+       sheer would stand its fitting on the cap rail, a bulwark's height over the deck, and no
+       existing rule would see it. Read on the meshes by name, all meshes of a name together
+       (a house is walls and a roof; its foot is the lowest of them): the foot over the deck's
+       edge at its station is at most half the bulwark, and 0.45 m at least (the camber's
+       crown over the edge). Half, because a house whose sill is sunk 0.45 m stood 0.90 m over
+       the edge when the builder was flipped to the sheer in PROOF B, and half plus 0.3 let
+       it by.
+       Silent on a hull whose deck is at the sheer. */
+    if (H.deck && H.deck.belowSheerM) {
+      if (!H.deck.provenance)
+        say(v.id, 'a deck depth with no provenance',
+            `deck.belowSheerM ${H.deck.belowSheerM} declared, deck.provenance absent — the deck lowered under the skin on no stated ground`);
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const deckMeshes = []; g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckMeshes.push(o); });
+      const dv = [].concat(...deckMeshes.map(world));
+      const deckEdgeNear = x => { let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - x);
+        if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); } return e; };
+      const FEET = /^(Deckhouse|Funnel|The wheel|Boat skids|Windlass|Compass platform)$/;
+      const feet = new Map();
+      g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && FEET.test(p.name || ''))) return;
+        const w = world(o); if (!w.length) return;
+        let y0 = 1e9, xs = 0; for (const q of w) { y0 = Math.min(y0, q[1]); xs += q[0]; }
+        const f = feet.get(p.name) || { y0: 1e9, x: 0, n: 0 };
+        if (y0 < f.y0) { f.y0 = y0; f.x = xs / w.length; } f.n++; feet.set(p.name, f); });
+      const allow = Math.max(0.45, 0.5 * H.deck.belowSheerM);
+      for (const [name, f] of feet) {
+        const e = dv.length ? deckEdgeNear(f.x) : 1e9; if (e > 1e8) continue;
+        if (f.y0 - e > allow)
+          say(v.id, 'a fitting standing on the sheer of a bulwarked hull',
+              `${name} (${f.n} mesh${f.n > 1 ? 'es' : ''}) foot ${f.y0.toFixed(2)} m, the deck's edge ${e.toFixed(2)} at x ${f.x.toFixed(1)}: ${(f.y0 - e).toFixed(2)} m over it, ${allow.toFixed(2)} allowed where the cap stands ${H.deck.belowSheerM} over the deck`);
+      }
+    }
+
+    /* ── A-STATIONS (round 293, Preussen): A MAST STANDS WHERE ITS OWN READ PUTS IT.
+       Preussen's five stations were a class placement at 0.18 intervals with no provenance while
+       three plates of her had been read for the rig, row by row on each pole's own column: the
+       fore stood 8.4 m and the main 5.5 m abaft the anchor plate's poles, and every mast stood
+       plumb where the plate leans them 2 degrees aft. The record now carries the read itself
+       (hull.stationRead: each pole's column at the deck row, its rake, the extent mapping) beside
+       the stations, and this rule reads three things. The SILENCE: a mast whose yard fractions
+       were read off a plate, on a hull whose stations carry no provenance; or a read with no
+       provenance. The RAKE: each mast's `rake` against the read's (0.15 deg). The MESH against
+       the PLATE: each mast's first segment's foot in hull space against the loft's own stem head
+       (-lwl/2 - stemRake x loa, hullSurface.rake(0)) plus the pole's distance abaft the head on
+       the plate, (col - stemHeadCol) / pxPerMAlongHull (0.3 m) - so a station typed through a
+       linear u, which the loft's ends are not, convicts here and nowhere else (the first r293
+       record was: 0.092 for the fore, drawn 1.7 m forward of the plate). Silent on every hull
+       without stationRead, except for the silence. */
+    {
+      const SR = H.stationRead;
+      const plateRead = (H.masts || []).some(m => /^PLATE READ/.test(m.yardFracsProvenance || ''));
+      if ((plateRead || SR) && !H.stationProvenance)
+        say(v.id, 'a rig read off a plate whose mast stations carry no provenance',
+            `${plateRead ? "a mast's yardFracsProvenance is a PLATE READ" : 'hull.stationRead is present'} and hull.stationProvenance is absent`);
+      if (SR) {
+        (H.masts || []).forEach((mk, i) => {
+          const rk = (SR.rakeDeg || [])[i];
+          if (rk !== undefined && Math.abs((mk.rake || 0) - rk) > 0.15)
+            say(v.id, 'a mast rake off its own read', `masts[${i}] rake ${mk.rake || 0} deg against the read's ${rk}`);
+        });
+        /* the mesh against the plate: the loft's deck-level stem head is at -lwl/2 - stemRake x rakeScale x loa in hull space
+           (hullSurface.rake(0)), and each pole stands (col - stemHeadCol) / pxPerMAlongHull abaft it on the plate */
+        const xHead = loftDeckX(H, 0);                    // the loft's deck-level stem head (the r294 helper)
+        const feet = {};
+        g.traverse(o => { const s = o.isMesh && o.userData.seg; if (s && s.si === 0 && s.footX !== undefined && feet[s.mi] === undefined) feet[s.mi] = s.footX; });
+        (H.masts || []).forEach((mk, i) => {
+          const col = (SR.cols || [])[i];
+          if (col === undefined) { say(v.id, 'a mast with no station read', `masts[${i}]: hull.stationRead.cols has no column for it`); return; }
+          if (feet[i] === undefined) { say(v.id, 'a mast with no segment foot to read its station off', `masts[${i}]`); return; }
+          const xPlate = xHead + (col - SR.stemHeadCol) / SR.pxPerMAlongHull;
+          if (Math.abs(feet[i] - xPlate) > 0.3)
+            say(v.id, 'a mast built off its read',
+                `masts[${i}] at ${mk.at}: its first segment's foot stands at x ${feet[i].toFixed(2)} in hull space, ${(feet[i] - xHead).toFixed(1)} m abaft the loft's stem head; the plate's column ${col} puts it ${((col - SR.stemHeadCol) / SR.pxPerMAlongHull).toFixed(1)} m abaft (${(feet[i] - xPlate).toFixed(2)} m off)`);
+        });
+      }
+    }
+    /* ── A-FUNNEL-STATIONS (round 296, Titanic): A FUNNEL STANDS WHERE ITS OWN READ PUTS IT.
+       Her four funnels were spaced evenly at 28.5 m while the 1911 side plan draws them 35 to
+       36 m apart, which left the forward funnel 16.6 m abaft the plan's. The record now carries
+       the read (hull.funnelRead: each stack's plan column at a stated height), and this rule
+       measures each built stack's own vertices: the centre of its lowest ring and of its
+       highest, interpolated to the read's height, against the plan's distance abaft the loft's
+       stem head (0.25 m). It also convicts the silence: a hull with funnels whose islands were
+       read off a side plan and whose funnels were not. */
+    {
+      const FR = H.funnelRead;
+      if (!FR && H.funnels && H.islands && H.islands.plate)
+        say(v.id, 'funnels on a side-plan hull with no read of their own', 'hull.islands.plate is present and hull.funnelRead is absent');
+      if (FR) {
+        const stacks = [];
+        g.updateMatrixWorld(true);
+        const invF = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.name === 'Funnel') stacks.push(o); });
+        if (stacks.length !== (FR.cols || []).length)
+          say(v.id, 'a funnel read that does not match the funnels built', `${(FR.cols || []).length} columns read, ${stacks.length} stacks built`);
+        else {
+          const xHeadF = loftDeckX(H, 0), P = new THREE.Vector3();
+          stacks.forEach((m, i) => {
+            const M = new THREE.Matrix4().multiplyMatrices(invF, m.matrixWorld), A = m.geometry.attributes.position;
+            let y0 = Infinity, y1 = -Infinity;
+            for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M); y0 = Math.min(y0, P.y); y1 = Math.max(y1, P.y); }
+            let a0 = Infinity, b0 = -Infinity, a1 = Infinity, b1 = -Infinity;
+            for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M);
+              if (P.y < y0 + 0.02) { a0 = Math.min(a0, P.x); b0 = Math.max(b0, P.x); }
+              if (P.y > y1 - 0.02) { a1 = Math.min(a1, P.x); b1 = Math.max(b1, P.x); } }
+            const c0 = (a0 + b0) / 2, c1 = (a1 + b1) / 2, built = c0 + (c1 - c0) * (FR.yM - y0) / (y1 - y0);
+            const plate = xHeadF + (FR.cols[i] - FR.stemHeadCol) / FR.pxPerMAlongHull;
+            if (Math.abs(built - plate) > 0.25)
+              say(v.id, 'a funnel built off its read', `funnel ${i + 1}: its axis at y ${FR.yM} stands at x ${built.toFixed(2)}; the plan's column ${FR.cols[i]} puts it at ${plate.toFixed(2)} (${(built - plate).toFixed(2)} m off)`);
+          });
+        }
+      }
+    }
+    /* ── A-FUNNEL-TOP (round 297, Titanic): A RECORDED FUNNEL HEAD STANDS AT ITS RECORDED HEIGHT.
+       Her stacks were built 19.0 m up from the boat deck, which put the heads at 38.87 m over
+       the water against the record's 42.80 m (175 ft keel to funnel top, less 34 ft 7 in of
+       draught). Where a hull carries funnelTopM, this rule reads each built stack's highest
+       vertex and convicts any head more than 0.15 m off. It also convicts the silence: a hull
+       whose funnel stations were read off a plan (funnelRead) and whose head height was not
+       recorded, because a station read with no height leaves the height a class default. */
+    {
+      if (H.funnelRead && H.funnelTopM === undefined)
+        say(v.id, 'funnel stations read with no head height', 'hull.funnelRead is present and hull.funnelTopM is absent');
+      if (H.funnelTopM !== undefined) {
+        g.updateMatrixWorld(true);
+        const invT = new THREE.Matrix4().copy(g.matrixWorld).invert(), P = new THREE.Vector3();
+        let n = 0;
+        g.traverse(o => {
+          if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
+          n++;
+          const M = new THREE.Matrix4().multiplyMatrices(invT, o.matrixWorld), A = o.geometry.attributes.position;
+          let top = -Infinity;
+          for (let k = 0; k < A.count; k++) top = Math.max(top, P.fromBufferAttribute(A, k).applyMatrix4(M).y);
+          if (Math.abs(top - H.funnelTopM) > 0.15)
+            say(v.id, 'a funnel head off its recorded height', `funnel ${n}: head at ${top.toFixed(2)} m over the water, the record says ${H.funnelTopM} m (${(top - H.funnelTopM).toFixed(2)} m off)`);
+        });
+        if (!n) say(v.id, 'a funnel head height with no funnel built', 'hull.funnelTopM is present and no Funnel mesh was found');
+      }
+    }
+    /* ── A-CROWS-NEST (round 296, Titanic): THE NEST STANDS WHERE THE PLAN DRAWS IT, ON THE MAST.
+       A class rule hung it at two thirds of the mast, 44.9 m over the water, where the 1911 side
+       plan draws it at 26.4 m. Where a mast's crowsNest carries a read, this rule measures the
+       built nest: its centre height against the plan's rows (0.2 m), and its aft edge against the
+       mast's own fore face at that height, read off the mast's vertices (it must touch, 0.15 m).
+       It convicts the silence: a nest with no read on a hull whose stations were read. */
+    (H.masts || []).forEach((mk, mi) => {
+      if (!mk.crowsNest) return;
+      const CN = mk.crowsNest;
+      if (CN === true || !CN.read) { if (H.stationRead) say(v.id, "a crow's nest with no read on a plate-read mast", `masts[${mi}].crowsNest carries no plate read`); return; }
+      g.updateMatrixWorld(true);
+      const invN = new THREE.Matrix4().copy(g.matrixWorld).invert(), bN = new THREE.Box3(), P = new THREE.Vector3();
+      let seg0 = null;
+      g.traverse(o => { if (!o.isMesh) return;
+        if (o.userData.part && o.userData.part.name === "Crow's nest") { const A = o.geometry.attributes.position, M = new THREE.Matrix4().multiplyMatrices(invN, o.matrixWorld); for (let k = 0; k < A.count; k++) bN.expandByPoint(P.fromBufferAttribute(A, k).applyMatrix4(M)); }
+        const s = o.userData.seg; if (s && s.mi === mi && s.si === 0) seg0 = o; });
+      if (bN.isEmpty()) { say(v.id, "a crow's nest recorded and not built", `masts[${mi}]`); return; }
+      const R = CN.read, plateY = (R.wlRow - (R.topRow + R.footRow) / 2) / R.pxPerM, yC = (bN.min.y + bN.max.y) / 2;
+      if (Math.abs(yC - plateY) > 0.2) say(v.id, "a crow's nest built off its read", `its centre stands ${yC.toFixed(2)} m over the water; the plan's rows put it at ${plateY.toFixed(2)}`);
+      if (seg0) {
+        const A = seg0.geometry.attributes.position, M = new THREE.Matrix4().multiplyMatrices(invN, seg0.matrixWorld);
+        /* the mast's fore face, off its own vertices: a cylinder has two rings, split at
+           mid-height, and the forward-most vertex of each is a point on the face. A raked ring
+           does not lie at one height, so a rule reading "the lowest vertices" sees a part of it. */
+        let yLo = Infinity, yHi = -Infinity;
+        for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M); yLo = Math.min(yLo, P.y); yHi = Math.max(yHi, P.y); }
+        const yMid = (yLo + yHi) / 2; let f0 = null, f1 = null;
+        for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M);
+          if (P.y < yMid) { if (!f0 || P.x < f0.x) f0 = { x: P.x, y: P.y }; }
+          else if (!f1 || P.x < f1.x) f1 = { x: P.x, y: P.y }; }
+        const face = f0.x + (f1.x - f0.x) * (yC - f0.y) / (f1.y - f0.y);
+        if (bN.max.x < face - 0.02 || bN.max.x > face + 0.15) say(v.id, "a crow's nest off its mast", `its aft edge is at x ${bN.max.x.toFixed(2)}; the mast's fore face at that height is at ${face.toFixed(2)}`);
+      }
+    });
+    /* ── A-RIG-DATUM (round 291, Preussen): A RIG READ OVER THE DECK STANDS ON THE DECK.
+       Preussen's five trucks and her thirty yard fractions were read on two plates over a
+       deck placed a bulwark's depth under the cap rail (r289: 'the cap rail plus the r215
+       class bulwark depth of 1.35 m'; r290 registered to r289), and the model drew her deck
+       at the skin's top, so every mast heel and every yard stood 1.35 m higher over the
+       water than the read that placed it, and the card's 58 m deck-to-truck was measured
+       from the cap. No rule could see it: the r215 and r272 rules are gated on
+       deck.belowSheerM, and she had no deck record. This rule reads the SILENCE: a mast
+       provenance that names a bulwark depth as its datum, on a hull whose record has no
+       deck.belowSheerM, is a read the model does not share. Silent on every hull whose
+       provenances name no such datum, and on every hull whose record lowers the deck. */
+    if (!(H.deck && H.deck.belowSheerM > 0)) {
+      const texts = [H.mastProvenance || ''].concat((H.masts || []).map(m => (m.yardFracsProvenance || '') + ' ' + (m.truckProvenance || '')));
+      const re = /bulwark depth of ([0-9.]+) m|rail \+ ([0-9.]+) m/;
+      for (let i = 0; i < texts.length; i++) {
+        const mm = re.exec(texts[i]); if (!mm) continue;
+        const d = mm[1] || mm[2];
+        say(v.id, 'a rig read over a deck the model draws at the cap',
+            `${i === 0 ? 'mastProvenance' : 'mast ' + (i - 1) + "'s provenance"} places the read's datum ${d} m under the cap rail and the record has no deck.belowSheerM: the masts stand on the skin's top, ${d} m over the deck the plate read them from`);
+        break;
+      }
+    }
+
+    /* ── THE FULL-RIGGER'S RIG IS THE RECORD'S RIG (round 44, Preussen). Three rules from
+       one survey, the same class as Wyoming's: right count, in the right place, gated on
+       the record. */
+    /* (5) THE YARD LIST IS CROSSED IN FULL. `yards` on a mast is the record's own tier
+       list — Preussen's thirty square sails are six to a mast, and the segment rig drew
+       three. A misnamed yard silently drops out of the plan (the builder filters unknown
+       names), so the drawn count is audited against the declared count, per mast.
+       ⚠ THE SIXTH STRIKE OF THE STATION-GATE CLASS (round 51, clipper). A fixed radius
+       around (at−0.5)·lwl missed the builder's own hull-rake shift AND the mast's rake
+       carrying its upper yards aft — a 5°-raked mizzen's royal stands 3.4 m abaft the
+       mast foot, outside any gate that still excludes the neighbouring mast. Same class
+       as rule 6's five strikes. So no gate at all: every square cloth belongs to exactly
+       one mast, so each is assigned to its NEAREST square-mast station and the per-mast
+       census is exact whatever the shared station bias. Inter-mast spacing is metres of
+       tens; the biases are single metres. */
+    {
+      const stations = (H.masts || [])
+        .map(mk => ({ mk, x: (mk.at - 0.5) * H.lwl }))
+        .filter(s => s.mk.rig === 'square');
+      if (stations.some(s => s.mk.yards)) {
+        const count = new Map(stations.map(s => [s.mk, 0]));
+        g.traverse(o => {
+          if (!o.isMesh || o.userData.kind !== 'square') return;
+          let best = null, bd = Infinity;
+          for (const s of stations) {
+            const d = Math.abs(o.position.x - s.x);
+            if (d < bd) { bd = d; best = s; }
+          }
+          if (best) count.set(best.mk, count.get(best.mk) + 1);
+        });
+        for (const s of stations) {
+          if (!s.mk.yards) continue;
+          const tiers = count.get(s.mk);
+          if (tiers !== s.mk.yards.length)
+            say(v.id, 'square tiers miscounted',
+                `${s.mk.yards.length} yards in the record at u=${s.mk.at}, ${tiers} sails crossed`);
+        }
+      }
+    }
+    /* ── A-YARD-LIST (round 282): THE YARD LIST SAYS WHERE IT COMES FROM, AND A PLATE-READ COUNT
+       BINDS IT. Endurance's record listed course, lower topsail, upper topsail and topgallant —
+       Howes' doubled rig, a CLASS list — and the builder crossed a lower topsail yard she never
+       carried: every plate of her fore mast (Hurley's full-sail, night and heeled plates) shows
+       THREE yards, the middle sail one deep topsail with a reef band. Rule (5) counts the drawn
+       tiers against the list, so a list the plates deny passed every check downstream as "the
+       record". So: (a) every square mast with a `yards` list carries `yardsProvenance` — the
+       SILENCE convicts, never a class answer that says it is one (the r108 rule); (b) where the
+       record carries `yardsRead` (the count read off plates of this ship) the list's length must
+       equal it — a list its own plate read denies is convicted, and rule (5) then binds the drawn
+       tiers to the list, so the meshes cross the plate's count transitively; (c) every name in the
+       list is one the builder's plan crosses — an unknown name drops out silently and rule (5)
+       would read it only as a miscount. */
+    (H.masts || []).forEach((mk, mi) => {
+      if (mk.rig !== 'square' || !Array.isArray(mk.yards)) return;
+      const at = `masts[${mi}] (station ${mk.at})`;
+      if (!mk.yardsProvenance)
+        say(v.id, 'a yard list with no provenance',
+            `${at}: yards [${mk.yards.join(', ')}] declared, yardsProvenance absent — a class list reads as the record`);
+      if (mk.yardsRead !== undefined && mk.yardsRead !== mk.yards.length)
+        say(v.id, 'a yard list its own plate read denies',
+            `${at}: ${mk.yards.length} yards listed [${mk.yards.join(', ')}] against yardsRead ${mk.yardsRead}, the count read off the plates yardsProvenance names`);
+      const KNOWN = ['course', 'ltop', 'utop', 'top', 'ltg', 'utg', 'tg', 'royal'];
+      mk.yards.filter(nm => !KNOWN.includes(nm)).forEach(nm =>
+        say(v.id, 'a yard the plan does not cross', `${at}: '${nm}' is not a yard the builder's plan knows; it drops out of the rig silently`));
+    });
+    /* ── A-YARD-FRAC (round 285, 0y⁸⁸): A YARD HANGS WHERE THE RECORD SAYS, AND THE RECORD ANSWERS.
+       Every yard of a listed rig was crossed at a class fraction of the truck (the builder's PLAN table)
+       and the record could not say otherwise, so a plate read of a yard's height had nowhere to go but the
+       table. Now `yardFracs: { <yard>: f }` on the mast hangs a named yard at its own fraction and each
+       plan-crossed yard records where it hangs (`userData.yardFrac`: name, frac, from 'record' | 'plan',
+       base, T, y). Read from the meshes and the record: (a) every square mast with a `yards` list carries
+       `yardFracsProvenance` — the SILENCE convicts ('yard fractions with no answer'); a CLASS answer that says
+       so passes (the r108 rule); (b) a recorded fraction names a yard the list crosses; (c) the mast's yard
+       meshes number the list; (d) a yard the record gives a fraction for is drawn at that fraction and
+       says so ('a recorded yard fraction not drawn'), a yard drawn as 'record' has one ('a yard fraction
+       drawn with no record'); (e) each yard mesh sits at the y its own record says (0.02), and a FIXED
+       yard at base + T × f (0.05 — the yard stands off the mast's face by its truss, which on a raked
+       mast is a few cm of y). */
+    {
+      const yardM = []; g.traverse(o => { if (o.isMesh && o.userData.yardFrac) yardM.push(o); });
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square' || !Array.isArray(mk.yards)) return;
+        const at = `masts[${mi}] (station ${mk.at})`;
+        if (!mk.yardFracsProvenance)
+          say(v.id, 'yard fractions with no answer',
+              `${at}: ${mk.yards.length} yards crossed at the plan's class fractions of the truck and the record says nothing of where they hang (yardFracs per yard with a provenance naming the plate read, or a provenance saying the class fractions stand unread)`);
+        const rec = mk.yardFracs || {};
+        Object.keys(rec).forEach(nm => { if (!mk.yards.includes(nm))
+          say(v.id, 'a yard fraction for a yard not crossed', `${at}: yardFracs.${nm} = ${rec[nm]} and '${nm}' is not in the yard list [${mk.yards.join(', ')}]`); });
+        const mine = yardM.filter(o => o.userData.yardFrac.mast === mi);
+        if (mine.length !== mk.yards.length)
+          say(v.id, 'yards miscounted against the list', `${at}: ${mine.length} yard meshes on this mast record where they hang, ${mk.yards.length} listed`);
+        for (const o of mine) {
+          const f = o.userData.yardFrac, tk = `${at}, yard '${f.name}'`;
+          const want = typeof rec[f.name] === 'number' ? rec[f.name] : null;
+          if (want !== null && (f.from !== 'record' || Math.abs(f.frac - want) > 1e-6))
+            say(v.id, 'a recorded yard fraction not drawn', `${tk}: the record hangs it at ${want} of the truck and the yard is drawn at ${f.frac} (${f.from})`);
+          if (want === null && f.from === 'record')
+            say(v.id, 'a yard fraction drawn with no record', `${tk}: drawn as the record's ${f.frac} and the record gives no fraction for this yard`);
+          if (Math.abs(o.position.y - f.y) > 0.02)
+            say(v.id, 'a yard drawn off its record', `${tk}: the mesh sits at y ${o.position.y.toFixed(3)} and its own record says ${f.y.toFixed(3)}`);
+          if (f.hoist === 'fixed' && f.from !== 'section' && Math.abs(o.position.y - (f.base + f.T * f.frac)) > 0.05)
+            say(v.id, 'a fixed yard off its fraction', `${tk}: at y ${o.position.y.toFixed(3)}; base ${f.base.toFixed(2)} + T ${f.T.toFixed(2)} x ${f.frac} = ${(f.base + f.T * f.frac).toFixed(3)}`);
+        }
+      });
+    }
+    /* ── A-YARD-SECTION (round 316, 0y¹⁵⁰): A DOUBLED RIG'S YARDS HANG FROM THE MAST'S OWN SECTIONS, AND NO SET
+       HOISTING YARD STANDS INSIDE A DOUBLING. The plan's class fractions of the truck put the clipper's and the
+       steamer's lower topsail yards 3.4 m under the lower cap they are fixed to, and their topgallants and
+       Endurance's topsail and topgallant under the cap of the section below the one they ride. Read off the set
+       build's meshes: the yard's height from its position, its radius from userData.slung, the caps from the
+       mast's segment meshes (userData.seg). On a square mast with a `yards` list, two or more sections and no
+       yard above the course read off a plate:
+       (a) every yard above the course is hung from the sections ('section') — 'a doubled-rig yard hung at the
+           plan's fraction';
+       (b) a fixed yard (ltop, ltg) rests on the cap of section 0 or 1, its centre one radius plus 0.02 m over it
+           (0.03) — 'a fixed yard off its cap';
+       (c) the highest hoisting yard on each section stands at 0.88 of it, the segment rig's height (0.03) —
+           'a set hoisting yard not atrip'.
+       And on EVERY square mast, both rig paths: (d) a set hoisting yard that the record does not read off a
+       plate stands at least 0.05 m clear over the cap of the section below the one it rides — 'a set hoisting
+       yard inside the doubling'. */
+    {
+      const segBy = {}; g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg) (segBy[sg.mi] = segBy[sg.mi] || [])[sg.si] = sg; });
+      const yd = []; g.traverse(o => { if (o.isMesh && (o.userData.yardFrac || o.userData.lowered) && o.userData.slung) yd.push(o); });
+      const HO = { utop: 1, top: 1, tg: 2, utg: 2, royal: 2 }, FX = { ltop: 0, ltg: 1 };
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square') return;
+        const sg = (segBy[mi] || []).filter(Boolean), last = sg.length - 1, at = `masts[${mi}] (station ${mk.at})`;
+        const mine = yd.filter(o => (o.userData.yardFrac ? o.userData.yardFrac.mast : o.userData.lowered.mast) === mi);
+        for (const o of mine) {
+          const L = o.userData.lowered, f = o.userData.yardFrac;
+          if (!L || L.lowered !== false || (f && f.from === 'record')) continue;
+          const sc = Math.min(L.tie, last); if (sc < 1 || !sg[sc - 1]) continue;
+          const R = o.userData.slung.yardR, clear = o.position.y - R - sg[sc - 1].headY;
+          if (clear < 0.05)
+            say(v.id, 'a set hoisting yard inside the doubling', `${at}, yard '${f ? f.name : 'tier ' + L.tie}': its spar's foot ${clear.toFixed(2)} m over the cap of section ${sc - 1} (${sg[sc - 1].headY.toFixed(2)}), under which a yard riding section ${sc} cannot travel`);
+        }
+        if (!Array.isArray(mk.yards) || last < 1) return;
+        const rec = mk.yardFracs || {};
+        if (Object.keys(rec).some(nm => nm !== 'course' && mk.yards.includes(nm))) return;
+        const groups = {};
+        for (const o of mine) {
+          const f = o.userData.yardFrac; if (!f || f.name === 'course') continue;
+          const tk = `${at}, yard '${f.name}'`, R = o.userData.slung.yardR, y = o.position.y;
+          if (f.from !== 'section') { say(v.id, "a doubled-rig yard hung at the plan's fraction", `${tk}: drawn from '${f.from}' at ${f.frac} of the truck, y ${y.toFixed(2)}`); continue; }
+          if (FX[f.name] !== undefined) { const k = FX[f.name]; if (k >= last) continue;
+            const want = sg[k].headY + R + 0.02;
+            if (Math.abs(y - want) > 0.03) say(v.id, 'a fixed yard off its cap', `${tk}: y ${y.toFixed(3)}, the cap of section ${k} at ${sg[k].headY.toFixed(3)} puts it at ${want.toFixed(3)}`);
+          } else if (HO[f.name]) { const sc = Math.min(HO[f.name], last); (groups[sc] = groups[sc] || []).push(o); }
+        }
+        Object.keys(groups).forEach(k => { const sc = +k, top = groups[k].reduce((a, b) => b.position.y > a.position.y ? b : a);
+          const want = sg[sc].headY - 0.12 * (sg[sc].headY - sg[sc].footY);
+          if (Math.abs(top.position.y - want) > 0.03)
+            say(v.id, 'a set hoisting yard not atrip', `${at}, yard '${top.userData.yardFrac.name}': y ${top.position.y.toFixed(3)}, 0.88 of section ${sc} is ${want.toFixed(3)}`); });
+      });
+    }
+    /* ── A-MAST-HEIGHTS (round 318, 0y¹⁵⁴): A RECORDED MAST HEIGHT IS BUILT, AND A POLE SHARED BY TWO YARDS
+       IS LONG ENOUGH FOR BOTH. Steel's topgallant mast, half its topmast, is a spar for one sail. On the clipper,
+       where the topgallant and the royal both ride it, it gave the fore a topgallant 3.9 m deep and a royal 2.2 m
+       under topsails 9.1-9.3 m deep. Read off the set build's segment meshes (userData.seg) and yards
+       (userData.yardFrac, userData.slung):
+       (1) a square mast whose record carries `mastHeightsM` names its source: `mastHeightsProvenance` opening
+           READ, RECORD or CONTESTED — 'mast heights with no source';
+       (2) it is built to them, within 0.05 m over the foot of its lower mast: the top at 0.90 of the lower
+           mast (the platform's rule), the crosstrees on the topmast's head, the truck on the last segment's
+           head — 'mast heights recorded and not built', 'a mast drawn off its recorded heights';
+       (3) on EVERY square mast, a set sail whose yard shares its section with another hoisting yard is at
+           least half as deep as the deepest HOISTING topsail on that mast (the upper or single topsail, which
+           rides the section below), each depth taken from the yard to the yard under it — 'two yards on a pole
+           too short for them'. The lower topsail is left out: it sheets to the course yard, and the course
+           hangs at the plan's class fraction of the truck, so its depth says nothing about the stack. The half
+           is CLASS: Cutty Sark's tea rig, the rig the record now carries, gives 0.57-0.66 (fore royal 4.2 m
+           against an upper topsail 7.4 m). */
+    {
+      const segBy = {}; g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg) (segBy[sg.mi] = segBy[sg.mi] || [])[sg.si] = sg; });
+      const yd = []; g.traverse(o => { if (o.isMesh && o.userData.yardFrac && o.userData.slung) yd.push(o); });
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square') return;
+        const at = `masts[${mi}] (station ${mk.at})`, sg = (segBy[mi] || []).filter(Boolean), MH = mk.mastHeightsM;
+        if (MH) {
+          if (!/^(READ|RECORD|CONTESTED)/.test(mk.mastHeightsProvenance || ''))
+            say(v.id, 'mast heights with no source', `${at}: mastHeightsM ${JSON.stringify(MH)} and no mastHeightsProvenance`);
+          /* r322: a mast built in two pieces (`only` 2) records a top and crosstrees and no truck */
+          const twoPiece = mk.only === 2 && MH.truck === undefined, need = twoPiece ? 2 : 3;
+          if (sg.length < need) say(v.id, 'mast heights recorded and not built', `${at}: ${sg.length} segments drawn for ${twoPiece ? 'a top and crosstrees' : 'a top, crosstrees and truck'}`);
+          else if (twoPiece && sg.length > 2) say(v.id, 'mast heights recorded and not built', `${at}: ${sg.length} segments drawn for a two-piece mast`);
+          else {
+            const foot = sg[0].footY, got = { top: 0.90 * (sg[0].headY - foot), crosstrees: sg[1].headY - foot, truck: sg[sg.length - 1].headY - foot };
+            for (const k of (twoPiece ? ['top', 'crosstrees'] : ['top', 'crosstrees', 'truck']))
+              if (Math.abs(got[k] - MH[k]) > 0.05)
+                say(v.id, 'a mast drawn off its recorded heights', `${at}: ${k} ${got[k].toFixed(2)} m over the foot, record ${MH[k]} m`);
+          }
+        }
+        const mine = yd.filter(o => o.userData.yardFrac.mast === mi).sort((a, b) => a.position.y - b.position.y);
+        if (mine.length < 3) return;
+        const depth = new Map(); mine.forEach((o, k) => { if (k > 0) depth.set(o, o.position.y - mine[k - 1].position.y); });
+        const tops = mine.filter(o => /top/.test(o.userData.yardFrac.name) && o.userData.yardFrac.hoist === 'tie' && depth.has(o));
+        if (!tops.length) return;
+        const deep = Math.max(...tops.map(o => depth.get(o)));
+        const bySec = {}; mine.forEach(o => { const f = o.userData.yardFrac; if (f.from === 'section' && f.atrip !== undefined) (bySec[f.sec] = bySec[f.sec] || []).push(o); });
+        Object.keys(bySec).forEach(sc => { if (bySec[sc].length < 2) return;
+          for (const o of bySec[sc]) { const d = depth.get(o);
+            if (d !== undefined && d < 0.5 * deep)
+              say(v.id, 'two yards on a pole too short for them', `${at}, yard '${o.userData.yardFrac.name}' on section ${sc}: its sail ${d.toFixed(2)} m deep against the deepest hoisting topsail's ${deep.toFixed(2)} m`); } });
+      });
+    }
+    /* ── A-YARD-LOWERED (round 314, 0y¹⁴⁶): A FURLED HOISTING YARD IS DOWN ON ITS CAP, AND A SET ONE IS NOT.
+       Eckersberg's 1828 Asow at anchor shows every topsail yard lowered onto its lower cap; until r314 every
+       hoisting yard stayed hoisted in the furled build. Read off each built yard that rides a tie over
+       section 1 or higher (userData.lowered), against the mast's own segment meshes (userData.seg): in the
+       SET build no yard is lowered — 'a set ship with a lowered yard'. In the FURLED build every such yard
+       is lowered — 'a furled hoisting yard left hoisted' — its spar's lowest point no more than 0.01 m under
+       the head of the section below — 'a lowered yard through the cap below' — and its centre within 0.05 m
+       of one yard radius plus 0.02 m over the higher of that head and the top of the yard below it, roll
+       included — 'a lowered yard standing off its rest'. The yard's height is read from its mesh, not from
+       the record. */
+    const yardLowerRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const heads = {}, ys = [];
+      G.traverse(o => {
+        if (!o.isMesh) return;
+        if (o.userData.seg) (heads[o.userData.seg.mi] || (heads[o.userData.seg.mi] = {}))[o.userData.seg.si] = o.userData.seg.headY;
+        const p = tagOf(o);
+        if (!p || p.key !== 'yard' || !o.userData.slung) return;
+        o.updateMatrixWorld(true);
+        const a = o.geometry.attributes.position, V = new THREE.Vector3();
+        let lo = 1e9, hi = -1e9;
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); lo = Math.min(lo, V.y); hi = Math.max(hi, V.y); }
+        ys.push({ o, lo, hi, c: o.userData.slung.axisY + (o.userData.slung.off * Math.sin((o.userData.slung.rakeDeg || 0) * Math.PI / 180)),
+                  r: o.userData.slung.yardR, roll: o.userData.slung.rollR || 0, rec: o.userData.lowered || null,
+                  mast: o.userData.lowered ? o.userData.lowered.mast : (o.userData.yardFrac ? o.userData.yardFrac.mast : (o.userData.courseAt ? o.userData.courseAt.mast : null)) });
+      });
+      for (const Y of ys) {
+        const L = Y.rec; if (!L) continue;
+        const at = `the yard on mast ${L.mast} riding a tie over section ${L.tie}, its centre at y ${(0.5 * (Y.lo + Y.hi)).toFixed(2)}`;
+        if (STATE === 'set') { if (L.setY !== undefined) say(v.id, 'a set ship with a lowered yard', `${at}: recorded lowered from ${L.setY}${SB}`); continue; }
+        if (L.setY === undefined && /^record/.test(L.why || '')) continue;   // the plate reads where it hangs
+        const capY = (heads[L.mast] || {})[L.tie - 1];
+        if (capY === undefined) { say(v.id, 'a lowered yard with no cap below it', `${at}: no segment ${L.tie - 1} on mast ${L.mast}${SB}`); continue; }
+        /* the mesh's own vertical extent is the braced, tapered spar; its centre is the slings' height */
+        const mid = 0.5 * (Y.lo + Y.hi), r = 0.5 * (Y.hi - Y.lo);
+        if (L.setY !== undefined && Y.lo < capY - 0.01) say(v.id, 'a lowered yard through the cap below', `${at}: its lowest point y ${Y.lo.toFixed(3)} under the head of section ${L.tie - 1} at ${capY.toFixed(3)}${SB}`);
+        let rest = capY;
+        for (const W of ys) if (W !== Y && W.mast === L.mast && W.hi < mid) rest = Math.max(rest, W.hi + 2 * W.roll);
+        /* the slings stand off the raked axis along its forward normal, which rises by off·sin(rake) */
+        const sl = Y.o.userData.slung, want = rest + r + 0.02 + sl.off * Math.sin((sl.rakeDeg || 0) * Math.PI / 180);
+        if (L.setY === undefined) { if (mid > want + 0.05) say(v.id, 'a furled hoisting yard left hoisted', `${at}: not lowered, ${(mid - want).toFixed(2)} m over its rest at ${rest.toFixed(3)}${SB}`); continue; }
+        if (Math.abs(mid - want) > 0.05) say(v.id, 'a lowered yard standing off its rest', `${at}: centre ${mid.toFixed(3)}, its rest at ${rest.toFixed(3)} puts it at ${want.toFixed(3)}${SB}`);
+      }
+      return ys.filter(Y => Y.rec && Y.rec.setY !== undefined).length;
+    };
+    yardLowerRead(g, 'set');
+    /* ── A-CROSSJACK-BARE (round 315, 0y¹⁴⁹): A SEGMENT RIG'S CROSSJACK CARRIES NO SAIL, AND THE RECORD SAYS WHY.
+       Falconer 1769: the crossjack sail "has generally been found of little service, and is therefore very seldom
+       used"; Eckersberg's 1828 Asow at anchor shows the 74's crossjack a bare spar while every other yard carries
+       its roll. Until r315 the builder bent a course to it, set and furled, with its sheets, tacks, garnets and
+       buntlines. For every mizzen that is the aftermost of three or more masts, square-rigged with no `yards` list
+       and more than one tier: (1) the record answers — `crossjackProvenance` opening PLATE READ or CLASS and
+       `crossjackSail` a boolean; silence is 'a crossjack with no answer'; (2) where the record says no sail, exactly
+       one Yard mesh on that mast is recorded bare (userData.bare) — 'a crossjack not crossed bare'; (3) no square
+       cloth hangs from it (a sail whose yardY is within 0.3 m of the bare yard's and whose mast is this one) — 'a sail
+       set from a bare crossjack'; (4) in the furled build no roll lies within 1.5 m of its centre — 'a roll on a bare
+       crossjack'; (5) no clewline or buntline tier is recorded on it — 'gear for a sail the crossjack does not
+       carry'; and (6) a bare yard anywhere else — 'a bare yard the record does not name'. */
+    const crossjackRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const ms = H.masts || [];
+      const bares = [], cloth = [], furls = [], gearTiers = [];
+      G.traverse(o => {
+        if (!o.isMesh || !o.geometry) return;
+        o.updateMatrixWorld(true);
+        const p = tagOf(o);
+        if (p && p.key === 'yard' && o.userData.bare) {
+          const a = o.geometry.attributes.position, V = new THREE.Vector3(), c = new THREE.Vector3();
+          for (let k = 0; k < a.count; k++) c.add(V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv));
+          bares.push({ o, c: c.divideScalar(a.count), rec: o.userData.bare });
+        }
+        if (o.userData.kind === 'square' && o.userData.yardY !== undefined) cloth.push(o);
+        if (o.userData.kind === 'furl' && !o.userData.brailed) {
+          const a = o.geometry.attributes.position, V = new THREE.Vector3(), c = new THREE.Vector3();
+          for (let k = 0; k < a.count; k++) c.add(V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv));
+          const f = c.divideScalar(a.count); f.onYard = o.userData.onYard || null; furls.push(f);
+        }
+        if (o.userData.courseGear && Array.isArray(o.userData.courseGear.tiers)) for (const t of o.userData.courseGear.tiers) if (t.yard) gearTiers.push(t);
+      });
+      ms.forEach((mk, mi) => {
+        if (!isSegCrossjack(mk)) return;
+        const at = `the mizzen (mast ${mi})`;
+        if (STATE === 'set') {
+          if (typeof mk.crossjackSail !== 'boolean' || !/^(PLATE READ|CLASS)/.test(mk.crossjackProvenance || ''))
+            say(v.id, 'a crossjack with no answer', `${at}: crossjackSail ${JSON.stringify(mk.crossjackSail)}, crossjackProvenance ${mk.crossjackProvenance ? JSON.stringify(mk.crossjackProvenance.slice(0, 40)) : 'absent'}`);
+        }
+        if (mk.crossjackSail === true) return;
+        const mine = bares.filter(b => b.rec.mast === mi);
+        if (mine.length !== 1) { say(v.id, 'a crossjack not crossed bare', `${at}: ${mine.length} yard(s) recorded bare${SB}`); return; }
+        const B = mine[0], yY = B.rec.y, mx = B.o.userData.slung ? B.o.userData.slung.mastX : null;
+        for (const o of cloth) if (Math.abs(o.userData.yardY - yY) < 0.3 && (mx === null || Math.abs(o.userData.mastX - mx) < 1.5))
+          say(v.id, 'a sail set from a bare crossjack', `${at}: a square sail hangs from y ${o.userData.yardY.toFixed(2)}, the bare crossjack at ${yY.toFixed(2)}${SB}`);
+        /* r322: a roll is on the crossjack when it RECORDS that yard. Every roll on a square yard records it
+           (userData.onYard, r316, crossYard's one furl path); a lateen's roll records none. A reach of 1.5 m convicted
+           the lateen's own roll once Vasa's heights put the lateen's crossing 1.05 m under the crossjack. */
+        if (STATE === 'furled') for (const f of furls) if (f.onYard && f.onYard.mast === mi && Math.abs(f.onYard.y - yY) < 0.05)
+          say(v.id, 'a roll on a bare crossjack', `${at}: a furled roll centred ${f.distanceTo(B.c).toFixed(2)} m from the crossjack's centre${SB}`);
+        for (const t of gearTiers) if (Math.abs(t.yard.yy - B.c.y) < 0.3 && (mx === null || Math.abs(t.yard.cx - B.c.x) < 1.5))
+          say(v.id, 'gear for a sail the crossjack does not carry', `${at}: a clewline/buntline tier recorded on the yard at y ${t.yard.yy}${SB}`);
+      });
+      for (const b of bares) { const mk = ms[b.rec.mast];
+        if (!mk || !isSegCrossjack(mk) || mk.crossjackSail === true)
+          say(v.id, 'a bare yard the record does not name', `mast ${b.rec.mast}: a yard at y ${b.c.y.toFixed(2)} recorded bare${SB}`); }
+    };
+    crossjackRead(g, 'set');
+    /* ── A-MIZZEN-SAIL (round 317, 0y¹⁵²): A SQUARE MIZZEN SETS A FORE-AND-AFT SAIL, OF ITS PERIOD, AND THE RECORD SAYS WHICH.
+       With the crossjack bare (r315) the East Indiaman's and the slave ship's mizzens set nothing under their topsails.
+       Waters 1958: on the larger ships of the sixteenth and seventeenth centuries "the mizzen mast carried a lateen-sail.
+       This rig remained typical of merchant ships well into the eighteenth" century; Falconer 1769, MIZEN: "extended
+       sometimes by a gaff, and sometimes by a yard which crosses the mast obliquely". For the aftermost of three or more
+       masts, square-rigged: (1) the record names one sail — `spanker` or `lateenMizzen`, not both, not neither:
+       'a square mizzen with no fore-and-aft sail' / 'a square mizzen with two'; (2) a lateen carries
+       `mizzenSailProvenance` opening PLATE READ or CLASS: 'a lateen mizzen with no source'; (3) the period — a gaff
+       spanker on a hull dated before 1700, 'a gaff spanker before its period', and a lateen on one dated after 1790,
+       'a lateen mizzen after its period'; (4) a recorded lateen is built: one 'Lateen yard' recording `onSquareMast` on
+       that mast, and in the set build one cloth beside it — 'a lateen mizzen recorded and not built' — and no such yard
+       on a mast whose record does not name it, 'a lateen yard the record does not name'; (5) the yard's sling stands
+       under the mast's lowest square yard, 'a lateen mizzen slung over the crossjack'. */
+    {
+      const ms = H.masts || [], mi = ms.length - 1, mk = ms[mi];
+      const lys = [], cloths = [], sqY = [];
+      g.traverse(o => { if (!o.isMesh) return;
+        if (o.userData.lateen && o.userData.lateen.onSquareMast) lys.push(o.userData.lateen);
+        if (o.userData.besideMast && typeof o.userData.mastX === 'number') cloths.push(o.userData.mastX);
+        if (o.userData.bare && o.userData.bare.mast === mi) sqY.push(o.userData.bare.y);
+        if (o.userData.yardFrac && o.userData.yardFrac.mast === mi) sqY.push(+o.userData.yardFrac.y); });
+      if (ms.length >= 3 && mk.rig === 'square') {
+        const at = `the mizzen (mast ${mi})`, yr = H.year;
+        if (!mk.spanker && !mk.lateenMizzen) say(v.id, 'a square mizzen with no fore-and-aft sail', `${at}: neither spanker nor lateenMizzen in the record`);
+        if (mk.spanker && mk.lateenMizzen) say(v.id, 'a square mizzen with two fore-and-aft sails', `${at}: both spanker and lateenMizzen`);
+        if (mk.lateenMizzen && !/^(PLATE READ|CLASS)/.test(mk.mizzenSailProvenance || ''))
+          say(v.id, 'a lateen mizzen with no source', `${at}: mizzenSailProvenance ${mk.mizzenSailProvenance ? JSON.stringify(mk.mizzenSailProvenance.slice(0, 30)) : 'absent'}`);
+        if (typeof yr === 'number' && mk.spanker && yr < 1700) say(v.id, 'a gaff spanker before its period', `${at}: spanker on a hull dated ${yr}`);
+        if (typeof yr === 'number' && mk.lateenMizzen && yr > 1790) say(v.id, 'a lateen mizzen after its period', `${at}: lateenMizzen on a hull dated ${yr}`);
+        if (mk.lateenMizzen) {
+          const mine = lys.filter(l => l.mast === mi);
+          if (mine.length !== 1) say(v.id, 'a lateen mizzen recorded and not built', `${at}: ${mine.length} lateen yard(s) on a square mast recorded on it`);
+          else {
+            const L = mine[0];
+            if (!cloths.some(x => Math.abs(x - L.mastX) < 0.01)) say(v.id, 'a lateen mizzen recorded and not built', `${at}: no cloth beside the mast at x ${L.mastX}`);
+            const low = sqY.length ? Math.min(...sqY) : null;
+            if (low !== null && L.slingY >= low) say(v.id, 'a lateen mizzen slung over the crossjack', `${at}: sling y ${L.slingY}, the lowest square yard at y ${low.toFixed(2)}`);
+          }
+        }
+      }
+      for (const L of lys) { const m2 = ms[L.mast];
+        if (!m2 || !m2.lateenMizzen) say(v.id, 'a lateen yard the record does not name', `mast ${L.mast}: a lateen yard on a square mast whose record has no lateenMizzen`); }
+    }
+    /* ── A-LATEEN-SHEET (round 319, 0y¹⁵⁶): A LATEEN'S CLEW IS SHEETED TO THE SHIP, AND ABAFT THE STERN TO AN OUTLICKER.
+       Until r319 no lateen drew a sheet, and on the carrack, the fluyt, the East Indiaman and the slave ship the clew
+       stood 0.75-1.07 m abaft the stern. Mainwaring's Seaman's Dictionary (c. 1620-23, printed 1644; NRS vol. 56 p. 193):
+       the outlicker, "some two or three yards long", is "made fast to the top of the poop, and so stands right out
+       astern", and the sheet is led to it where "there is not room enough within-board to haul down the sheet flat".
+       Read off the set build, against the deck's aft end xAft (0.5 lwl + rake(1), the hull surface's own):
+       (1) every lateen yard has one 'Lateen sheet' mesh on its mast, 'a lateen clew sheeted to nothing'; the cloth reaches
+       the yard's recorded clew within 0.2 m, 'a lateen clew off its cloth'; the sheet reaches it within 0.08 m, 'a lateen
+       sheet short of its clew'. (2) A clew less than 0.3 m (class: a block's room) forward of xAft has an outlicker on
+       its mast, 'a clew abaft the stern with no outlicker'; a clew with room has none, 'an outlicker where the sheet has
+       room within-board'. (3) The outlicker, measured off its mesh: 1.83-2.74 m long, 'an outlicker outside Mainwaring's
+       two to three yards'; its inboard end forward of xAft, 'an outlicker not made fast to the poop'; its outer end abaft
+       the clew, 'an outlicker short of the clew'; its top under the clew by 0.2 m, 'an outlicker the sheet hauls up to';
+       and the sheet comes within 0.2 m of its outer end, 'a sheet that does not reach its outlicker'. */
+    {
+      g.updateMatrixWorld(true);
+      const hs = SHIPS_HULL.hullSurface(H), xAft = 0.5 * H.lwl + hs.rake(1);
+      const lys = [], cl = [], shs = [], outs = [];
+      g.traverse(o => { if (!o.isMesh) return;
+        if (o.userData.lateen) lys.push(o.userData.lateen);
+        if (o.userData.besideMast && typeof o.userData.mastX === 'number') cl.push(o);
+        if (o.userData.lateenSheet) shs.push(o);
+        if (o.userData.part && o.userData.part.key === 'outlicker') outs.push(o); });
+      const vp = new THREE.Vector3();
+      const minD = (o, P) => { let d = Infinity; const pa = o.geometry.attributes.position;
+        for (let i = 0; i < pa.count; i++) { vp.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); d = Math.min(d, vp.distanceTo(P)); } return d; };
+      for (const L of lys) {
+        const at = `mast ${L.mast} (lateen, x ${L.mastX})`;
+        const mySh = shs.filter(o => o.userData.lateenSheet.mast === L.mast);
+        if (mySh.length !== 1 || !L.clew) { say(v.id, 'a lateen clew sheeted to nothing', `${at}: ${mySh.length} lateen sheet meshes${L.clew ? '' : ', and the yard records no clew'}`); continue; }
+        const C = new THREE.Vector3(...L.clew);
+        const myCl = cl.filter(o => Math.abs(o.userData.mastX - L.mastX) < 0.01);
+        if (myCl.length && Math.min(...myCl.map(o => minD(o, C))) > 0.2) say(v.id, 'a lateen clew off its cloth', `${at}: no cloth vertex within 0.2 m of the recorded clew ${L.clew}`);
+        const dC = minD(mySh[0], C);
+        if (dC > 0.08) say(v.id, 'a lateen sheet short of its clew', `${at}: the sheet's nearest vertex ${dC.toFixed(3)} m from the clew`);
+        const myO = outs.filter(o => o.userData.outlicker && o.userData.outlicker.mast === L.mast);
+        const need = L.clew[0] > xAft - 0.3;
+        if (need && !myO.length) say(v.id, 'a clew abaft the stern with no outlicker', `${at}: clew x ${L.clew[0]} against the deck's aft end ${xAft.toFixed(3)}`);
+        if (!need && myO.length) say(v.id, 'an outlicker where the sheet has room within-board', `${at}: clew x ${L.clew[0]}, ${(xAft - L.clew[0]).toFixed(2)} m forward of the deck's aft end`);
+        for (const o of myO) {
+          const bb = new THREE.Box3().setFromObject(o), len = bb.max.x - bb.min.x;
+          if (len < 1.81 || len > 2.76) say(v.id, "an outlicker outside Mainwaring's two to three yards", `${at}: ${len.toFixed(3)} m`);
+          if (bb.min.x >= xAft) say(v.id, 'an outlicker not made fast to the poop', `${at}: inboard end x ${bb.min.x.toFixed(3)}, the deck's aft end ${xAft.toFixed(3)}`);
+          if (bb.max.x < L.clew[0]) say(v.id, 'an outlicker short of the clew', `${at}: outer end x ${bb.max.x.toFixed(3)}, clew x ${L.clew[0]}`);
+          if (bb.max.y > L.clew[1] - 0.2) say(v.id, 'an outlicker the sheet hauls up to', `${at}: outlicker top y ${bb.max.y.toFixed(3)}, clew y ${L.clew[1]}`);
+          const end = new THREE.Vector3(bb.max.x, (bb.min.y + bb.max.y) / 2, (bb.min.z + bb.max.z) / 2);
+          const dE = minD(mySh[0], end);
+          if (dE > 0.2) say(v.id, 'a sheet that does not reach its outlicker', `${at}: the sheet's nearest vertex ${dE.toFixed(3)} m from the outer end`);
+        }
+      }
+    }
+    /* ── A-LATEEN-READ (round 321, 0y¹⁵⁸): A MIZZEN LATEEN YARD IS BUILT AS ITS RECORD SAYS, AND THE RECORD ANSWERS.
+       Until r321 every lateen mizzen on a square-rigged hull took the builder's class yard (1.15 of the lower mast, 56°
+       from the horizontal, slung a third of its length from the heel), read from no plate. Hocker's Vasa rig diagram
+       (Vasa II, 2023, p. 31) draws a 1628 mizzen yard at 42.1°, 1.576 times the main-to-mizzen spacing, its heel 0.531
+       of that spacing before the mizzen. RECORD: every lateen mizzen on a hull that carries square canvas says where its
+       yard comes from (`lateenYardProvenance`); the SILENCE convicts. A 'PLATE READ' carries `lateenRead`, and one
+       without it, or a `lateenRead` under any other answer, convicts. READ: the shares agree with the plate rows they
+       came from within 0.005 (and the angle within 0.1°): 'a lateen read that disagrees with its own rows'. BUILT, on
+       the set build, off the yard mesh's own end centres: the yard's length over the spacing of this mast's and the next
+       mast forward's stations, the angle, and the heel's distance before the mast over that spacing each stand within the
+       read's bound: 'a lateen yard off its read'. */
+    {
+      g.updateMatrixWorld(true);
+      const mixedH = (H.masts || []).some(m2 => m2.rig === 'square');
+      const ly = {};
+      g.traverse(o => { if (o.isMesh && o.userData.lateen && !o.userData.lateen.furled) ly[o.userData.lateen.mast] = o; });
+      const hs = SHIPS_HULL.hullSurface(H), Lh = H.lwl;
+      const stX = u => (u - 0.5) * Lh + hs.rake(u);
+      (H.masts || []).forEach((mk, mi) => {
+        if (!mixedH || !(mk.rig === 'lateen' || mk.lateenMizzen === true)) return;
+        const at = `masts[${mi}] (station ${mk.at}, lateen mizzen)`;
+        const pv = mk.lateenYardProvenance, rd = mk.lateenRead;
+        if (!pv) { say(v.id, 'a lateen mizzen yard with no answer', `${at}: lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from`); return; }
+        const isRead = /^PLATE READ/.test(pv);
+        if (isRead !== !!rd) { say(v.id, 'a lateen read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and lateenRead is ${rd ? 'present' : 'absent'}`); return; }
+        if (!rd) return;
+        const R = rd.rows, sp = R.mainFoot[0] - R.mizzenFoot[0];
+        const yl = Math.hypot(R.heel[0] - R.peak[0], R.heel[1] - R.peak[1]);
+        const ang = Math.atan2(R.heel[1] - R.peak[1], R.heel[0] - R.peak[0]) * 180 / Math.PI;
+        const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / sp - rd.heelAheadOfMastSpacing)];
+        if (Math.max(...dRows) > 0.005 || Math.abs(ang - rd.angleDeg) > 0.1)
+          say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / sp).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
+        const o = ly[mi];
+        if (!o) { say(v.id, 'a lateen read with no yard', `${at}: no set lateen yard records this mast`); return; }
+        const fwd = (H.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
+        const spB = stX(mk.at) - stX(fwd.at);
+        const hh = o.geometry.parameters.height;
+        const e1 = new THREE.Vector3(0, -hh / 2, 0).applyMatrix4(o.matrixWorld), e2 = new THREE.Vector3(0, hh / 2, 0).applyMatrix4(o.matrixWorld);
+        const lo = e1.y < e2.y ? e1 : e2, hi = e1.y < e2.y ? e2 : e1;
+        const bAng = Math.atan2(hi.y - lo.y, Math.abs(hi.x - lo.x)) * 180 / Math.PI;
+        const bYard = hh / spB, bHeel = (stX(mk.at) - lo.x) / spB, b = rd.boundPm || 0.03;
+        if (Math.abs(bYard - rd.yardOfMastSpacing) > b || Math.abs(bHeel - rd.heelAheadOfMastSpacing) > b || Math.abs(bAng - rd.angleDeg) > (rd.boundAngleDeg || 1))
+          say(v.id, 'a lateen yard off its read', `${at}: built yard ${bYard.toFixed(3)} and heel ${bHeel.toFixed(3)} of the ${spB.toFixed(2)} m spacing at ${bAng.toFixed(2)}°; the read is ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}° ± ${b}`);
+      });
+    }
+    /* ── A-MAST-READ (round 322, 0y¹⁶⁴): THE MASTS OF A HULL WHOSE LATEEN YARD IS READ OFF VASA ANSWER FOR THEIR HEIGHTS,
+       AND A READ HEIGHT IS ITS SHARE OF THE BUILT STATIONS. Until r322 the East Indiaman's and the slave ship's masts were
+       Steel's 1794 proportions, and the East Indiaman's mizzen stood 0.45 of her waterline from the deck to its top, where
+       Vasa's stands 0.17 of hers. Hocker's Vasa rig diagram (Vasa II, 2023, p. 31) gives each mast's top, topmast cap
+       and topgallant cap as shares of the distance between the fore and mizzen masts' feet.
+       RECORD: on a hull whose lateen mizzen carries `lateenRead`, every mast says where its heights come from
+       (`mastHeightsProvenance`, READ, RECORD, CONTESTED or CLASS); the SILENCE convicts: 'a mast beside a Vasa read with no
+       height answer'. A READ carries `mastHeightsRead`, and one without it convicts.
+       READ: each share agrees with the plate rows it came from, (foot row - row) / (fore foot column - mizzen foot column),
+       within 0.0005: 'a mast read that disagrees with its own rows'.
+       BUILT: each recorded height is its share times the spacing of this hull's fore and aftermost stations, as the
+       builder places them, within `boundM`: 'mast heights off their read'. A-MAST-HEIGHTS checks the segments against
+       the metres; this rule checks the metres against the stations, so a moved station cannot leave stale heights. */
+    {
+      const lrH = (H.masts || []).some(m2 => m2.lateenRead && typeof m2.lateenRead.yardOfMastSpacing === 'number');
+      if (lrH) {
+        const hs = SHIPS_HULL.hullSurface(H), Lh = H.lwl;
+        const stX = u => (u - 0.5) * Lh + hs.rake(u);
+        const ats = (H.masts || []).map(m2 => m2.at);
+        const spB = stX(Math.max(...ats)) - stX(Math.min(...ats));
+        (H.masts || []).forEach((mk, mi) => {
+          const at = `masts[${mi}] (station ${mk.at})`, pv = mk.mastHeightsProvenance, rd = mk.mastHeightsRead;
+          if (!/^(READ|RECORD|CONTESTED|CLASS)/.test(pv || '')) { say(v.id, 'a mast beside a Vasa read with no height answer', `${at}: mastHeightsProvenance is ${pv ? "'" + pv.slice(0, 12) + "'" : 'absent'}`); return; }
+          if (/^READ/.test(pv) !== !!rd) { say(v.id, 'a mast read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and mastHeightsRead is ${rd ? 'present' : 'absent'}`); return; }
+          if (!rd) return;
+          const sh = rd.ofForeMizzenSpacing || {}, span = Math.abs(rd.feetPx[0] - rd.feetPx[1]), MH = mk.mastHeightsM || {};   /* r329: Hollar's bow is at the left */
+          for (const k of Object.keys(sh)) {
+            const fromRows = (rd.foot[1] - rd.rows[k]) / span;
+            if (Math.abs(fromRows - sh[k]) > 0.0005)
+              say(v.id, 'a mast read that disagrees with its own rows', `${at}: ${k} rows give ${fromRows.toFixed(4)} of the spacing, the read says ${sh[k]}`);
+            if (MH[k] === undefined || Math.abs(MH[k] - sh[k] * spB) > (rd.boundM || 0.05))
+              say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded; ${sh[k]} of the built ${spB.toFixed(3)} m fore-to-mizzen spacing is ${(sh[k] * spB).toFixed(2)} m`);
+          }
+          for (const k of Object.keys(MH)) if (sh[k] === undefined)
+            say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded with no share read for it`);
+        });
+      }
+    }
+    /* ── A-MIZZEN-TIERS (round 320, 0y¹⁵⁷): A LATEEN MIZZEN OF THE 1590s-1620s CROSSES NO TOPGALLANT.
+       A square mizzen that sets a lateen (`lateenMizzen`, r317) carried one square sail, the topsail, over the crossjack
+       that spreads its foot. Vasa's rig (Hocker, Vasa II, 2023, p. 31) names a topgallant mast on the fore and the main and
+       none on the mizzen: "(i) mizzenmast; (j) mizzen topmast", sails "(9) mizzen; (10) mizzen topsail". Until r320 the
+       East Indiaman and the slave ship stepped a topgallant mast on the mizzen and crossed a topgallant yard on it.
+       RECORD: every such mast says how many tiers it crosses and from what (`tiersProvenance`); the SILENCE convicts.
+       BUILT, on the set build: the mast's segment meshes (userData.seg) number two, and the square yards slung to it
+       (userData.slung, within 0.6 m of the lateen yard's mast x) number two: 'a topgallant over a lateen mizzen'. */
+    {
+      const segN = {}, slung = [], lat = {};
+      g.traverse(o => { if (!o.isMesh) return; const u = o.userData;
+        if (u.seg) segN[u.seg.mi] = Math.max(segN[u.seg.mi] || 0, u.seg.si + 1);
+        if (u.slung && !u.lateen) slung.push(u.slung.mastX);
+        if (u.lateen && u.lateen.onSquareMast) lat[u.lateen.mast] = u.lateen.mastX; });
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square' || mk.lateenMizzen !== true) return;
+        const at = `masts[${mi}] (station ${mk.at}, lateen mizzen)`;
+        if (!mk.tiersProvenance) say(v.id, 'a lateen mizzen whose tiers have no answer', `${at}: tiersProvenance is absent; the record does not say how many square sails the mizzen crosses, or from what`);
+        if (lat[mi] === undefined) { say(v.id, 'a lateen mizzen with no lateen yard', `${at}: no lateen yard records this mast`); return; }
+        const ny = slung.filter(x => Math.abs(x - lat[mi]) < 0.6).length;
+        if ((segN[mi] || 0) > 2 || ny > 2)
+          say(v.id, 'a topgallant over a lateen mizzen', `${at}: ${segN[mi] || 0} mast pieces and ${ny} square yards drawn; a lateen mizzen crosses the crossjack and the topsail on two pieces`);
+      });
+    }
+    /* ── A-COURSE-READ (round 313, 0y¹⁴³): A COURSE ON A SEGMENT RIG HANGS WHERE ITS RECORD SAYS, AND THE RECORD ANSWERS.
+       A square mast with no `yards` list crosses one yard per segment, and its lowest, the course (the crossjack on a
+       mizzen), hung at a class 0.60 of the lower mast (0.72 under one tier) that no plate set. The Asow plate put the
+       74's crossjack at 0.845 of the deck-to-top height, where the class figure gave 0.667. RECORD: every such mast with
+       more than one tier carries `courseAtProvenance`, opening 'PLATE READ' with a `courseRead` or 'UNREAD' with none;
+       the SILENCE convicts. A read carries its plate rows, and its value is the mean of the two deck datums' shares
+       (0.005). BUILT: the course mesh records where it hangs (`userData.courseAt`, from 'record' | 'class'); a read is
+       drawn as the record's, a class yard as the class figure; and the yard's height over the mast's foot, over the
+       height of that mast's own TOP mesh over the foot, stands within the read's bound of the read. */
+    {
+      const courseM = [], topM = [];
+      g.traverse(o => { if (o.isMesh && o.userData.courseAt) courseM.push(o);
+                        if (o.userData.part && o.userData.part.key === 'top' && o.userData.part.name === 'Top') topM.push(o); });   // r325: the lower top, not a topmast top or crosstrees on the same axis
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square' || Array.isArray(mk.yards) || (mk.only || 3) < 2) return;
+        const at = `masts[${mi}] (station ${mk.at})`, P = mk.courseAtProvenance || '', R = mk.courseRead;
+        if (!P) say(v.id, 'a course height with no answer', `${at}: the course hangs at a class share of the lower mast and the record says nothing of where it hangs (courseAtProvenance opening PLATE READ with a courseRead, or UNREAD)`);
+        else if (/^PLATE READ/.test(P) && !(R && typeof R.ofDeckToTop === 'number'))
+          say(v.id, 'a course read with no figure', `${at}: courseAtProvenance opens PLATE READ and courseRead.ofDeckToTop is absent`);
+        else if (/^UNREAD/.test(P) && R)
+          say(v.id, 'a course figure over an UNREAD provenance', `${at}: courseRead ${JSON.stringify(R.ofDeckToTop)} and the provenance opens UNREAD`);
+        else if (!/^(PLATE READ|UNREAD)/.test(P))
+          say(v.id, 'a course provenance that does not say', `${at}: courseAtProvenance opens '${P.slice(0, 30)}', neither PLATE READ nor UNREAD`);
+        if (R && R.rows) {
+          const w = R.rows, a = (w.deckRail - w.yard) / (w.deckRail - w.top), b = (w.deckHidden - w.yard) / (w.deckHidden - w.top);
+          if (Math.abs((a + b) / 2 - R.ofDeckToTop) > 0.005)
+            say(v.id, 'a course read off its own rows', `${at}: rows give ${a.toFixed(3)} and ${b.toFixed(3)} (mean ${((a + b) / 2).toFixed(3)}) against ofDeckToTop ${R.ofDeckToTop}`);
+        }
+        const mine = courseM.filter(o => o.userData.courseAt.mast === mi);
+        if (mine.length !== 1) { say(v.id, 'a course that does not say where it hangs', `${at}: ${mine.length} course meshes record where they hang, 1 expected`); return; }
+        const o = mine[0], c = o.userData.courseAt;
+        if ((c.from === 'record') !== !!R)
+          say(v.id, R ? 'a course read not drawn' : 'a course drawn as read with no read', `${at}: drawn from '${c.from}', courseRead ${R ? R.ofDeckToTop : 'absent'}`);
+        if (R && typeof R.ofDeckToTop === 'number') {
+          const ax = o.userData.slung ? o.userData.slung.axisX : o.position.x;
+          const tops = topM.filter(t => t.parent === o.parent).sort((p, q) => Math.abs(p.position.x - ax) - Math.abs(q.position.x - ax));
+          if (!tops.length || Math.abs(tops[0].position.x - ax) > 3) { say(v.id, 'a read course with no top to read it against', `${at}: no top within 3 m of the mast's axis at the yard`); return; }
+          const share = (o.position.y - c.base) / (tops[0].position.y - c.base), bound = R.boundPm || 0.02;
+          if (Math.abs(share - R.ofDeckToTop) > bound)
+            say(v.id, 'a course off its plate read', `${at}: the yard stands ${share.toFixed(3)} of the way from the mast's foot (y ${c.base.toFixed(2)}) to its top (y ${tops[0].position.y.toFixed(2)}); the plate reads ${R.ofDeckToTop} +/- ${bound}`);
+        }
+      });
+    }
+    /* ── A-HOIST-READ (round 324, 0y¹⁶⁶): A HOISTING YARD ON A SEGMENT RIG IS SET WHERE ITS RECORD SAYS, AND THE RECORD ANSWERS.
+       Above the course every yard of a one-yard-per-segment rig is set atrip, at a class 0.88 of the section it hoists
+       on, which no plate set. Hocker's Vasa rig diagram draws all five of her hoisting yards lower: the topsail yards at
+       0.883-0.905 of the height from the mast's foot to the topmast's head, where the class figure gave 0.936-0.951.
+       RECORD: every square mast with no `yards` list and more than one tier carries `hoistProvenance`, opening
+       'PLATE READ' with a `hoistRead` or 'UNREAD' with none; the SILENCE convicts. A read names a share for each
+       section above the lower mast (`topmast`, and `topgallantMast` on a three-piece mast), and each share agrees with
+       its own rows (0.005). BUILT: every hoisting yard records where it is set (`userData.hoistAt`, from 'record' |
+       'class'); a mast crosses one per section above the lower; a read is drawn as the record's and a class yard as the
+       class figure; and the set height over the mast's foot, over the section's head over the foot, stands within the
+       read's bound of the read. The furled build lowers the yard onto the cap below, so the SET height (`setY`) is the
+       one tested, and a set build's yard stands at it (0.005 m). */
+    {
+      const hoistM = [];
+      g.traverse(o => { if (o.isMesh && o.userData.hoistAt) hoistM.push(o); });
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square' || Array.isArray(mk.yards) || (mk.only || 3) < 2) return;
+        const at = `masts[${mi}] (station ${mk.at})`, P = mk.hoistProvenance || '', R = mk.hoistRead;
+        const keys = (mk.only || 3) >= 3 ? ['topmast', 'topgallantMast'] : ['topmast'];
+        if (!P) say(v.id, 'a hoisting yard with no answer', `${at}: the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)`);
+        else if (/^PLATE READ/.test(P) && !R)
+          say(v.id, 'a hoist read with no figure', `${at}: hoistProvenance opens PLATE READ and hoistRead is absent`);
+        else if (/^UNREAD/.test(P) && R)
+          say(v.id, 'a hoist figure over an UNREAD provenance', `${at}: hoistRead present and the provenance opens UNREAD`);
+        else if (!/^(PLATE READ|UNREAD)/.test(P))
+          say(v.id, 'a hoist provenance that does not say', `${at}: hoistProvenance opens '${P.slice(0, 30)}', neither PLATE READ nor UNREAD`);
+        if (R) keys.forEach(k => {
+          const e = R[k];
+          if (!e || typeof e.ofFootToHead !== 'number') { say(v.id, 'a hoist read missing a section', `${at}: hoistRead.${k}.ofFootToHead is absent`); return; }
+          if (e.rows) {
+            const w = e.rows, a = (w.foot - w.yard) / (w.foot - w.head);
+            if (Math.abs(a - e.ofFootToHead) > 0.005)
+              say(v.id, 'a hoist read off its own rows', `${at} ${k}: rows give ${a.toFixed(4)} against ofFootToHead ${e.ofFootToHead}`);
+          }
+        });
+        const mine = hoistM.filter(o => o.userData.hoistAt.mast === mi);
+        if (mine.length !== keys.length) { say(v.id, 'a hoisting yard that does not say where it is set', `${at}: ${mine.length} hoisting yards record where they are set, ${keys.length} expected`); return; }
+        mine.forEach(o => {
+          const h = o.userData.hoistAt, e = R && R[h.section], read = !!(e && typeof e.ofFootToHead === 'number');
+          if ((h.from === 'record') !== read)
+            say(v.id, read ? 'a hoist read not drawn' : 'a hoisting yard drawn as read with no read', `${at} ${h.section}: drawn from '${h.from}', hoistRead ${read ? e.ofFootToHead : 'absent'}`);
+          const share = (h.setY - h.base) / (h.head - h.base);
+          if (read && Math.abs(share - e.ofFootToHead) > (R.boundPm || 0.01))
+            say(v.id, 'a hoisting yard off its plate read', `${at} ${h.section}: set ${share.toFixed(4)} of the way from the mast's foot (y ${h.base.toFixed(2)}) to the section's head (y ${h.head.toFixed(2)}); the plate reads ${e.ofFootToHead} +/- ${R.boundPm || 0.01}`);
+          const lw = o.userData.lowered;
+          if (lw && lw.lowered === false && o.userData.slung && Math.abs(o.userData.slung.axisY - h.setY) > 0.005)
+            say(v.id, 'a set hoisting yard not at its set height', `${at} ${h.section}: the yard's axis stands at y ${o.userData.slung.axisY} and its set height is ${h.setY}`);
+        });
+      });
+    }
+    /* ── A-TOPMAST-TOP (round 325, 0y¹⁶⁷): A TOPMAST BEFORE 1710 SAYS WHETHER IT CARRIES A TOP, AND A READ TOP IS DRAWN THERE.
+       Every three-tier topmast was given open crosstrees at its head, the 18th-century fitting. Hocker's Vasa rig diagram
+       (1628) draws a small round top on the fore and main topmasts, under the cap, at 0.945 and 0.943 of the height from
+       the mast's foot to the topmast's head, 0.46 and 0.48 of the lower top's width. RECORD: on a hull dated before 1710
+       every square mast with no `yards` list and three tiers carries `topmastTopProvenance`, opening 'PLATE READ' with a
+       `topmastTop` or 'UNREAD' with none; the SILENCE convicts. A read's two figures agree with its own rows and widths
+       (0.005, 0.01). BUILT: a read mast carries exactly one 'Topmast top' group (`userData.topmastTop` for the mast) and
+       no crosstrees; its centre stands within the read's bound of the read share of foot-to-head, and its half-width
+       measured off its meshes is the read share of the lower top's radius (0.05 of it); the topmast shrouds' highest
+       vertex stands under the top's lowest (the r324 build ran them through the platform to the cap); and every
+       topgallant shroud's foot stands on the top's rim, within 0.15 r of 0.85 r off the axis. A mast with no read
+       carries crosstrees and no topmast top. */
+    {
+      const ttG = [], ctG = [], tmS = [], tgS = [];
+      g.updateMatrixWorld(true);
+      const invG = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+        if (o.userData.topmastTop) ttG.push(o);
+        else if (p.key === 'top' && p.name === 'Crosstrees' && o.userData.mast !== undefined) ctG.push(o);
+        if (o.isMesh && o.userData.topmastShrouds) tmS.push(o);
+        if (o.isMesh && p.key === 'shroud' && p.name === 'Topgallant shrouds') tgS.push(o); });
+      const vtx = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(invG); out.push(V.clone()); } return out; };
+      (H.masts || []).forEach((mk, mi) => {
+        if ((H.year || 0) >= 1710 || mk.rig !== 'square' || Array.isArray(mk.yards) || (mk.only || 3) < 3) return;
+        const at = `masts[${mi}] (station ${mk.at})`, P = mk.topmastTopProvenance || '', R = mk.topmastTop;
+        if (!P) say(v.id, 'a topmast head with no answer', `${at}: a topmast on a hull dated ${H.year} carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)`);
+        else if (/^PLATE READ/.test(P) && !R) say(v.id, 'a topmast top read with no figure', `${at}: topmastTopProvenance opens PLATE READ and topmastTop is absent`);
+        else if (/^UNREAD/.test(P) && R) say(v.id, 'a topmast top figure over an UNREAD provenance', `${at}: topmastTop present and the provenance opens UNREAD`);
+        else if (!/^(PLATE READ|UNREAD)/.test(P)) say(v.id, 'a topmast top provenance that does not say', `${at}: topmastTopProvenance opens '${P.slice(0, 30)}', neither PLATE READ nor UNREAD`);
+        const read = !!(R && typeof R.ofFootToHead === 'number' && R.ofLowerTop > 0);
+        if (R && R.rows && R.widthPx) {
+          const a = (R.rows.foot - R.rows.top) / (R.rows.foot - R.rows.head), b = R.widthPx.top / R.widthPx.lowerTop;
+          if (Math.abs(a - R.ofFootToHead) > 0.005 || Math.abs(b - R.ofLowerTop) > 0.01)
+            say(v.id, 'a topmast top read off its own rows', `${at}: rows give ${a.toFixed(4)} against ofFootToHead ${R.ofFootToHead}, widths ${b.toFixed(3)} against ofLowerTop ${R.ofLowerTop}`);
+        }
+        const mine = ttG.filter(o => o.userData.topmastTop.mast === mi), cts = ctG.filter(o => o.userData.mast === mi);
+        if (!read) {
+          if (mine.length) say(v.id, 'a topmast top drawn with no read', `${at}: ${mine.length} topmast top(s) and no topmastTop`);
+          if (cts.length !== 1) say(v.id, 'a topmast head with nothing to spread its shrouds', `${at}: ${cts.length} crosstrees and no topmast top`);
+          return;
+        }
+        if (mine.length !== 1 || cts.length) { say(v.id, 'a topmast top read not drawn', `${at}: ${mine.length} topmast tops and ${cts.length} crosstrees; the read wants one top and no crosstrees`); return; }
+        const T = mine[0], u = T.userData.topmastTop;
+        const share = (T.position.y - u.base) / (u.head - u.base);
+        if (Math.abs(share - R.ofFootToHead) > (R.boundPm || 0.01))
+          say(v.id, 'a topmast top off its plate read', `${at}: the top stands ${share.toFixed(4)} of the way from the mast's foot (y ${u.base}) to the topmast's head (y ${u.head}); the plate reads ${R.ofFootToHead}`);
+        const P3 = []; T.traverse(m => { if (m.isMesh) P3.push(...vtx(m)); });
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity;
+        for (const q of P3) { x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); }
+        const half = (x1 - x0) / 2, want = u.lowerR * R.ofLowerTop;
+        if (Math.abs(half - want) > 0.05 * want)
+          say(v.id, 'a topmast top not the read size', `${at}: half-width ${half.toFixed(3)} m measured off its meshes; ${R.ofLowerTop} of the lower top's ${u.lowerR} m is ${want.toFixed(3)} m`);
+        const sh = tmS.filter(o => o.userData.topmastShrouds.mast === mi);
+        if (sh.length !== 1) say(v.id, 'a topmast top with no topmast shrouds under it', `${at}: ${sh.length} topmast shroud meshes`);
+        else { const yMax = Math.max(...vtx(sh[0]).map(q => q.y));
+          if (yMax > y0) say(v.id, 'a topmast shroud through its top', `${at}: the topmast shrouds reach y ${yMax.toFixed(3)} and the top's lowest point is y ${y0.toFixed(3)}`); }
+        /* the topgallant shrouds' feet: the lowest vertices of the mast's topgallant shroud mesh within 3 m of the top */
+        const near = [].concat(...tgS.map(vtx)).filter(q => Math.abs(q.y - u.y) < 0.6 && Math.abs(q.x - T.position.x) < u.r * 2);
+        if (!near.length) say(v.id, 'a topmast top with no topgallant shrouds at its rim', `${at}: no topgallant shroud vertex within 0.6 m of the top's height`);
+        else { const dz = Math.max(...near.map(q => Math.abs(q.z)));
+          if (Math.abs(dz - 0.85 * u.r) > 0.15 * u.r + 0.05) say(v.id, 'a topgallant shroud off its top\'s rim', `${at}: the shroud feet stand ${dz.toFixed(3)} m off the centreline; the rim is at ${(0.85 * u.r).toFixed(3)} m`); }
+      });
+    }
+    /* ── A-SAIL-TOP (round 326, 0y¹⁶⁸): NO TOP STANDS THROUGH THE SAIL SET OVER IT, AND A SAIL CUT OVER A TOP BEARS ON IT.
+       A topsail's foot is sheeted to the yard under the top, so its cloth comes down past the top on the fore side of
+       the mast. The cloth hung in its own belly about a mast's width before the axis, and a top reaches forward by its
+       whole radius: 25 tops on 9 hulls stood through the sail set over them, by up to 1.9 m. makeSail now cuts the
+       cloth to clear each top on its mast (Falconer's TOP-LINING is where a real topsail rubbed the rim). TEST, on the
+       set build: every vertex of every top on a set square sail's own mast (the lower top's `userData.mast`, the
+       topmast top's `userData.topmastTop.mast`) that falls inside the cloth's width and rows is put in the sail's
+       frame, and the cloth there is read off the mesh's own TRIANGLES (memory: a point on a coarse mesh); the rows
+       within the yard's diameter of the head are the head laced round the spar and are not read. A vertex before the
+       cloth by more than 5 mm convicts. A sail the builder cut over a top (`userData.drape` not empty) must bear on
+       it: its nearest top vertex no more than 0.30 m abaft the cloth. Every set square sail says what it bears on
+       (`userData.drape`, an array, empty where no top reaches it); the silence convicts. */
+    {
+      g.updateMatrixWorld(true);
+      const sqS = [], tps = [];
+      g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+        if (o.isMesh && p.key === 'sail' && o.userData.kind === 'square' && o.userData.surface && o.userData.grid) sqS.push(o);
+        if (!o.isMesh && p.key === 'top') {
+          const mi = o.userData.topmastTop ? o.userData.topmastTop.mast : o.userData.mast;
+          if (mi !== undefined) tps.push({ o, mi });
+        } });
+      const V = new THREE.Vector3();
+      for (const sl of sqS) {
+        const ud = sl.userData, surf = ud.surface, { NW, NH } = ud.grid;
+        const at = `the sail on masts[${ud.mast}] from the yard at y ${(+ud.yardY).toFixed(2)}`;
+        if (!Array.isArray(ud.drape)) { say(v.id, 'a sail that does not say what it bears on', `${at}: userData.drape is absent`); continue; }
+        if (ud.mast === undefined) continue;
+        const W = 2 * surf(1, 0)[0], pa = sl.geometry.attributes.position, row = NH + 1;
+        const inv = new THREE.Matrix4().copy(sl.matrixWorld).invert();
+        const headSkip = 2 * (ud.yardR || 0.1);
+        const uOf = x => { let a = 0, b = 1; for (let k = 0; k < 40; k++) { const m = (a + b) / 2; if (surf(m, 0)[0] < x) a = m; else b = m; } return (a + b) / 2; };
+        const zAt = (u, vv) => {
+          const fi = Math.min(NW - 1e-9, u * NW), fj = Math.min(NH - 1e-9, vv * NH), i = Math.floor(fi), j = Math.floor(fj), ss = fi - i, tt = fj - j;
+          const Z = (ii, jj) => pa.getZ(ii * row + jj);
+          return ss + tt <= 1 ? Z(i, j) + ss * (Z(i + 1, j) - Z(i, j)) + tt * (Z(i, j + 1) - Z(i, j))
+                              : Z(i + 1, j + 1) + (1 - ss) * (Z(i, j + 1) - Z(i + 1, j + 1)) + (1 - tt) * (Z(i + 1, j) - Z(i + 1, j + 1));
+        };
+        for (const { o, mi } of tps) {
+          if (mi !== ud.mast) continue;
+          let worst = -Infinity, n = 0;
+          o.traverse(m => { if (!m.isMesh) return; const ga = m.geometry.attributes.position;
+            for (let k = 0; k < ga.count; k++) {
+              V.fromBufferAttribute(ga, k).applyMatrix4(m.matrixWorld).applyMatrix4(inv);
+              if (Math.abs(V.x) > W / 2 * 0.98 || V.y > -headSkip) continue;
+              const u = uOf(V.x), foot = surf(u, 1)[1];
+              if (V.y < foot) continue;
+              n++;
+              worst = Math.max(worst, zAt(u, V.y / foot) - V.z);   // the cloth's z less the vertex's: > 0, the vertex stands before the cloth
+            } });
+          if (!n) continue;
+          const nm = o.userData.part.name || 'Top';
+          if (worst > 0.005) say(v.id, 'a top through the sail set over it', `${at}: the ${nm} stands ${worst.toFixed(3)} m before the cloth (${n} of its vertices inside the sail's rows)`);
+          else if (ud.drape.some(d => d.name === nm) && worst < -0.30) say(v.id, 'a sail cut over a top and standing off it', `${at}: cut over the ${nm}, the cloth stands ${(-worst).toFixed(3)} m before its nearest point; it bears within 0.30 m`);
+        }
+      }
+    }
+
+    /* ── A-RIG-HEIGHT (round 287, 0y⁹⁶): THE RIG'S HEIGHT IS ONE FIGURE, MEASURED BETWEEN THE SAME TWO POINTS
+       EVERYWHERE. The Shipwright's 'deck to truck' tile read the loft's rigTruckY - rigDeckY, and the loft took
+       both off the one mast MESH that reaches highest — on a fidded mast the topgallant, whose own foot is the
+       second doubling — so ten hulls printed one segment's length (Preussen 10.2 m against her attested 58, the
+       74 9.8 against 56); and every listed yard hung at base + T x f with T = the segment loop's y - base, 0.88 of
+       the last segment over its heel, 0.036 x lower SHORT of the truck the meshes draw (Preussen 56.78 against 58).
+       Every segment mesh records its mast and its ends (`seg.mi`, `seg.si`, `seg.footY`, `seg.headY`), so the truck
+       over the deck at a mast is the head of its last drawn segment over the foot of its first, read off the
+       meshes: (a) the loft's rigDeckY and rigTruckY are that pair for the mast that reaches highest (0.02) —
+       'the card's rig height is one segment' convicts the r235 derivation; (b) the loft says where the figure
+       comes from (rigTruckFrom) — the SILENCE convicts — and says 'record' exactly when that mast attests truckM
+       (a square stack solved for it) or is one piece of the record's own heightM, otherwise not; (c) every yard
+       mesh's T is its own mast's truck over its foot and its base that foot (0.02) — 'a yard's T is not the
+       truck'; (d) a square mast attesting truckM has its segments' deck-to-truck at truckM (0.05; the r155 rule
+       reads the mesh boxes at 0.75, this one the segments' own record); (e) every staysail's stay records the two
+       trucks it hoists between (`staysail`), and each is its mast's truck over its foot (0.02) — "a staysail's T is not the
+       truck". */
+    {
+      const U = g.userData || {};
+      const stacks = {};
+      g.traverse(o => { const s = o.isMesh && o.userData.seg; if (!s || s.mi === undefined) return;
+        const m = stacks[s.mi] = stacks[s.mi] || { foot: Infinity, head: -Infinity, n: 0 };
+        if (s.si === 0) m.foot = Math.min(m.foot, s.footY); m.head = Math.max(m.head, s.headY); m.n++; });
+      const anyMast = (H.masts || []).length > 0;
+      let tallest = null, tmi = null;
+      Object.keys(stacks).forEach(k => { const m = stacks[k]; if (m.foot < Infinity && (!tallest || m.head > tallest.head)) { tallest = m; tmi = +k; } });
+      let topMesh = -Infinity;
+      g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast') { const b2 = new THREE.Box3().setFromObject(o); topMesh = Math.max(topMesh, b2.max.y); } });
+      if (anyMast && topMesh > -Infinity) {
+        const d2t = (U.rigTruckY !== undefined && U.rigDeckY !== undefined) ? (U.rigTruckY - U.rigDeckY) : null;
+        if (d2t === null)
+          say(v.id, "the card's rig height is unset", `masts drawn and the loft records no rigDeckY/rigTruckY`);
+        else if (tallest && topMesh - tallest.head < 0.5) {
+          if (Math.abs(U.rigDeckY - tallest.foot) > 0.02 || Math.abs(U.rigTruckY - tallest.head) > 0.02)
+            say(v.id, "the card's rig height is one segment",
+                `the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
+          const mk = H.masts[tmi] || {};
+          const wantRecord = (mk.rig === 'square' && !!mk.mastHeightsM && !mk.mastHeightsRead) ||   /* r322: a height read off ANOTHER ship's plate is derived for this hull */ (mk.truckM !== undefined && (mk.rig === 'square' || (mk.rig === 'gaff' && mk.capFrac !== undefined))) || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
+          if (!U.rigTruckFrom)
+            say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
+          else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)
+            say(v.id, 'rig height provenance wrong', `rigTruckFrom '${U.rigTruckFrom}' for masts[${tmi}] (${mk.rig}; truckM ${mk.truckM}, heightM ${mk.heightM}, ${tallest.n} segment(s)) — ${wantRecord ? 'the record attests this figure' : 'the figure is derived through class fractions'}`);
+        } else if (!U.rigTruckFrom)
+          say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck off a mast with no segment record and does not say so (rigTruckFrom)`);
+      }
+      g.traverse(o => { if (!o.isMesh || !o.userData.yardFrac) return; const f = o.userData.yardFrac; const m = stacks[f.mast];
+        const tk = `masts[${f.mast}], yard '${f.name}'`;
+        if (!m || m.foot === Infinity) { say(v.id, 'a yard on a mast with no segment record', tk); return; }
+        const truck = m.head - m.foot;
+        if (Math.abs(f.T - truck) > 0.02)
+          say(v.id, "a yard's T is not the truck", `${tk}: hangs at ${f.frac} of T ${f.T.toFixed(3)} and the mast's segments put the truck ${truck.toFixed(3)} over its foot (T ${(truck - f.T).toFixed(3)} m short)`);
+        if (Math.abs(f.base - m.foot) > 0.02)
+          say(v.id, "a yard's base is not the mast's foot", `${tk}: base ${f.base.toFixed(3)} against the first segment's foot ${m.foot.toFixed(3)}`); });
+      g.traverse(o => { if (!o.isMesh || !o.userData.staysail) return; const f = o.userData.staysail;
+        const a = stacks[f.mi], w = stacks[f.mi - 1], tk = `masts[${f.mi}], staysail ${f.k}`;
+        if (!a || a.foot === Infinity || !w || w.foot === Infinity) { say(v.id, 'a staysail between masts with no segment record', tk); return; }
+        if (Math.abs(f.aftT - (a.head - a.foot)) > 0.02 || Math.abs(f.fwdT - (w.head - w.foot)) > 0.02 || Math.abs(f.aftBase - a.foot) > 0.02 || Math.abs(f.fwdBase - w.foot) > 0.02)
+          say(v.id, "a staysail's T is not the truck", `${tk}: hoists on aft T ${f.aftT.toFixed(3)} over base ${f.aftBase.toFixed(3)} and fwd T ${f.fwdT.toFixed(3)} over ${f.fwdBase.toFixed(3)}, against the segments' ${(a.head - a.foot).toFixed(3)} over ${a.foot.toFixed(3)} and ${(w.head - w.foot).toFixed(3)} over ${w.foot.toFixed(3)}`); });
+      (H.masts || []).forEach((mk, mi) => { if (mk.truckM === undefined || mk.rig !== 'square') return; const m = stacks[mi]; if (!m || m.foot === Infinity) return;
+        if (Math.abs((m.head - m.foot) - mk.truckM) > 0.05)
+          say(v.id, 'a recorded truck the segments do not land', `masts[${mi}]: the segments span ${(m.head - m.foot).toFixed(3)} m deck to truck against truckM ${mk.truckM}`); });
+    }
+    /* ── A-REEF-BAND (round 284, 0y⁸⁹): A SQUARE SAIL'S REEF BANDS ARE THE RECORD'S, AND THE RECORD
+       ANSWERS. Hurley's plate of Endurance's topsail shows one band with its points at 0.40 of the leech,
+       and until r284 the builder drew every square sail in the fleet plain. Read from the BUILT scene
+       (the set build) and the record: (a) every square mast with a `yards` list carries `reefs` with a
+       provenance — the SILENCE convicts ('reef bands with no answer'); an UNREAD answer that says so
+       does not (the r108 rule: a plain sail drawn in silence would read as the record); (b) for each
+       tier of the list, the drawn cloth (the k-th square sail up the mast's station, by its yard's
+       height) carries in userData.reef the bands the record gives for that tier and no other: a
+       recorded band not drawn, a band drawn with no record, a band at the wrong row (0.005), the
+       points miscounted against the cloth's width and the pitch; (c) the reef points: a 'Reef points'
+       mesh for the tier records one eyelet per point per band, each eyelet ON THE CLOTH (within 0.06 of the
+       cloth's own triangles — a vertex test is wrong here, the grid is half a metre) and at the band's row (within
+       0.02 of the drop, the drop read at the eyelet's own column between the cloth's head and its roached foot), and each point has TWO tails —
+       the recorded ends each within 0.05 of a vertex of the mesh, each at least 0.30 m under its eyelet,
+       and ACROSS THE CLOTH from each other at the row they end on (the cloth's own point there recorded
+       and on the sail, the fore tail's end before it and the aft tail's abaft it): a reef point is one
+       line rove through the eyelet with a tail on either face. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const near = (Q, c) => { let d = 1e9; for (const q of Q) d = Math.min(d, Math.hypot(q.x - c[0], q.y - c[1], q.z - c[2])); return d; };
+      /* an eyelet lies on a FACE of the cloth's 28x20 grid, up to a quarter-metre from any vertex — the measure is to the triangles */
+      const toCloth = (S, ix, c) => { const P = new THREE.Vector3(c[0], c[1], c[2]), T = new THREE.Triangle(), Q = new THREE.Vector3(); let d = 1e9;
+        for (let t = 0; t < ix.length; t += 3) { T.set(S[ix[t]], S[ix[t + 1]], S[ix[t + 2]]); T.closestPointToPoint(P, Q); d = Math.min(d, Q.distanceTo(P)); } return d; };
+      const sailM = [], reefM = [];
+      g.traverse(o => { if (!o.isMesh) return; const p = tagOf(o);
+        if (o.userData.kind === 'square') sailM.push(o);
+        else if (p && p.key === 'reefPoint') reefM.push(o); });
+      const stations = (H.masts || []).map((mk, mi) => ({ mk, mi, x: (mk.at - 0.5) * H.lwl })).filter(s => s.mk.rig === 'square');
+      const byMast = new Map(stations.map(s => [s.mi, []]));
+      for (const o of sailM) { let best = null, bd = Infinity; for (const s of stations) { const d = Math.abs(o.position.x - s.x); if (d < bd) { bd = d; best = s; } } if (best) byMast.get(best.mi).push(o); }
+      for (const o of reefM) { const r = o.userData.reef; if (!r || !stations.some(s => s.mi === r.mast)) say(v.id, 'reef points on no square mast', `a Reef points mesh records mast ${r && r.mast}, which is no square mast of the record`); }
+      for (const s of stations) {
+        const m = s.mk; if (!Array.isArray(m.yards)) continue;
+        const at = `masts[${s.mi}] (station ${m.at})`;
+        if (!m.reefs || !m.reefs.provenance)
+          say(v.id, 'reef bands with no answer', `${at}: ${m.yards.length} square tiers and the record says nothing of their reef bands (reefs: bands per tier with a provenance naming the plate read, or a provenance saying no plate has been read)`);
+        const cloths = byMast.get(s.mi).slice().sort((a, b) => (a.userData.yardY || 0) - (b.userData.yardY || 0));
+        for (let k = 0; k < m.yards.length; k++) {
+          const name = m.yards[k], tk = `${at}, tier ${k} (${name})`;
+          const rec = (m.reefs && m.reefs[name]) || null, want = rec && Array.isArray(rec.bands) ? rec.bands.filter(b => b > 0.02 && b < 0.98) : [];
+          const cloth = cloths[k]; if (!cloth) continue;   // rule (5) reads the miscount
+          const drawn = cloth.userData.reef || null;
+          const rp = reefM.find(o => o.userData.reef && o.userData.reef.mast === s.mi && o.userData.reef.tier === name) || null;
+          if (want.length && !drawn) say(v.id, 'a recorded reef band not drawn', `${tk}: the record gives band(s) at [${want.join(', ')}] of the drop and the cloth carries none`);
+          if (!want.length && drawn) say(v.id, 'a reef band drawn with no record', `${tk}: the cloth carries band(s) at [${(drawn.bands || []).join(', ')}] and the record gives none for this tier`);
+          if (!want.length && rp) say(v.id, 'reef points with no band', `${tk}: a Reef points mesh hangs on a tier the record gives no band for`);
+          if (!(want.length && drawn)) continue;
+          const db = drawn.bands || [];
+          if (db.length !== want.length || db.some((b, i) => Math.abs(b - want[i]) > 0.005)) say(v.id, 'a reef band at the wrong row', `${tk}: drawn at [${db.join(', ')}], the record says [${want.join(', ')}]`);
+          const pitch = rec.pitchM || 0.75, nWant = Math.max(2, Math.round(drawn.widthM / pitch));
+          if (drawn.n !== nWant) say(v.id, 'reef points miscounted', `${tk}: ${drawn.n} points across a ${drawn.widthM} m cloth at ${pitch} m (${nWant} wanted)`);
+          if (!rp) { say(v.id, 'reef points not drawn', `${tk}: a band is drawn on the cloth and no Reef points mesh hangs from it`); continue; }
+          const rr = rp.userData.reef, P = pts(rp), S = pts(cloth), IX = cloth.geometry.index.array, grid = cloth.userData.grid || { NW: 28, NH: 20 };
+          const colY = (i, j) => S[i * (grid.NH + 1) + j].y;
+          if ((rr.eyelets || []).length !== want.length * drawn.n) say(v.id, 'reef points miscounted', `${tk}: ${(rr.eyelets || []).length} eyelets recorded on the Reef points mesh, ${want.length * drawn.n} wanted`);
+          const yHead = cloth.userData.yardY, dropM = drawn.dropM;
+          (rr.eyelets || []).forEach((e, i) => {
+            const dS = toCloth(S, IX, e); if (dS > 0.06) say(v.id, 'a reef point off the cloth', `${tk}, point ${i}: the eyelet [${e}] is ${dS.toFixed(3)} m off the cloth's surface`);
+            const u = ((i % drawn.n) + 0.5) / drawn.n, fi = u * grid.NW, i0 = Math.min(grid.NW - 1, Math.floor(fi)), f = fi - i0;
+            const yH = colY(i0, 0) * (1 - f) + colY(i0 + 1, 0) * f, yF = colY(i0, grid.NH) * (1 - f) + colY(i0 + 1, grid.NH) * f;
+            const row = (yH - e[1]) / (yH - yF), bandAt = want[Math.min(want.length - 1, Math.floor(i / drawn.n))];
+            if (Math.abs(row - bandAt) > 0.02) say(v.id, 'a reef point off the band\'s row', `${tk}, point ${i}: the eyelet hangs ${row.toFixed(3)} of the cloth's drop at its column (head ${yH.toFixed(2)}, foot ${yF.toFixed(2)}), the band is at ${bandAt}`);
+            const F = (rr.foreEnds || [])[i], A = (rr.aftEnds || [])[i], C = (rr.clothAtTail || [])[i];
+            if (!F || !A || !C) { say(v.id, 'a reef point with no tails', `${tk}, point ${i}: the mesh records no tail ends for the eyelet`); return; }
+            for (const [nm, q] of [['fore tail', F], ['aft tail', A]]) {
+              const d = near(P, q); if (d > 0.05) say(v.id, 'a reef tail drawn elsewhere', `${tk}, point ${i}: the ${nm}'s end [${q}] has its nearest Reef points vertex ${d.toFixed(3)} m away`);
+              if (e[1] - q[1] < 0.30) say(v.id, 'a reef tail that does not hang', `${tk}, point ${i}: the ${nm} ends ${(e[1] - q[1]).toFixed(2)} m under its eyelet (0.30 wanted)`);
+            }
+            const dC = toCloth(S, IX, C); if (dC > 0.06) say(v.id, 'a reef point off the cloth', `${tk}, point ${i}: the cloth's recorded point at the tails' row [${C}] is ${dC.toFixed(3)} m off the sail's surface`);
+            if (!(F[0] < C[0] - 0.03 && A[0] > C[0] + 0.03)) say(v.id, 'reef tails on one face', `${tk}, point ${i}: the fore tail ends at x ${F[0]} and the aft at ${A[0]} against the cloth's ${C[0]} at that row — not one on each face`);
+          });
+        }
+      }
+    }
+    /* (6) DECLARED STAYSAILS FLY IN THEIR OWN GAP, ALOFT. `staysails: n` on the after
+       mast is the suit on the stays to the mast ahead. A staysail lives wholly BETWEEN
+       the two stations — square canvas straddles its own mast, jibs stand before the
+       foremast, a spanker runs past the after station — and well above the deck, so the
+       gap's aloft census is the staysail count and nothing else can inflate it. */
+    (H.masts || []).forEach((mk, mi) => {
+      if (!mk.staysails || !mi) return;
+      const xF = (H.masts[mi - 1].at - 0.5) * H.lwl, xA = (mk.at - 0.5) * H.lwl;
+      /* ⚠ THE BUILDER RAKES THE MAST OFF ITS STATION AND THIS RULE DID NOT (wrong for the
+         fifth time, round 45). A drawn mast stands at (at−0.5)·lwl PLUS the hull's own rake
+         shift, so on the steamer the fore staysail's tack sat 6 cm outside a fixed 0.8 m
+         gate and two drawn, correct sails were reported missing. The gate scales with the
+         hull instead — and once it is wide enough for rake it is wide enough for a raked
+         mast's own narrow upper squares to drift in, so the census also asks the sail's
+         KIND: a staysail is a `tri` cloth, and square canvas cannot masquerade. */
+      const tol = H.lwl * 0.03;
+      let n = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'tri' &&
+                            o.userData.part && o.userData.part.key === 'sail') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.min.x > xF - tol && bbx.max.x < xA + tol && bbx.min.y > deckY + 4) n++;
+      } });
+      if (n !== mk.staysails)
+        say(v.id, 'staysails miscounted',
+            `${mk.staysails} in the record between u=${H.masts[mi - 1].at} and u=${mk.at}, ${n} drawn`);
+    });
+    /* (7) A DECLARED SPANKER STANDS ABAFT ITS OWN MAST. `spanker` on a square mast is the
+       full-rigger's one fore-and-aft sail; it is drawn by the gaff block, so losing it
+       leaves a complete-looking square rig — 'declared but not drawn' cannot see a sail
+       that is one of thirty-one. It is the only QUAD cloth (gaff-and-boom four-corner,
+       `kind: 'quad'`) at that station — the mast's own royal and upper topgallant drift
+       into a bare aft-of-station census through rake and belly, measured 2 of 3 hits on
+       the clean build, so the kind is the discriminant, not the box alone. */
+    for (const mk of (H.masts || [])) {
+      if (mk.rig !== 'square' || !mk.spanker) continue;
+      const mx = (mk.at - 0.5) * H.lwl;
+      let found = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'quad') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.min.x > mx - 1.5 && bbx.max.x > mx + 4) found++;
+      } });
+      if (!found)
+        say(v.id, 'spanker not set',
+            `mast at u=${mk.at} declares a spanker and no quad cloth runs aft of its station`);
+    }
+    /* ── D-SAIL-SPAR (round 242): THE CLOTH IS ON THE SPAR IT IS BENT TO. A lateen's head is
+       laced to its yard, a jib's luff is hanked to its stay, a gaff sail's luff rides the mast
+       on hoops and its head is laced to the gaff, a junk panel lies between two battens. The
+       builder records which edges (userData.held: 'head' | 'luff' | 'foot'), and this rule
+       reads each held edge's row of vertices in the sail's own space, where z is the cloth's
+       departure from the sail's plane and every spar lies in that plane: a held row with a
+       vertex more than 0.01 m off is a sail standing off its spar. On the r241 builder every
+       lateen's head row stood 0.0232 of its length off the yard (0.92 m on the galley's
+       39.5 m main yard, 1.02 m on the galleass's), every jib's luff 0.0085–0.0118 of its stay,
+       every gaff sail's luff 0.21–0.54 m off the mast and its head 0.05–0.12 m off the gaff
+       (build/staging/r242/sailhead-before.json, -before-quads.json). A sail that does not say
+       which edges are held is convicted for the silence (rule 10) and read as if its head
+       were held — the one edge every one of these sails has on a spar. */
+    g.traverse(o => {
+      if (!o.isMesh || !o.geometry || (o.userData.kind !== 'tri' && o.userData.kind !== 'quad')) return;
+      const pos = o.geometry.attributes.position, n = pos.count, row = Math.round(Math.sqrt(n));
+      if (row * row !== n) { say(v.id, 'a sail that is not a grid', `${o.userData.kind} cloth with ${n} vertices`); return; }
+      let held = o.userData.held;
+      if (!held) { say(v.id, 'a sail that does not name the edges its spars hold', `${o.userData.kind} cloth, userData.held absent`); held = ['head']; }
+      /* tri: i runs from the yard (0) to the foot (N), j from the tack (0) to the leech (N):
+         head = row 0, foot = row N. quad: i from the luff (0) to the leech (N), j from the
+         foot (0) to the head (N): luff = row 0, head = column N, foot = column 0. */
+      const at = o.userData.kind === 'tri'
+        ? { head: q => q, foot: q => (row - 1) * row + q }
+        : { luff: q => q, head: q => q * row + row - 1, foot: q => q * row };
+      for (const e of held) {
+        if (!at[e]) { say(v.id, 'a sail holding an edge it does not have', `${o.userData.kind} cloth names '${e}'`); continue; }
+        let m = 0; for (let q = 0; q < row; q++) m = Math.max(m, Math.abs(pos.getZ(at[e](q))));
+        const P0 = at[e](0), P1 = at[e](row - 1);
+        const len = Math.hypot(pos.getX(P1) - pos.getX(P0), pos.getY(P1) - pos.getY(P0));
+        if (m > 0.01)
+          say(v.id, 'a sail standing off the spar it is bent to', `${o.userData.kind} cloth's ${e} stands ${m.toFixed(2)} m off its ${len.toFixed(1)} m spar (${(m / len).toFixed(4)} of it)`);
+      }
+    });
+    /* ── D-CASTLES, THE GEOMETRY (round 243): A WALLED CASTLE STANDS ON THE SHIP AND INSIDE
+       HER PLANKING. buildTieredCastles lofts each tier's wall off the hull's own half-breadth,
+       inset a step, its base sunk a tenth of a deck into what it stands on; each mesh records
+       userData.castle = {kind: 'wall' | 'deck', end, tier, u0, u1, dh}. Read here in hull
+       space: (1) every declared tier has its wall and its deck; (2) a wall vertex within the
+       skin's own height band must lie inside the skin's half-breadth at its x and height,
+       +0.02 m (a wall outside the planking is a wall drawn through the hull); (3) tier 0's
+       base rides no more than 0.30 m over the skin's top near its x, and tier t's base rides
+       no more than 0.30 m over tier t−1's deck (a castle standing off the ship). */
+    if (H.castles) {
+      const worldC = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      let skinC = null; g.traverse(o => { const p = tagOf(o); if (!skinC && o.isMesh && p && p.key === 'planking') skinC = o; });
+      const walls = [], decks = [];
+      g.traverse(o => { if (o.isMesh && o.userData.castle) (o.userData.castle.kind === 'wall' ? walls : decks).push(o); });
+      for (const end of ['fore', 'aft']) {
+        const c = H.castles[end]; if (!c) continue;
+        const w = walls.filter(o => o.userData.castle.end === end).length, d = decks.filter(o => o.userData.castle.end === end).length;
+        if (w !== c[2] || d !== c[2])
+          say(v.id, 'castle tiers missing', `${end}: ${c[2]} tier(s) declared, ${w} wall(s) and ${d} deck(s) drawn`);
+      }
+      if (!skinC) say(v.id, 'castles with no planking to stand in', 'no planking mesh');
+      else {
+        const sv = worldC(skinC);
+        const skinTopNear = x => { let t = -1e9; for (const q of sv) if (Math.abs(q[0] - x) < 0.5) t = Math.max(t, q[1]); return t; };
+        const skinHalfNear = (x, y) => { let w = 0; for (const q of sv) if (Math.abs(q[0] - x) < 0.3 && Math.abs(q[1] - y) < 0.3) w = Math.max(w, Math.abs(q[2])); return w; };
+        const deckYNear = (end, tier, x) => { let y = null;
+          for (const o of decks) { const c = o.userData.castle; if (c.end !== end || c.tier !== tier) continue;
+            for (const q of worldC(o)) if (Math.abs(q[0] - x) < 0.5 && (y === null || q[1] < y)) y = q[1]; }
+          return y; };
+        for (const o of walls) {
+          const c = o.userData.castle, pts = worldC(o);
+          /* (2) inside the planking, read where the skin has vertices to read */
+          let worst = 0, at = null;
+          for (const q of pts) {
+            const top = skinTopNear(q[0]); if (q[1] > top - 0.05) continue;
+            const half = skinHalfNear(q[0], q[1]); if (!half) continue;
+            const over = Math.abs(q[2]) - half;
+            if (over > worst) { worst = over; at = q; }
+          }
+          if (worst > 0.02)
+            say(v.id, 'a castle wall outside the planking', `${c.end} tier ${c.tier}: a base vertex ${worst.toFixed(2)} m outside the skin at x ${at[0].toFixed(1)}, y ${at[1].toFixed(2)}`);
+          /* (3) standing on what is under it: the wall's lowest vertex near a handful of x */
+          const xs = [...new Set(pts.map(q => Math.round(q[0] * 2) / 2))];
+          let lift = 0, where = null;
+          for (const x of xs) {
+            let base = 1e9; for (const q of pts) if (Math.abs(q[0] - x) < 0.26) base = Math.min(base, q[1]);
+            const under = c.tier === 0 ? skinTopNear(x) : deckYNear(c.end, c.tier - 1, x);
+            if (under === null || under < -1e8) continue;
+            const d = base - under; if (d > lift) { lift = d; where = x; }
+          }
+          if (lift > 0.30)
+            say(v.id, 'a castle standing off the ship', `${c.end} tier ${c.tier}: base ${lift.toFixed(2)} m over ${c.tier === 0 ? 'the skin' : 'the tier beneath'} at x ${where.toFixed(1)}`);
+        }
+        /* (4) A MAST'S SHROUDS SET UP ON THE STRUCTURE THAT STANDS AT THEIR STATION (round 244).
+           Read from the rope mesh's own geometry — ropeMesh lays 8 vertices a segment, the
+           foot's 4 then the head's — each lower shroud is sampled foot to head; the first
+           sample inboard of a wall's half-breadth (−0.02 m) while between the wall's base and
+           its head plus its rail is a rope drawn through the castle, and the band it is in
+           (wall or rail) is named. A wall is read only across its own x extent, so a shroud
+           standing forward of a break is not read against the wall abaft it. And a channel
+           whose x a wall covers must stand at that wall's head (within 0.5 m under it): the
+           r243 fore channel hung 2.2 m under the forecastle deck at the main-deck sheer, with
+           the forecastle's wall over it, and the shrouds it set up ran through the rail. */
+        const wallsX = walls.map(o => { const pts = worldC(o); return { c: o.userData.castle, pts,
+          xMin: Math.min(...pts.map(q => q[0])), xMax: Math.max(...pts.map(q => q[0])) }; });
+        const wallNear = (w, x) => {
+          if (x < w.xMin - 0.02 || x > w.xMax + 0.02) return null;
+          let h = 0, lo = 1e9, hi = -1e9, n = 0;
+          for (const q of w.pts) if (Math.abs(q[0] - x) < 0.6) { n++; h = Math.max(h, Math.abs(q[2])); lo = Math.min(lo, q[1]); hi = Math.max(hi, q[1]); }
+          return n ? { half: h, lo, hi, railH: w.c.railH || 0.9 } : null;
+        };
+        let through = 0, feet = 0, first = null;
+        g.traverse(o => {
+          const p = tagOf(o);
+          if (!(o.isMesh && p && p.key === 'shroud' && p.name === 'Shrouds')) return;
+          const pts = worldC(o);
+          for (let i = 0; i + 7 < pts.length; i += 8) {
+            const cen = k => { const s = [0, 0, 0]; for (let j = k; j < k + 4; j++) for (let d = 0; d < 3; d++) s[d] += pts[i + j][d] / 4; return s; };
+            const a = cen(0), b = cen(4), foot = a[1] < b[1] ? a : b, head = a[1] < b[1] ? b : a;
+            feet++;
+            let hit = null;
+            for (let k = 0; k <= 200 && !hit; k++) {
+              const f = k / 200, x = foot[0] + (head[0] - foot[0]) * f, y = foot[1] + (head[1] - foot[1]) * f, z = foot[2] + (head[2] - foot[2]) * f;
+              for (const w of wallsX) { const n = wallNear(w, x); if (!n) continue;
+                if (Math.abs(z) < n.half - 0.02 && y > n.lo - 0.02 && y < n.hi + n.railH) { hit = { w, y, band: y < n.hi ? 'wall' : 'rail', over: y - n.hi, foot }; break; } }
+            }
+            if (hit) { through++; if (!first) first = hit; }
+          }
+        });
+        if (through)
+          say(v.id, 'a shroud through a castle', `${through} of ${feet} lower shrouds pass through a castle's wall or rail (first: the ${first.w.c.end} tier ${first.w.c.tier} ${first.band} at y ${first.y.toFixed(2)}, ${first.over >= 0 ? first.over.toFixed(2) + ' m over' : (-first.over).toFixed(2) + ' m under'} the wall's head, from a foot at x ${first.foot[0].toFixed(2)}, y ${first.foot[1].toFixed(2)}, z ${first.foot[2].toFixed(2)})`);
+        g.traverse(o => {
+          const p = tagOf(o);
+          if (!(o.isMesh && p && p.key === 'channel')) return;
+          const pts = worldC(o);
+          const cx = pts.reduce((s, q) => s + q[0], 0) / pts.length, cy = pts.reduce((s, q) => s + q[1], 0) / pts.length;
+          let top = null;
+          for (const w of wallsX) { const n = wallNear(w, cx); if (n && (!top || n.hi > top.hi)) top = { ...n, c: w.c }; }
+          if (top && cy < top.hi - 0.5)
+            say(v.id, 'a channel under a castle wall', `a channel at x ${cx.toFixed(2)}, y ${cy.toFixed(2)} stands ${(top.hi - cy).toFixed(2)} m under the ${top.c.end} tier ${top.c.tier} wall's head (${top.hi.toFixed(2)}); the shrouds it sets up run through the castle`);
+        });
+      }
+    }
+    /* ── D-SHROUDS (round 245): A SHROUD ENDS ON A DEADEYE, AND THE DEADEYE STANDS ON A
+       CHANNEL. The builders placed the feet, the channel and the deadeyes from three
+       expressions (r245/feet-before.json: 410 of 510 lower shroud feet more than 1.5 r from
+       any deadeye, 198 over no channel — the channel block was gated on rig === 'square'
+       while buildRig draws shrouds on every mast that declares them). Now shroudFeet is the
+       one derivation, and this reads the BUILT scene against it: (1) on a deadeye-class mast
+       — square or gaff, or any mast on a hull that also carries a square one, with no
+       shroudFixing — each lower shroud's foot (from the 'Shrouds' mesh's own vertices, 8 a
+       segment, the lower end) lies within 1.5 r + 0.05 m of a deadeye's centre; (2) every
+       deadeye stands over a channel on its side — within the channel's x extent (+0.02) and
+       from 0.1 m under to 0.5 m over its centre; (3) a deadeye-class mast with shrouds has a
+       channel each side within 0.06 L of its station.
+       ── AND THE TACKLE CLASS (round 246): a lateen mast on an all-lateen hull sets up with a
+       tackle, drawn by buildRig from shroudFeet's seats (72 feet on the dhow, caravel, galley
+       and galleass stood at the deck edge on nothing drawn, r246/feet-before.json). Read from
+       the 'tackle' group's blocks (userData.block: mast, shroud, side, upper, len): (4) each
+       tackle-class lower shroud's foot lies within 0.75 len + 0.05 m of an UPPER block's
+       centre (the foot is the block's top, len/2 away); (5) each LOWER block's centre stands
+       from 0.05 m under to 1.5 len + 0.1 m over the rail's cap at the sheer at its own x
+       (H.sheer + the cap's height, as buildFittings lays it) and within 0.35 m of the sheer's
+       half-breadth there; (6) a tackle-class mast has one upper block a side per shroud.
+       ── AND THE LASHING CLASS (round 247): a crab-claw mast on a double hull sets up with a
+       lashing round the crossbeam at the hull's rail (the canoe's four feet stood on the
+       platform at z ±0.55 on hulls 2.7 m out, r246/feet-after.json). Read from the
+       'shroudLashing' group's eyes (userData.lash: mast, shroud, side, eye, seat, timber) and
+       the built crossbeams (userData.crossbeam): (7) each lashing-class lower shroud's foot
+       lies within 0.10 m of an eye's centre; (8) each lashing's seat lies on a built
+       crossbeam — within its x extent (+0.02), within 0.05 m of its top, inboard of its end
+       — or, where the timber is the cap, on the cap's top at the sheer as (5) reads it; (9)
+       a lashing-class mast has one eye a side per shroud. Where the record names the class
+       (mast.shroudSetup) kindOf reads it, as shroudFeet does. */
+    {
+      const worldS = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const cenOf = pts => { const c = [0, 0, 0]; for (const q of pts) for (let d = 0; d < 3; d++) c[d] += q[d] / pts.length; return c; };
+      const anySquare = (H.masts || []).some(m => m.rig === 'square');
+      const kindOf = mk => !mk.shrouds ? null
+        : (mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length) ? 'fixing'
+        : ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup
+        : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
+        : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+      const dead = [], chans = [], shr = [], tack = [], lash = [], beams = [], falls = [];
+      const extent = pts => { const e = { xMin: Infinity, xMax: -Infinity, yMin: Infinity, yMax: -Infinity, zMax: 0 };
+        for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMin = Math.min(e.yMin, q[1]); e.yMax = Math.max(e.yMax, q[1]); e.zMax = Math.max(e.zMax, Math.abs(q[2])); }
+        return e; };
+      g.traverse(o => {
+        const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'deadeye') dead.push({ c: cenOf(worldS(o)), r: o.geometry.parameters ? o.geometry.parameters.radiusTop : 0.1 });
+        else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs) }); }
+        else if (p.key === 'shroud' && p.name === 'Shrouds') shr.push(o);
+        else if (p.key === 'tackle' && o.userData.block) tack.push({ c: cenOf(worldS(o)), ...o.userData.block });
+        else if (p.key === 'shroudLashing' && o.userData.lash) {
+          const P = worldS(o); let top = null, bot = null;
+          for (const q of P) { if (!top || q[1] > top[1]) top = q; if (!bot || q[1] < bot[1]) bot = q; }
+          /* r265: a heart's top and bottom vertices and its length between them, off the mesh */
+          const heart = o.userData.lash.bullseye ? { top, bot, len: Math.hypot(top[0] - bot[0], top[1] - bot[1], top[2] - bot[2]) } : null;
+          lash.push({ c: cenOf(P), ...o.userData.lash, top: heart ? heart.top : null, heart, pts: heart ? P : null });
+        }
+        else if (p.key === 'shroudLashing' && o.userData.falls) falls.push({ pts: worldS(o), ...o.userData.falls });   // r266: the lanyard's segments
+        else if (p.key === 'crossbeam' && o.userData.crossbeam) beams.push({ ...extent(worldS(o)), ...o.userData.crossbeam });
+      });
+      let off = 0, feet = 0, first = null;
+      for (const o of shr) {
+        const mk = (H.masts || [])[o.userData.mast]; if (!mk || kindOf(mk) !== 'deadeyes') continue;
+        const pts = worldS(o);
+        for (let i = 0; i + 7 < pts.length; i += 8) {
+          const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
+          feet++;
+          let best = null;
+          for (const d of dead) { const dist = Math.hypot(foot[0] - d.c[0], foot[1] - d.c[1], foot[2] - d.c[2]); if (!best || dist < best.dist) best = { dist, r: d.r }; }
+          if (!best || best.dist > 1.5 * best.r + 0.05) { off++; if (!first) first = { foot, mast: o.userData.mast, dist: best ? best.dist : null }; }
+        }
+      }
+      if (off)
+        say(v.id, 'a shroud on no deadeye', `${off} of ${feet} lower shrouds on deadeye-class masts end more than 1.5 r from any deadeye (first: mast ${first.mast}, a foot at x ${first.foot[0].toFixed(2)}, y ${first.foot[1].toFixed(2)}, z ${first.foot[2].toFixed(2)}, ${first.dist === null ? 'no deadeye drawn' : 'the nearest deadeye ' + first.dist.toFixed(2) + ' m away'})`);
+      let offC = 0, firstC = null;
+      for (const d of dead) {
+        const on = chans.some(c => Math.sign(c.c[2]) === Math.sign(d.c[2]) && d.c[0] >= c.xMin - 0.02 && d.c[0] <= c.xMax + 0.02 && d.c[1] - c.c[1] > -0.1 && d.c[1] - c.c[1] < 0.5);
+        if (!on) { offC++; if (!firstC) firstC = d; }
+      }
+      if (offC)
+        say(v.id, 'a deadeye off its channel', `${offC} of ${dead.length} deadeyes stand over no channel (first at x ${firstC.c[0].toFixed(2)}, y ${firstC.c[1].toFixed(2)}, z ${firstC.c[2].toFixed(2)})`);
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'deadeyes') return;
+        const mx = (mk.at - 0.5) * H.lwl;
+        for (const sgn of [-1, 1])
+          if (!chans.some(c => Math.sign(c.c[2]) === sgn && Math.abs(c.c[0] - mx) < 0.06 * H.lwl))
+            say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sideOf(sgn)} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
+      });
+      /* (4) a tackle-class shroud ends in its upper block */
+      let offT = 0, feetT = 0, firstT = null;
+      for (const o of shr) {
+        const mk = (H.masts || [])[o.userData.mast]; if (!mk || kindOf(mk) !== 'tackle') continue;
+        const pts = worldS(o);
+        for (let i = 0; i + 7 < pts.length; i += 8) {
+          const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
+          feetT++;
+          let best = null;
+          for (const t of tack) { if (!t.upper) continue; const dist = Math.hypot(foot[0] - t.c[0], foot[1] - t.c[1], foot[2] - t.c[2]); if (!best || dist < best.dist) best = { dist, len: t.len }; }
+          if (!best || best.dist > best.len * 0.75 + 0.05) { offT++; if (!firstT) firstT = { foot, mast: o.userData.mast, dist: best ? best.dist : null }; }
+        }
+      }
+      if (offT)
+        say(v.id, 'a shroud on no tackle', `${offT} of ${feetT} lower shrouds on tackle-class masts end away from any tackle's upper block (first: mast ${firstT.mast}, a foot at x ${firstT.foot[0].toFixed(2)}, y ${firstT.foot[1].toFixed(2)}, z ${firstT.foot[2].toFixed(2)}, ${firstT.dist === null ? 'no tackle drawn' : 'the nearest upper block ' + firstT.dist.toFixed(2) + ' m away'})`);
+      /* (5) the lower block stands on the rail's cap at the sheer */
+      if (tack.length) {
+        const HSt = SHIPS_HULL.hullSurface(H), capH = H.capM ? H.capM : H.beam * 0.016 * 1.6;
+        let offR = 0, firstR = null;
+        for (const t of tack) {
+          if (t.upper) continue;
+          let uf = 0.5 + t.c[0] / H.lwl;
+          for (let k = 0; k < 2; k++) uf = Math.max(0.02, Math.min(0.98, 0.5 + (t.c[0] - HSt.rake(uf)) / H.lwl));
+          const top = HSt.sheer(uf) + capH, hb = Math.abs(SHIPS_HULL.surfacePoint(H, HSt, uf, 1)[2]);
+          const dy = t.c[1] - top, dz = Math.abs(t.c[2]) - hb;
+          if (dy < -0.05 || dy > t.len * 1.5 + 0.1 || Math.abs(dz) > 0.35) { offR++; if (!firstR) firstR = { t, dy, dz }; }
+        }
+        if (offR)
+          say(v.id, 'a tackle off the rail', `${offR} lower tackle blocks stand off the rail's cap (first: mast ${firstR.t.mast} shroud ${firstR.t.shroud} ${sideOf(firstR.t.side)}, ${firstR.dy.toFixed(2)} m over the cap, ${firstR.dz.toFixed(2)} m outboard of the sheer's half-breadth)`);
+      }
+      /* (6) every tackle-class shroud has its tackle */
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'tackle') return;
+        for (const sgn of [-1, 1]) {
+          const n = tack.filter(t => t.mast === mi && t.side === sgn && t.upper).length;
+          if (n !== mk.shrouds)
+            say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sideOf(sgn)} tackle${n === 1 ? '' : 's'}`);
+        }
+      });
+      /* (7) a lashing-class shroud ends in its eye (round 247) */
+      let offL = 0, feetL = 0, firstL = null;
+      for (const o of shr) {
+        const mk = (H.masts || [])[o.userData.mast]; if (!mk || kindOf(mk) !== 'lashing') continue;
+        const pts = worldS(o);
+        for (let i = 0; i + 7 < pts.length; i += 8) {
+          const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
+          feetL++;
+          let best = null;
+          for (const e of lash) {
+            /* r265 (0y⁴⁶): where the eye is a hardwood heart the shroud ends seized round its rim — its top, read off
+               the mesh as the heart's highest vertex — not at its hole */
+            const at = e.top ? e.top : e.eye;
+            const dist = Math.hypot(foot[0] - at[0], foot[1] - at[1], foot[2] - at[2]); if (best === null || dist < best) best = dist; }
+          if (best === null || best > 0.10) { offL++; if (!firstL) firstL = { foot, mast: o.userData.mast, dist: best }; }
+        }
+      }
+      if (offL)
+        say(v.id, 'a shroud on no lashing', `${offL} of ${feetL} lower shrouds on lashing-class masts end away from any lashing's eye (first: mast ${firstL.mast}, a foot at x ${firstL.foot[0].toFixed(2)}, y ${firstL.foot[1].toFixed(2)}, z ${firstL.foot[2].toFixed(2)}, ${firstL.dist === null ? 'no lashing drawn' : 'the nearest eye ' + firstL.dist.toFixed(2) + ' m away'})`);
+      /* (8) the lashing's seat is on a built crossbeam — or on the cap where the hull has none */
+      if (lash.length) {
+        const HSl = SHIPS_HULL.hullSurface(H), capHl = H.capM ? H.capM : H.beam * 0.016 * 1.6;
+        let offB = 0, firstB = null;
+        for (const e of lash) {
+          const st = e.seat; let on;
+          if (e.timber && e.timber.what === 'crossbeam')
+            on = beams.some(bm => st[0] >= bm.xMin - 0.02 && st[0] <= bm.xMax + 0.02 && Math.abs(st[1] - bm.yMax) <= 0.05 && Math.abs(st[2]) <= bm.zMax + 0.02);
+          else {
+            let uf = 0.5 + st[0] / H.lwl;
+            for (let k = 0; k < 2; k++) uf = Math.max(0.02, Math.min(0.98, 0.5 + (st[0] - HSl.rake(uf)) / H.lwl));
+            const top = HSl.sheer(uf) + capHl, hb = Math.abs(SHIPS_HULL.surfacePoint(H, HSl, uf, 1)[2]);
+            on = Math.abs(st[1] - top) <= 0.05 && Math.abs(Math.abs(st[2]) - hb) <= 0.35;
+          }
+          if (!on) { offB++; if (!firstB) firstB = e; }
+        }
+        if (offB)
+          say(v.id, 'a lashing off its beam', `${offB} of ${lash.length} shroud lashings seat on no built ${firstB.timber && firstB.timber.what === 'crossbeam' ? 'crossbeam' : 'cap'} (first: mast ${firstB.mast} shroud ${firstB.shroud} ${sideOf(firstB.side)}, seat at x ${firstB.seat[0].toFixed(2)}, y ${firstB.seat[1].toFixed(2)}, z ${firstB.seat[2].toFixed(2)}; ${beams.length} crossbeams built)`);
+      }
+      /* (9) every lashing-class shroud has its lashing */
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'lashing') return;
+        for (const sgn of [-1, 1]) {
+          const n = lash.filter(e => e.mast === mi && e.side === sgn).length;
+          if (n !== mk.shrouds)
+            say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sideOf(sgn)} lashing${n === 1 ? '' : 's'}`);
+        }
+      });
+      /* ── D-LASHING-BULLSEYE (round 265, 0y⁴⁶): A LASHED SHROUD ENDS IN THE BLOCK ITS RECORD READS. The lashing
+         class ended every shroud in a rope eye 0.3 B over the beam, a class figure; the 2010 Marine Education
+         Training Center plates of Hōkūleʻa (r265/crop-bullseye-3x.png) show a hardwood heart at every foot with the
+         lanyard rove through it. (a) A lashing-class mast whose spars are a plate read (mk.sail with a yard) and whose
+         record carries no shroudFoot.block is convicted for the silence — the feet stand on plates that show them.
+         (b) With a recorded bullseye: every lashing eye of the mast must be a heart (userData.lash.bullseye), the
+         hearts must number 2 × shrouds, each heart's length off the mesh (its highest to its lowest vertex) must
+         be within 25% of the record's, and each heart's centre must lie within 0.10 m of the builder's eye point
+         on the line from the seat. Rule (7) above already reads every foot against the heart's top. */
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'lashing') return;
+        const plateRead = mk.sail && mk.sail.yard > 0;
+        const BF = mk.shroudFoot;
+        if (!BF || !BF.block) {
+          if (plateRead) say(v.id, "a lashed shroud whose foot fitting is a class figure while its spars are the plate's", `mast ${mi} at u ${mk.at}: sail.yard ${mk.sail.yard} m is a plate read and the record carries no shroudFoot — the 2010 plates show a hardwood bullseye at every foot`);
+          return;
+        }
+        if (BF.block !== 'bullseye') return;
+        const mine = lash.filter(e => e.mast === mi), hearts = mine.filter(e => e.heart);
+        const want = (mk.shrouds | 0) * 2;
+        if (hearts.length !== want) say(v.id, 'a lashed shroud with no bullseye', `mast ${mi}: ${hearts.length} hearts built at the feet, ${want} (${mk.shrouds} a side) recorded as bullseyes`);
+        let offLen = 0, offAt = 0, first = null;
+        for (const e of hearts) {
+          const L = e.heart.len, rec = BF.lengthM || 0.36;
+          if (Math.abs(L - rec) > rec * 0.25) { offLen++; if (!first) first = { e, L }; }
+          const d = Math.hypot(e.c[0] - e.eye[0], e.c[1] - e.eye[1], e.c[2] - e.eye[2]);
+          if (d > 0.10) { offAt++; if (!first) first = { e, L, d }; }
+        }
+        if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${sideOf(first.e.side)})`);
+        if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${sideOf(first.e.side)})`);
+        /* r266 (0y⁴⁷): the hole stands over the timber at the height the record reads — each heart's centre, off its
+           mesh, against the builder's seat; a plate-read rig whose record reads the heart but not its height is
+           convicted for the silence (the 2010 deck plate shows the nearest foot down to its timber) */
+        if (!(BF.holeOverSeatM > 0)) {
+          if (plateRead) say(v.id, "a bullseye whose height over the beam is a class figure while its spars are the plate's", `mast ${mi}: the record reads the heart (${BF.lengthM} m) but not how far its hole stands over the timber the lanyard wraps — the 2010 deck plate shows it at the nearest foot`);
+        } else {
+          const tol = BF.holeOverSeatToleranceM > 0 ? BF.holeOverSeatToleranceM : 0.10;
+          let offH = 0, firstH = null;
+          for (const e of hearts) {
+            const d = Math.hypot(e.c[0] - e.seat[0], e.c[1] - e.seat[1], e.c[2] - e.seat[2]);
+            if (Math.abs(d - BF.holeOverSeatM) > tol) { offH++; if (!firstH) firstH = { e, d }; }
+          }
+          if (offH) say(v.id, 'a bullseye not at the height the plate reads', `mast ${mi}: ${offH} of ${hearts.length} hearts' centres more than ${tol} m off the record's ${BF.holeOverSeatM} m from the seat (first: ${firstH.d.toFixed(3)} m, shroud ${firstH.e.shroud} ${sideOf(firstH.e.side)})`);
+        }
+      });
+      /* ── D-LASHING-FALLS (round 266, 0y⁴⁸): A LANYARD THROUGH A BULLSEYE PASSES THROUGH ITS HOLE. The r265 turns ran
+         from the hole's centre in the heart's own plane, out through the wood; the 2010 deck plate shows three falls
+         side by side in the hole, hanging down the heart's face to the beam. Off the meshes: each heart's frame is
+         read off its own vertices (the long axis top to bottom, the breadth the widest direction square to it, the
+         hole's axis their cross); the lanyard's segments off the lanyard mesh, eight vertices a segment as ropeMesh
+         lays them. (a) The segments with both ends within 0.06 m of the heart's centre are the falls through the
+         hole: they must number the record's turns and each must run along the axis (|cos| > 0.9). (b) No segment of
+         the lanyard may pass through the wood: every 0.02 m of every segment is tested against the heart's scaled
+         ring — between the hole's edge and the rim in the plane, within 0.9 of the half-thickness along the axis. */
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'lashing') return;
+        const BF = mk.shroudFoot; if (!BF || BF.block !== 'bullseye') return;
+        const hearts = lash.filter(e => e.mast === mi && e.heart && e.pts), fm = falls.filter(f => f.mast === mi);
+        if (!hearts.length) return;                                        // D-LASHING-BULLSEYE says so
+        if (!fm.length) { say(v.id, 'a bullseye with no lanyard', `mast ${mi}: ${hearts.length} hearts and no lanyard mesh`); return; }
+        const segs = [];
+        for (const f of fm) { const P = f.pts; for (let i = 0; i + 7 < P.length; i += 8) segs.push([cenOf(P.slice(i, i + 4)), cenOf(P.slice(i + 4, i + 8))]); }
+        const want = Math.max(2, Math.min(4, Math.round(BF.turns || 3)));
+        const len = BF.lengthM || 0.36, wid = BF.breadthM || 0.22, thk = BF.thicknessM || 0.05;
+        const hole = Math.max(0.03, Math.min(wid * 0.3, 0.08)) / 2;
+        const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+        const nrm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+        const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+        let badN = 0, badAxis = 0, inWood = 0, firstN = null, firstW = null;
+        for (const e of hearts) {
+          const c = e.c, U = nrm(sub(e.heart.top, e.heart.bot));
+          let W = null, wBest = 0;
+          for (const q of e.pts) { const dq = sub(q, c), t = dot(dq, U), perp = [dq[0] - U[0] * t, dq[1] - U[1] * t, dq[2] - U[2] * t], m = Math.hypot(perp[0], perp[1], perp[2]); if (m > wBest) { wBest = m; W = nrm(perp); } }
+          const A = nrm(crs(U, W));
+          let through = 0, along = 0;
+          for (const [a, b] of segs) {
+            const da = Math.hypot(a[0] - c[0], a[1] - c[1], a[2] - c[2]), db = Math.hypot(b[0] - c[0], b[1] - c[1], b[2] - c[2]);
+            if (da < 0.06 && db < 0.06) { through++; if (Math.abs(dot(nrm(sub(b, a)), A)) > 0.9) along++; }
+            if (Math.min(da, db) > len) continue;                          // nowhere near this heart
+            const L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), nS = Math.max(2, Math.ceil(L / 0.02) + 1);
+            for (let i = 0; i < nS; i++) {
+              const t = i / (nS - 1), q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t], dq = sub(q, c);
+              const u = dot(dq, U), w = dot(dq, W), ax = dot(dq, A), rho = Math.hypot(u * wid / len, w);
+              if (Math.abs(ax) < thk / 2 * 0.9 && rho > hole + 0.003 && rho < wid / 2 - 0.003) { inWood++; if (!firstW) firstW = { e, q, rho, ax }; break; }
+            }
+          }
+          if (through !== want || along !== through) { badN++; if (!firstN) firstN = { e, through, along }; }
+        }
+        if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${sideOf(firstN.e.side)}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
+        if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${sideOf(firstW.e.side)}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
+      });
+      /* ── D-LASHING-SHARED (round 267, 0y⁵¹): ON A BEAM TWO MASTS SHARE, THE AFTER MAST'S LANYARD WRAPS IT OUTBOARD OF
+         THE FORWARD MAST'S, ON BOTH SIDES. r264 set the after mast's turns 3.4 rope widths from the forward mast's on a
+         shared crossbeam by adding to z on both sides — outboard to port and inboard to starboard, where they ran
+         through the forward mast's turns. Off the meshes: every lanyard segment lying at a crossbeam (both ends within
+         the timber's fore-and-aft width and depth, two rope widths clear, on the eye's side) is a turn round it; the
+         turns are grouped by beam and side; where two masts' turns share a group, the mast further aft (the record's
+         `at`) must wrap the beam wholly outboard of the other's — its nearest turn further from the centreline than
+         the other's farthest — with a rope's diameter clear between them. Which mast wraps outboard is the builder's
+         class choice; that it is the same on both sides is what the rule holds.
+         ── D-LASHING-SEAT (round 268, 0y⁵²): ON EVERY BEAM, THE INNERMOST TURNS WRAP IT AT THE SEAT. r267 ranked every
+         beam of the after mast by the mast's index, so on the two beams it has to itself its turns stood 0.05 m
+         outboard of the seat its heart stands over, while the forward mast's stood centred on theirs. In the same
+         grouping — and with one lashing mast as well as two — the mast whose turns lie nearest the centreline on
+         a beam and side must have them centred on its seat (the mean of the turns' |z| against the seat's |z|)
+         within a rope's diameter. The side is named through sideOf, the app's word (round 269). */
+      {
+        const lm = (H.masts || []).filter(mk => kindOf(mk) === 'lashing');
+        if (lm.length >= 1 && falls.length) {
+          const groups = new Map();
+          for (const e of lash) {
+            const T = e.timber; if (!T || T.what !== 'crossbeam' || !e.seat || e.mast === undefined) continue;
+            const fm = falls.filter(f => f.mast === e.mast); if (!fm.length) continue;
+            const rr = fm[0].ropeR || 0.007, sgn = e.side < 0 ? -1 : 1, key = `${T.x.toFixed(2)}|${sgn}`;
+            const at = q => Math.abs(q[0] - T.x) <= T.lenX / 2 + rr * 2 + 0.01 && q[1] >= T.yBot - rr * 2 - 0.01 && q[1] <= T.yTop + rr * 2 + 0.01 && q[2] * sgn > 0 && Math.abs(q[2] - e.seat[2]) < 0.5;
+            const zs = [];
+            for (const f of fm) { const P = f.pts; for (let i = 0; i + 7 < P.length; i += 8) {
+              const a = cenOf(P.slice(i, i + 4)), b = cenOf(P.slice(i + 4, i + 8));
+              if (at(a) && at(b)) zs.push(Math.abs(a[2]), Math.abs(b[2])); } }
+            if (!zs.length) continue;
+            if (!groups.has(key)) groups.set(key, { T, sgn, masts: new Map() });
+            const gm = groups.get(key).masts;
+            if (!gm.has(e.mast)) gm.set(e.mast, { rr, zs: [], mast: e.mast, seat: Math.abs(e.seat[2]) });
+            gm.get(e.mast).zs.push(...zs);
+          }
+          const meanOf = zs => zs.reduce((t, z) => t + z, 0) / zs.length;
+          for (const gp of groups.values()) {
+            const ms = [...gp.masts.keys()].sort((a, b) => ((H.masts[a] || {}).at || 0) - ((H.masts[b] || {}).at || 0));
+            const inner = ms.map(m => gp.masts.get(m)).sort((a, b) => meanOf(a.zs) - meanOf(b.zs))[0];
+            const off = meanOf(inner.zs) - inner.seat;
+            if (Math.abs(off) > inner.rr * 2 + 1e-6)
+              say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${sideOf(gp.sgn)} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
+            for (let i = 0; i + 1 < ms.length; i++) {
+              const F = gp.masts.get(ms[i]), A = gp.masts.get(ms[i + 1]);
+              const gap = Math.min(...A.zs) - Math.max(...F.zs), rr = Math.max(F.rr, A.rr);
+              if (gap < rr * 2 - 1e-6)
+                say(v.id, "a shared beam's lanyards the wrong way round", `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} ${sideOf(gp.sgn)}: mast ${ms[i + 1]}'s turns ${gap < 0 ? 'lie inboard of' : 'touch'} mast ${ms[i]}'s — the nearest after turn stands ${gap.toFixed(3)} m outboard of the farthest forward turn, a rope's diameter (${(rr * 2).toFixed(3)} m) wanted (${A.zs.length / 2} after and ${F.zs.length / 2} forward turn segments read off the lanyard meshes)`);
+            }
+          }
+        }
+      }
+    }
+    /* ── D-MAST-COUNT (round 249): THE CARD'S RIG ROW AGAINST THE RECORD'S MASTS. The canoe's
+       Rig row said "two masts" and her text "carrying two masts" while hull.masts stepped one,
+       for 248 rounds, and nothing read the words against the data (r243 did the same for the
+       carrack's castles). The row keyed 'Rig' is read for a number word before 'mast',
+       'masts' or '-masted' — an exact count must equal hull.masts.length; a range ('one to
+       three', 'two or three', 'three or four') must contain it; a count after 'than' ('more
+       than one mast', the corbita's row, which the rule's first run convicted — rule 8, the
+       audit was wrong) is not read. The text is not read: it describes the type as often as the ship. Only
+       the record's own words convict. */
+    {
+      const rigRow = (v.rows || []).find(r => Array.isArray(r) && String(r[0]).toLowerCase() === 'rig');
+      const W = { one: 1, single: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7 };
+      if (rigRow) {
+        const txt = String(rigRow[1]).toLowerCase().replace(/\*/g, '');
+        const n = (H.masts || []).length;
+        const rng = /(?<!than )\b(one|single|two|three|four|five|six|seven) (?:to|or) (one|two|three|four|five|six|seven)[- ]mast/.exec(txt);
+        const one = /(?<!than )\b(one|single|two|three|four|five|six|seven)[- ]mast/.exec(txt);
+        if (rng) {
+          const lo = W[rng[1]], hi = W[rng[2]];
+          if (n < lo || n > hi)
+            say(v.id, 'a rig row the masts contradict', `the Rig row says "${rng[0]}" and hull.masts steps ${n}`);
+        } else if (one) {
+          if (W[one[1]] !== n)
+            say(v.id, 'a rig row the masts contradict', `the Rig row says "${one[0]}" and hull.masts steps ${n}`);
+        }
+      }
+    }
+    /* ── D-CRABCLAW-SPARS, D-SAIL-AREA (round 250) and D-CRABCLAW-MASTHEAD (round 262): THE SPARS ARE THE RECORD'S, AND THE
+       CLOTH IS THE ROW'S OR THE RECORD SAYS WHY NOT. The canoe's crab claws had their tacks
+       0.22 L forward of their masts and their spars solved from 25 m² a sail, for 249 rounds,
+       while the 2009 broadside puts both tacks at the masts' feet, the yards along the masts
+       and the booms at 47–48°, and counts about 60 m² of cloth for the pair against the row's
+       50.2. (a) For every mast whose record carries `sail` (yard, boom, boomAngle) the built
+       spars — userData.crabclaw on the yard mesh — must be the record's: the yard and the boom
+       to 0.02 m, the boom's angle to 0.5°, the tack within 0.10 m of the mast's built heel
+       plus tackAbaft; a recorded read the builder did not draw is convicted. (b) The row keyed
+       'Sail area' is read for its figure (the first number before m²); the built cloth —
+       every set sail mesh's triangles ('square', 'tri', 'quad'; not a 'furl' bundle) summed in
+       hull space, so belly and creases are in it — is compared to that figure, or to sailAreaContested's used figure where the
+       record names a contest; a built cloth more than 25% off the figure it answers to is
+       convicted, and a contest field that names no used figure is convicted for the silence
+       (rule 9: what is contested is a field). */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const hullPt = (o, k, out) => { const a = o.geometry.attributes.position; return out.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); };
+      const cc = [], heels = [], mhf = [], shrM = [], collars = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return;
+        const pointsOf = () => { o.updateMatrixWorld(true); const V = new THREE.Vector3(), P = []; for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); P.push(V.clone()); } return P; };
+        if (o.userData.mastheadFitting) { /* r263 (0y⁴²): every masthead fitting, its centre and its extremes off the mesh */
+          const P = pointsOf(); const c = new THREE.Vector3(); let yMin = 1e9, yMax = -1e9, xMin = 1e9, xMax = -1e9;
+          for (const q of P) { c.add(q); yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
+          c.divideScalar(Math.max(1, P.length));
+          mhf.push({ rec: o.userData.mastheadFitting, c, yMin, yMax, xMin, xMax }); }
+        if (o.userData.shroudEye) { /* r264 (0y⁴³): every shroud collar, its centre off the mesh */
+          const P = pointsOf(); const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(Math.max(1, P.length));
+          collars.push({ rec: o.userData.shroudEye, c }); }
+        if (o.userData.segs && o.userData.mast !== undefined && o.userData.feetKind !== undefined) { /* r264: the lower shrouds, 8 vertices a segment */
+          shrM.push({ mast: o.userData.mast, P: pointsOf() }); }
+        if (o.userData.crabclaw) { /* r261 (0y³⁶): the yard's heel radius off the mesh, for the tack's two radii */
+          const P = pointsOf(); let yMin = 1e9, yMax = -1e9; for (const q of P) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+          const band = P.filter(q => q.y < yMin + (yMax - yMin) * 0.03); const c = new THREE.Vector3(); for (const q of band) c.add(q); c.divideScalar(Math.max(1, band.length));
+          let r = 0; for (const q of band) r = Math.max(r, Math.hypot(q.x - c.x, q.z - c.z));
+          cc.push(Object.assign({ heelR: r }, o.userData.crabclaw)); }
+        const p = tagOf(o);
+        if (p && p.key === 'mast') { /* r261: the mast's axis (foot and head band means) and its foot radius (the band's max), off the mesh */
+          const P = pointsOf(); let yMin = 1e9, yMax = -1e9; for (const q of P) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+          const span = yMax - yMin; if (span < 0.5) return;
+          const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0, rF = 0;
+          for (const q of P) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+          lo.divideScalar(Math.max(1, nl)); hi.divideScalar(Math.max(1, nh));
+          for (const q of P) if (q.y < yMin + span * 0.02) rF = Math.max(rF, Math.hypot(q.x - lo.x, q.z - lo.z));
+          heels.push({ x: lo.x, y: lo.y, lo, hi, rFoot: rF, yMin, yMax }); }
+      });
+      (H.masts || []).forEach((mk, i) => {
+        const sg = mk.sail; if (!sg || !(sg.yard > 0) || !(sg.boom > 0)) return;
+        const b = cc.find(c => Math.abs(c.at - mk.at) < 1e-6);
+        if (!b) { say(v.id, 'a recorded sail the builder did not draw', `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m recorded, no crab claw built from it`); return; }
+        if (!b.fromRecord || Math.abs(b.yard - sg.yard) > 0.02 || Math.abs(b.boom - sg.boom) > 0.02)
+          say(v.id, "crab-claw spars that are not the record's", `mast ${i}: yard ${b.yard.toFixed(2)} m and boom ${b.boom.toFixed(2)} m built, ${sg.yard} and ${sg.boom} recorded`);
+        if (Math.abs(b.boomAngle - sg.boomAngle) > 0.5)
+          say(v.id, 'a crab-claw boom at the wrong angle', `mast ${i}: ${b.boomAngle.toFixed(1)}° built, ${sg.boomAngle}° recorded`);
+        let heel = null; for (const h of heels) if (!heel || Math.abs(h.x - b.mastX) < Math.abs(heel.x - b.mastX)) heel = h;
+        if (heel) { /* r261 (0y³⁶): the tack IS the yard's heel, lashed against the mast's after face — the axis at the
+                       tack's height plus the mast's radius there and the yard's own, both off the meshes; r250's
+                       record tackAbaft (0.5 m, the read of a corner of cloth) is retired */
+          const d = heel.hi.clone().sub(heel.lo); const tt = Math.abs(d.y) > 1e-6 ? (b.tack[1] - heel.lo.y) / d.y : 0; const ax = heel.lo.clone().addScaledVector(d, tt);
+          const nA = new THREE.Vector3(d.y, -d.x, 0).normalize(); if (nA.x < 0) nA.negate();
+          const want = heel.rFoot + (b.heelR || 0); const aft = (b.tack[0] - ax.x) * nA.x + (b.tack[1] - ax.y) * nA.y; const off = aft - want;
+          if (Math.abs(off) > 0.06) say(v.id, 'a crab-claw tack away from its mast', `mast ${i}: the tack at x ${b.tack[0].toFixed(2)} stands ${aft.toFixed(3)} m abaft the axis at its height against the two radii ${want.toFixed(3)} (mast ${heel.rFoot.toFixed(3)} + yard heel ${(b.heelR || 0).toFixed(3)})`); }
+        /* ── D-CRABCLAW-MASTHEAD (round 262, 0y³⁸): THE POLE IS AS TALL AS ITS RECORD, AND THE RECORD IS A
+           READ. A mast whose spars are read off a plate stands on that plate, so its height is readable too;
+           for 261 rounds the canoe's two poles were 0.95 of Steel's main (9.05 m) under spars read at 52 px/m,
+           and the fore yard's tip stood 3.90 m over its head against the plate's 2.90 (r262/tip-before.json).
+           (a) A crab-claw mast with a `sail` record and no heightM is convicted for the silence — a share of a
+           1794 warship rule is not a read of this rig. (b) With heightM, the built pole (the 'mast' mesh
+           nearest the station, its lowest to its highest vertex) must stand at it to 0.05 m. (c) With
+           sail.tipOverHeadM (the plate's read of the yard's tip over the masthead) the built yard's tip
+           (userData.crabclaw.yardTip) over the pole's top must be within 0.5 m of it — a 6 px read at each
+           end and the yard's own 2% — and a sail record without the read is convicted for the silence. */
+        if (mk.heightM === undefined) say(v.id, "a crab-claw mast whose height is a class share while its spars are the plate's", `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m is a plate read and the pole under it carries no heightM (${mk.height !== undefined ? mk.height + " of Steel's main" : 'no height at all'})`);
+        else if (heel) {
+          const built = heel.yMax - heel.yMin;
+          if (Math.abs(built - mk.heightM) > 0.05) say(v.id, "a crab-claw mast built against its record's height", `mast ${i}: ${built.toFixed(3)} m deck to head built, ${mk.heightM} recorded`);
+          if (sg.tipOverHeadM === undefined) say(v.id, 'a crab-claw sail record that does not say where its yard ends over the masthead', `mast ${i}: sail.tipOverHeadM missing`);
+          else { const over = b.yardTip[1] - heel.yMax;
+            if (Math.abs(over - sg.tipOverHeadM) > 0.5) say(v.id, over > sg.tipOverHeadM ? 'a crab-claw yard standing too far above its masthead' : 'a crab-claw yard stopping short above its masthead', `mast ${i}: the yard's tip ${over.toFixed(2)} m over the masthead against the plate's ${sg.tipOverHeadM}`); }
+        }
+        /* ── D-CRABCLAW-MASTHEAD-FITTINGS (round 263, 0y⁴²): THE MASTHEAD CARRIES WHAT THE PLATE SHOWS. The pole
+           ended bare on its forward face for 262 rounds while the 2009 broadside at 8x shows, on both masts, a
+           short horn at the head and a column of four blocks down the forward face over about a metre, the
+           shrouds fanning from them (r263/fore-head-fit-8x.png, main-head-fit-8x.png). (a) A crab-claw mast with
+           a `sail` record and no `masthead` record is convicted for the silence — the fittings stand on the same
+           plate the spars were read from. (b) With the record: every mesh carrying userData.mastheadFitting
+           whose centre is within 1.0 m of this mast's axis (x at its own height) and above the pole's top less
+           3 m is this mast's; the blocks among them must number masthead.blocks, each centred FORWARD of the
+           axis at its height by at least the pole's foot radius (the yard's side is the after face), and lie
+           between lastUnderHeadM + 0.3 and firstUnderHeadM − 0.15 under the built head; with masthead.horn the
+           horn's highest vertex must stand within 0.10 m of the head and its centre forward of the axis. Read
+           off the meshes; the builder's record on each mesh is provenance, not the test. */
+        if (heel) {
+          const MH = mk.masthead;
+          if (!MH) say(v.id, "a crab-claw masthead whose fittings are unread while its spars are the plate's", `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m is a plate read and the pole under it carries no masthead record — the head is bare on its forward face`);
+          else {
+            const d = heel.hi.clone().sub(heel.lo), axX = y => heel.lo.x + (Math.abs(d.y) > 1e-6 ? (y - heel.lo.y) / d.y : 0) * d.x;
+            const mine = mhf.filter(f => Math.abs(f.c.x - axX(f.c.y)) <= 1.0 && f.c.y >= heel.yMax - 3);
+            const blocks = mine.filter(f => f.rec.kind === 'block'), horns = mine.filter(f => f.rec.kind === 'horn');
+            const want = MH.blocks | 0;
+            if (blocks.length !== want) say(v.id, 'a crab-claw masthead with the wrong count of blocks', `mast ${i}: ${blocks.length} block meshes within 1 m of the axis under the head, ${want} recorded`);
+            for (const f of blocks) {
+              const fwd = axX(f.c.y) - f.c.x, under = heel.yMax - f.c.y;
+              if (fwd < heel.rFoot) say(v.id, 'a masthead block that is not on the forward face', `mast ${i}: block ${f.rec.i} centred ${fwd.toFixed(3)} m forward of the axis (the pole's foot radius is ${heel.rFoot.toFixed(3)})`);
+              const lo = (MH.firstUnderHeadM !== undefined ? MH.firstUnderHeadM : 0.34) - 0.15, hi = (MH.lastUnderHeadM !== undefined ? MH.lastUnderHeadM : 1.3) + 0.3;
+              if (under < lo || under > hi) say(v.id, "a masthead block outside the band the plate reads", `mast ${i}: block ${f.rec.i} centred ${under.toFixed(2)} m under the head against the record's ${lo.toFixed(2)}–${hi.toFixed(2)}`);
+            }
+            if (MH.horn) {
+              if (horns.length !== 1) say(v.id, 'a crab-claw masthead without its horn', `mast ${i}: ${horns.length} horn meshes at the head, one recorded`);
+              else { const f = horns[0], gap = heel.yMax - f.yMax, fwd = axX(f.c.y) - f.c.x;
+                if (gap > 0.10 || gap < -0.05) say(v.id, "a masthead horn that does not reach the head", `mast ${i}: the horn's top ${gap.toFixed(3)} m under the pole's top`);
+                if (fwd <= 0) say(v.id, 'a masthead horn abaft its pole', `mast ${i}: the horn's centre ${(-fwd).toFixed(3)} m abaft the axis`); }
+            } else if (horns.length) say(v.id, 'a masthead horn the record does not read', `mast ${i}: ${horns.length} horn meshes, none recorded`);
+          }
+        }
+        /* ── D-CRABCLAW-SHROUDS (round 264, 0y⁴³): THE SHROUDS ARE AS MANY AS THE PLATE SHOWS AND LEAVE THE POLE
+           WHERE IT SHOWS. For 263 rounds the canoe's record carried 2 shrouds a side, a class figure, under a
+           provenance that said the plate shows more; and every shroud ended 0.03 of the pole's height under the
+           head, on the axis, while the 2009 broadside at 8x shows them converging on the pole's forward side in
+           a band under the block column (r264/plate-fore-head-eyes-8x.png, plate-main-head-eyes-8x.png). (a) A
+           crab-claw mast with a `sail` record and no `shroudHead` band, or a `shrouds` count with no
+           shroudsProvenance, is convicted for the silence — the shrouds stand on the plate the spars were read
+           from. (b) With the record: the lower shroud mesh of this mast (userData.mast, 8 vertices a segment, the
+           upper end the higher of the two ends) must carry 2 × shrouds segments; each upper end must stand under
+           the built head by a height inside the band ± 0.15 m, within the pole's foot radius + 0.08 m of the axis
+           at its height (on the pole, not in the air), and within 0.06 m in height and 0.10 m in x of a shroud
+           collar (userData.shroudEye, its centre off the mesh); and the collars within 0.5 m of the axis under
+           the head must number shrouds — one a pair. Off the meshes; the builder's record on each mesh is
+           provenance, not the test. */
+        if (heel) {
+          const SH = mk.shroudHead;
+          if (!SH || SH.firstUnderHeadM === undefined || SH.lastUnderHeadM === undefined)
+            say(v.id, "a crab-claw mast whose shrouds leave the pole at a class height while its spars are the plate's", `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m is a plate read and the record carries no shroudHead band — the 2009 broadside at 8x shows where the shrouds converge on the pole`);
+          else if (mk.shrouds && mk.shroudsProvenance === undefined)
+            say(v.id, "a crab-claw shroud count that is a class figure while its spars are the plate's", `mast ${i}: ${mk.shrouds} shrouds a side recorded with no provenance — the plate shows the count`);
+          else {
+            const d = heel.hi.clone().sub(heel.lo), axX = y => heel.lo.x + (Math.abs(d.y) > 1e-6 ? (y - heel.lo.y) / d.y : 0) * d.x;
+            const cen = A => { const c = new THREE.Vector3(); for (const q of A) c.add(q); return c.divideScalar(Math.max(1, A.length)); };
+            const heads = [];
+            for (const m of shrM) { if (m.mast !== i) continue;
+              for (let k = 0; k + 7 < m.P.length; k += 8) { const a = cen(m.P.slice(k, k + 4)), b2 = cen(m.P.slice(k + 4, k + 8)); heads.push(a.y > b2.y ? a : b2); } }
+            const want = (mk.shrouds | 0) * 2;
+            if (heads.length !== want) say(v.id, 'a crab-claw mast with the wrong count of shrouds', `mast ${i}: ${heads.length} lower shroud segments built, ${want} (${mk.shrouds} a side) recorded`);
+            const lo = SH.firstUnderHeadM - 0.15, hi = SH.lastUnderHeadM + 0.15;
+            const mine = collars.filter(c => Math.abs(c.c.x - axX(c.c.y)) <= 0.5 && c.c.y >= heel.yMax - 3);
+            if (mine.length !== (mk.shrouds | 0)) say(v.id, 'a crab-claw mast with the wrong count of shroud collars', `mast ${i}: ${mine.length} collars round the pole under the head, ${mk.shrouds} (one a pair) recorded`);
+            let outBand = 0, offPole = 0, noCollar = 0, first = null;
+            for (const h of heads) {
+              const under = heel.yMax - h.y, off = Math.hypot(h.x - axX(h.y), h.z);
+              if (under < lo || under > hi) { outBand++; if (!first) first = { h, under, off }; }
+              if (off > heel.rFoot + 0.08) { offPole++; if (!first) first = { h, under, off }; }
+              if (!mine.some(c => Math.abs(c.c.y - h.y) <= 0.06 && Math.abs(c.c.x - axX(c.c.y)) <= 0.10)) { noCollar++; if (!first) first = { h, under, off }; }
+            }
+            if (outBand) say(v.id, "a shroud leaving the pole outside the band the plate reads", `mast ${i}: ${outBand} of ${heads.length} upper ends outside ${lo.toFixed(2)}–${hi.toFixed(2)} m under the head (first: ${first.under.toFixed(3)} m under, x ${first.h.x.toFixed(2)}, z ${first.h.z.toFixed(2)})`);
+            if (offPole) say(v.id, 'a shroud head standing off its pole', `mast ${i}: ${offPole} of ${heads.length} upper ends more than the foot radius + 0.08 m from the axis (first: ${first.off.toFixed(3)} m against ${heel.rFoot.toFixed(3)})`);
+            if (noCollar) say(v.id, 'a shroud head with no collar round the pole', `mast ${i}: ${noCollar} of ${heads.length} upper ends have no shroud collar within 0.06 m of their height (first: ${first.under.toFixed(3)} m under the head)`);
+          }
+        }
+      });
+      const saRow = (v.rows || []).find(r => Array.isArray(r) && /^sail area$/i.test(String(r[0]).trim()));
+      if (saRow) {
+        const mnum = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*m²/.exec(String(saRow[1]).replace(/\*/g, ''));
+        const rowA = mnum ? parseFloat(mnum[1].replace(/,/g, '')) : NaN;
+        const con = v.sailAreaContested;
+        let expect = rowA, src = 'the Sail area row';
+        if (con) {
+          const used = con.used === 'plate' ? con.plate : con.used === 'record' ? con.record : NaN;
+          if (!(used > 0)) say(v.id, 'a sail-area contest that names no figure', `sailAreaContested.used = ${con.used}`);
+          else { expect = used; src = `sailAreaContested, ${con.used} ${used} m² against the row's ${rowA}`; }
+        }
+        let built = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+        g.traverse(o => {
+          /* every SET cloth: 'square' (makeSail), 'tri' and 'quad'; a 'furl' bundle is not cloth area. The rule's
+             first run read only 'tri' and 'quad' and convicted the clipper on 787 m² of jibs and staysails against her
+             2,970 — rule 8, the audit was wrong */
+          if (!o.isMesh || !o.geometry || !o.userData.kind || o.userData.kind === 'furl') return;
+          o.updateMatrixWorld(true); const ix = o.geometry.index, n = ix ? ix.count : o.geometry.attributes.position.count;
+          const at = (k, out) => hullPt(o, ix ? ix.getX(k) : k, out);
+          for (let k = 0; k + 2 < n; k += 3) { at(k, A); at(k + 1, B); at(k + 2, C); built += B.sub(A).cross(C.sub(A)).length() / 2; }
+        });
+        if (expect > 0 && Math.abs(built - expect) / expect > 0.25)
+          say(v.id, 'a sail area the cloth contradicts', `${built.toFixed(1)} m² of cloth built against ${expect} m² (${src})`);
+      }
+    }
+    /* ── D-SAIL-THROUGH-MAST (round 251): A SAIL IS NOT IN THE PLANE OF A MAST. Every lateen,
+       settee and crab claw was drawn in the centreline plane, so the canoe's fore boom ran
+       through her mainmast 6.4 m over the deck, the caravel's fore cloth through her mainmast,
+       the galleass's two forward clews into the masts abaft them, and every lateen's foot
+       through its own mast at the deck (r251/cross-before.json: 71 crossings on 15 hulls, 15 of them
+       on the seven lateen and crab-claw hulls; the other 56 are the residual classes named below).
+       Read from the BUILT scene: each mesh tagged 'mast' gives an axis, foot to head (the
+       means of its lowest and highest rings, in hull space), and that axis is cast through
+       every set fore-and-aft cloth — 'tri' and 'quad'; a 'furl' bundle is not cloth.
+       Round 256: THE SQUARE CLOTH IS READ TOO. It hangs from a yard slung ON its mast, so its
+       own mast's axis meets its head row by construction and that is exempt — a hit within
+       0.35 m of the cloth's top; any hit lower on the cloth by its own mast, or anywhere by
+       another, convicts. The corbita's artemon (0y⁹): the spar's line ran through the cloth
+       0.46 m under the yard (r256/cross-before.json) because the pole was built short and the
+       yard hung above and abaft its head. The square builder names its mast (userData.mastX,
+       round 256). The masts' axes are read by principal component here too (exact at any
+       rake; the ring-mean read was 1.1° off on the 48° artemon). A hit is placed on the cloth's own grid from
+       its vertex index: makeTriSail's row i runs from the head on the yard to the foot,
+       makeQuadSail's row i from the luff to the leech and its column j from the foot to the
+       head. A cloth that names its mast (userData.mastX — the lateen, settee and crab-claw
+       builders, round 251) is convicted for any hit but its own mast's on the row laced to the
+       yard (a tri's i ≤ 1, a settee's j ≥ N − 1): the yard is slung at the mast, and the cloth
+       swings about it. A cloth that does not name its mast (the lug, the gaff sail, the
+       spanker) is convicted for a hit by a mast that is not the one at its luff — its own mast
+       stands within the cloth's run and hits it within 15% of the chord from the luff or on
+       the head row.
+       Round 253: A CLOTH THAT HANGS BESIDE ITS MAST ON PARRELS — the battened lug of the junk, the
+       treasure ship and the panokseon (userData.besideMast, and on an older builder a quad held
+       at its head and its foot and not at its luff, which only the lug builder makes) — stands
+       off the axis by the mast's radius and the batten's, so the axis must pass clear of every
+       panel and ANY own-mast crossing convicts: the lug in its mast's plane that r251 named
+       (0y⁷), 50 crossings at 8% of the chord on the three hulls (r251/cross-before.json).
+       Round 252: A CLOTH WHOSE LUFF RIDES ITS MAST has no row slung at the mast to be exempt —
+       the gaff sail, the spanker and the gaff topsail (userData.luffOnMast, and on an older
+       builder a quad whose held edges include 'luff') lie along the mast on hoops, a hoop's
+       radius abaft its axis, so the axis must pass clear of the cloth at every height and ANY
+       own-mast crossing convicts: the plumb luff on the raked mast that r251 named (0y⁸) — the
+       74's and the clipper's 5° spankers, the steamer's 3° gaff mast and Endurance's 2° and 4°
+       masts, five crossings at the throat (r251/cross-after.json). */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const masts = [], cloths = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o);
+        if (p && p.key === 'mast') {
+          const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+          const span = yMax - yMin; if (span < 0.5) return;
+          const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+          let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+          for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+          const d = new THREE.Vector3(0, 1, 0);
+          for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+          if (d.y < 0) d.negate();
+          let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+          masts.push({ name: p.name, foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax) });
+        }
+        if (o.userData.kind === 'tri' || o.userData.kind === 'quad' || o.userData.kind === 'square') cloths.push(o);
+      });
+      const T = new THREE.Vector3();
+      for (const o of cloths) {
+        const pts = hullPts(o), ix = o.geometry.index, n = ix ? ix.count : pts.length, row = Math.round(Math.sqrt(pts.length));
+        let xMin = 1e9, xMax = -1e9, yTop = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); yTop = Math.max(yTop, q.y); }
+        const own = o.userData.mastX, named = typeof own === 'number', isSquare = o.userData.kind === 'square';
+        for (const m of masts) {
+          const dir = m.head.clone().sub(m.foot), len = dir.length(); dir.normalize();
+          const ray = new THREE.Ray(m.foot, dir); let best = null;
+          for (let k = 0; k + 2 < n; k += 3) {
+            const a = ix ? ix.getX(k) : k, b = ix ? ix.getX(k + 1) : k + 1, c = ix ? ix.getX(k + 2) : k + 2;
+            if (ray.intersectTriangle(pts[a], pts[b], pts[c], false, T)) { const d = T.distanceTo(m.foot);
+              if (d <= len && (!best || d < best.d)) best = { d, at: T.clone(), i: Math.floor(a / row), j: a % row }; }
+          }
+          if (!best) continue;
+          const onYard = isSquare ? (yTop - best.at.y) < 0.35
+                       : o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
+          const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
+          const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
+                      : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
+          const held = o.userData.held || [], isQuad = o.userData.kind === 'quad';
+          const onMast = !!o.userData.luffOnMast || !!o.userData.besideMast
+            || (isQuad && held.includes('luff'))
+            || (isQuad && held.includes('head') && held.includes('foot') && !held.includes('luff'));
+          if (isOwn && !onMast && (!named || onYard)) continue;
+          say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on the mast at x ' + own.toFixed(2) : ''} (x ${xMin.toFixed(1)}–${xMax.toFixed(1)}) crossed by the axis of ${m.name} at x ${m.foot.x.toFixed(2)}: hit at x ${best.at.x.toFixed(2)}, y ${best.at.y.toFixed(2)}, z ${best.at.z.toFixed(2)}, grid ${best.i},${best.j}`);
+        }
+      }
+    }
+    /* ── D-LATEEN-YARD-ON-MAST (round 254): A LATEEN YARD IS SLUNG ON ITS MAST, BESIDE IT, AND
+       HELD THERE. Every lateen yard was built on the centreline through its own mast's axis
+       (offset 0.000–0.002 m at the sling on all twelve, six hulls; r254/lateen-before.json),
+       and its line crossed the mast's station 0.26–1.07 m ABOVE the masthead, because the
+       builder wrote the sling from the deck at the mast while the heel is bowsed to the
+       higher deck under it — a spar slung on air. Read from the BUILT scene: each mesh tagged
+       'mast' gives an axis, foot to head, and its ring radii at both ends; each yard named
+       'Lateen yard' gives its own axis (the end-cap centres, least and greatest x) and its
+       end radii; its own mast is the one its record names (userData.lateen.mastX) or, on an
+       older builder, the one nearest the point a third of the way from its heel. Where the
+       yard's line crosses the mast's station: (a) that point lies within the mast's span,
+       below its head — else 'a lateen yard slung off its mast'; (b) its horizontal offset from
+       the axis is at least nine tenths of the mast's radius there plus the yard's — else 'a
+       lateen yard through its mast' — and not over that sum by more than 0.6 m (a furled roll
+       lies between) — else 'a lateen yard adrift of its mast'; (c) a 'parrel' ring stands
+       within 0.15 m of that height, centred on the axis — else 'a lateen yard held to its mast
+       by nothing'. And every mesh tagged 'shroud', on every hull: its highest vertex must lie
+       within some mast's span (foot to head, 0.05 m of grace) with that mast's axis within
+       3.5 m of it (a topmast shroud spreads to the top's rim) — else 'a shroud made fast
+       above its mast': the shroud block wrote its head
+       at the RECORD's height while the lateen block built a pole only as tall as its yard
+       needs, so on every lateen mast the shrouds ran to a point 2.1–6.9 m above the masthead
+       (10.6–12.1 m on the carrack's and fluyt's mizzens; r254/lateen-after.json, shroudTops).
+       Round 260 (0y³⁵): a function of the scene, lateenRead(G, STATE), run on the set build here
+       and on the FURLED build from the stowed-cloth block below, the state named in the
+       conviction; and the 'adrift' gate is 0.05 m over the two radii in BOTH states — r254's
+       0.6 m of grace, "a furled roll lies between", was the fault itself: the furled yard stood
+       off its own parrel by the roll's radius less its own, 0.125–0.332 m on all twelve yards of
+       six hulls (r260/lateen-before.json). The shroud read runs on the set build alone. */
+    const lateenRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      /* r317: each position once. A three.js cylinder repeats its seam vertex (theta 0, on +z) in
+         every ring, so a ring's centroid stood about r/(n+1) to +z, and on the East Indiaman's
+         square mizzen that read a yard 0.319 m off the axis (the builder's own offset, the mast's
+         radius plus the yard's) as 0.305 m and called it through the mast. */
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], seen = new Set(), V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { const key = Math.round(a.getX(k) * 1e5) + ',' + Math.round(a.getY(k) * 1e5) + ',' + Math.round(a.getZ(k) * 1e5);   // sin(2π) is -2e-16: toFixed gives '-0.00000'
+          if (seen.has(key)) continue; seen.add(key);
+          V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const masts = [], yards = [], parrels = [], shrouds = [];
+      G.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+        if (p.key === 'mast') {
+          const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+          const span = yMax - yMin; if (span < 0.5) return;
+          const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0, rLo = 0, rHi = 0;
+          for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+          lo.divideScalar(nl); hi.divideScalar(nh);
+          for (const q of pts) { if (q.y < yMin + span * 0.02) rLo = Math.max(rLo, Math.hypot(q.x - lo.x, q.z - lo.z)); if (q.y > yMax - span * 0.02) rHi = Math.max(rHi, Math.hypot(q.x - hi.x, q.z - hi.z)); }
+          masts.push({ name: p.name, foot: lo, head: hi, rFoot: rLo, rHead: rHi, span });
+        }
+        if (p.key === 'yard' && p.name === 'Lateen yard') yards.push({ o, rec: o.userData.lateen || null });
+        if (p.key === 'parrel') parrels.push(o);
+        if (p.key === 'shroud') shrouds.push(o);
+      });
+      const axisAt = (m, y) => { const d = m.head.clone().sub(m.foot); const t = Math.abs(d.y) > 1e-6 ? (y - m.foot.y) / d.y : 0; return m.foot.clone().add(d.multiplyScalar(t)); };
+      const axisDist = (m, q) => { const d = m.head.clone().sub(m.foot).normalize(); const w = q.clone().sub(m.foot); return w.sub(d.multiplyScalar(w.dot(d))).length(); };
+      const mastR = (m, y) => m.rFoot + (m.rHead - m.rFoot) * Math.max(0, Math.min(1, (y - m.foot.y) / Math.max(1e-6, m.head.y - m.foot.y)));
+      for (const y of yards) {
+        const pts = hullPts(y.o); let a = pts[0], b = pts[0]; for (const q of pts) { if (q.x < a.x) a = q; if (q.x > b.x) b = q; }
+        const len = a.distanceTo(b); if (len < 1) continue;
+        const A = new THREE.Vector3(), B = new THREE.Vector3(); let na = 0, nb = 0, rA = 0, rB = 0;
+        for (const q of pts) { if (q.distanceTo(a) < len * 0.03) { A.add(q); na++; } if (q.distanceTo(b) < len * 0.03) { B.add(q); nb++; } }
+        A.divideScalar(na); B.divideScalar(nb);
+        for (const q of pts) { if (q.distanceTo(a) < len * 0.03) rA = Math.max(rA, Math.hypot(q.y - A.y, q.z - A.z, q.x - A.x) ); if (q.distanceTo(b) < len * 0.03) rB = Math.max(rB, q.distanceTo(B)); }
+        let m = null, bd = 1e9;
+        const want = y.rec && typeof y.rec.mastX === 'number' ? y.rec.mastX : A.x + (B.x - A.x) / 3;
+        for (const mm of masts) { const dd = Math.abs(mm.foot.x - want); if (dd < bd) { bd = dd; m = mm; } }
+        if (!m) { say(v.id, 'a lateen yard slung off its mast' + SB, 'no mast mesh on the hull'); continue; }
+        /* the crossing is where the yard's LINE meets the mast's AXIS, not the foot's station
+           (round 255): on a raked pole the axis at the sling's height stands tan(rake) times
+           that height from the foot — 0.35 m on the carrack's 4° mizzen — and a read at the
+           station would call a yard slung on the axis 'adrift' or 'through'. Solve
+           A + (B − A)·t = axis(y) in the x–y plane; the station read is the fallback where
+           the yard runs parallel to the axis. */
+        const kx = (m.head.x - m.foot.x) / ((m.head.y - m.foot.y) || 1e-9);
+        const den = (B.x - A.x) - kx * (B.y - A.y);
+        const t = Math.abs(den) > 1e-9 ? (m.foot.x - A.x + kx * (A.y - m.foot.y)) / den : (m.foot.x - A.x) / ((B.x - A.x) || 1e-9);
+        const cross = A.clone().lerp(B, Math.max(0, Math.min(1, t)));
+        const ax = axisAt(m, cross.y), off = Math.hypot(cross.x - ax.x, cross.z - ax.z);
+        const rM = mastR(m, cross.y), rY = rA + (rB - rA) * Math.max(0, Math.min(1, t));
+        const where = `yard ${len.toFixed(1)} m on the mast at x ${m.foot.x.toFixed(2)}, crossing its station at y ${cross.y.toFixed(2)}`;
+        if (t < 0 || t > 1 || cross.y > m.head.y - 0.02 || cross.y < m.foot.y)
+          say(v.id, 'a lateen yard slung off its mast' + SB, `${where}: the mast runs y ${m.foot.y.toFixed(2)}–${m.head.y.toFixed(2)}, the sling ${(cross.y - m.head.y).toFixed(2)} m from its head`);
+        if (off < 0.9 * (rM + rY))
+          say(v.id, 'a lateen yard through its mast' + SB, `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
+        else if (off > rM + rY + 0.05)
+          say(v.id, 'a lateen yard adrift of its mast' + SB, `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
+        let held = false;
+        for (const o of parrels) { const pp = hullPts(o).filter(q => Math.abs(q.y - cross.y) < 0.15); if (pp.length < 8) continue;
+          const c = new THREE.Vector3(); for (const q of pp) c.add(q); c.divideScalar(pp.length); const cax = axisAt(m, c.y);
+          if (Math.hypot(c.x - cax.x, c.z - cax.z) < 0.1) { held = true; break; } }
+        if (!held) say(v.id, 'a lateen yard held to its mast by nothing' + SB, `${where}: no parrel ring within 0.15 m of the sling's height centred on the mast`);
+      }
+      let loose = 0, first = null;
+      for (const o of shrouds) {
+        const pts = hullPts(o); let hi = pts[0]; for (const q of pts) if (q.y > hi.y) hi = q;
+        let ok = false, near = null;
+        for (const m of masts) { const d = axisDist(m, hi); if (near === null || d < near.d) near = { m, d };
+          if (hi.y >= m.foot.y - 0.05 && hi.y <= m.head.y + 0.05 && d < 3.5) { ok = true; break; } }
+        if (!ok) { loose++; if (!first) first = { hi, near }; }
+      }
+      if (loose && STATE === 'set')
+        say(v.id, 'a shroud made fast above its mast', `${loose} of ${shrouds.length} shroud meshes end where no mast is (first: top at x ${first.hi.x.toFixed(2)}, y ${first.hi.y.toFixed(2)}, z ${first.hi.z.toFixed(2)}; the nearest axis ${first.near ? first.near.m.name + ' at x ' + first.near.m.foot.x.toFixed(2) + ', head y ' + first.near.m.head.y.toFixed(2) + ', ' + first.near.d.toFixed(2) + ' m off' : 'none'})`);
+    };
+    lateenRead(g, 'set');
+    /* ── D-CRABCLAW-YARD-ON-MAST and D-FURL-CRABCLAW (round 261, 0y³⁶): THE CRAB-CLAW YARD LIES
+       AGAINST ITS MAST, LASHED TO IT, AND THE STOWED CLOTH ROLLS TO THE YARD'S AFTER SIDE. The
+       canoe's luff spars stood 0.34–0.49 m abaft the fore mast's axis and 0.14–0.29 m abaft
+       the main's on both builds (r261/crab-before.json) against the two radii of 0.03–0.05,
+       with nothing drawn holding them, because r250 read the TACK at a corner of cloth 0.5 m
+       abaft the mast and hung the yard's line through it; the 2009 broadside at 8x shows the
+       yard against the mast's after face, lashed at the heel, mid-height and masthead. Read
+       from the BUILT scene, set and furled: every 'Yard' mesh carrying userData.crabclaw gives
+       an axis by principal component and its end radii; its mast is the nearest foot to the
+       record's mastX; at five stations from the yard's heel + 0.3 m to the masthead − 0.1 m
+       the yard's centre is decomposed against the mast's axis — ABAFT along the axis's aft
+       normal and athwartships — and compared with the mast's radius there plus the yard's:
+       more than 0.05 m over is 'a crab-claw yard standing off its mast', more than 0.03 m
+       under 'through its mast', a centre forward of the axis 'forward of its mast', more than
+       0.03 m athwartships "off its mast's centreline". Every 'yardLashing' ring on that mast
+       must reach from the mast's far side to the yard's far side (0.03 m tolerance), there
+       must be at least two, one within 0.6 m of the masthead and one within 0.6 m of the
+       heel. On the furled build the roll (a 'furl' mesh whose mean lies within 1.5 m of the
+       yard's line): no point more than 0.03 m inside the pole, the roll within 0.05 m of the
+       yard's surface, its centre ABAFT the yard's axis (away from the mast), and a yard with
+       no roll convicted. */
+    const crabRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const axisOf = pts => {
+        const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        /* r304: the power iteration starts OFF every axis. Started at (0, 1, 0), an exactly level yard (xy = yz = 0
+           to the last bit, Endurance's fore topsail yard once her fore became the tallest lower mast) left y an
+           eigenvector of its own covariance, and the iteration stayed on it: the yard's 'axis' came out vertical and
+           its slings radius 6.17 m. The other yards escaped only on 1e-13 of rounding noise. */
+        const d = new THREE.Vector3(0.31, 0.89, 0.33).normalize();
+        for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.y < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9; const ts = [];
+        for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        const span = tMax - tMin;
+        const radAt = (t0, tol) => { let r = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) r = Math.max(r, q.clone().sub(c).addScaledVector(d, -ts[i]).length()); }); return r; };
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span, rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02) };
+      };
+      const masts = [], yards = [], lash = [], furls = [];
+      G.traverse(o => { if (!o.isMesh || !o.geometry) return;
+        if (o.userData.kind === 'furl') { if (STATE === 'furled') { const pts = hullPts(o); const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length); furls.push({ c, pts }); } return; }
+        const p = tagOf(o); if (!p) return;
+        if (p.key === 'yardLashing') { lash.push({ rec: o.userData.yardLashing || {}, pts: hullPts(o) }); return; }
+        if (p.key === 'mast') { const ax = axisOf(hullPts(o)); if (ax.span >= 0.5) masts.push(ax); }
+        if (p.key === 'yard' && o.userData.crabclaw) yards.push({ ax: axisOf(hullPts(o)), rec: o.userData.crabclaw }); });
+      for (const yd of yards) {
+        const Y = yd.ax, at = `the crab-claw yard on the mast at x ${yd.rec.mastX}`;
+        let m = null, bd = 1e9; for (const mm of masts) { const dd = Math.abs(mm.foot.x - yd.rec.mastX); if (dd < bd) { bd = dd; m = mm; } }
+        if (!m) { say(v.id, 'a crab-claw yard with no mast' + SB, at); continue; }
+        const nA = new THREE.Vector3(m.dir.y, -m.dir.x, 0).normalize(); if (nA.x < 0) nA.negate();
+        const mastR = h => { const t = Math.max(0, Math.min(1, (h - m.foot.y) / Math.max(1e-6, m.head.y - m.foot.y))); return m.rFoot + (m.rHead - m.rFoot) * t; };
+        const axisAt = h => m.foot.clone().addScaledVector(m.dir, (h - m.foot.y) / (m.dir.y || 1e-9));
+        const yardAt = h => Y.foot.clone().addScaledVector(Y.dir, (h - Y.foot.y) / (Y.dir.y || 1e-9));
+        const yardR = h => { const t = Math.max(0, Math.min(1, (h - Y.foot.y) / Math.max(1e-6, Y.head.y - Y.foot.y))); return Y.rFoot + (Y.rHead - Y.rFoot) * t; };
+        const h0 = Y.foot.y + 0.3, h1 = m.head.y - 0.1; let worstOff = -1e9, worstIn = 1e9, zMax = 0, fwd = false;
+        for (let i = 0; i < 5; i++) { const h = h0 + (h1 - h0) * i / 4; const d = yardAt(h).sub(axisAt(h)); const aft = d.dot(nA); const ex = aft - (mastR(h) + yardR(h));
+          worstOff = Math.max(worstOff, ex); worstIn = Math.min(worstIn, ex); zMax = Math.max(zMax, Math.abs(d.z)); if (aft < 0) fwd = true; }
+        if (fwd) say(v.id, 'a crab-claw yard forward of its mast' + SB, `${at}: its centre stands forward of the axis`);
+        else if (worstIn < -0.03) say(v.id, 'a crab-claw yard through its mast' + SB, `${at}: ${(-worstIn).toFixed(3)} m inside the two radii`);
+        if (worstOff > 0.05) say(v.id, 'a crab-claw yard standing off its mast' + SB, `${at}: ${worstOff.toFixed(3)} m over the two radii (the mast's radius plus its own) at the worst of five stations`);
+        if (zMax > 0.03) say(v.id, "a crab-claw yard off its mast's centreline" + SB, `${at}: ${zMax.toFixed(3)} m athwartships of the axis`);
+        const L = lash.filter(l => typeof l.rec.mastX === 'number' && Math.abs(l.rec.mastX - yd.rec.mastX) < 0.05);
+        if (L.length < 2) say(v.id, 'a crab-claw yard with no lashing to its mast' + SB, `${at}: ${L.length} lashing ring(s) drawn`);
+        else {
+          let nearHead = false, nearHeel = false;
+          for (const l of L) { let lo = 1e9, hi = -1e9, hm = 0; for (const q of l.pts) { hm += q.y; const a = q.clone().sub(axisAt(q.y)).dot(nA); lo = Math.min(lo, a); hi = Math.max(hi, a); } hm /= l.pts.length;
+            if (hm > m.head.y - 0.6) nearHead = true; if (hm < Y.foot.y + 0.6) nearHeel = true;
+            const yFar = yardAt(hm).sub(axisAt(hm)).dot(nA) + yardR(hm);
+            if (lo > -mastR(hm) + 0.03 || hi < yFar - 0.03) say(v.id, 'a crab-claw lashing that does not go round both spars' + SB, `${at}: the ring at ${hm.toFixed(2)} m reaches ${lo.toFixed(3)}..${hi.toFixed(3)} m abaft the axis against the mast's far side ${(-mastR(hm)).toFixed(3)} and the yard's ${yFar.toFixed(3)}`); }
+          if (!nearHead) say(v.id, 'a crab-claw yard unlashed at the masthead' + SB, `${at}: no lashing within 0.6 m of the head`);
+          if (!nearHeel) say(v.id, 'a crab-claw yard unlashed at its heel' + SB, `${at}: no lashing within 0.6 m of the heel`);
+        }
+        if (STATE === 'furled') {
+          const rolls = furls.filter(f => { const vv = f.c.clone().sub(Y.foot); const s = vv.dot(Y.dir); return vv.clone().addScaledVector(Y.dir, -s).length() <= 1.5 && s >= -0.5 && s <= Y.span + 0.5; });
+          if (!rolls.length) { say(v.id, 'a furled crab-claw yard with no roll on it', `${at} has no furled roll within 1.5 m of its line`); continue; }
+          for (const f of rolls) {
+            let into = 0, gap = 1e9;
+            for (const q of f.pts) { const w = q.clone().sub(m.foot); const t = w.dot(m.dir);
+              if (t >= -0.02 && t <= m.span + 0.02) { const r = m.rFoot + (m.rHead - m.rFoot) * Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))); const dist = w.clone().addScaledVector(m.dir, -t).length(); if (dist < r) into = Math.max(into, r - dist); }
+              const wy = q.clone().sub(Y.centre); const ty = wy.dot(Y.dir); const sy = Math.max(0, Math.min(1, (ty + Y.span / 2) / Math.max(Y.span, 1e-6))); const rq = Y.rFoot + (Y.rHead - Y.rFoot) * sy;
+              gap = Math.min(gap, wy.clone().addScaledVector(Y.dir, -ty).length() - rq); }
+            const vv = f.c.clone().sub(Y.centre); const sv = vv.dot(Y.dir); const aftOf = vv.clone().addScaledVector(Y.dir, -sv).dot(nA);
+            if (into > 0.03) say(v.id, 'a furled crab claw stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+            if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+            if (aftOf < 0) say(v.id, 'a furled crab claw hung forward of its yard', `the roll on ${at} has its centre ${(-aftOf).toFixed(3)} m forward of the yard's axis, toward the mast`);
+          }
+        }
+      }
+    };
+    crabRead(g, 'set');
+    /* ── D-MAST-RAKE (round 255): A MAST STANDS AT ITS RECORD'S RAKE. The lateen block built
+       its pole plumb on every hull while five lateen masts carry a rake in their record — the
+       carrack's and the fluyt's mizzens 4° aft, the galley's and the galleass's foremasts 4°
+       forward, the galleass's mizzen 2° aft (r255/rake-before.json: built 0.00° on all five;
+       the square masts have always taken theirs, and the lug's since round 253). Read from
+       the BUILT scene: every mesh tagged 'mast' and named 'Mast' spanning 2 m or more gives an
+       axis, foot to head (the means of its lowest and highest rings, in hull space); its rake
+       is atan2(Δx, Δy) in degrees, +aft; its record is the mast whose station (at − 0.5)·lwl
+       lies nearest its foot, within a tenth of the hull. The two must agree to 0.5°, else 'a
+       mast built against its record's rake'.
+       Round 256: the axis is read by principal component (principalAxis below), which is
+       exact at any rake, so the rule now covers the corbita's 48° artemon and the trireme's
+       28° bow mast; the r255 ring-mean read and its 20° gate are gone. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      /* r256: the axis by principal component. The mean of every vertex of a cylinder lies on
+         its axis however it leans, and the direction of greatest spread is the pole's own; the
+         ends are the extreme projections on that direction — the rim centres, exactly. The r255
+         read (the means of the lowest and highest 2% of the y-span) took one side of each rim
+         on a leaning pole and read the corbita's 48° artemon 1.1° off (0y²³); this read is
+         exact at any rake, so the 20° gate is gone. */
+      const principalAxis = pts => {
+        const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+          xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        const d = new THREE.Vector3(0, 1, 0);
+        for (let it = 0; it < 60; it++)
+          d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.y < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9;
+        for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+      };
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const Lr = H.lwl;
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p || p.key !== 'mast' || p.name !== 'Mast') return;
+        const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+        const span = yMax - yMin; if (span < 2) return;
+        const ax = principalAxis(pts), lo = ax.foot, hi = ax.head;
+        const built = Math.atan2(hi.x - lo.x, hi.y - lo.y) * 180 / Math.PI;
+        let rec = null, bd = 1e9;
+        for (const mk of (H.masts || [])) { const dd = Math.abs((mk.at - 0.5) * Lr - lo.x); if (dd < bd) { bd = dd; rec = mk; } }
+        if (!rec || bd > 0.1 * Lr) return;
+        const want = rec.rake || 0;
+        if (Math.abs(built - want) > 0.5)
+          say(v.id, "a mast built against its record's rake", `the ${rec.rig} mast at station ${rec.at} (foot x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}, ${span.toFixed(1)} m tall) stands at ${built.toFixed(2)}° where its record says ${want}°`);
+      });
+    }
+    /* ── D-YARD-ON-MAST (round 256): A SQUARE YARD IS SLUNG ON ITS MAST, WITHIN ITS SPAN. The
+       corbita's artemon yard hung 0.41 m ABOVE its pole's head and 0.24 m abaft it
+       (r256/rake-before.json: head y 8.414, the yard at 8.82) because the pole was built short
+       of its height and the yard was placed on a line that was not the pole's (0y⁹). Read from
+       the BUILT scene: every mesh tagged 'yard' and named 'Yard' whose centre (the mean of
+       its vertices) is on the centreline — the square block's crossed yards, braced about
+       their own slings; the lug's yard is 'Yard' too but hangs beside its mast in its own
+       frame, its centre 0.5–1.6 m to port, and is not slung at its middle (round 253 reads
+       it). Every mast segment is a mesh tagged 'mast' whose name ends in 'mast' ('Mast',
+       'Iron mast', 'Steel mast', 'Wooden mast' — the iron hulls name their poles, and a
+       filter on 'Mast' alone read Preussen's thirty yards against no mast at all); its axis
+       is read by principal component. A yard's masts are the segments whose axis passes
+       within 0.6 m of its centre: none, and it is 'a yard hung on no mast'; if the centre
+       stands more than 0.02 m above the highest of their heads, 'a yard slung above its
+       mast's head' — a stacked mast is several collinear segments, and a topsail yard on the
+       topmast is above the LOWER's head by construction, so the highest head is the test.
+       ── Round 257 (0y²⁵): A SQUARE YARD LIES ON ITS MAST'S FORE FACE. Every crossed yard was
+       slung ON its mast's axis — the spar's centre through the middle of the pole
+       (r257/yards-before.json: every centreline yard on the thirteen square-rigged hulls
+       within 0.02 m of its mast's axis). A yard touching its mast stands off the axis by the
+       mast's radius at the slings plus its own, before the mast, held there by a parrel or a
+       truss. Read from the MESHES, not from the builder's numbers: the yard's own axis and
+       its slings radius (the ring at its centre) by principal component; the mast segment's
+       radius at the yard's projection from its two rims (cyl() draws one open-ended tapered
+       segment, so the radius is linear between them); the nearest segment's perpendicular
+       distance to the yard's centre. Within 0.03 m of the two radii, and forward of the
+       axis at the yard's height, or it is 'a square yard slung through its mast' (nearer
+       than the radii allow — the r256 builder, every yard), 'a square yard standing off its
+       mast' (farther: hung on nothing that touches it), or 'a square yard slung abaft its
+       mast'. The fore-face test reads every ATHWARTSHIPS centreline 'Yard' (its axis within
+       32° of the beam — the square block braces its yards 19.5°); the crab claw's 'Yard' lies
+       along its mast and is r250's. The 'no mast' gate widens from 0.6 m to 1.5 m, because a
+       yard before its mast stands off by two radii — 0.9 m on Preussen. A builder that
+       records the offset (userData.slung, the lateen's pattern) is read the same way; the
+       record is provenance, not the test.
+       ── Round 258 (0y²⁷): D-YARD-HELD — SOMETHING HOLDS THE YARD THERE. r257 stood every
+       yard at the two radii and drew nothing holding it; the lateen and the lug carry their
+       parrels. Every mesh tagged 'parrel' or 'truss' is read: its vertex mean, its z extent
+       and its points. An athwartships yard must have one within 1.5 m of its slings and
+       within 0.6 m of its height, and that fitting must go ROUND the mast — reach both sides
+       of the centreline by half the mast's radius there and reach abaft the AXIS by half
+       the radius, read along the axis's own normal (on the corbita's 48° artemon the axis
+       at the yard's height is not the axis at the slings) — else 'a square yard with nothing holding it to its mast' (the r257
+       builder, every yard) or 'a yard's parrel that does not go round its mast'.
+       ── Round 259 (0y²⁸): THE RULE READS BOTH BUILDS. It read the SET build only; the furled
+       build `gf` (built by the stowed-cloth block below) was read by round 63's rule alone, and
+       r257 stood every furled yard off its mast by the ROLL's radius — 104 yards on thirteen
+       hulls, 0.07–0.50 m past the two radii (r259/furl-before.json) — which this rule would
+       have convicted as 'standing off its mast' had it run on `gf`. The block is a function of
+       the scene now, run on `g` here and on `gf` from the stowed-cloth block, the state named in
+       every conviction; the mast-segment rule (below) runs on the set build alone. It returns
+       what it read, so the bunt rule can read the same masts and yards. */
+    const yardRead = (G, STATE) => {
+      const st = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const axisOf = pts => {
+        const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        /* r304: the power iteration starts OFF every axis. Started at (0, 1, 0), an exactly level yard (xy = yz = 0
+           to the last bit, Endurance's fore topsail yard once her fore became the tallest lower mast) left y an
+           eigenvector of its own covariance, and the iteration stayed on it: the yard's 'axis' came out vertical and
+           its slings radius 6.17 m. The other yards escaped only on 1e-13 of rounding noise. */
+        const d = new THREE.Vector3(0.31, 0.89, 0.33).normalize();
+        for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.y < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9; const ts = [];
+        for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        const span = tMax - tMin;
+        /* the radius at a station along the axis: the mean distance from the axis of the vertices within tol of it (r257) */
+        const radAt = (t0, tol) => { let r = 0, n = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) { r += q.clone().sub(c).addScaledVector(d, -ts[i]).length(); n++; } }); return n ? r / n : NaN; };
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span,
+                 rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
+      };
+      const masts = [], yards = [], segs = [], fits = [];
+      G.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+        if (p.key === 'parrel' || p.key === 'truss') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length);
+          let zMin = 1e9, zMax = -1e9; for (const q of pts) { zMin = Math.min(zMin, q.z); zMax = Math.max(zMax, q.z); }
+          fits.push({ key: p.key, name: p.name, c: fc, zMin, zMax, pts }); }
+        if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
+          if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
+        if (p.key === 'yard' && p.name === 'Yard') { const ax = axisOf(hullPts(o)); if (Math.abs(ax.centre.z) < 0.3) yards.push({ c: ax.centre, ax, slung: o.userData.slung || null, athwart: Math.abs(ax.dir.z) >= 0.85, bare: o.userData.bare || null }); }
+      });
+      const distToAxis = (m, q) => { const w = q.clone().sub(m.foot); const t = w.dot(m.dir); return w.sub(m.dir.clone().multiplyScalar(t)).length(); };
+      for (const yd of yards) {
+        const c = yd.c; let n = null; const near = [];
+        /* the yard's segment: on a stacked mast every segment shares the axis line, so the pick is the LOWEST
+           segment whose own span contains the yard's projection (the builder's mastRAt reads the same one),
+           and only where none does, the nearest by distance */
+        let seg = null;
+        for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 1.5) near.push(m);
+          const tt = c.clone().sub(m.foot).dot(m.dir); if (d <= 1.5 && tt >= -0.02 && tt <= m.span + 0.02 && (!seg || m.foot.y < seg.m.foot.y)) seg = { m, d }; }
+        if (!near.length) { say(v.id, 'a yard hung on no mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}, ${c.z.toFixed(2)}) is ${n ? n.d.toFixed(2) + ' m from the axis of the nearest mast (foot x ' + n.m.foot.x.toFixed(2) + ')' : 'on a hull with no mast mesh'}`); continue; }
+        const top = near.reduce((mx, m) => Math.max(mx, m.head.y), -1e9), tm = near.reduce((b, m) => (!b || m.head.y > b.head.y) ? m : b, null);
+        if (c.y > top + 0.02) say(v.id, "a yard slung above its mast's head", `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${(c.y - top).toFixed(2)} m above the head (y ${top.toFixed(2)}) of the mast at foot x ${tm.foot.x.toFixed(2)}`);
+        /* r257: the fore face — the yard's segment's radius at the yard's projection plus the yard's own */
+        if (yd.athwart || yd.slung) {
+          const pick = seg || n; const m = pick.m; n = pick;
+          const w = c.clone().sub(m.foot), t = Math.max(0, Math.min(1, w.dot(m.dir) / Math.max(m.span, 1e-6)));
+          const rAt = m.rFoot + (m.rHead - m.rFoot) * t, expect = rAt + yd.ax.rMid;
+          const axisXAtY = m.foot.x + (c.y - m.foot.y) * (m.dir.x / Math.max(m.dir.y, 1e-6));
+          const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off${st}`;
+          if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
+          else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
+          else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
+          /* r258 (0y²⁷): D-YARD-HELD — the fitting at the slings, and it goes round the mast */
+          const nearF = fits.filter(f => f.c.distanceTo(c) <= 1.5 && Math.abs(f.c.y - c.y) <= 0.6);
+          /* how far abaft the AXIS the fitting reaches, along the axis's forward normal (−dir.y, dir.x): negative is abaft */
+          const faMin = f => { let mn = 1e9; for (const q of f.pts) { const w = q.clone().sub(m.foot), t = w.dot(m.dir); mn = Math.min(mn, (w.x - m.dir.x * t) * (-m.dir.y) + (w.y - m.dir.y * t) * m.dir.x); } return mn; };
+          const round = nearF.filter(f => f.zMin <= -0.5 * rAt && f.zMax >= 0.5 * rAt && faMin(f) <= -0.5 * rAt);
+          if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}${st}`);
+          else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole${st}`);
+        }
+      }
+      /* ── D-MAST-SEGMENT (round 256): A POLE ENDS WHERE ITS BUILDER SAYS. Every square-block
+         segment records its own ends (userData.seg: footY, headY, footX, headX — the segment's
+         y and y + seg on the raked axis). The mesh's rim centres, by principal component, must
+         stand at those points to 0.03 m, else 'a mast segment built short of its record': the
+         r255 pole was a cylinder of the segment's HEIGHT turned about its centre, so it stood
+         (1 − cos rake)·seg/2 short at each end — 5 cm on a 5° mast, 0.35 m on the trireme's
+         28° bow mast and 1.13 m on the corbita's 48° artemon, whose foot floated over the
+         deck. Silent on a hull where no segment records itself (an older builder, or an all-lateen
+         hull — the lateen pole of round 255 carries no record yet); where the builder records,
+         every recorded segment is read. */
+      if (STATE === 'set' && segs.some(q => q.rec)) {
+        for (const q of segs) {
+          if (!q.rec) continue;
+          const r = q.rec, dF = Math.hypot(q.ax.foot.x - r.footX, q.ax.foot.y - r.footY), dH = Math.hypot(q.ax.head.x - r.headX, q.ax.head.y - r.headY);
+          if (dF > 0.03 || dH > 0.03)
+            say(v.id, 'a mast segment built short of its record', `segment ${r.si} at foot x ${r.footX.toFixed(2)}: built foot (${q.ax.foot.x.toFixed(3)}, ${q.ax.foot.y.toFixed(3)}) against the record's (${r.footX.toFixed(3)}, ${r.footY.toFixed(3)}), ${dF.toFixed(3)} m off; head ${dH.toFixed(3)} m off`);
+        }
+      }
+      return { masts, yards, hullPts, axisOf };
+    };
+    yardRead(g, 'set');
+    /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
+       mast stood with its heel 0.18 m inside the platform between her hulls (r247/
+       feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig
+       stepped every mast at the single hull's deck line and nothing could ask where the
+       platform was. Read from the BUILT scene: the 'platform' mesh (its box, and
+       userData.platform where the builder records it), read in hull space, and every lower-mast mesh named
+       'Mast' whose heel — the mesh's lowest vertex — lies between the platform's ends. The
+       heel must stand on the platform's top: from 0.02 m under it (a raked heel's cap) to
+       0.10 m over it. A double hull with no platform mesh is convicted outright. Silent on a
+       single hull.
+       Round 249: the platform lies on the beams and follows the sheer, so its top is read AT
+       THE HEEL'S STATION — from the profile the builder records (userData.platform.profile,
+       interpolated), which the mesh's own vertices must bracket to 5 mm or the record and
+       the mesh disagree; the mesh's highest vertex where there is no profile. And a lower
+       mast whose heel stands BETWEEN the hulls (|z| inside the hull separation less a beam)
+       beyond the platform's ends is convicted — 'a mast stepped on nothing between the
+       hulls' — because r248 left it unread and the deck was the only thing there to step
+       on; the canoe's foremast at u 0.26 stood 1.1 m forward of the r248 platform's end. */
+    if (H.doubleHull) {
+      /* every point in HULL space, the frame the platform's record and the feet are in */
+      const worldM = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const plats = [], heels = [];
+      const sepH = (H.hullSep || H.loa * 0.26) / 2 - H.beam / 2;      // inboard of this |z| is between the hulls
+      g.traverse(o => {
+        const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'platform') {
+          const pts = worldM(o), e = { xMin: 1e9, xMax: -1e9, yMax: -1e9, yMin: 1e9 };
+          for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMax = Math.max(e.yMax, q[1]); e.yMin = Math.min(e.yMin, q[1]); }
+          const rec = o.userData.platform || null, PR = rec && rec.profile && rec.profile.length ? rec.profile : null;
+          if (PR) {
+            const top = Math.max(...PR.map(q => q.yTop)), bot = Math.min(...PR.map(q => q.yBot));
+            if (Math.abs(top - e.yMax) > 0.005 || Math.abs(bot - e.yMin) > 0.005)
+              say(v.id, 'a platform whose mesh is not its profile',
+                  `the platform's profile runs y ${bot.toFixed(3)}–${top.toFixed(3)} and its mesh y ${e.yMin.toFixed(3)}–${e.yMax.toFixed(3)}`);
+          }
+          const topAt = x => {
+            if (!PR) return e.yMax;
+            if (x <= PR[0].x) return PR[0].yTop;
+            if (x >= PR[PR.length - 1].x) return PR[PR.length - 1].yTop;
+            for (let k = 0; k + 1 < PR.length; k++)
+              if (x >= PR[k].x && x <= PR[k + 1].x) { const t = (x - PR[k].x) / (PR[k + 1].x - PR[k].x); return PR[k].yTop + (PR[k + 1].yTop - PR[k].yTop) * t; }
+            return e.yMax;
+          };
+          plats.push({ ...e, rec, topAt });
+        } else if (p.key === 'mast' && p.name === 'Mast') {
+          const pts = worldM(o); let lo = pts[0], hi = pts[0];
+          for (const q of pts) { if (q[1] < lo[1]) lo = q; if (q[1] > hi[1]) hi = q; }
+          if (hi[1] - lo[1] < Math.min(3, H.beam * 0.35)) return;
+          heels.push({ x: lo[0], y: lo[1], z: lo[2] });
+        }
+      });
+      if (!plats.length)
+        say(v.id, 'a double hull with no platform', 'doubleHull is set and no platform mesh is built between the hulls');
+      for (const m of heels) {
+        const pl = plats.find(p => m.x >= p.xMin - 0.01 && m.x <= p.xMax + 0.01);
+        if (!pl) {
+          if (plats.length && Math.abs(m.z) < sepH)
+            say(v.id, 'a mast stepped on nothing between the hulls',
+                `a mast's heel at x ${m.x.toFixed(2)}, z ${m.z.toFixed(2)} stands between the hulls beyond the platform's ends (x ${plats[0].xMin.toFixed(2)} to ${plats[0].xMax.toFixed(2)})`);
+          continue;
+        }
+        const top = pl.topAt(m.x);
+        if (m.y < top - 0.02)
+          say(v.id, 'a mast stepped under its platform',
+              `a mast's heel at x ${m.x.toFixed(2)}, y ${m.y.toFixed(3)} stands ${(top - m.y).toFixed(3)} m under the platform's top at ${top.toFixed(3)}`);
+        else if (m.y > top + 0.10)
+          say(v.id, 'a mast floating over its platform',
+              `a mast's heel at x ${m.x.toFixed(2)}, y ${m.y.toFixed(3)} stands ${(m.y - top).toFixed(3)} m over the platform's top at ${top.toFixed(3)}`);
+      }
+    }
+    /* ── THE CROSSED YARD IS WORKED, AND THE UPPER MASTS ARE STAYED (round 59). Item 2's
+       standing remainder: a yard without lifts is held up by nothing, a sail without sheets
+       is trimmed by nothing, and every topmast in the fleet stood as an unstayed pole —
+       none of it visible to a ratchet that only sees change, because gear that never
+       existed never changes. The builder merges each category into ONE mesh per square
+       mast, so the census is exact: lifts, sheets, tacks and a halyard fall per square
+       mast (a junk mast adds its own crowfoot sheet and halyard), and above one drawn tier
+       the topmast shroud set with its futtocks, above two the topgallant set. Counted on
+       the fine build, where the gear is drawn. */
+    {
+      const sq = (H.masts || []).filter(mk => mk.rig === 'square');
+      if (sq.length) {
+        const jm = (H.masts || []).filter(mk => mk.rig === 'junk').length;
+        for (const [key, label] of [['lift', 'lift'], ['sheet', 'sheet'],
+                                    ['tack', 'tack'], ['halyard', 'halyard']]) {
+          /* r315 (0y¹⁴⁹): a segment rig's crossjack carries no sail, so its mast has no tacks */
+          const want = sq.length + ((key === 'sheet' || key === 'halyard') ? jm : 0) - (key === 'tack' ? sq.filter(isSegCrossjack).filter(mk => mk.crossjackSail !== true).length : 0);
+          const got = part[key] ? part[key].n : 0;
+          if (got !== want)
+            say(v.id, 'yard gear missing',
+                `${want} ${label} mesh(es) for ${sq.length} square mast(s), ${got} drawn`);
+        }
+        const tiers = mk => mk.only ? Math.min(mk.only, 3) : 3;
+        const wantTop = sq.filter(mk => mk.shrouds && tiers(mk) >= 2).length;
+        const wantTg = sq.filter(mk => mk.shrouds && tiers(mk) >= 3).length;
+        let gotTop = 0, gotFut = 0, gotTg = 0;
+        g.traverse(o => { if (!o.isMesh || !o.userData.part) return;
+          const nm = o.userData.part.name;
+          if (nm === 'Topmast shrouds') gotTop++;
+          if (nm === 'Futtock shrouds') gotFut++;
+          if (nm === 'Topgallant shrouds') gotTg++; });
+        if (gotTop !== wantTop || gotFut !== wantTop)
+          say(v.id, 'topmast unstayed',
+              `${wantTop} topmast shroud set(s) wanted with futtocks, ` +
+              `${gotTop} drawn (${gotFut} futtock)`);
+        if (gotTg !== wantTg)
+          say(v.id, 'topgallant unstayed',
+              `${wantTg} topgallant set(s) wanted, ${gotTg} drawn`);
+      }
+    }
+    /* ── THE ANCHOR IS FORGE-SIZED (round 45, steamer). The bower's shank scaled at L/8
+       for every hull, which is right at a 74's size and hung a 10.6 m anchor across the
+       92 m steamer's forecastle and a 17 m one on Preussen. Anchors stopped growing when
+       hulls did not: the largest ever hand-forged, Titanic's centre anchor, is 5.7 m over
+       all. So the drawn extent of a catted anchor is bounded by the forge, not the hull —
+       the bound is generous so only the linear-scaling absurdity trips it. */
+    {
+      const ancs = [];
+      g.traverse(o => { if (o.userData && o.userData.part && o.userData.part.key === 'anchor')
+                          ancs.push(new THREE.Box3().setFromObject(o)); });
+      for (const bb of ancs) {
+        const worst = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z);
+        if (worst > 8.5)
+          say(v.id, 'anchor out of scale',
+              `catted anchor spans ${worst.toFixed(1)} m; the largest ever forged is 5.7 m over all`);
+      }
+    }
+
+    /* ── A BULKHEAD HULL ENDS IN BULKHEADS (round 46, treasure ship). The junk's own
+       stage card teaches bulkhead-first construction, while the drawn hull wore a European
+       stem and sternpost and ran out past them to open, uncapped shell ends — the bow read
+       as a yacht's. The outermost bulkheads ARE the ends, planked across: both caps must
+       exist, and the backbone members must not. */
+    if (H.build === 'bulkhead') {
+      if (!part.bowtransom) say(v.id, 'bulkhead ends', 'no bow transom drawn');
+      if (!part.sterntransom) say(v.id, 'bulkhead ends', 'no stern transom drawn');
+      if (part.stempost) say(v.id, 'bulkhead ends', 'a stem/sternpost on a bulkhead-built hull');
+      /* and the median rudder is ENORMOUS — the Longjiang yard's own ground gave an
+         11.07 m rudder post. Chord near a tenth of the waterline, and the foot BELOW the
+         bottom, because lowered it is the leeway board of a hull with no deep keel. */
+      if (!part.rudder) say(v.id, 'junk rudder', 'no rudder drawn');
+      else {
+        const c = part.rudder.x[1] - part.rudder.x[0];
+        if (c < H.lwl * 0.055)
+          say(v.id, 'junk rudder', `chord ${c.toFixed(1)} m on ${H.lwl} m of waterline`);
+        if (part.rudder.y[0] > -H.draught * 1.02)
+          say(v.id, 'junk rudder',
+              `foot at ${part.rudder.y[0].toFixed(1)} m never reaches below the bottom (draught ${H.draught} m)`);
+      }
+    }
+
+    /* ── THE JUNK RIG IS A FAN, AND ITS SPARS ARE A CENSUS (round 46). Reddish's average
+       is five battens between boom and yard — seven spars per mast — and for eleven rounds
+       the numbers were drawn as parallel battens under a level head, which read as square
+       sails. The count pins the structure; the ratchet frames pin the fan. Applies where
+       every mast is junk-rigged, so a square ship's crossed yards cannot leak in. */
+    {
+      const jm = (H.masts || []).filter(m => m.rig === 'junk').length;
+      if (jm && jm === (H.masts || []).length) {
+        const got = part.yard ? part.yard.n : 0;
+        if (got !== jm * 7)
+          say(v.id, 'junk spar census',
+              `${got} spars across ${jm} junk masts (boom + five battens + yard = ${jm * 7})`);
+      }
+    }
+
+    /* ── THE SHIP FLOATS AT HER MARKS — round 33. Both views float every hull on the
+       construction fact that surfacePoint puts the load waterline at local y = 0 and bottoms
+       the skin at exactly -draught (measured 0.000 on all 25, r33). This guards the fact: if
+       the parametrisation ever moves the skin floor off -draught, the waterlineY datum in
+       hull.js userData becomes a lie and the whole fleet floats wrong while every frame still
+       looks like a ship on water — the wrongness no picture ratchet can see. */
+    if (part.planking && H.draught &&
+        Math.abs(part.planking.y[0] + H.draught) > Math.max(0.02, H.draught * 0.01))
+      say(v.id, 'skin off her marks',
+          `skin bottoms at ${part.planking.y[0].toFixed(2)} m against a stated draught of ${H.draught} m`);
+
+    /* ── THE KEEL IS THE DEEPEST THING ON THE SHIP. She dry-docks on blocks that take her
+       weight on the keel, so nothing hangs below it — the container's bulb rode 0.97 m under
+       the baseline for as long as it existed (r33), and no ratchet bearing looks under a
+       hull. */
+    if (part.keel) {
+      let floorY = 1e9, floorPart = null;
+      for (const k in part) if (part[k].y[0] < floorY) { floorY = part[k].y[0]; floorPart = k; }
+      /* ⚠ ONE DOCUMENTED EXCEPTION: the junk's median rudder is drawn LOWERED, below the
+         bottom, because under way that is where it worked — it is the leeway board of a
+         keel-less hull. She dry-docks with it raised in its trunk, which is the whole
+         point of slinging a rudder on tackles instead of pintles. */
+      const lowered = H.build === 'bulkhead' && floorPart === 'rudder';
+      if (floorPart !== 'keel' && !lowered && floorY < part.keel.y[0] - 0.02)
+        say(v.id, 'hangs below the keel',
+            `${floorPart} reaches ${floorY.toFixed(2)} m, keel bottom ${part.keel.y[0].toFixed(2)} m`);
+    }
+
+    /* ⚠ A FLIGHT DECK STANDS ON A HANGAR, NOT ON AIR. The deck was a slab floating over the
+       hull — from any low bearing you saw under it, across open air, to the sea on the far
+       side. The casing must exist and must span the gap from the sheer to the slab. */
+    if (H.flightDeck) {
+      if (!part.hangar) say(v.id, 'flight deck stands on air', 'no hangar casing built');
+      else if (part.flightdeck &&
+               (part.hangar.y[1] < part.flightdeck.y[0] - 1.0 ||
+                part.hangar.y[0] > deckY + 1.0))
+        say(v.id, 'hangar does not span the gap',
+            `casing ${part.hangar.y[0].toFixed(1)}–${part.hangar.y[1].toFixed(1)} m, ` +
+            `deck slab from ${part.flightdeck.y[0].toFixed(1)}, sheer ${deckY.toFixed(1)}`);
+    }
+
+    /* ⚠ THE DECK PARK PARKS CLEAR OF THE LANDING AREA. Declared aircraft must be drawn, at
+       the declared count; each must stand ON the flight deck rather than float over it or
+       sink through it; none may leave the deck; and none may sit inside the angled landing
+       area — the strip's geometry comes from the builder's own landingStrip(), one
+       derivation for the marks, the wires and this rule, so they cannot disagree. */
+    if (H.deckPark) {
+      const acs = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'aircraft')
+                          acs.push(o); });
+      if (!acs.length) say(v.id, 'declared but not drawn', 'deck park');
+      else {
+        if (acs.length !== H.deckPark)
+          say(v.id, 'deck park miscounted', `${H.deckPark} declared, ${acs.length} drawn`);
+        const LS = SHIPS_HULL.landingStrip(H);
+        const slabTop = part.flightdeck ? part.flightdeck.y[1] : 0;
+        for (const ac of acs) {
+          const ab = new THREE.Box3().setFromObject(ac);
+          const cxA = (ab.min.x + ab.max.x) / 2, czA = (ab.min.z + ab.max.z) / 2;
+          if (ab.min.y > slabTop + 1.0 || ab.min.y < slabTop - 1.8)
+            say(v.id, 'aircraft not on the deck',
+                `wheels at ${ab.min.y.toFixed(1)} m, deck about ${slabTop.toFixed(1)}`);
+          if (Math.max(-ab.min.z, ab.max.z) > H.flightDeck * 0.5 + 0.5 ||
+              Math.max(-ab.min.x, ab.max.x) > H.lwl * 0.51 + 0.5)
+            say(v.id, 'aircraft off the deck',
+                `at x ${cxA.toFixed(0)} z ${czA.toFixed(0)}`);
+          const dx = cxA - LS.cx, dz = czA - LS.cz;
+          const xl = dx * Math.cos(LS.rot) - dz * Math.sin(LS.rot);
+          const zl = dx * Math.sin(LS.rot) + dz * Math.cos(LS.rot);
+          if (Math.abs(zl) < LS.halfW + 4 && Math.abs(xl) < LS.halfLen + 9)
+            say(v.id, 'aircraft parked foul of the landing area',
+                `${zl.toFixed(1)} m off the axis at x ${cxA.toFixed(0)}`);
+        }
+        /* ⚠ AN AIRFRAME IS ONE BODY (round 145). Each parked aircraft's principal
+           mesh — the one with the longest run down the group's own x axis — must BE
+           the airframe: spanning at least 0.8 of the group's length and lofted
+           rather than a twelve-triangle box. The convicted form was a nose cone
+           abutting a 13.2 m brick — the r144 step class, two meshes pretending to
+           be one body, and the brick was 70% of the airframe. Measured in the
+           group's LOCAL frame (the r144 lesson), because every aircraft on the
+           deck is rotated to its own heading and a world-frame box aliases the
+           rake in. */
+        let acBad = 0, acNote = '';
+        for (const ac of acs) {
+          let lo = Infinity, hi = -Infinity, pRun = 0, pTris = 0;
+          ac.traverse(o => {
+            if (!o.isMesh || !o.geometry) return;
+            o.geometry.computeBoundingBox();
+            const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+            lo = Math.min(lo, bb.min.x); hi = Math.max(hi, bb.max.x);
+            const r = bb.max.x - bb.min.x;
+            if (r > pRun) {
+              pRun = r;
+              pTris = o.geometry.index ? o.geometry.index.count / 3
+                    : o.geometry.attributes.position.count / 3;
+            }
+          });
+          if (pRun < (hi - lo) * 0.8 || pTris <= 12) {
+            acBad++;
+            acNote = `principal mesh runs ${pRun.toFixed(2)} of ${(hi - lo).toFixed(2)} m ` +
+                     `at ${pTris} triangles`;
+          }
+        }
+        if (acBad)
+          say(v.id, 'airframe is not one body',
+              `${acBad} of ${acs.length} — ${acNote} — a cone abutting a brick, ` +
+              'not a lofted body');
+      }
+    }
+
+    /* ⚠ AN ISLAND IS ONE TOWER, NOT A STACK OF SLABS UNDER A STICK (round 146). The
+       island's principal mesh — the one with the longest run up the group's own y axis —
+       must BE the tower: spanning at least half the island's full height, mast included,
+       and lofted rather than boxed. The convicted form was three stacked tier boxes with
+       a glass box laid over each upper tier and a picket of 22 mullion boxes over the
+       glass; its tallest single mesh was the MAST, an eight-sided stick at 43% of the
+       assembly, and no slab rose past a quarter of it. Measured in the group's LOCAL
+       frame, the r144 lesson. */
+    if (H.flightDeck) {
+      let islG = null;
+      g.traverse(o => {
+        if (!islG && o.isGroup && o.userData.part && o.userData.part.key === 'island')
+          islG = o;
+      });
+      if (islG) {
+        islG.updateMatrixWorld(true);
+        let lo2 = Infinity, hi2 = -Infinity, pRun = 0, pTris = 0;
+        islG.traverse(o => {
+          if (!o.isMesh || !o.geometry) return;
+          o.geometry.computeBoundingBox();
+          const bb2 = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+          lo2 = Math.min(lo2, bb2.min.y); hi2 = Math.max(hi2, bb2.max.y);
+          const r = bb2.max.y - bb2.min.y;
+          if (r > pRun) {
+            pRun = r;
+            pTris = o.geometry.index ? o.geometry.index.count / 3
+                  : o.geometry.attributes.position.count / 3;
+          }
+        });
+        if (pRun < (hi2 - lo2) * 0.5 || pTris <= 40)
+          say(v.id, 'island is not one tower',
+              `principal mesh runs ${pRun.toFixed(2)} of ${(hi2 - lo2).toFixed(2)} m ` +
+              `at ${pTris} triangles — slabs under a stick, not a lofted tower`);
+      }
+
+      /* ── D-ISLAND-SIDE (round 270, 0y⁵⁴): THE ISLAND STANDS ON THE RECORD'S SIDE, THE LIFTS
+         WITH IT, AND THE ANGLED DECK LEAVES IT. Until r270 the carrier's island, her two
+         deck-edge lifts and her catapults were placed at +z under the belief that +z was
+         starboard, and her landing area drifted to −z — every one-sided fitting on the mirror
+         side of the ship her record describes (+z is port; see sideOf above). The record's
+         word — islandSide, starboard when the record is silent — is read HERE, not through the
+         builder, so a builder that has no islandSide() is convicted by its meshes; the island
+         group's centre and each lift's centre are read off the meshes, and the strip's two
+         ends off the builder's own landingStrip(), which the marks and the wires share. */
+      const wantSide = (H.islandSide || 'starboard') === 'port' ? 1 : -1;
+      const centreZ = o => { const bb = new THREE.Box3().setFromObject(o); return (bb.min.z + bb.max.z) / 2; };
+      if (islG) {
+        const zc = centreZ(islG);
+        if (Math.sign(zc) !== wantSide)
+          say(v.id, 'island on the wrong side',
+              `the island's centre stands ${Math.abs(zc).toFixed(1)} m to ${sideOf(zc)}; ` +
+              `the record puts it to ${sideOf(wantSide)}`);
+      }
+      const lifts = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.name === 'Deck-edge lift') lifts.push(o); });
+      for (const lf of lifts) {
+        const zc = centreZ(lf);
+        if (Math.sign(zc) !== wantSide)
+          say(v.id, 'a lift on the wrong side',
+              `a deck-edge lift at x ${lf.position.x.toFixed(0)} stands ${Math.abs(zc).toFixed(1)} m to ` +
+              `${sideOf(zc)}; the lifts stand on the island's side, ${sideOf(wantSide)}`);
+      }
+      if (SHIPS_HULL.landingStrip) {
+        const LS = SHIPS_HULL.landingStrip(H);
+        const fwdZ = LS.cz + Math.sin(LS.rot) * LS.halfLen, aftZ = LS.cz - Math.sin(LS.rot) * LS.halfLen;
+        if (Math.sign(fwdZ) === wantSide || Math.abs(fwdZ) <= Math.abs(aftZ))
+          say(v.id, 'the angled deck runs toward the island',
+              `the landing area's forward end stands ${Math.abs(fwdZ).toFixed(1)} m to ${sideOf(fwdZ)} ` +
+              `and its aft end ${Math.abs(aftZ).toFixed(1)} m to ${sideOf(aftZ)}; it should run forward ` +
+              `to ${sideOf(-wantSide)}, away from an island to ${sideOf(wantSide)}`);
+      }
+    }
+
+    /* ⚠ A FLOATPLANE IS ONE BODY TOO (round 148) — the r145 airframe law reaching the
+       catapult aircraft. Each floatplane group's principal mesh — the longest run down
+       the group's own x axis — must BE the airframe: spanning at least 0.8 of the
+       aircraft's length and lofted rather than boxed. The convicted form was three
+       abutting cylinders — cowl, barrel, tail cone, the r144 step class — whose
+       principal mesh was the 6.6 m barrel of a 9.3 m aircraft. Measured in the group's
+       LOCAL frame (the r144 lesson): one aircraft rides the catapult nose-astern, the
+       parked ones stand at hand-pushed headings, and a world-frame box aliases all of
+       that in. */
+    if (H.floatplanes) {
+      const acs = [];
+      g.traverse(o => {
+        if (o.isGroup && o.userData.part && o.userData.part.key === 'floatplane')
+          acs.push(o);
+      });
+      let fpBad = 0, fpNote = '';
+      for (const ac of acs) {
+        let lo = Infinity, hi = -Infinity, pRun = 0, pTris = 0;
+        ac.traverse(o => {
+          if (!o.isMesh || !o.geometry) return;
+          o.geometry.computeBoundingBox();
+          const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+          lo = Math.min(lo, bb.min.x); hi = Math.max(hi, bb.max.x);
+          const r = bb.max.x - bb.min.x;
+          if (r > pRun) {
+            pRun = r;
+            pTris = o.geometry.index ? o.geometry.index.count / 3
+                  : o.geometry.attributes.position.count / 3;
+          }
+        });
+        if (pRun < (hi - lo) * 0.8 || pTris <= 12) {
+          fpBad++;
+          fpNote = `principal mesh runs ${pRun.toFixed(2)} of ${(hi - lo).toFixed(2)} m ` +
+                   `at ${pTris} triangles`;
+        }
+      }
+      if (fpBad)
+        say(v.id, 'floatplane is not one body',
+            `${fpBad} of ${acs.length} — ${fpNote} — a cowl, a barrel and a tail cone ` +
+            'abutting, not a lofted body');
+    }
+
+    /* ⚠ A WING PLATFORM STANDS ON A TAPERING WEB, NOT ON A SLAB (round 149). Each
+       searchlight platform hangs off the pagoda on a bracket, and a cantilever bracket
+       is deep at the tower face and thins to a toe under the platform rim — a web whose
+       depth at the root is at least twice its depth at the free end, plated rather than
+       boxed. The convicted form was one 1.1 × 0.9 × 2.6 box, the same depth at the
+       tower as at its free end, which no cantilever web is. Measured on the bracket's
+       own geometry in mesh-local coordinates — the port meshes share the starboard
+       geometry under a PI turn about y (r118), which only swaps the two ends, so the
+       root/toe read is taken as max/min of the ends and holds on both sides. */
+    if (H.searchlights) {
+      let bkBad = 0, bkN = 0, bkNote = '';
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Platform bracket')
+          return;
+        bkN++;
+        const pos = o.geometry.attributes.position;
+        const bkTris = o.geometry.index ? o.geometry.index.count / 3 : pos.count / 3;
+        let zLo = Infinity, zHi = -Infinity;
+        for (let i = 0; i < pos.count; i++) {
+          zLo = Math.min(zLo, pos.getZ(i)); zHi = Math.max(zHi, pos.getZ(i));
+        }
+        const span = zHi - zLo;
+        const depth = band => {
+          let yLo = Infinity, yHi = -Infinity;
+          for (let i = 0; i < pos.count; i++)
+            if (band(pos.getZ(i))) {
+              yLo = Math.min(yLo, pos.getY(i)); yHi = Math.max(yHi, pos.getY(i));
+            }
+          return yHi > yLo ? yHi - yLo : 0;
+        };
+        const dA = depth(z => z < zLo + span * 0.15);
+        const dB = depth(z => z > zHi - span * 0.15);
+        const dRoot = Math.max(dA, dB), dToe = Math.min(dA, dB);
+        if (bkTris <= 12 || dRoot < 2 * dToe) {
+          bkBad++;
+          bkNote = `depth ${dRoot.toFixed(2)} at the tower, ${dToe.toFixed(2)} at the ` +
+                   `toe, ${bkTris} triangles`;
+        }
+      });
+      if (bkBad)
+        say(v.id, 'platform bracket is a slab',
+            `${bkBad} of ${bkN} — ${bkNote} — the same depth at its free end as at ` +
+            'the tower face, which no cantilever web is');
+    }
+
+    /* ⚠ A GUN SHIELD RAKES; ONLY A CRATE IS PLUMB ON EVERY SIDE (round 150). The
+       high-angle gunhouse and the shielded 25 mm mount are near-boxy in life — that is
+       why they survived 149 rounds — but both shields rake back from their own base:
+       the Type 89 house to a narrower crown, the Type 96 wrap inward toward the guns.
+       The convicted forms were rectangular boxes, 12 triangles, plumb on every side.
+       Measured on the shield's own geometry in mesh-local coordinates — the port
+       mount turns the starboard geometry PI about y (r118), which leaves the local
+       attributes untouched, so the read holds on both sides: max z in the top quarter
+       of the mesh's height must be ≤ 0.9 x max z in the bottom quarter, and the shell
+       must be plated past the boxy line (> 12 triangles). */
+    if (H.aa || H.aaLight) {
+      let shBad = 0, shN = 0, shNote = '';
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        const nm = o.userData.part.name;
+        if (nm !== 'High-angle mount' && nm !== 'Triple 25 mm mount') return;
+        shN++;
+        const pos = o.geometry.attributes.position;
+        const shTris = o.geometry.index ? o.geometry.index.count / 3 : pos.count / 3;
+        let yLo = Infinity, yHi = -Infinity;
+        for (let i = 0; i < pos.count; i++) {
+          yLo = Math.min(yLo, pos.getY(i)); yHi = Math.max(yHi, pos.getY(i));
+        }
+        const h = yHi - yLo;
+        const maxZ = band => {
+          let m = -Infinity;
+          for (let i = 0; i < pos.count; i++)
+            if (band(pos.getY(i))) m = Math.max(m, pos.getZ(i));
+          return m;
+        };
+        const zTop = maxZ(y => y > yHi - h * 0.25), zBot = maxZ(y => y < yLo + h * 0.25);
+        if (shTris <= 12 || zTop > 0.9 * zBot) {
+          shBad++;
+          shNote = `${nm}: face ${zBot.toFixed(2)} at the base, ${zTop.toFixed(2)} at ` +
+                   `the crown, ${shTris} triangles`;
+        }
+      });
+      if (shBad)
+        say(v.id, 'gun shield is a crate',
+            `${shBad} of ${shN} — ${shNote} — plumb on every side, which no gun ` +
+            'shield is');
+    }
+
+    /* ⚠ A PAGODA IS ONE TOWER, NOT A STACK OF CRATES (round 151) — the r146 island
+       law reaching the battleship's bridge structure. The superstructure's principal
+       mesh — the one with the longest run up the group's own y axis — must BE the
+       tower: spanning at least 0.6 of the assembly's full height, rangefinder
+       included, and lofted rather than boxed. The convicted form was K stacked boxes
+       with a proud glass box wrapped round each of the top two levels; its tallest
+       single mesh was one level at 14% of the assembly on yamato, 19% on
+       dreadnought. Measured through each mesh's own matrix — every superstructure
+       mesh is a direct child of the citadel group, so one level of matrix is the
+       whole local frame (the r144 lesson). */
+    if (H.turrets) {
+      let ssLo = Infinity, ssHi = -Infinity, pRun = 0, pTris = 0, ssN = 0;
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry || !o.userData.part ||
+            o.userData.part.key !== 'superstructure') return;
+        ssN++;
+        o.geometry.computeBoundingBox();
+        const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+        ssLo = Math.min(ssLo, bb.min.y); ssHi = Math.max(ssHi, bb.max.y);
+        const r = bb.max.y - bb.min.y;
+        if (r > pRun) {
+          pRun = r;
+          pTris = o.geometry.index ? o.geometry.index.count / 3
+                : o.geometry.attributes.position.count / 3;
+        }
+      });
+      if (ssN && (pRun < (ssHi - ssLo) * 0.6 || pTris <= 40))
+        say(v.id, 'pagoda is a stack of crates',
+            `principal mesh runs ${pRun.toFixed(2)} of ${(ssHi - ssLo).toFixed(2)} m ` +
+            `at ${pTris} triangles — stacked boxes, not one lofted tower`);
+    }
+
+    /* ⚠ THE AVIATION DECK'S STEELWORK IS OPEN STEELWORK (round 152). A catapult is
+       a truss and a crane jib is a tapering lattice: member-built, open web — only
+       a crate encloses its own bounding volume, so the mesh's enclosed volume (the
+       divergence sum over its own triangles) must stay under a quarter of its
+       bounding box, and past the boxy line by a plated margin (> 60 triangles).
+       And a launch rail carries its shuttle in a SLOT: in the head band — the top
+       5 cm, mesh-local — no triangle may cross the centreline. The old rail's
+       one-piece top face cannot dodge that; a vertex-band width read on an
+       8-vertex box sees nothing at all, which is why the property is asked of
+       triangles. */
+    if (H.catapults) {
+      let avBad = 0, avN = 0, avNote = '';
+      const avTri = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+      const eachTri = (geo, fn) => {
+        const pos = geo.attributes.position, ix = geo.index;
+        const n = ix ? ix.count : pos.count;
+        for (let i = 0; i + 2 < n; i += 3) {
+          for (let k = 0; k < 3; k++) {
+            const vi = ix ? ix.getX(i + k) : i + k;
+            avTri[k][0] = pos.getX(vi); avTri[k][1] = pos.getY(vi);
+            avTri[k][2] = pos.getZ(vi);
+          }
+          fn(avTri);
+        }
+      };
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        const nm = o.userData.part.name;
+        if (nm !== 'Aircraft catapult' && nm !== 'Aircraft crane' &&
+            nm !== 'Launch rail') return;
+        avN++;
+        const geo = o.geometry;
+        const tris = geo.index ? geo.index.count / 3
+                   : geo.attributes.position.count / 3;
+        if (nm === 'Launch rail') {
+          let yHi = -Infinity, cross = false;
+          eachTri(geo, t => {
+            for (const p of t) yHi = Math.max(yHi, p[1]);
+          });
+          eachTri(geo, t => {
+            if (t[0][1] >= yHi - 0.05 && t[1][1] >= yHi - 0.05 &&
+                t[2][1] >= yHi - 0.05 &&
+                Math.min(t[0][2], t[1][2], t[2][2]) < -0.02 &&
+                Math.max(t[0][2], t[1][2], t[2][2]) > 0.02) cross = true;
+          });
+          if (tris <= 12 || cross) {
+            avBad++;
+            avNote = `${nm}: ${tris} triangles, head face in one piece across ` +
+                     'the slot line';
+          }
+        } else {
+          geo.computeBoundingBox();
+          const bb = geo.boundingBox;
+          const bbV = Math.max(1e-9, (bb.max.x - bb.min.x) *
+                      (bb.max.y - bb.min.y) * (bb.max.z - bb.min.z));
+          let vol = 0;
+          eachTri(geo, t => {
+            const a = t[0], b = t[1], c = t[2];
+            vol += (a[0] * (b[1] * c[2] - b[2] * c[1])
+                  - a[1] * (b[0] * c[2] - b[2] * c[0])
+                  + a[2] * (b[0] * c[1] - b[1] * c[0])) / 6;
+          });
+          const fill = Math.abs(vol) / bbV;
+          if (tris <= 60 || fill > 0.25) {
+            avBad++;
+            avNote = `${nm}: ${tris} triangles filling ${fill.toFixed(2)} of its ` +
+                     'own box';
+          }
+        }
+      });
+      if (avBad)
+        say(v.id, 'aviation steelwork is a crate',
+            `${avBad} of ${avN} — ${avNote} — a catapult is a truss, a rail is a ` +
+            'slotted girder, a jib is a lattice');
+    }
+
+    /* ⚠ A BALANCED RUDDER IS A FOIL (round 153). A steel ship's rudder is a
+       streamlined body, thickest near a third of its chord and CLOSED by its
+       trailing edge: in the aft tenth of the chord run no vertex may stand past
+       0.35 of the mesh's own max half-thickness (a NACA00 section still carries
+       44% of max thickness at 80% chord, so the band is the last tenth, where the
+       section really has closed). The convicted form was the 12-triangle slab at
+       full thickness to its trailing edge — on every steel-steered hull in the
+       fleet, twelve of them. Timber and median rudders really are plates, and stay
+       out of scope by the record's own steering kind. */
+    const steerR153 = H.steering ? H.steering
+      : (H.build === 'steel' || H.build === 'iron') ? 'steel'
+      : H.build === 'bulkhead' ? 'median' : 'stern';
+    if (steerR153 === 'steel') {
+      let rdBad = 0, rdNote = '';
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Rudder')
+          return;
+        const geo = o.geometry, pos = geo.attributes.position;
+        const tris = geo.index ? geo.index.count / 3 : pos.count / 3;
+        let xLo = Infinity, xHi = -Infinity, zMax = 0;
+        for (let i = 0; i < pos.count; i++) {
+          xLo = Math.min(xLo, pos.getX(i)); xHi = Math.max(xHi, pos.getX(i));
+          zMax = Math.max(zMax, Math.abs(pos.getZ(i)));
+        }
+        let zAft = 0;
+        for (let i = 0; i < pos.count; i++)
+          if (pos.getX(i) > xHi - (xHi - xLo) * 0.10)
+            zAft = Math.max(zAft, Math.abs(pos.getZ(i)));
+        if (tris <= 12 || zAft > 0.35 * zMax) {
+          rdBad++;
+          rdNote = `${(zAft / Math.max(1e-9, zMax)).toFixed(2)} of full thickness ` +
+                   `at the trailing edge, ${tris} triangles`;
+        }
+      });
+      if (rdBad)
+        say(v.id, 'rudder is a slab',
+            `${rdNote} — a balanced rudder is a foil, closed at its trailing edge`);
+    }
+
+    /* ⚠ A NET SHELF IS ONE LEDGE ON GOOSENECKS, NOT A CHAIN OF CRATES (round 154).
+       The torpedo-net outfit rides a continuous shelf plate following the plating —
+       one fair ledge spanning the gear's own run, carried on gusset webs — and every
+       boom heel swings in a gooseneck: backing pad, tapering cheek lugs, a pin. The
+       convicted form was 18 loose plumb boxes per side chained on 6% overlap, and a
+       solid crate at every heel. Two reads, both on the part's own meshes: the
+       principal 'Net shelf' mesh must run at least 0.8 of the gear's fore-aft span
+       past the boxy line (the r148 principal-body read), and no 'Boom hinge' may
+       enclose more than 0.6 of its own bounding box (the divergence sum over its
+       triangles, the r152 read) or sit at the boxy line. Extents via o.matrix — the
+       net gear hangs directly on the ship group. */
+    if (H.netDefence) {
+      let ndBad = 0, ndN = 0, ndNote = '';
+      let nsLo = Infinity, nsHi = -Infinity, nsRun = 0, nsTris = 0;
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        const nm = o.userData.part.name;
+        if (nm !== 'Net shelf' && nm !== 'Boom hinge') return;
+        const geo = o.geometry;
+        geo.computeBoundingBox();
+        const tris = geo.index ? geo.index.count / 3
+                   : geo.attributes.position.count / 3;
+        if (nm === 'Net shelf') {
+          ndN++;
+          const bb = geo.boundingBox.clone().applyMatrix4(o.matrix);
+          nsLo = Math.min(nsLo, bb.min.x); nsHi = Math.max(nsHi, bb.max.x);
+          const r = bb.max.x - bb.min.x;
+          if (r > nsRun) { nsRun = r; nsTris = tris; }
+          return;
+        }
+        ndN++;
+        const bb = geo.boundingBox;
+        const bbV = Math.max(1e-9, (bb.max.x - bb.min.x) *
+                    (bb.max.y - bb.min.y) * (bb.max.z - bb.min.z));
+        const pos = geo.attributes.position, ix = geo.index;
+        const n = ix ? ix.count : pos.count;
+        let vol = 0;
+        const t = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        for (let i = 0; i + 2 < n; i += 3) {
+          for (let k = 0; k < 3; k++) {
+            const vi = ix ? ix.getX(i + k) : i + k;
+            t[k][0] = pos.getX(vi); t[k][1] = pos.getY(vi); t[k][2] = pos.getZ(vi);
+          }
+          vol += (t[0][0] * (t[1][1] * t[2][2] - t[1][2] * t[2][1])
+                - t[0][1] * (t[1][0] * t[2][2] - t[1][2] * t[2][0])
+                + t[0][2] * (t[1][0] * t[2][1] - t[1][1] * t[2][0])) / 6;
+        }
+        const fill = Math.abs(vol) / bbV;
+        if (tris <= 12 || fill > 0.6) {
+          ndBad++;
+          ndNote = `a heel fitting of ${tris} triangles filling ${fill.toFixed(2)} ` +
+                   'of its own box';
+        }
+      });
+      if (nsHi > nsLo && (nsTris <= 12 || nsRun < (nsHi - nsLo) * 0.8)) {
+        ndBad++;
+        ndNote = `principal shelf plate runs ${nsRun.toFixed(2)} of ` +
+                 `${(nsHi - nsLo).toFixed(2)} m at ${nsTris} triangles`;
+      }
+      if (ndBad)
+        say(v.id, 'net defence is dry goods',
+            `${ndBad} of ${ndN} — ${ndNote} — a net shelf is one ledge riding the ` +
+            'plating, and a boom heel swings in a gooseneck, not a crate');
+    }
+
+    /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
+       boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
+       the deck the boats are named for, and the row of white hulls read as blisters riveted
+       to the ship's side. The card said "on the boat deck" the whole time; no picture-diff
+       could disagree with it. One derivation — SHIPS_HULL.linerHouse — for the builder and
+       for this rule. */
+    if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
+      const T = SHIPS_HULL.linerHouse(H);
+      /* recessed boats (round 70) stow at the SOLE of the gallery tier, not on the roof —
+         the datum moves with the class, or Queen Mary 2's Deck 8 boats read as 32 m adrift */
+      const rec = T.tiers.find(t => t.recess);
+      const datum = rec ? rec.y0 : T.top;
+      let off = 0, worst = 0;
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Ship\'s boat') return;
+        const bb2 = new THREE.Box3().setFromObject(o);
+        const d = bb2.min.y - datum;
+        if (d < -0.6 || d > 2.2) { off++; if (Math.abs(d) > Math.abs(worst)) worst = d; }
+      });
+      if (off) say(v.id, 'boats off the boat deck',
+                   `${off} boats, worst ${worst.toFixed(1)} m from the boat deck datum`);
+    }
+
+    /* ⚠ A POWERED, DECKED SHIP IS CONNED FROM A BRIDGE. "Stepped plates, no fronts" was the
+       Titanic for twenty-seven rounds: tier ends closed with blank caps and nowhere to con
+       the ship from. The wheelhouse stands ON the boat deck, at the FORWARD end of the house
+       — a bridge amidships-aft is a different ship. */
+    if (H.decks && H.funnels && !H.turrets && !H.flightDeck) {
+      if (!part.bridge) say(v.id, 'no bridge', 'a decked steamer with no wheelhouse');
+      else {
+        const T = SHIPS_HULL.linerHouse(H);
+        if (Math.abs(part.bridge.y[0] - T.top) > 1.5)
+          say(v.id, 'bridge not on the boat deck',
+              `bridge base ${part.bridge.y[0].toFixed(1)} m, boat deck ${T.top.toFixed(1)} m`);
+        const frontX = (T.tiers[T.n - 1].uA - 0.5) * H.lwl;
+        if (part.bridge.x[0] > frontX + 0.12 * H.lwl)
+          say(v.id, 'bridge not at the front',
+              `bridge starts ${(part.bridge.x[0] - frontX).toFixed(1)} m abaft the house front`);
+      }
+    }
+
+    /* ⚠ THE FUNNEL STANDS ON ITS OWN DECK. funnelH is the record's number and the record
+       measures a stack above the deck it stands on; rising from the sheer, Titanic's 19 m
+       funnels spent 12 m hidden inside the house and showed 7, with the black top half the
+       visible stack instead of a fifth. Each casing must sit on the highest tier covering
+       its station — where the RECORD located the house (linerHouse().recorded). Where the
+       house is the default abstraction, the recorded height keeps the sheer as its datum:
+       raising Great Eastern's 30 m stacks onto an inferred house made them out-tower her
+       own foremast, and the funnel-height rule caught it (right, 2 for 6 lifetime). */
+    if (H.funnels && H.decks && !H.turrets && !H.flightDeck && part.funnel) {
+      const T = SHIPS_HULL.linerHouse(H);
+      const HS3 = SHIPS_HULL.hullSurface(H);
+      g.updateMatrixWorld(true);
+      let bad = 0, msg = '';
+      g.traverse(o => {
+        if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'funnel') return;
+        const bb2 = new THREE.Box3().setFromObject(o);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bb2.min.x + bb2.max.x) / 2) / H.lwl));
+        let deck = HS3.deck(u);                    // the casing's foot reads H.deck since r221
+        if (T.recorded)
+          for (const t of T.tiers) if (u >= t.uA && u <= t.uB) deck = Math.max(deck, t.y1);
+        const d = bb2.min.y - deck;
+        if (d < -2.0 || d > 1.5) { bad++; msg = `casing bottom ${d.toFixed(1)} m from its deck`; }
+      });
+      if (bad) say(v.id, 'funnel does not stand on its deck', `${bad} of ${H.funnels}: ${msg}`);
+    }
+
+    /* ⚠ THE DECK NARROWS AND THE CARGO MUST NARROW WITH IT. Found by the spin survey from
+       every bow bearing of the container ship: the hatch covers, the forecastle and the outer
+       container columns stood at one constant width on a hull whose deck tapers to the stem —
+       up to 9 m past the ship's side at their own station, over open water. The beam-limit
+       rule above cannot see it: B*0.52 is generous amidships and wrong at the bow. So ask at
+       each part's OWN station, against the hull's own half-breadth, from the same
+       surfacePoint the builder lofts from — one derivation of the edge. */
+    /* ── A-ISLANDS (round 292, Preussen): A RECORDED ISLAND IS BUILT WHERE AND AS HIGH AS THE
+       RECORD SAYS, AND NOTHING ELSE IS. hull.islands carries each island's u-span and its top
+       over the water at both ends, read off a plate; the builder lofts a wall from the sheer to
+       that top and a deck railM under it, tagged 'forecast' with the island's own name. Read
+       back off the meshes: for every listed island a group of that name must exist, its top
+       (the group's max y) must be the record's higher end within 0.15 m, its length along the
+       hull the span's within 1.5 m; a 'forecast' group named for no island on a hull that has
+       islands is a stray; and the record side — each island needs a name, an ascending u-span
+       inside [0,1], a topM pair over the sheer, and the block a provenance. Silent on every hull
+       without hull.islands.
+       ⚠ THE SPAN IS READ THROUGH THE LOFT'S DECK-LEVEL LINE (round 294), loftDeckX, not u × lwl:
+       r292's rule multiplied u by lwl and so did r292's builder, and the two agreed while the
+       forecastle began 6.2 m abaft the stem head and ran 6.6 m for the plate's 12.8. And the
+       MESH AGAINST THE PLATE: where the record carries the plate's datum (islands.plate:
+       stemHeadCol, pxPerMAlongHull) and each island its two columns (isl.cols), each end of the
+       built group must stand (col − stemHeadCol) / pxPerMAlongHull abaft the loft's own stem head
+       within 1.5 m — a u typed through a linear mapping fails here and nowhere else. The SILENCE:
+       islands on a hull whose stations were read off a plate (hull.stationRead) with no plate
+       datum of their own, or an island with no columns under a datum. */
+    if (H.islands) {
+      const IL = H.islands.list;
+      if (!(Array.isArray(IL) && IL.length)) say(v.id, 'islands with no list', 'hull.islands.list absent or empty');
+      if (!(H.islands.provenance && H.islands.provenance.length > 20)) say(v.id, 'islands with no provenance', 'hull.islands.provenance absent');
+      const H2 = SHIPS_HULL.hullSurface(H);
+      const groups = [];
+      g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.key === 'forecast') groups.push({ o, name: p.name }); });
+      for (const isl of (IL || [])) {
+        const shapeOK = isl && typeof isl.name === 'string' && Array.isArray(isl.u) && isl.u.length === 2 && isl.u[0] >= 0 && isl.u[1] <= 1 && isl.u[1] > isl.u[0]
+          && Array.isArray(isl.topM) && isl.topM.length === 2 && isl.topM.every(t => typeof t === 'number');
+        if (!shapeOK) { say(v.id, 'an island declared out of shape', `${JSON.stringify(isl).slice(0, 120)}; want {name, u: [a, b], topM: [fwd, aft]}`); continue; }
+        const um = (isl.u[0] + isl.u[1]) / 2;
+        if (Math.min(isl.topM[0], isl.topM[1]) < H2.sheer(um)) say(v.id, 'an island whose top lies under the sheer', `${isl.name}: topM ${isl.topM.join('/')} m, the sheer at its middle ${H2.sheer(um).toFixed(2)} m`);
+        const grp = groups.find(q => q.name === isl.name);
+        if (!grp) { say(v.id, 'an island recorded and not built', `${isl.name}, u ${isl.u[0]}-${isl.u[1]}: no forecast group of that name`); continue; }
+        const bb = new THREE.Box3().setFromObject(grp.o);
+        const wantTop = Math.max(isl.topM[0], isl.topM[1]);
+        if (Math.abs(bb.max.y - wantTop) > 0.15) say(v.id, 'an island built off its recorded top', `${isl.name}: built top ${bb.max.y.toFixed(2)} m over the water, record ${wantTop.toFixed(2)}`);
+        const x0 = loftDeckX(H, isl.u[0]), x1 = loftDeckX(H, isl.u[1]);
+        if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record u ${isl.u[0]}-${isl.u[1]} on the loft's deck-level line ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+        /* ⚠ AN ISLAND THAT RUNS TO THE HULL'S END CLOSES ON IT (round 294). A record end of u 0 or 1
+           is the stem head or the stern end: the built group must reach it (0.1 m), and within
+           1.5 m of it no vertex may hang more than 0.3 m under both the sheer and the island's own
+           deck, which is what a bulkhead dropped to the main deck does where the shell rakes inboard. */
+        for (const ue of [0, 1]) {
+          if (ue === 0 ? isl.u[0] > 0 : isl.u[1] < 1) continue;
+          const xe = loftDeckX(H, ue), built = ue === 0 ? bb.min.x : bb.max.x;
+          if (Math.abs(built - xe) > 0.1) say(v.id, "an island short of the hull's end it runs to", `${isl.name}: built to x ${built.toFixed(2)}, the loft's ${ue === 0 ? 'stem head' : 'stern end'} at ${xe.toFixed(2)}`);
+          const tE = isl.topM[ue] - (H.islands.railM || 1.0), floorY = Math.min(H2.sheer(ue), tE) - 0.3;
+          let low = 0, lowest = Infinity; const P3 = new THREE.Vector3();
+          grp.o.updateMatrixWorld(true);
+          grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P3.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (Math.abs(P3.x - xe) < 1.5 && P3.y < floorY) { low++; lowest = Math.min(lowest, P3.y); } } });
+          /* and nothing under the sheer stands past the shell's own end AT ITS OWN HEIGHT: the end
+             rakes inboard going down, so a deck edge placed at the sheer's x comes out through it */
+          const endAt = y => { let a0 = 0, b0 = 1; for (let i = 0; i < 24; i++) { const m = (a0 + b0) / 2; if (SHIPS_HULL.surfacePoint(H, H2, ue, m)[1] < y) a0 = m; else b0 = m; } return SHIPS_HULL.surfacePoint(H, H2, ue, (a0 + b0) / 2)[0]; };
+          let past = 0, worstPast = 0;
+          grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P3.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (Math.abs(P3.x - xe) > 3 || P3.y >= H2.sheer(ue) - 0.05) continue;
+              const over = ue === 0 ? endAt(P3.y) - P3.x : P3.x - endAt(P3.y);
+              if (over > 0.05) { past++; worstPast = Math.max(worstPast, over); } } });
+          if (past) say(v.id, "an island standing out through the hull's raked end", `${isl.name}: ${past} vertices under the sheer stand up to ${worstPast.toFixed(2)} m past the shell's ${ue === 0 ? 'stem' : 'stern'} at their own height`);
+          if (low) say(v.id, "a bulkhead hung under the sheer at an island's closed end", `${isl.name}: ${low} vertices within 1.5 m of the ${ue === 0 ? 'stem head' : 'stern end'} reach y ${lowest.toFixed(2)}, under the floor ${floorY.toFixed(2)} (the sheer ${H2.sheer(ue).toFixed(2)}, the island's deck ${tE.toFixed(2)})`);
+        }
+        const PL = H.islands.plate;
+        if (PL && !(Array.isArray(isl.cols) && isl.cols.length === 2)) { say(v.id, 'an island under a plate datum with no columns', `${isl.name}: hull.islands.plate is present and isl.cols is not`); continue; }
+        if (PL) {
+          const xHead = loftDeckX(H, 0), xStern = loftDeckX(H, 1);
+          const xp0 = xHead + (isl.cols[0] - PL.stemHeadCol) / PL.pxPerMAlongHull, xp1 = xHead + (isl.cols[1] - PL.stemHeadCol) / PL.pxPerMAlongHull;
+          const e0 = bb.min.x - xp0, e1 = bb.max.x - xp1;
+          if (Math.abs(e0) > 1.5 || Math.abs(e1) > 1.5)
+            say(v.id, 'an island built off its plate', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, ${(bb.min.x - xHead).toFixed(1)}..${(bb.max.x - xHead).toFixed(1)} m abaft the loft's stem head; the plate's columns ${isl.cols[0]}..${isl.cols[1]} put it ${(xp0 - xHead).toFixed(1)}..${(xp1 - xHead).toFixed(1)} m abaft (${e0.toFixed(2)} / ${e1.toFixed(2)} m off; the loft's stern end ${(xStern - xHead).toFixed(1)} m abaft the head)`);
+        }
+      }
+      if (H.stationRead && !H.islands.plate) say(v.id, 'islands on a plate-read hull with no plate datum of their own', `hull.stationRead is present and hull.islands.plate is absent, so no island's end can be read against the plate`);
+      /* ── A-ISLAND-SEATING (round 295, Titanic): AN ISLAND'S SIDE IS THE SHELL. Read off the meshes:
+         (1) FLUSH: every vertex of the island above the sheer, clear of its two ends, stands on the
+         shell's half-breadth at its own station within 0.05 m (her old wall stood 0.42 m inside it
+         over an open slot); (2) NO CAPPING along it: no 'rail' vertex lies within 0.6 m of the sheer
+         inside the island's span; (3) THE HOUSE AGAINST THE PLATE: where islands.plate carries
+         houseCols, the Superstructure's built ends stand at those columns within 1.0 m, because a
+         break read off a plate means nothing if the well's other side is somewhere else. */
+      {
+        const uAtX = x => { let a = 0, b = 1; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (loftDeckX(H, m) < x) a = m; else b = m; } return (a + b) / 2; };
+        const P4 = new THREE.Vector3();
+        for (const isl of (IL || [])) {
+          const grp = groups.find(q => isl && q.name === isl.name); if (!grp) continue;
+          const xa = loftDeckX(H, isl.u[0]), xb = loftDeckX(H, isl.u[1]);
+          let worstInset = 0, atX = 0;
+          grp.o.updateMatrixWorld(true);
+          grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P4.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (P4.x < xa + 0.5 || P4.x > xb - 0.5) continue;
+              const u = uAtX(P4.x); if (P4.y < H2.sheer(u) + 0.2) continue;
+              const inset = Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1)[2]) - Math.abs(P4.z);
+              if (inset > worstInset) { worstInset = inset; atX = P4.x; } } });
+          if (worstInset > 0.05) say(v.id, "an island's side standing inside the shell", `${isl.name}: a vertex at x ${atX.toFixed(1)} stands ${worstInset.toFixed(2)} m inside the shell's half-breadth`);
+          let capped = 0, capX = 0;
+          g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (!pt || pt.key !== 'rail') return;
+            o.updateMatrixWorld(true); const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P4.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (P4.x < xa + 0.5 || P4.x > xb - 0.5) continue;
+              if (Math.abs(P4.y - H2.sheer(uAtX(P4.x))) < 0.6) { capped++; capX = P4.x; } } });
+          if (capped) say(v.id, "a capping ridden along an island's side", `${isl.name}: ${capped} 'rail' vertices within 0.6 m of the sheer inside its span, one at x ${capX.toFixed(1)}`);
+        }
+        const PLH = H.islands.plate;
+        if (PLH && Array.isArray(PLH.houseCols)) {
+          const bbH = new THREE.Box3().makeEmpty();
+          g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (pt && pt.key === 'superstructure' && pt.name === 'Superstructure') bbH.expandByObject(o); });
+          const xH = loftDeckX(H, 0), wa = xH + (PLH.houseCols[0] - PLH.stemHeadCol) / PLH.pxPerMAlongHull, wb = xH + (PLH.houseCols[1] - PLH.stemHeadCol) / PLH.pxPerMAlongHull;
+          if (bbH.isEmpty()) say(v.id, 'a house read off a plate and not built', 'islands.plate.houseCols is present and no Superstructure part exists');
+          else if (Math.abs(bbH.min.x - wa) > 1.0 || Math.abs(bbH.max.x - wb) > 1.0)
+            say(v.id, 'a house built off its plate', `built x ${bbH.min.x.toFixed(2)}..${bbH.max.x.toFixed(2)}, the plate's columns put it at ${wa.toFixed(2)}..${wb.toFixed(2)}`);
+        }
+      }
+      /* ── A-PLATE-TRACE (round 311, Titanic): A READ FITTED OVER A RUN OF COLUMNS CARRIES ITS TRACE.
+         A-SHEER-TRACE (r309) caught r299's deck-line trace stepping 5 rows onto another line. The
+         island tops (r298) and the wells' bulwark tops (r303) were fitted the same way, over a run of
+         columns, and the record kept only the fit's two end rows, so a jump could not be seen. r311
+         re-ran both reads and stored them: the after well's trace had stepped 3 rows down onto the
+         house's own line at columns 754 to 760, where the bulwark's heavy line ends. Any read that
+         carries colRange (a fit over columns) must carry trace {fromCol, stepCol, rows, maxStepRows,
+         fit}, rows null where the read rejected a column. (1) No step between neighbouring kept
+         points exceeds maxStepRows per stepCol: a larger one is a jump to another line. (2) Every
+         kept point stands within 2 px of the fit: a fit that leaves its trace is the other sign of
+         one. (3) The recorded end rows are the fit's rows at the read's end columns within 0.15 px,
+         so rows and trace belong to one read. (4) The kept points span exactly colRange, and their
+         rms about the fit is rmsPx within 0.05 px. SILENCE: colRange with no trace is convicted. */
+      const plateTrace = (what, R, cols) => {
+        if (!(R && Array.isArray(R.colRange))) return;
+        const T = R.trace;
+        if (!(T && Array.isArray(T.rows) && T.rows.length >= 3 && T.stepCol && T.maxStepRows > 0 && Array.isArray(T.fit) && T.fit.length >= 2 && Array.isArray(cols) && cols.length === R.rows.length)) {
+          say(v.id, 'a plate read fitted over columns with no trace', `${what}: colRange ${R.colRange.join('-')} is recorded and trace {fromCol, stepCol, rows, maxStepRows, fit} is absent or out of shape, so the fit cannot be checked against the rows it was fitted to`); return; }
+        const fit = c => T.fit.reduce((a, k) => a * c + k, 0);
+        let prev = -1, worst = 0, wAt = null, off = 0, oAt = null, n = 0, ss = 0, cLo = Infinity, cHi = -Infinity;
+        T.rows.forEach((r, i) => {
+          if (r === null || r === undefined) return;
+          const c = T.fromCol + i * T.stepCol, e = r - fit(c);
+          n++; ss += e * e; cLo = Math.min(cLo, c); cHi = Math.max(cHi, c);
+          if (Math.abs(e) > Math.abs(off)) { off = e; oAt = c; }
+          if (prev >= 0) { const d = Math.abs(r - T.rows[prev]) / (i - prev); if (d > worst) { worst = d; wAt = c; } }
+          prev = i;
+        });
+        if (worst > T.maxStepRows) say(v.id, 'a plate trace that steps onto another line', `${what}: the trace steps ${worst.toFixed(2)} rows per ${Math.abs(T.stepCol)} columns at column ${wAt}, over its limit of ${T.maxStepRows}`);
+        if (Math.abs(off) > 2.0) say(v.id, 'a plate fit that leaves its trace', `${what}: the trace's row at column ${oAt} stands ${off.toFixed(2)} px off the fit`);
+        cols.forEach((c, e) => { if (Math.abs(R.rows[e] - fit(c)) > 0.15) say(v.id, 'a plate read whose end rows are not its fit', `${what}: row ${R.rows[e]} at column ${c}, the trace's fit gives ${fit(c).toFixed(2)}`); });
+        if (cLo !== Math.min(...R.colRange) || cHi !== Math.max(...R.colRange)) say(v.id, 'a plate read whose column range is not its trace', `${what}: colRange ${R.colRange.join('-')}, the kept trace spans ${cLo}-${cHi}`);
+        const rms = Math.sqrt(ss / Math.max(1, n));
+        if (typeof R.rmsPx === 'number' && Math.abs(rms - R.rmsPx) > 0.05) say(v.id, 'a plate read whose rms is not its trace', `${what}: rmsPx ${R.rmsPx}, the kept trace's rms about the fit is ${rms.toFixed(2)}`);
+      };
+      /* ── A-ISLAND-TOP-READ (round 298, Titanic): AN ISLAND'S TOP IS ITS PLATE'S ROWS, AT BOTH ENDS.
+         r295 read Titanic's islands' ends off the 1911 side plan and left their heights a class
+         figure (the weather deck plus one 2.96 m deck), and its provenance said so; the forecastle
+         stood 1.40 m under the plan at the stem. On a hull whose islands carry a plate datum
+         (islands.plate), every island must carry topRead {rows, datumRows, datumM, pxPerM}, and
+         each end's topM must be datumM + (datumRow - row) / pxPerM within 0.05 m. Then off the
+         meshes: the island's highest vertex within 1.5 m of each built end, inside its span,
+         must stand at that end's topM within 0.15 m, so a builder that drew the right top at one
+         end and a flat line from it is caught at the other. Silent without islands.plate. */
+      if (H.islands.plate) for (const isl of (IL || [])) {
+        if (!(isl && Array.isArray(isl.topM) && isl.topM.length === 2 && Array.isArray(isl.u))) continue;
+        const TR = isl.topRead;
+        if (!(TR && Array.isArray(TR.rows) && TR.rows.length === 2 && Array.isArray(TR.datumRows) && TR.datumRows.length === 2 && typeof TR.datumM === 'number' && TR.pxPerM > 0)) {
+          say(v.id, 'an island top under a plate datum with no read', `${isl.name}: hull.islands.plate is present and isl.topRead is absent or out of shape, so topM ${isl.topM.join('/')} m is not a reading`); continue; }
+        for (const e of [0, 1]) {
+          const want = TR.datumM + (TR.datumRows[e] - TR.rows[e]) / TR.pxPerM;
+          if (Math.abs(isl.topM[e] - want) > 0.05) say(v.id, 'an island top off its plate read', `${isl.name} ${e ? 'aft' : 'fwd'} end: topM ${isl.topM[e]} m, the plate's row ${TR.rows[e]} over datum row ${TR.datumRows[e]} (${TR.datumM} m) at ${TR.pxPerM} px/m reads ${want.toFixed(2)} m`);
+        }
+        plateTrace(`${isl.name} top`, TR, isl.cols);
+        const grp = groups.find(q => q.name === isl.name);
+        if (!grp) continue;
+        const xa = loftDeckX(H, isl.u[0]), xb = loftDeckX(H, isl.u[1]);
+        const P4 = new THREE.Vector3(), endTop = [-Infinity, -Infinity];
+        grp.o.updateMatrixWorld(true);
+        grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+          for (let i = 0; i < pa.count; i++) { P4.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+            if (P4.x >= xa - 0.05 && P4.x <= xa + 1.5) endTop[0] = Math.max(endTop[0], P4.y);
+            if (P4.x <= xb + 0.05 && P4.x >= xb - 1.5) endTop[1] = Math.max(endTop[1], P4.y); } });
+        for (const e of [0, 1])
+          if (!(Math.abs(endTop[e] - isl.topM[e]) <= 0.15)) say(v.id, 'an island built off its top at one end', `${isl.name} ${e ? 'aft' : 'fwd'} end: built top ${endTop[e].toFixed(2)} m within 1.5 m of x ${(e ? xb : xa).toFixed(2)}, record ${isl.topM[e]} m`);
+      }
+      /* ── A-WELL-BULWARK (round 303, Titanic): A WELL'S SIDE IS SHELL UP TO ITS READ BULWARK TOP, AND
+         THE CAPPING IS ON THAT TOP. Titanic's shell stopped at the deck in both wells and the capping
+         sat on the deck edge, so the after well's side stood about a metre under the 1911 plan's
+         bulwark line. hull.islands.wells carries each well's u-span and its bulwark top over the
+         water at both ends, read off the plate. (1) RECORD: each well has a name, an ascending
+         u-span, a topM pair at least 0.3 m over the sheer, and a topRead whose rows give topM within
+         0.05 m; the block a provenance. (2) BUILT: a 'wellBulwark' group named '<well> bulwark'
+         exists; its highest vertex within 1.5 m of each end stands at that end's topM within 0.15 m;
+         it stays inside its span (0.1 m); every vertex above the sheer stands on the shell's
+         half-breadth within 0.05 m. (3) THE CAPPING: the 'rail' inside the span tops out at the
+         well's line within 0.15 m at its middle, and nowhere stands more than 0.15 m over it.
+         SILENCE: a hull with islands whose deck lies at the sheer (no deck.belowSheerM) and no
+         wells record: its wells would be built with no bulwark at all. */
+      {
+        const WL = H.islands.wells;
+        if (!WL && !(H.deck && H.deck.belowSheerM > 0)) say(v.id, 'islands with wells and no bulwark record', 'hull.islands has no wells and the deck lies at the sheer, so the shell between the islands ends at the deck');
+        if (WL && !(H.islands.wellsProvenance && H.islands.wellsProvenance.length > 20)) say(v.id, 'wells with no provenance', 'hull.islands.wellsProvenance absent');
+        const uAtX = x => { let a = 0, b = 1; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (loftDeckX(H, m) < x) a = m; else b = m; } return (a + b) / 2; };
+        const P5 = new THREE.Vector3();
+        for (const w of (WL || [])) {
+          const ok = w && typeof w.name === 'string' && Array.isArray(w.u) && w.u.length === 2 && w.u[0] >= 0 && w.u[1] <= 1 && w.u[1] > w.u[0]
+            && Array.isArray(w.topM) && w.topM.length === 2 && w.topM.every(t => typeof t === 'number');
+          if (!ok) { say(v.id, 'a well declared out of shape', `${JSON.stringify(w).slice(0, 120)}; want {name, u: [a, b], topM: [fwd, aft]}`); continue; }
+          for (const e of [0, 1]) if (w.topM[e] < H2.sheer(w.u[e]) + 0.3) say(v.id, "a well's bulwark top under the deck", `${w.name} ${e ? 'aft' : 'fwd'} end: topM ${w.topM[e]} m, the sheer ${H2.sheer(w.u[e]).toFixed(2)} m`);
+          const TR = w.topRead;
+          if (!(TR && Array.isArray(TR.rows) && TR.rows.length === 2 && Array.isArray(TR.datumRows) && TR.datumRows.length === 2 && typeof TR.datumM === 'number' && TR.pxPerM > 0))
+            say(v.id, "a well's bulwark top with no read", `${w.name}: topRead absent or out of shape, so topM ${w.topM.join('/')} m is not a reading`);
+          else for (const e of [0, 1]) {
+            const want = TR.datumM + (TR.datumRows[e] - TR.rows[e]) / TR.pxPerM;
+            if (Math.abs(w.topM[e] - want) > 0.05) say(v.id, "a well's bulwark top off its plate read", `${w.name} ${e ? 'aft' : 'fwd'} end: topM ${w.topM[e]} m, row ${TR.rows[e]} over datum row ${TR.datumRows[e]} reads ${want.toFixed(2)} m`);
+          }
+          if (TR) plateTrace(`${w.name} bulwark top`, TR, w.cols);
+          const xa = loftDeckX(H, w.u[0]), xb = loftDeckX(H, w.u[1]);
+          let grp = null;
+          g.traverse(o => { const pt = o.userData && o.userData.part; if (pt && pt.key === 'wellBulwark' && pt.name === w.name + ' bulwark') grp = o; });
+          if (!grp) { say(v.id, 'a well recorded and its bulwark not built', `${w.name}: no wellBulwark group named '${w.name} bulwark'`); continue; }
+          const endTop = [-Infinity, -Infinity]; let out = 0, worstInset = 0, insetX = 0;
+          grp.updateMatrixWorld(true);
+          grp.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P5.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (P5.x < xa - 0.1 || P5.x > xb + 0.1) out++;
+              if (P5.x <= xa + 1.5) endTop[0] = Math.max(endTop[0], P5.y);
+              if (P5.x >= xb - 1.5) endTop[1] = Math.max(endTop[1], P5.y);
+              const u = uAtX(P5.x); if (P5.y < H2.sheer(u) + 0.2) continue;
+              const inset = Math.abs(Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1)[2]) - Math.abs(P5.z));
+              if (inset > worstInset) { worstInset = inset; insetX = P5.x; } } });
+          for (const e of [0, 1]) if (!(Math.abs(endTop[e] - w.topM[e]) <= 0.15)) say(v.id, "a well's bulwark built off its top", `${w.name} ${e ? 'aft' : 'fwd'} end: built ${endTop[e].toFixed(2)} m, record ${w.topM[e]} m`);
+          if (out) say(v.id, "a well's bulwark built past its span", `${w.name}: ${out} vertices outside x ${xa.toFixed(2)}..${xb.toFixed(2)}`);
+          if (worstInset > 0.05) say(v.id, "a well's bulwark standing off the shell", `${w.name}: a vertex at x ${insetX.toFixed(1)} stands ${worstInset.toFixed(2)} m off the shell's half-breadth`);
+          const xm = (xa + xb) / 2, um = uAtX(xm), wantMid = H2.wellTop(um);
+          let capMid = -Infinity, over = 0, overBy = 0;
+          g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (!pt || pt.key !== 'rail') return;
+            o.updateMatrixWorld(true); const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P5.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (P5.x < xa + 0.5 || P5.x > xb - 0.5) continue;
+              if (Math.abs(P5.x - xm) < 2.0) capMid = Math.max(capMid, P5.y);
+              const wt = H2.wellTop(uAtX(P5.x)); if (wt !== null && P5.y > wt + 0.15) { over++; overBy = Math.max(overBy, P5.y - wt); } } });
+          if (!(Math.abs(capMid - wantMid) <= 0.15)) say(v.id, "a well's capping off its bulwark top", `${w.name}: the rail tops out at ${capMid.toFixed(2)} m at x ${xm.toFixed(1)}, the bulwark line ${wantMid.toFixed(2)} m`);
+          if (over) say(v.id, "a well's capping standing over its bulwark top", `${w.name}: ${over} rail vertices up to ${overBy.toFixed(2)} m over the line`);
+        }
+        /* ── A-WASH-PORT (round 307, 0y¹³⁰, Titanic): A WELL READ OFF A PLATE ANSWERS FOR ITS WASH
+           PORTS, AND A RECORDED PORT IS A HOLE IN THE BUILT BULWARK. The 1911 plan draws two
+           rectangles under each well's bulwark line; they are wash ports (Bob Read), open with two
+           bars forward, closed by doors aft. The model built both bulwarks as solid sheets, and its
+           0.72 m class capping covered the top of every port. (1) RECORD: a well with a topRead
+           carries a ports array (an empty one is an answer, silence is convicted); each port sits
+           inside its well, its topM and bottomM are its read rows within 0.05 m, its doors are
+           'closed' or 'removed', a removed port has bars as fractions of the opening, and
+           islands.portsProvenance exists. (2) THE HOLE: a horizontal ray from outboard at the port's
+           middle and the opening's mid-height passes the 'wellBulwark' sheets on both sides, and the
+           same ray in the plating between two ports does not. (3) THE FITTINGS: a 'washPort' group
+           named '<well> wash ports'; a closed port has a door on each side that the ray hits within
+           0.06 m outboard of the shell, and a removed port has its bars, each inside the opening.
+           (4) THE CAPPING: no 'rail' vertex over the port's span stands under the opening's top. */
+        if (WL) {
+          const capH = H.capM ? H.capM : H.beam * 0.016 * 1.6;
+          const rcW = new THREE.Raycaster();
+          const meshesOf = (key, name) => { const out = []; g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (pt && pt.key === key && (!name || pt.name === name)) out.push(o); }); return out; };
+          g.updateMatrixWorld(true);
+          const shoot = (meshes, u, y, sgn) => {
+            const x = loftDeckX(H, u), half = Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1)[2]);
+            rcW.set(new THREE.Vector3(x, y, sgn * (half + 3)), new THREE.Vector3(0, 0, -sgn));
+            const hit = rcW.intersectObjects(meshes, false)[0];
+            return hit ? { off: sgn * hit.point.z - half, o: hit.object } : null;
+          };
+          for (const w of WL) {
+            if (!w || !Array.isArray(w.u)) continue;
+            if (w.topRead && !Array.isArray(w.ports)) { say(v.id, "a plate-read well with its wash ports unanswered", `${w.name}: topRead is recorded and ports is absent; the plate draws or does not draw ports, and the record must say which`); continue; }
+            const PL = w.ports || [];
+            if (PL.length && !(H.islands.portsProvenance && H.islands.portsProvenance.length > 20)) say(v.id, 'wash ports with no provenance', 'hull.islands.portsProvenance absent');
+            const sheets = meshesOf('wellBulwark', w.name + ' bulwark'), fits = meshesOf('washPort', w.name + ' wash ports');
+            if (PL.length && !fits.length) say(v.id, 'wash ports recorded and no fittings built', `${w.name}: no washPort group named '${w.name} wash ports'`);
+            PL.forEach((p, pi) => {
+              const ok = p && Array.isArray(p.u) && p.u.length === 2 && p.u[0] >= w.u[0] && p.u[1] <= w.u[1] && p.u[1] > p.u[0] && p.topM > p.bottomM && (p.doors === 'closed' || p.doors === 'removed');
+              if (!ok) { say(v.id, 'a wash port declared out of shape', `${w.name} port ${pi}: ${JSON.stringify(p).slice(0, 140)}`); return; }
+              const R = p.read;
+              if (!(R && R.pxPerM > 0 && typeof R.lineUnderRow === 'number' && typeof R.bottomRow === 'number' && typeof R.datumRow === 'number')) say(v.id, 'a wash port with no read', `${w.name} port ${pi}`);
+              else {
+                const tW = R.datumM + (R.datumRow - R.lineUnderRow) / R.pxPerM, bW = R.datumM + (R.datumRow - R.bottomRow) / R.pxPerM;
+                if (Math.abs(tW - p.topM) > 0.05 || Math.abs(bW - p.bottomM) > 0.05) say(v.id, 'a wash port off its plate read', `${w.name} port ${pi}: top ${p.topM}/${tW.toFixed(2)}, bottom ${p.bottomM}/${bW.toFixed(2)} m`);
+              }
+              if (p.doors === 'removed' && !(Array.isArray(p.bars) && p.bars.length && p.bars.every(f => f > 0 && f < 1))) say(v.id, 'an open wash port with no bars recorded', `${w.name} port ${pi}`);
+              const um = (p.u[0] + p.u[1]) / 2;
+              const lo = Math.max(p.bottomM, H2.sheer(um) - 0.02), hi = Math.min(p.topM, H2.wellTop(um) - capH), ym = (lo + hi) / 2;
+              if (!(hi - lo >= 0.4)) say(v.id, 'a wash port with no room under the capping', `${w.name} port ${pi}: the opening runs ${lo.toFixed(2)}..${hi.toFixed(2)} m`);
+              for (const sgn of [1, -1]) {
+                const sh = shoot(sheets, um, ym, sgn);
+                if (sh && Math.abs(sh.off) < 0.5) say(v.id, 'a wash port not cut through the bulwark', `${w.name} port ${pi}, ${sgn > 0 ? '+z' : '-z'} side: the plating stands across it at the opening's mid-height ${ym.toFixed(2)} m`);
+                if (p.doors === 'closed') {
+                  const d = shoot(fits.filter(o => o.userData.washPort && o.userData.washPort.side === sgn && !o.userData.washPort.what), um, ym, sgn);
+                  if (!d || d.off < -0.01 || d.off > 0.06) say(v.id, 'a closed wash port with no door over it', `${w.name} port ${pi}, ${sgn > 0 ? '+z' : '-z'} side: ${d ? 'door ' + d.off.toFixed(3) + ' m off the shell' : 'the ray meets no door'}`);
+                } else {
+                  const bars = fits.filter(o => o.userData.washPort && o.userData.washPort.side === sgn && o.userData.washPort.what === 'bar'
+                    && Math.abs(o.userData.washPort.u[0] - p.u[0]) < 1e-6);
+                  if (bars.length !== p.bars.length) say(v.id, "an open wash port's bars not built", `${w.name} port ${pi}, ${sgn > 0 ? '+z' : '-z'} side: ${bars.length} bars, the record ${p.bars.length}`);
+                  for (const b of bars) { const by = b.getWorldPosition(new THREE.Vector3()).y; if (by < lo - 0.02 || by > hi + 0.02) say(v.id, "a wash port's bar outside its opening", `${w.name} port ${pi}: a bar at ${by.toFixed(2)} m, the opening ${lo.toFixed(2)}..${hi.toFixed(2)}`); }
+                }
+              }
+              let capLow = Infinity, capX = 0;
+              g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (!pt || pt.key !== 'rail') return; const pa = o.geometry.attributes.position;
+                const xa = loftDeckX(H, p.u[0]), xb = loftDeckX(H, p.u[1]);
+                for (let i = 0; i < pa.count; i++) { P5.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); if (!(P5.x > xa + 0.3 && P5.x < xb - 0.3)) continue;
+                  /* the opening's top at this vertex's own station: the well's line falls along it */
+                  const hiAt = Math.min(p.topM, H2.wellTop(uAtX(P5.x)) - capH), d = P5.y - hiAt;
+                  if (d < capLow) { capLow = d; capX = P5.x; } } });
+              if (capLow < -0.02) say(v.id, 'a capping hanging over a wash port', `${w.name} port ${pi}: at x ${capX.toFixed(1)} the rail comes ${(-capLow).toFixed(2)} m down over the opening's top`);
+            });
+            /* the plating between two ports, and outside them, is still there */
+            const gaps = [];
+            const PS = PL.filter(p => p && Array.isArray(p.u)).map(p => p.u).sort((a, b) => a[0] - b[0]);
+            for (let i = 0; i + 1 < PS.length; i++) gaps.push((PS[i][1] + PS[i + 1][0]) / 2);
+            if (PS.length) gaps.push((w.u[0] + PS[0][0]) / 2);
+            for (const ug of gaps) for (const sgn of [1, -1]) {
+              const ym = (H2.sheer(ug) + H2.wellTop(ug)) / 2, sh = shoot(sheets, ug, ym, sgn);
+              if (!sh || Math.abs(sh.off) > 0.06) say(v.id, "a well's plating missing between its ports", `${w.name} at u ${ug.toFixed(4)}, ${sgn > 0 ? '+z' : '-z'}: ${sh ? sh.off.toFixed(2) + ' m off the shell' : 'the ray meets nothing'}`);
+            }
+          }
+        }
+      }
+      for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
+    }
+
+    /* ── A-TRUCK-READ (round 300, Titanic): A POLE RECORDED BY ITS TRUCK IS ITS PLATE'S ROWS, AND
+       THE BUILT POLE ENDS THERE. Titanic's two poles carried a class heightM of 52.2 m from the deck,
+       so when r299 raised her deck 0.6 m under the foremast the fore truck rose with it to 63.25 m,
+       2.4 m over the side plan's 60.81. On a hull whose masts were read off a plate (stationRead),
+       every pole mast must carry truckWLM with its read (col, topRow, wlRow, pxPerM), the figure must
+       equal (wlRow - topRow) / pxPerM within 0.05 m, and off the meshes the head of that mast's
+       highest segment must stand at it within 0.15 m. A pole on such a hull with no truck read is
+       convicted for the silence. Square masts (Preussen's) carry truckM and are not this rule's. */
+    if (H.stationRead) {
+      const headOf = mi => { let hd = -Infinity; g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg && sg.mi === mi) hd = Math.max(hd, sg.headY); }); return hd; };
+      (H.masts || []).forEach((mk, mi) => {
+        if (!(mk.rig === 'pole' || mk.rig === 'none')) return;
+        if (mk.truckWLM === undefined) { say(v.id, 'a pole with no truck read on a plate-read hull', `mast ${mi} at u ${mk.at}: the stations were read off the plate and the truck was not`); return; }
+        const tr = mk.truckRead;
+        if (!(tr && tr.pxPerM > 0 && typeof tr.topRow === 'number' && typeof tr.wlRow === 'number')) { say(v.id, 'a truck height with no rows', `mast ${mi}: truckWLM ${mk.truckWLM} m and no truckRead`); return; }
+        const want = (tr.wlRow - tr.topRow) / tr.pxPerM;
+        if (Math.abs(mk.truckWLM - want) > 0.05) say(v.id, 'a truck off its plate read', `mast ${mi}: truckWLM ${mk.truckWLM} m, the plate's row ${tr.topRow} over waterline row ${tr.wlRow} reads ${want.toFixed(2)} m`);
+        const hd = headOf(mi);
+        if (!(Math.abs(hd - mk.truckWLM) <= 0.15)) say(v.id, 'a pole built off its read truck', `mast ${mi}: the highest segment's head stands at ${isFinite(hd) ? hd.toFixed(2) : 'nothing'} m, the read ${mk.truckWLM} m`);
+      });
+    }
+
+    /* ── A-STAGE-CARD (round 301, 0y¹²⁶): A HULL THAT SETS NO SAIL IS NOT TOLD ABOUT CANVAS, AND ITS
+       CARDS SAY WHAT EACH STAGE ADDS. The Shipwright's card on Titanic read "Canvas. She can now be
+       driven by the wind", because the test for a powered hull was "no masts" and she has two poles;
+       Queen Mary 2, Dreadnought and Yamato got the topgallant, ratline and yard cards the same way.
+       The rigless hulls got four fixed container-ship paragraphs that named machinery, accommodation
+       and a funnel at stages where the picture adds none of them. This rule decides "sets no sail"
+       for itself (no mast rigged other than pole or none, no headsails), asks the page's own
+       dispatch (SW_STAGE_CARD) for stages 3 to 7 with the parts the built hull adds at each, and
+       convicts: a sailing word on such a card; a card that lists additions at a stage that adds
+       none, or lists none where the stage adds some; a last card without the recorded machinery;
+       and a hull that sets no sail with no machinery record, or one without its provenance. */
+    {
+      const setsSail = (H.masts || []).some(m => m.rig && m.rig !== 'pole' && m.rig !== 'none') || !!H.headsails;
+      /* the dugout is outside it: she is paddled, and TRADITION.dugout writes her stage 3 to 7
+         cards itself (swApplyStage), so the powered composer never speaks for her */
+      if (!setsSail && H.build !== 'dugout') {
+        if (typeof SW_STAGE_CARD !== 'function') say(v.id, 'a stage card the audit cannot ask', 'window.SW_STAGE_CARD is not defined');
+        else {
+          if (!H.machinery) say(v.id, 'a hull that sets no sail with no machinery record', 'hull.machinery is absent, so her last stage card cannot say what drives her');
+          else if (!H.machineryProvenance) say(v.id, 'a machinery record with no provenance', 'hull.machinery has no machineryProvenance');
+          const SKIP = new Set(['deck', 'rail', 'waterway', 'islandRail', 'stair']);
+          const by = {};
+          g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.stage >= 3) (by[p.stage] = by[p.stage] || []).push({ key: p.key, name: p.name }); });
+          for (let st = 3; st <= 7; st++) {
+            const card = SW_STAGE_CARD(v, st, by[st] || []);
+            const txt = card ? card[0] + ' — ' + card[1] : '';
+            if (!card) { say(v.id, 'a stage with no card', `stage ${st}`); continue; }
+            if (/canvas|topgallant|ratline|yards crossed|bent on|driven by the wind|fidded|doubling/i.test(txt))
+              say(v.id, 'a sailing card on a hull that sets no sail', `stage ${st}: "${txt.slice(0, 120)}"`);
+            const adds = (by[st] || []).some(p => !SKIP.has(p.key));
+            if (adds !== /Added at this stage/.test(txt))
+              say(v.id, 'a stage card that does not say what the stage adds', `stage ${st}: the built hull adds ${adds ? [...new Set((by[st] || []).filter(p => !SKIP.has(p.key)).map(p => p.key))].join(', ') : 'nothing'}; the card reads "${txt.slice(0, 120)}"`);
+            if (st === 7 && H.machinery && txt.indexOf(H.machinery) < 0)
+              say(v.id, 'a last stage card without her machinery', `stage 7 reads "${txt.slice(0, 120)}"`);
+          }
+        }
+      }
+
+      /* ── A-STAGE-CARD-SAIL (round 302, 0y¹²⁷): A SAILING HULL'S CARDS SAY WHAT ITS STAGES ADD.
+         The eight sailing cards were one fixed list on every hull that sets sail: "carries the guns"
+         on the junk and the clipper, "Rudder hung aft" on the trireme and the dhow, which steer with
+         quarter rudders, and "Lower mast, topmast, topgallant — each fidded" on every lateen, junk
+         and crab-claw pole. This asks SW_STAGE_CARD for stages 3 to 7 with the parts the built hull
+         adds at each (a mast mesh's userData.seg gives its mast and piece, as on the page) and
+         convicts any card whose claim the parts contradict, either way: guns, a stern rudder,
+         quarter rudders, fidded pieces, single poles, shrouds, ratlines, braces; and any rig named
+         on the yard, sail or furled card that she does not carry, or carried and not named.
+         Stage 0 is the keel on every hull but the dugout: r301's powered composer answered it with
+         "Afloat", and an iron or steel hull must not be told its keel is a timber. */
+      if (H.build !== 'dugout' && typeof SW_STAGE_CARD === 'function') {
+        const k0 = SW_STAGE_CARD(v, 0, []);
+        if (!k0 || k0[0] !== 'Keel laid') say(v.id, 'a keel stage that is not the keel', `stage 0 reads "${k0 ? k0.join(' — ').slice(0, 100) : 'nothing'}"`);
+        else if ((H.build === 'steel' || H.build === 'iron') && /timber/i.test(k0[1])) say(v.id, 'a metal keel told it is a timber', `stage 0 reads "${k0[1].slice(0, 100)}"`);
+      }
+      if (setsSail && H.build !== 'dugout') {
+        if (typeof SW_STAGE_CARD !== 'function') say(v.id, 'a stage card the audit cannot ask', 'window.SW_STAGE_CARD is not defined');
+        else {
+          const by = {};
+          g.traverse(o => { const p = o.userData && o.userData.part; if (!p || p.stage < 3) return;
+            const sg = o.userData.seg;
+            (by[p.stage] = by[p.stage] || []).push(sg ? { key: p.key, name: p.name, mi: sg.mi, si: sg.si } : { key: p.key, name: p.name }); });
+          const rigs = new Set((H.masts || []).map(m => m.rig));
+          /* r317 (0y¹⁵²): the sails bent on at stage 7 include a square mizzen's fore-and-aft sail,
+             a lateen (lateenMizzen) or a gaff spanker (spanker); A-MIZZEN-SAIL checks each is built */
+          const rigs7 = new Set(rigs), rigsF = new Set(rigs);
+          if ((H.masts || []).some(m => m.rig === 'square' && m.lateenMizzen)) { rigs7.add('lateen'); rigsF.add('lateen'); }
+          if ((H.masts || []).some(m => m.rig === 'square' && m.spanker)) rigs7.add('gaff');
+          const card = {};
+          for (let st = 3; st <= 7; st++) {
+            const c = SW_STAGE_CARD(v, st, by[st] || []);
+            if (!c) { say(v.id, 'a stage with no card', `stage ${st}`); continue; }
+            card[st] = c[0] + ' — ' + c[1];
+            const has = k => (by[st] || []).some(p => p.key === k);
+            const claim = (what, said, built) => { if (said !== built)
+              say(v.id, 'a sailing stage card that misstates what the stage adds',
+                  `stage ${st}: the card ${said ? 'names' : 'omits'} ${what}, which the built hull ${built ? 'adds' : 'does not add'} here: "${card[st].slice(0, 140)}"`); };
+            claim('guns', /\bguns\b/i.test(card[st]), has('gun'));
+            claim('a stern rudder', /a rudder hung/i.test(card[st]), has('rudder'));
+            claim('quarter rudders', /quarter rudder/i.test(card[st]), has('quarterRudder'));
+            claim('ratlines', /ratline/i.test(card[st]), has('ratline'));
+            claim('braces', /\bbraces\b/i.test(card[st]), has('brace'));
+            if (/driven by the wind rather than carried/i.test(card[st])) say(v.id, 'a sailing stage card that gestures', `stage ${st}: "${card[st].slice(0, 120)}"`);
+            if (st === 4) {
+              const pcs = {};
+              for (const p of by[4] || []) if (p.key === 'mast' && p.mi !== undefined) pcs[p.mi] = Math.max(pcs[p.mi] || 0, (p.si || 0) + 1);
+              const vals = Object.values(pcs);
+              claim('a fidded piece', /\bfid\b|fidded|topmast|topgallant/i.test(card[st]), vals.some(n => n > 1));
+              /* a lateen mast is built by its own path and carries no userData.seg: one mesh named
+                 "Mast" with no segment record is a pole in one piece */
+              const bare = (by[4] || []).some(p => p.key === 'mast' && p.mi === undefined && /mast$/i.test(p.name));
+              claim('a single pole', /single pole/i.test(card[st]), vals.some(n => n === 1) || bare);
+            }
+            if (st === 5) {
+              claim('shrouds', /^Rigged — Shrouds run/.test(card[st]), has('shroud'));
+              claim('stays', /\bStays hold\b/.test(card[st]), has('stay'));
+            }
+            if (st >= 6) {
+              const RIGW = { square: /square/i, lateen: /lateen/i, gaff: /\bgaffs?\b/i, junk: /batten/i, crabclaw: /crab-claw/i };
+              /* r319: a square mizzen's lateen yard is crossed at stage 6 as well (lateenMizzen) */
+              const rigs6 = new Set(rigs); if ((H.masts || []).some(m => m.rig === 'square' && m.lateenMizzen)) rigs6.add('lateen');
+              for (const [rig, re] of Object.entries(RIGW)) claim(`the ${rig} rig`, re.test(card[st]), (st === 7 ? rigs7 : rigs6).has(rig));
+            }
+          }
+          if (typeof SW_FURLED_CARD === 'function') {
+            const f = SW_FURLED_CARD(v);
+            const txt = f[0] + ' — ' + f[1];
+            const RIGF = { square: /square sails/i, lateen: /lateen/i, gaff: /gaff sails/i, junk: /battened/i, crabclaw: /crab-claw/i };
+            for (const [rig, re] of Object.entries(RIGF)) if (re.test(txt) !== rigsF.has(rig))
+              say(v.id, 'a furled card that misnames her rig', `the ${rig} rig is ${rigsF.has(rig) ? 'carried and not named' : 'named and not carried'}: "${txt.slice(0, 140)}"`);
+            /* r308: the gaff clause says how each gaff mast's sail is stowed */
+            const gmF = (H.masts || []).filter(m => m.rig === 'gaff');
+            const nBr = gmF.filter(m => m.gaffStow === 'brailed' || m.furlStow === 'brailed').length;
+            if (nBr && !/brailed/i.test(txt)) say(v.id, 'a furled card that lowers a brailed gaff', `${nBr} gaff mast(s) stow by brails and the card does not say so: "${txt.slice(0, 160)}"`);
+            if (gmF.length > nBr && !/lowered onto their booms/i.test(txt)) say(v.id, 'a furled card that leaves a lowered gaff unsaid', `${gmF.length - nBr} gaff mast(s) lower the gaff onto the boom and the card does not say so: "${txt.slice(0, 160)}"`);
+            if (gmF.length === nBr && /lowered onto their booms/i.test(txt)) say(v.id, 'a furled card that lowers a brailed gaff', `every gaff mast stows by brails and the card says the gaffs are lowered: "${txt.slice(0, 160)}"`);
+            /* r310 (0y¹³⁸): a square-rigged ship's spanker is named, and stowed as the record has it */
+            const spF = (H.masts || []).filter(m => m.rig === 'square' && m.spanker);
+            if (spF.length) {
+              const allBr = spF.every(m => m.furlStow === 'brailed');
+              if (!/spanker/i.test(txt)) say(v.id, 'a furled card that leaves the spanker unsaid', `${spF.length} spanker(s) carried and the card does not name one: "${txt.slice(0, 200)}"`);
+              else if (allBr !== /spanker is brailed/i.test(txt)) say(v.id, 'a furled card that stows the spanker the wrong way', `the record ${allBr ? 'brails' : 'lowers'} the spanker: "${txt.slice(0, 200)}"`);
+            } else if (/spanker/i.test(txt)) say(v.id, 'a furled card that names a spanker she does not carry', `"${txt.slice(0, 200)}"`);
+          } else say(v.id, 'a furled card the audit cannot ask', 'window.SW_FURLED_CARD is not defined');
+        }
+      }
+    }
+
+    /* ── A-SHEER-READ (round 299, Titanic): A READ DECK LINE IS ITS PLATE'S ROWS, AND THE BUILT DECK.
+       Titanic's sheer was the class curve (freeboard 10.1 m, rises 0.7 and 0.4 m) while her
+       side plan draws the C deck 9.60 m amidships and 2.6 m higher at the stem. On a hull whose
+       record carries sheerRead: every station's height must be datumM + (datumRow - row) /
+       pxPerM within 0.05 m; hullSurface's sheer must pass through every station within 0.05 m;
+       and off the meshes, the deck's OUTERMOST vertex within 0.5 m of each station's x, between
+       the islands, must stand at that station within 0.15 m. The outermost, because the deck is
+       cambered: its crown stands about half a metre over its edge on a 28 m beam, and the
+       sheer is the edge. Silent without sheerRead. */
+    if (H.sheerRead) {
+      const SR = H.sheerRead, ST = SR.stations;
+      if (!(Array.isArray(ST) && ST.length >= 2 && Array.isArray(SR.rows) && SR.rows.length === ST.length && Array.isArray(SR.datumRows) && SR.datumRows.length === ST.length && SR.pxPerM > 0 && typeof SR.datumM === 'number'))
+        say(v.id, 'a deck line read with no rows', 'hull.sheerRead needs stations, rows and datumRows of one length, datumM and pxPerM');
+      else {
+        const HS = SHIPS_HULL.hullSurface(H);
+        const inIsland = u => ((H.islands && H.islands.list) || []).some(isl => isl && Array.isArray(isl.u) && u >= isl.u[0] - 0.01 && u <= isl.u[1] + 0.01);
+        const P5 = new THREE.Vector3();
+        const near = ST.map(() => NaN), far = ST.map(() => -1), xs = ST.map(([u]) => loftDeckX(H, u));
+        g.updateMatrixWorld(true);
+        g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (!pt || pt.key !== 'deck') return;
+          const pa = o.geometry.attributes.position;
+          for (let i = 0; i < pa.count; i++) { P5.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+            for (let j = 0; j < ST.length; j++) if (Math.abs(P5.x - xs[j]) <= 0.5 && Math.abs(P5.z) > far[j]) { far[j] = Math.abs(P5.z); near[j] = P5.y; } } });
+        ST.forEach(([u, m], j) => {
+          const want = SR.datumM + (SR.datumRows[j] - SR.rows[j]) / SR.pxPerM;
+          if (Math.abs(m - want) > 0.05) say(v.id, 'a deck line station off its plate read', `u ${u}: ${m} m, the plate's row ${SR.rows[j]} over datum row ${SR.datumRows[j]} reads ${want.toFixed(2)} m`);
+          if (Math.abs(HS.sheer(u) - m) > 0.05) say(v.id, 'a sheer drawn off its read deck line', `u ${u}: hullSurface sheer ${HS.sheer(u).toFixed(2)} m, the read ${m} m`);
+          if (u > 0.02 && u < 0.98 && !inIsland(u) && !(Math.abs(near[j] - m) <= 0.15))
+            say(v.id, 'a deck built off its read deck line', `u ${u}: the deck's outermost vertex within 0.5 m of x ${xs[j].toFixed(2)} stands at ${near[j].toFixed(2)} m, the read ${m} m`);
+        });
+        /* ── A-SHEER-TRACE (round 309): THE TRACE STAYS ON ONE LINE, AND THE FIT STAYS ON THE TRACE.
+           r299 traced Titanic's C deck letting each point move 4 rows from the last. At column 790
+           a solid line begins 5 rows under the dashed C line, and the trace stepped onto it and
+           followed it to the stern, while its provenance said it followed the dashed line: the
+           after well's deck stood 0.27 m low, and r307 found the after wash ports 0.7 m over a
+           deck the plan draws 0.4 m under them. The record carries the raw trace now. (1) No two
+           neighbouring trace points may differ by more than its maxStepRows (a deck line's
+           steepest slope on the plate): a larger step is a jump to another line. (2) Every
+           station inside the trace's columns must stand within 2 px of the trace's own row at
+           its column: a smooth fit cannot follow a jump, so a fit that leaves its trace is the
+           other sign of one. SILENCE: a sheerRead with no trace is convicted. */
+        const TR = SR.trace;
+        if (!(TR && Array.isArray(TR.rows) && TR.rows.length >= 2 && TR.stepCol && TR.maxStepRows > 0 && Array.isArray(SR.cols) && SR.cols.length === ST.length))
+          say(v.id, 'a deck line read with no trace', 'hull.sheerRead needs trace {fromCol, stepCol, rows, maxStepRows} and cols, so the fit can be checked against the raw rows');
+        else {
+          let worst = 0, at = null;
+          for (let i = 1; i < TR.rows.length; i++) { const dd = Math.abs(TR.rows[i] - TR.rows[i - 1]); if (dd > worst) { worst = dd; at = TR.fromCol + i * TR.stepCol; } }
+          if (worst > TR.maxStepRows)
+            say(v.id, 'a deck line trace that steps onto another line', `the trace steps ${worst.toFixed(2)} rows at column ${at}, over its limit of ${TR.maxStepRows}`);
+          const lastCol = TR.fromCol + (TR.rows.length - 1) * TR.stepCol, cMin = Math.min(TR.fromCol, lastCol), cMax = Math.max(TR.fromCol, lastCol);
+          ST.forEach(([u], j) => {
+            const c = SR.cols[j]; if (!(c >= cMin && c <= cMax)) return;
+            const f = (c - TR.fromCol) / TR.stepCol, i0 = Math.min(TR.rows.length - 2, Math.floor(f)), t = f - i0;
+            const tr = TR.rows[i0] * (1 - t) + TR.rows[i0 + 1] * t;
+            if (Math.abs(SR.rows[j] - tr) > 2.0)
+              say(v.id, 'a deck line station off its own trace', `u ${u}: the station's row ${SR.rows[j]} is ${(SR.rows[j] - tr).toFixed(2)} px off the trace's ${tr.toFixed(2)} at column ${c}`);
+          });
+        }
+      }
+    }
+
+    if (part.container || part.forecast) {
+      const H2 = SHIPS_HULL.hullSurface(H);
+      let over = 0, worst = 0;
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        const p = tagOf(o);
+        if (!p || (p.key !== 'container' && p.key !== 'forecast')) return;
+        const bb = new THREE.Box3().setFromObject(o);
+        /* ⚠ sampled across the mesh's SPAN, not at its centre (round 34): the forecastle
+           wall is ONE mesh lofted along a tapering bow, so its widest point is at its aft
+           end while its bb centre sits where the hull is narrow — the centre-station test
+           flagged geometry that is lofted from surfacePoint and cannot overhang. A box at
+           constant width over the bow still fires: the hull is narrow across its whole span. */
+        let allow = 0;
+        for (let s = 0; s <= 4; s++) {
+          const u = Math.max(0.001, Math.min(0.999,
+            0.5 + (bb.min.x + (s / 4) * (bb.max.x - bb.min.x)) / H.lwl));
+          allow = Math.max(allow, Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1.0)[2]));
+        }
+        allow += Math.max(1.5, H.beam * 0.033);
+        const z = Math.max(-bb.min.z, bb.max.z);
+        if (z > allow) { over++; worst = Math.max(worst, z - allow); }
+      });
+      if (over) say(v.id, 'cargo off the deck edge',
+                    `${over} meshes reach up to ${worst.toFixed(1)} m past the hull side at their own station`);
+    }
+
+    /* ⚠ A WELDED SHIP'S POST STAYS INSIDE HER SHELL (round 95, Azzam). The steel stem bar
+       carried a fixed siding of 5.5% of beam, wider than a fine entry's own half-breadth
+       over most of the stem's run, and broke through the white shell as a dark arc down the
+       bow. No rule saw it, because every width rule asks about deck fittings; this one walks
+       the POST'S OWN STATIONS — its geometry is a strip, four vertices each — and asks the
+       surface for its half-breadth at that station's height, u recovered through the rake by
+       one fixed-point pass. Timber posts stand proud by design and are exempt. */
+    if (H.build === 'steel' || H.build === 'iron') {
+      const HS4 = SHIPS_HULL.hullSurface(H);
+      let poke = 0, worstP = 0;
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        const p = tagOf(o);
+        if (!p || p.key !== 'stempost') return;
+        const pa = o.geometry.getAttribute('position');
+        for (let s = 0; s + 3 < pa.count; s += 4) {
+          const x = pa.getX(s), y = pa.getY(s);
+          const zHalf = Math.max(Math.abs(pa.getZ(s)), Math.abs(pa.getZ(s + 1)));
+          if (y < 0.3) continue;                       // the underwater run cannot read
+          let u = Math.max(0.001, Math.min(0.999, 0.5 + x / H.lwl));
+          const fb = HS4.sheer(u) || 1;
+          const k = Math.max(0, Math.min(1, y / fb));
+          u = Math.max(0.001, Math.min(0.999, 0.5 + (x - HS4.rake(u) * k) / H.lwl));
+          const shell = Math.abs(
+            SHIPS_HULL.surfacePoint(H, HS4, u, 0.62 + 0.38 * k)[2]);
+          if (zHalf > shell + 0.05) { poke++; worstP = Math.max(worstP, zHalf - shell); }
+        }
+      });
+      if (poke) say(v.id, 'post proud of a welded shell',
+                    `${poke} stations stand up to ${worstP.toFixed(2)} m outside the plating`);
+    }
+
+    /* ⚠ THE BRIDGE MUST SEE OVER THE STOW. The ship's own card says it — "the bridge has to
+       see over a stack that may be twelve high" — and the model broke it: the stack amidships
+       reached 21.3 m above deck and the top of the house 18.1, a ship that could not be
+       conned. The wheelhouse roof stands clear above the tallest box, and this asserts the
+       clearance rather than the styling. */
+    if (H.containers && part.container && part.bridge &&
+        part.container.y[1] > part.bridge.y[1] - 2.0)
+      say(v.id, 'the bridge cannot see over the stow',
+          `stack top ${(part.container.y[1] - deckY).toFixed(1)} m above deck, ` +
+          `house top ${(part.bridge.y[1] - deckY).toFixed(1)} m`);
+
+    /* ⚠ THE ISLANDS STAND WHERE THE RECORD STANDS THEM (round 113). Ever Given's bridge
+       was drawn right aft for 66 rounds because the builder hard-coded the classic
+       single-island layout, while her own loading computer puts her highest point — the
+       bridge mast — 245.35 m forward of the aft perpendicular. A hull whose record
+       carries bridgeU or funnelU must build that island within 3% of length of the
+       recorded station; a record field the builder silently ignores is the class this
+       round found. */
+    for (const [fld, key] of [['bridgeU', 'bridge'], ['funnelU', 'funnel']]) {
+      if (H[fld] === undefined || !part[key]) continue;
+      const want = (H[fld] - 0.5) * H.lwl;
+      const got = (part[key].x[0] + part[key].x[1]) / 2;
+      if (Math.abs(got - want) > H.lwl * 0.03)
+        say(v.id, `${key} island off its recorded station`,
+            `record ${fld} = ${H[fld]} puts it at x ${want.toFixed(1)} m; ` +
+            `built centroid x ${got.toFixed(1)} m`);
+    }
+
+    /* ── THE WINDING MUST AGREE WITH THE DECLARED NORMALS (round 35). ─────────────────
+       buildDeckGeometry declared every deck normal (0,1,0) and wound its triangles the other
+       way, so three.js's double-sided lighting flip — which trusts the winding — inverted
+       correct normals into wrong ones, and every weather deck in the fleet was lit as if it
+       faced the sea floor: the "dark olive deck" of rounds 34–35 was the GROUND half of the
+       hemisphere light on a sunlit deck. No picture ratchet can see it, because a
+       consistently wrong deck never changes. Checked only on materials whose lighting does
+       the flip (MeshStandardMaterial); the hull shader has no flip logic, and its mirrored
+       port half disagrees with its winding on purpose. */
+    {
+      const bad = {};
+      g.traverse(o => {
+        if (!o.isMesh || !o.material || !o.material.isMeshStandardMaterial) return;
+        const ge = o.geometry;
+        if (!ge || !ge.index || !ge.attributes.normal) return;
+        const ix = ge.index.array, nr = ge.attributes.normal.array, ps = ge.attributes.position.array;
+        const faces = ix.length / 3, step = Math.max(1, Math.floor(faces / 40));
+        let dis = 0, tot = 0;
+        for (let f = 0; f < faces; f += step) {
+          const A = ix[f * 3], B = ix[f * 3 + 1], C = ix[f * 3 + 2];
+          const ax = ps[A * 3], ay = ps[A * 3 + 1], az = ps[A * 3 + 2];
+          const e1 = [ps[B * 3] - ax, ps[B * 3 + 1] - ay, ps[B * 3 + 2] - az];
+          const e2 = [ps[C * 3] - ax, ps[C * 3 + 1] - ay, ps[C * 3 + 2] - az];
+          const gx = e1[1] * e2[2] - e1[2] * e2[1],
+                gy = e1[2] * e2[0] - e1[0] * e2[2],
+                gz = e1[0] * e2[1] - e1[1] * e2[0];
+          const gl = Math.hypot(gx, gy, gz); if (gl < 1e-9) continue;
+          const sx = (nr[A * 3] + nr[B * 3] + nr[C * 3]) / 3,
+                sy = (nr[A * 3 + 1] + nr[B * 3 + 1] + nr[C * 3 + 1]) / 3,
+                sz = (nr[A * 3 + 2] + nr[B * 3 + 2] + nr[C * 3 + 2]) / 3;
+          const sl = Math.hypot(sx, sy, sz); if (sl < 1e-6) continue;
+          tot++;
+          if ((gx * sx + gy * sy + gz * sz) / (gl * sl) < -0.2) dis++;
+        }
+        if (tot >= 8 && dis / tot > 0.5) {
+          const p = tagOf(o); const k = p ? p.key : '(untagged)';
+          bad[k] = (bad[k] || 0) + 1;
+        }
+      });
+      const keys = Object.keys(bad);
+      if (keys.length)
+        say(v.id, 'winding contradicts declared normals',
+            keys.map(k => `${bad[k]} ${k} mesh(es)`).join(', ') +
+            ' — double-sided lighting flips these the wrong way');
+    }
+
+    /* ── A SURFACE YOU STAND ON TAKES THE RECORDED COVERING (round 108). ──────────────
+       Azzam's record states 2,200 m² of laid teak and after r106 the weather deck drew
+       it — while the terrace stairs stayed topside white and every walkable tier roof
+       stayed a MeshStandard plate: surfaces you stand on, ignoring the record they stand
+       in the middle of. The class: stair treads and exposed house roofs are DECKS, and
+       must ask deckCovering()'s one judgement. Gated exactly as the builder gates —
+       recorded AND laid — so the 32 fallback ships convict nothing. Checked on the built
+       graph because the fault is an assignment, invisible in the record itself. */
+    if (H.deck && /^(teak|hinoki|pine|wood)$/.test(H.deck.covering || '')) {
+      const covCol = { teak: '8a7250', hinoki: 'b3a17c', pine: 'c0ad84',
+                       wood: 'a08a66' }[H.deck.covering];
+      let badTreads = 0, coveredRoof = false;
+      g.traverse(o => {
+        if (!o.isMesh || !o.material) return;
+        const p = tagOf(o);
+        if (p && p.key === 'stair') {
+          const c = o.material.uniforms && o.material.uniforms.uCol
+            ? o.material.uniforms.uCol.value.getHexString()
+            : (o.material.color ? o.material.color.getHexString() : '');
+          if (c !== covCol) badTreads++;
+        }
+        if (p && p.key === 'superstructure' && o.material.isShaderMaterial
+            && o.material.uniforms && o.material.uniforms.uPlankW
+            && o.geometry && o.geometry.type === 'ShapeGeometry') coveredRoof = true;
+      });
+      if (badTreads)
+        say(v.id, 'stair treads ignore the recorded covering',
+            `${badTreads} tread mesh(es) not in ${H.deck.covering} on a ship whose record lays it`);
+      /* ⚠ AND SILENCE IS THE FAULT, NOT A DECISION. This convicted any ship with a laid
+         covering whose tier roofs were not in it — which is r108's inference, and r132 found
+         it too strong: a record covers the DECK IT NAMES. Queen Mary 2's source attests the
+         wrap-around Promenade, deck 7, and deck 7 is that hull's own weather deck, so the
+         teak is already drawn where it is attested; extending it upward painted her sun deck
+         and every aft terrace one khaki field, which no photograph of her supports and which
+         her own provenance admitted in the words "EXTENDED above".
+         So what this rule now asks is whether the record has ANSWERED the question. A ship
+         that says deck.roofs (either way, with a reason) has decided; a ship that is silent
+         while carrying a laid covering has not, and that is the ambiguity worth convicting. */
+      if (H.decks && !H.flightDeck && !H.turrets && H.houseAt
+          && (H.deck || {}).roofs === undefined && !coveredRoof)
+        say(v.id, 'record is silent on whether the covering reaches the tier roofs',
+            'a recorded laid covering, a walkable tier roof cascade, and no roof plate '
+            + 'draws in the deck shader');
+
+      /* ── ⚠ A 'terraces' ANSWER THE DRAWING IGNORES (round 159). ────────────────────
+         deck.roofs learned a third value: 'terraces' — the covering reaches the exposed
+         tier terraces but NOT the top tier's roof, which stays coated plate (Azzam: the
+         delivery-trials aerial reads white around the radome pedestals and the mast
+         foot, the teak one level down on the ringing terraces; Research/AZZAM-PLATES.md
+         plate 2). A record field the builder ignores is the r84 class, so the graph is
+         checked in both directions: a covered crest is the word not honoured, and no
+         covered terrace at all is the word read as false. */
+      if ((H.deck || {}).roofs === 'terraces') {
+        const plates = [];
+        g.traverse(o => {
+          if (!o.isMesh || !o.material || !o.geometry) return;
+          const p = tagOf(o);
+          if (!p || p.key !== 'superstructure' || o.geometry.type !== 'ShapeGeometry') return;
+          if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+          plates.push({
+            covered: !!(o.material.isShaderMaterial && o.material.uniforms
+                        && o.material.uniforms.uPlankW),
+            y: o.geometry.boundingBox.max.y });
+        });
+        if (plates.length) {
+          const top = plates.reduce((a, b) => (b.y > a.y ? b : a));
+          if (top.covered)
+            say(v.id, 'the crest roof wears the covering the record keeps off it',
+                `deck.roofs is 'terraces' yet the topmost roof plate (y ${top.y.toFixed(2)}) `
+                + 'draws in the deck shader');
+          if (!plates.some(p2 => p2.covered))
+            say(v.id, "a 'terraces' answer with no terrace drawn in the covering",
+                `deck.roofs is 'terraces' yet none of ${plates.length} roof plates draws `
+                + 'in the deck shader');
+        }
+      }
+    }
+
+    /* ── THE POLAR IS THE VESSEL'S OWN (round 47). ─────────────────────────────────────
+       25 vessels shared 8 curves: the card printed Preussen's 20.5 kn over the corbita's
+       5.8-kn curve, Yamato's 27 over a shared 9.6, and the audit could not see it because
+       no rule asked. The polar's SHAPE belongs to the rig; its SCALE must be anchored to a
+       figure from the vessel's own record, named in polar.anchor — and the arithmetic that
+       ties record to curve is route.js's own: a sail curve saturates at 1.55× reference,
+       so a logged burst must sit at the ceiling, a day's run must fit under it, and an
+       engine's curve IS its at-sea speed. */
+    {
+      const P = v.polar || {};
+      const anch = P.anchor;
+      const cmax = P.curve ? Math.max.apply(null, Object.keys(P.curve).map(k => P.curve[k])) : 0;
+      if (!anch || !(anch.kn > 0) || !anch.source)
+        say(v.id, 'polar without an anchor', 'no polar.anchor {kn, kind, source} names the record');
+      else if (P.beatLight === 0 && P.beatHard === 0) {
+        if (Math.abs(cmax - anch.kn) > 0.11)
+          say(v.id, 'engine curve off its anchor',
+              `routes at ${cmax} kn against an anchored ${anch.kn}`);
+        if (v.speedKn !== undefined && (cmax < 0.7 * v.speedKn || cmax > 1.05 * v.speedKn))
+          say(v.id, 'engine curve contradicts the card',
+              `routes at ${cmax} kn against a stated ${v.speedKn} — the steamer fault`);
+      } else if (anch.kind === 'burst') {
+        if (Math.abs(1.55 * cmax - anch.kn) > 0.15 * anch.kn)
+          say(v.id, 'burst anchor off the 1.55× ceiling',
+              `1.55 × ${cmax} = ${(1.55 * cmax).toFixed(1)} kn vs the record's ${anch.kn}`);
+      } else {
+        if (anch.kn > 1.55 * cmax)
+          say(v.id, "day's run above the hull's own ceiling",
+              `${anch.kn} kn recorded, curve ceiling ${(1.55 * cmax).toFixed(1)}`);
+        if (cmax > 2 * anch.kn)
+          say(v.id, 'polar claims twice its own record',
+              `curve max ${cmax} kn against a day's-run anchor of ${anch.kn}`);
+      }
+
+      /* And the card's PROSE is held to the same ceiling as its curve. The dugout carried
+         the trireme's whole rigNote — "8.3 kn sprint", Olympias's own measurement — for as
+         long as the two shared a paddling curve, and the shared-curve rule above cannot see
+         it because text is not a curve. A speed the note states is a claim about THIS hull;
+         it must fit under this hull's own 1.55× ceiling (engines: the curve itself). Notes
+         shared within a rig class state no figures, so they pass untouched. */
+      {
+        const eng = P.beatLight === 0 && P.beatHard === 0;
+        const ceil = (eng ? cmax : 1.55 * cmax) + 0.15;
+        const m = (P.rigNote || '').match(/\d+(?:\.\d+)?(?=\s*kn)/g) || [];
+        const over = m.map(Number).filter(kn => kn > ceil);
+        if (over.length)
+          say(v.id, "rigNote claims a speed the hull cannot make",
+              `note states ${over.join(', ')} kn over a ceiling of ${ceil.toFixed(1)} — another vessel's record pasted on`);
+      }
+
+      /* ── MUSCLE IS NOT A SAIL (round 48, B9). ──────────────────────────────────────
+         route.js scales every sail curve by √(wind/8), so for as long as the paddlers'
+         cruise sat inside a sail curve, a calm slowed the oars and a gale sped them.
+         The fix is polar.floor {kn, lossKnPerMs, source} — thrust the router never
+         wind-scales, less a measured windage per m/s of head component. These rules keep
+         the class honest: every muscled hull must carry one, no engine may, and the floor
+         must be consistent with the curve and survive its own reference headwind. */
+      {
+        const eng = P.beatLight === 0 && P.beatHard === 0;
+        const muscled = /\b(oar|paddle)/.test(P.rig || '') && !eng;
+        const F = P.floor;
+        if (muscled && !(F && F.kn > 0 && F.lossKnPerMs >= 0 && F.source))
+          say(v.id, 'muscle vessel without an oar floor',
+              `rig says "${P.rig}" but no polar.floor {kn, lossKnPerMs, source} — route.js will wind-scale the crew`);
+        if (F && eng)
+          say(v.id, 'engine with an oar floor', 'a floor on a beat-0/0 polar is a contradiction — the engine curve already ignores the wind');
+        if (F && cmax && F.kn > cmax + 0.05)
+          say(v.id, 'oar floor above the curve',
+              `floor ${F.kn} kn over a curve topping at ${cmax} — the curve at reference wind already includes the muscle`);
+        if (F && F.kn - F.lossKnPerMs * 8 <= 0)
+          say(v.id, 'oar floor dies in its own reference wind',
+              `${F.kn} − ${F.lossKnPerMs}×8 ≤ 0 — she could never have made the crossing her anchor records`);
+      }
+
+      /* ── THE BEAT ANGLES BELONG TO THE RIG (round 48, the fault's second face). ────
+         The two muscled hulls carried 30/45 — tighter than a modern sloop — a compensator
+         from before the floor existed, when impossible pointing was the only way an oared
+         hull could make windward ground. Once the card printed "closest made good under
+         sail" the pair became a stated falsehood. Shape is the rig's (r47): every sailing
+         hull's beat pair must be its rig family's researched pair, first match wins —
+         "oars, with a square sail" is square, and pure muscle ("paddles") carries a
+         fair-wind rig that claims nothing to windward. */
+      {
+        const eng = P.beatLight === 0 && P.beatHard === 0;
+        const FAM = [
+          /* ⚠ BARQUENTINE BEFORE SQUARE, AND THAT ORDER IS THE POINT. This table is
+             matched by substring in array order, so a barquentine — which is square on
+             the fore and fore-and-aft on main and mizzen — matched 'square' and was
+             held to a full-rigged ship's 80/95. She points better than that and worse
+             than a schooner, because two of her three masts are fore-and-aft; that is
+             the whole reason the rig exists. Adding the family beats rewording the
+             ship to suit the audit. */
+          ['barquentine',  62,  78],
+          ['square',       80,  95],
+          ['lateen',       72,  84],
+          ['settee',       72,  84],
+          ['battened lug', 62,  70],
+          ['gaff',         55,  68],
+          ['crab claw',    75,  82],
+          ['paddles',      90, 105],
+        ];
+        const fam = FAM.find(f => (P.rig || '').indexOf(f[0]) >= 0);
+        if (!eng && fam && (P.beatLight !== fam[1] || P.beatHard !== fam[2]))
+          say(v.id, "beat angles are not the rig's",
+              `${P.beatLight}/${P.beatHard} on a "${P.rig}" — the ${fam[0]} family's measured pair is ${fam[1]}/${fam[2]}`);
+        if (!eng && !fam)
+          say(v.id, 'rig outside the beat-angle table',
+              `"${P.rig}" matches no rig family — add its researched pair to the audit table`);
+      }
+
+      /* ── THE SUBTITLE IS THE RECORD'S RIG, NOT THE MESH'S MAST COUNT (round 49). ────
+         The card's line keyed 'no sail' off hull.masts.length, so every mastless hull
+         had its rig text overridden: the dugout read "no sail" above two "closest made
+         good under sail" rows — her fair-wind mat sail is real, just undrawn — and the
+         USV read "no sail" a full round after r47 set her label to "wind, wave and
+         solar". The line is composed once, SHIPS_SW.rigLine, for both card views; run
+         it for every hull and it must end with the polar's own rig. 'no sail' is only
+         the fallback for a hull with no rig at all, and no vessel in the fleet is one. */
+      {
+        if (!(P.rig && String(P.rig).trim()))
+          say(v.id, 'no polar.rig',
+              "the card subtitle needs the record's rig; a missing one prints the 'no sail' fallback");
+        const rl = (window.SHIPS_SW && window.SHIPS_SW.rigLine)
+                   ? window.SHIPS_SW.rigLine(v) : null;
+        if (rl !== null && P.rig && !rl.endsWith(P.rig))
+          say(v.id, 'card subtitle contradicts the rig',
+              `rigLine gives "${rl}" but the record's rig is "${P.rig}"`);
+      }
+
+      /* ── A CALM DOES NOT SLOW HER, THROUGH THE MODEL ITSELF (round 50). ────────────
+         The r48 rules above hold the DATA honest — floor present, consistent, alive in
+         its own reference wind. This one asks the running model: compile the polar with
+         route.js's own compilePolar and evaluate route.js's own polarSpeed at zero wind,
+         where a floored hull must make exactly her floor at every heading (no wind, no
+         windage; no wind, no sail). Every consumer that goes through polarSpeed — the
+         router since r48, the battle since r50 — inherits the pass; a consumer that
+         wind-scales the crew again fails it before any picture is taken. */
+      /* guarded on ALL THREE globals — polarSpeed calls polarBeat, so a missing one would
+         throw here and mask the reachability rule below, which is the one that names it */
+      if (P.floor && P.curve
+          && typeof compilePolar === 'function' && typeof polarSpeed === 'function'
+          && typeof polarBeat === 'function') {
+        const CP = compilePolar(P);
+        for (const a of [0, 90, 180]) {
+          const kn = polarSpeed(CP, 0, a);
+          if (Math.abs(kn - P.floor.kn) > 0.02) {
+            say(v.id, 'a calm slows the muscled hull',
+                `polarSpeed at 0 m/s, ${a}° gives ${kn.toFixed(2)} kn against a floor of ${P.floor.kn} — the crew is being wind-scaled`);
+            break;
+          }
+        }
+      }
+    }
+
+    /* ── THE FURLED STATE IS A SECOND BUILD, AND IT IS AUDITED AS ONE (round 63). ──────
+       `buildShip(H, {furled:true})` must swap every cloth for stowed geometry, on the spar
+       that cloth stows to. Four rules, all provable by fault injection:
+         · a furled ship wearing SET canvas is the state simply not applied;
+         · a rigged ship whose furled build shows NO stowed cloth is declared-but-not-drawn
+           in its second state;
+         · a furl in the SET build is the state leaking the other way;
+         · a furl must LIE ON something — yard, boom, stay, mast or bowsprit — because a
+           roll of canvas in open air is the floating-fitting class in its newest clothes.
+       Coarse build: every furl path runs in it, and 29 extra fine builds would double the
+       audit's runtime for no added coverage (only the FINE-gated sheet leads differ). */
+    {
+      const setKinds = ['square', 'tri', 'quad'];
+      let setCloth = 0, setFurls = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind) {
+        if (setKinds.includes(o.userData.kind)) setCloth++;
+        if (o.userData.kind === 'furl' && !o.userData.brailed) setFurls++;   // r306: a brailed sail is stowed in both states
+      } });
+      if (setFurls)
+        say(v.id, 'a set ship carrying stowed canvas',
+            `${setFurls} furled rolls drawn in the set state`);
+      if (setCloth) {
+        let gf = null;
+        try { gf = SHIPS_HULL.buildShip(H, { furled: true }); }
+        catch (e) { say(v.id, 'FURLED BUILD THREW', e.message); }
+        if (gf) {
+          gf.updateMatrixWorld(true);
+          /* r259 (0y²⁸): the yard rules on the furled build — the two radii, the fore face, the fitting */
+          const YF = yardRead(gf, 'furled');
+          /* r260 (0y³⁵): the lateen yard rules on the furled build — the two radii, the parrel */
+          lateenRead(gf, 'furled');
+          /* r261 (0y³⁶): the crab-claw yard rules on the furled build — the two radii, the lashings, the roll */
+          crabRead(gf, 'furled');
+          /* r275 (0y⁶³): the boom rules on the furled build — the cock, the foot, the lift, the platform */
+          boomRead(gf, 'furled');
+          halRead(gf, 'furled');
+          gaffSailRead(gf, 'furled');   // r306
+          /* r314 (0y¹⁴⁶): the furled card says the yards are lowered exactly when the furled build lowers one */
+          {
+            const nLow = yardLowerRead(gf, 'furled');
+            crossjackRead(gf, 'furled');   // r315 (0y¹⁴⁹)
+            if (typeof SW_FURLED_CARD === 'function') {
+              let nBare = 0; gf.traverse(o => { if (o.isMesh && o.userData.bare) nBare++; });
+              const txt2 = SW_FURLED_CARD(v, gf).join(' — ');
+              if ((nBare > 0) !== /the crossjack \(the mizzen\u2019s lowest yard\) carries no sail/.test(txt2))
+                say(v.id, 'a furled card that misstates the crossjack', `${nBare} bare crossjack(s) in the furled build: "${txt2.slice(0, 220)}"`);
+            }
+            if (typeof SW_FURLED_CARD === 'function') {
+              const txt = SW_FURLED_CARD(v, gf).join(' — ');
+              if ((nLow > 0) !== /yards are lowered onto the caps/.test(txt))
+                say(v.id, 'a furled card that misstates the lowered yards', `${nLow} yard(s) lowered in the furled build: "${txt.slice(0, 220)}"`);
+            }
+          }
+          /* ── D-FURL-LATEEN (round 260, 0y³⁵): THE BRAILED ROLL HANGS ON ITS YARD, OUTBOARD OF
+             THE POLE. r254 stood every furled lateen yard off its mast by the ROLL's radius so
+             the bundle, hung on the yard's line, would lie against the pole and not through it —
+             which put the yard 0.125–0.332 m off its own parrel on all twelve yards of six hulls
+             (r260/lateen-before.json). A lateen is brailed up to its yard aloft and the roll
+             lashed along it on the sail's own side; the yard stays where the parrel holds it and
+             the roll, fatter than the spar, leans outboard of the mast. Read from the BUILT furled
+             scene: every mesh named 'Lateen yard' gives an axis by principal component and its
+             end radii; its mast is the record's (userData.lateen.mastX) or the nearest foot to a
+             third up the yard; its roll is every 'furl' mesh whose vertex mean lies within 1.5 m
+             of the yard's line and projects within its span. Against the pole as a cylinder, no
+             point of the roll may stand more than 0.03 m inside it — 'a furled lateen roll stowed
+             through its mast'; the roll's nearest point must come within 0.05 m of the yard's
+             surface at that station — 'a furled roll floating off its yard'; the roll's centre
+             must stand OUTBOARD of the yard's axis, farther from the centreline — 'a furled lateen
+             roll hung inboard of its yard' (the r259 builder: −0.013 to −0.027 m on all twelve);
+             and a lateen yard with no roll within reach is 'a furled lateen yard with no roll on
+             it'. The canoe's crab-claw yards are not named 'Lateen yard' and are not read. */
+          {
+            const inv = new THREE.Matrix4().copy(gf.matrixWorld).invert();
+            const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+              for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+            const axisOf = pts => {
+              const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+              let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+              for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+              const d = new THREE.Vector3(0, 1, 0);
+              for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+              if (d.y < 0) d.negate();
+              let tMin = 1e9, tMax = -1e9; const ts = [];
+              for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+              const span = tMax - tMin;
+              /* the end ring's radius is the MAX radial distance in the end band: a closed cylinder's cap centre vertex sits on the axis and drags a mean down by a third (the first pass read the dhow's 0.134 m mast as 0.093) */
+              const radAt = (t0, tol) => { let r = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) r = Math.max(r, q.clone().sub(c).addScaledVector(d, -ts[i]).length()); }); return r; };
+              return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span, rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02) };
+            };
+            const mastsL = [], yardsL = [], furlsL = [];
+            gf.traverse(o => { if (!o.isMesh || !o.geometry) return;
+              if (o.userData.kind === 'furl') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsL.push({ c: fc, pts }); return; }
+              const p = tagOf(o); if (!p) return;
+              if (p.key === 'mast' && /mast$/i.test(p.name)) { const ax = axisOf(hullPts(o)); if (ax.head.y - ax.foot.y >= 0.5) mastsL.push(ax); }
+              if (p.key === 'yard' && p.name === 'Lateen yard') yardsL.push({ ax: axisOf(hullPts(o)), rec: o.userData.lateen || null }); });
+            for (const yd of yardsL) {
+              const Y = yd.ax;
+              const want = yd.rec && typeof yd.rec.mastX === 'number' ? yd.rec.mastX : Y.foot.x + (Y.head.x - Y.foot.x) / 3;
+              let m = null, bd = 1e9; for (const mm of mastsL) { const dd = Math.abs(mm.foot.x - want); if (dd < bd) { bd = dd; m = mm; } }
+              if (!m) continue;                                  // 'slung off its mast' is the rule above
+              const at = `the lateen yard from (${Y.foot.x.toFixed(2)}, ${Y.foot.y.toFixed(2)}) to (${Y.head.x.toFixed(2)}, ${Y.head.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)}`;
+              const outb = Y.centre.z >= 0 ? 1 : -1;             // away from the centreline, which is away from the mast
+              const rolls = furlsL.filter(f => { const w = f.c.clone().sub(Y.foot), sd = w.dot(Y.dir); return w.clone().addScaledVector(Y.dir, -sd).length() <= 1.5 && sd >= -0.5 && sd <= Y.span + 0.5; });
+              if (!rolls.length) { say(v.id, 'a furled lateen yard with no roll on it', `${at} has no furled roll within 1.5 m of its line`); continue; }
+              for (const f of rolls) {
+                let into = 0, gap = 1e9;
+                for (const q of f.pts) {
+                  const w = q.clone().sub(m.foot), t = w.dot(m.dir);
+                  if (t >= -0.02 && t <= m.span + 0.02) {
+                    const tt = Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))), r = m.rFoot + (m.rHead - m.rFoot) * tt;
+                    const dist = w.clone().addScaledVector(m.dir, -t).length();
+                    if (dist < r) into = Math.max(into, r - dist);
+                  }
+                  const wy = q.clone().sub(Y.centre), ty = wy.dot(Y.dir);
+                  const sy = Math.max(0, Math.min(1, (ty + Y.span / 2) / Math.max(Y.span, 1e-6))), rq = Y.rFoot + (Y.rHead - Y.rFoot) * sy;
+                  gap = Math.min(gap, wy.addScaledVector(Y.dir, -ty).length() - rq);
+                }
+                const vv = f.c.clone().sub(Y.centre), sv = vv.dot(Y.dir); const perp = vv.addScaledVector(Y.dir, -sv);
+                const out = perp.z * outb;
+                if (into > 0.03) say(v.id, 'a furled lateen roll stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+                if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+                if (out < 0) say(v.id, 'a furled lateen roll hung inboard of its yard', `the roll on ${at} has its centre ${(-out).toFixed(3)} m INBOARD of the yard's axis, toward the mast`);
+              }
+            }
+          }
+          /* ── D-FURL-BUNT (round 259, 0y²⁶): THE STOWED ROLL LIES ON ITS YARD AND CLEAR OF THE
+             POLE. makeFurl hung every roll 0.3·r0 UNDER its spar's line and swelled the square
+             roll to 1.4·r0 at the bunt, where the mast is, so on the furled build 56 of 104
+             square yards' bunts stood into their pole's fore face — 0.19 m on the 74's course,
+             0.25 m on Preussen's, 0.23 on the cog's (r259/furl-before.json: every roll's points
+             read against the axis, a point inside the cylinder when its distance from the axis
+             is under the mast's radius at its projection). A square sail is stowed on TOP of
+             its yard, the bunt triced up at the slings before the mast. Read from the BUILT
+             furled scene: every 'furl' mesh whose vertex mean lies within 1.5 m of a centreline
+             athwartships yard's centre is that yard's roll; against the yard's segment (the pick
+             above), no point of the roll may stand more than 0.03 m inside the pole — 'a furled
+             bunt stowed through its mast'; the roll's nearest point must come within 0.05 m of
+             the yard's slings surface — 'a furled roll floating off its yard'; and the roll's
+             centre must stand ABOVE the yard's along the mast's axis — 'a furled roll hung
+             under its yard' (the r258 builder, every one). A furled athwartships yard with no
+             roll within reach is 'a furled square yard with no roll on it'. */
+          {
+            const furlsF = [];
+            gf.traverse(o => { if (o.isMesh && o.geometry && o.userData.kind === 'furl') {
+              const pts = YF.hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsF.push({ c: fc, pts, on: o.userData.onYard || null }); } });
+            for (const yd of YF.yards) {
+              if (!(yd.athwart || yd.slung)) continue;
+              const c = yd.c; let seg = null, n = null;
+              for (const m of YF.masts) { const w = c.clone().sub(m.foot), t = w.dot(m.dir), d = w.clone().addScaledVector(m.dir, -t).length();
+                if (!n || d < n.d) n = { m, d }; if (d <= 1.5 && t >= -0.02 && t <= m.span + 0.02 && (!seg || m.foot.y < seg.m.foot.y)) seg = { m, d }; }
+              if (!n || n.d > 1.5) continue;                       // 'a yard hung on no mast' is the rule above
+              const m = (seg || n).m;
+              const at = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)}`;
+              /* r316 (0y¹⁵⁰): a roll that records its yard (userData.onYard) is read against that yard only. A lowered upper
+                 topsail yard rests 1.1 m over the fixed lower topsail yard, and the 1.5 m reach gave each yard both rolls */
+              const rolls = furlsF.filter(f => Math.abs(f.c.y - c.y) <= 1.5 && Math.abs(f.c.x - c.x) <= 1.5 && Math.abs(f.c.z - c.z) <= 1.5
+                && (!f.on || (Math.abs(f.on.y - c.y) <= 0.05 && Math.abs(f.on.x - c.x) <= 0.05)));
+              if (yd.bare) continue;                               // r315: the crossjack is crossed bare; A-CROSSJACK-BARE reads it
+              if (!rolls.length) { say(v.id, 'a furled square yard with no roll on it', `${at} has no furled roll within 1.5 m of its centre`); continue; }
+              for (const f of rolls) {
+                let into = 0, gap = 1e9;
+                for (const q of f.pts) {
+                  const w = q.clone().sub(m.foot), t = w.dot(m.dir);
+                  if (t >= -0.02 && t <= m.span + 0.02) {
+                    const tt = Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))), r = m.rFoot + (m.rHead - m.rFoot) * tt;
+                    const dist = w.clone().addScaledVector(m.dir, -t).length();
+                    if (dist < r) into = Math.max(into, r - dist);
+                  }
+                  const wy = q.clone().sub(c), ty = wy.dot(yd.ax.dir);
+                  gap = Math.min(gap, wy.addScaledVector(yd.ax.dir, -ty).length() - yd.ax.rMid);
+                }
+                const up = f.c.clone().sub(c).dot(m.dir);
+                if (into > 0.03) say(v.id, 'a furled bunt stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+                if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+                if (up < 0) say(v.id, 'a furled roll hung under its yard', `the roll on ${at} has its centre ${(-up).toFixed(3)} m BELOW the yard's along the mast's axis`);
+              }
+            }
+          }
+          let worn = 0, furls = 0;
+          const furlBoxes = [], sparBoxes = [];
+          /* no 'mast' here: nothing in the fleet stows to a bare mast — a junk's stack
+             rests on its boom, a staysail on its stay — and a mast is a tall box that
+             would alibi any square furl drifted straight up */
+          const sparKeys = ['yard', 'stay', 'bowsprit'];
+          gf.traverse(o => {
+            if (!o.isMesh) return;
+            const p = tagOf(o);
+            if (o.userData.kind && setKinds.includes(o.userData.kind)) worn++;
+            if (o.userData.kind === 'furl') {
+              furls++; furlBoxes.push(new THREE.Box3().setFromObject(o));
+            } else if (p && sparKeys.includes(p.key)) {
+              sparBoxes.push(new THREE.Box3().setFromObject(o));
+            }
+          });
+          if (worn)
+            say(v.id, 'furled ship still wearing canvas',
+                `${worn} set cloths drawn in the furled state`);
+          if (!furls)
+            say(v.id, 'furled ship with no stowed canvas',
+                `${setCloth} cloths when set, nothing stowed when furled`);
+          const slack = Math.max(1.2, H.beam * 0.12);
+          furlBoxes.forEach((fb, i) => {
+            const fbx = fb.clone().expandByScalar(slack);
+            if (!sparBoxes.some(sb => fbx.intersectsBox(sb)))
+              say(v.id, 'a furled sail stowed on nothing',
+                  `furl ${i} at y ${fb.min.y.toFixed(1)}–${fb.max.y.toFixed(1)} m touches no yard, stay or bowsprit`);
+          });
+          /* and a junk's furl DROPS — the stack lies at the boom, not up the hoist */
+          if ((H.masts || []).length && (H.masts || []).every(m => m.rig === 'junk')) {
+            let setTop = -1e9, furlTop = -1e9;
+            g.traverse(o => { if (o.isMesh && o.userData.kind &&
+                                  setKinds.includes(o.userData.kind))
+              setTop = Math.max(setTop, new THREE.Box3().setFromObject(o).max.y); });
+            furlBoxes.forEach(fb => { furlTop = Math.max(furlTop, fb.max.y); });
+            if (furlTop > mastDeckY + (setTop - mastDeckY) * 0.6)
+              say(v.id, "a junk's furled sail left hoisted",
+                  `stowed cloth tops at ${furlTop.toFixed(1)} m against set canvas at ${setTop.toFixed(1)} m — the battens did not drop`);
+          }
+        }
+      }
+    }
+
+    /* ── THE MADE MAST IS BOUND, AND BOUND IN ITS OWN PRACTICE (rounds 64, 67) ─────────
+       A wooden lower mast drawn past 0.55 m through is past what one tree gives: it is a
+       MADE mast and it must be bound or it opens at sea. The binding belongs to the
+       CULTURE as well as the century. European square rig: rope wooldings pinched
+       between pale wooden hoops to about 1800, shrunk iron hoops after. Chinese junk
+       rig: compound spars "bound together with iron straps" (Needham IV:3 — an 1842
+       Shanghai mainmast measured 1.12 m through, no shrouds or stays), and NEVER the
+       European signature. The year asked is H.year — the year the hull is DEPICTED at —
+       falling back to the record's own era start. Research/MASTHEADS.md. */
+    {
+      /* the drawn diameter is PER MAST since round 68: each mast scales beam x 0.06 by its
+         own lower length over the ship's longest (Steel 1794 p.39 — an inch of diameter
+         per yard of the spar's own length), and the aftermost mast of a wooden square-
+         canvased three-master takes Steel's mizzen clause, 3/5 of the main's diameter.
+         The audit recomputes the same rule; only masts past one tree (0.55 m) are bound. */
+      const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
+      const jk = (H.masts || []).filter(mm => mm.rig === 'junk').length;
+      const lowersA = (H.masts || []).map(mm => lowerOf(mm));
+      const mainLowerA = Math.max(...lowersA, 0) || 1;
+      const aftAt = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
+      const mixedSqA = (H.masts || []).some(mm => mm.rig === 'square');
+      const drawnD = i => {
+        const mm = H.masts[i], lo = lowersA[i];
+        const mz = mm.at === aftAt && (H.masts || []).length >= 3 && !H.iron
+          && mixedSqA && lo < mainLowerA * 0.95
+          && (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+        /* r234: a wooden mast with an attested diameter at the partners (diaM) draws it */
+        if (mm.diaM !== undefined) return mm.diaM;
+        return H.beam * 0.06 * (mz ? Math.min(lo / mainLowerA, 0.60) : lo / mainLowerA);
+      };
+      /* r234: a mast the record attests as ONE TREE (oneTree) is a single stick, unbound */
+      const sqThick = (H.masts || []).filter((mm, i) =>
+        mm.rig === 'square' && !H.iron && !mm.oneTree && drawnD(i) > 0.55).length;
+      const jkThick = (H.masts || []).filter((mm, i) =>
+        mm.rig === 'junk' && !H.iron && drawnD(i) > 0.55).length;
+      const nW = part.woolding ? part.woolding.n : 0;
+      const nB = part.mastband ? part.mastband.n : 0;
+      /* rope wooldings draw TWO meshes per bound mast — the tarred bands and their pale
+         pinch-hoops; iron hoops and junk straps draw one — so bound MASTS, not meshes,
+         are what the counts must be read in */
+      const depYearA = H.year || v.from || 0;
+      const perMast = depYearA >= 1800 || jk ? 1 : 2;
+      const bound = Math.round((nW + nB) / perMast);
+      if (bound < sqThick + jkThick)
+        say(v.id, 'a made mast left unbound',
+            `${sqThick + jkThick} lower masts past 0.55 m through, ${bound} bound — ` +
+            'timber that thick is coaked, and unbound it opens');
+      if (jkThick && nB < jkThick)
+        say(v.id, 'a made junk mast left unbound',
+            `${jkThick} junk masts past 0.55 m through carry ${nB} iron-strap ` +
+            'meshes — a compound pole with no shrouds is held together by its straps alone');
+      if (jk && nW)
+        say(v.id, 'European wooldings on a junk',
+            `${nW} woolding meshes on a junk-rigged hull — the r61 copy class; Chinese ` +
+            'practice is flat iron straps, no rope bands, no pale pinch-hoops');
+      if (bound > sqThick + jkThick)
+        say(v.id, 'binding on a single stick',
+            `${bound} masts bound for ${sqThick + jkThick} past one tree — a stick one ` +
+            'tree yields, or an iron tube, is not bound');
+      const depYear = H.year || v.from || 0;
+      if (nW && depYear >= 1820)
+        say(v.id, 'rope wooldings out of their century',
+            `depicted ${depYear}; iron hoops replaced wooldings about 1800`);
+      /* the European iron-hoop date applies to the European practice only — a junk's
+         iron straps are attested throughout the span this fleet depicts */
+      if (nB && sq && depYear && depYear < 1780)
+        say(v.id, 'iron mast hoops before the technology',
+            `depicted ${depYear}; shrunk iron hoops arrive about 1800`);
+      /* three dated technologies hang off the depicted year (tops, wooldings/hoops,
+         straps), so a hull that carries a dated rig must state its year — a silent
+         fallback here is the round-32 class at the masthead */
+      if ((sq || jk) && !H.year)
+        say(v.id, 'a dated rig with no date',
+            `${sq + jk} square/junk masts and no H.year — tops and bindings key off it`);
+    }
+
+    /* ── THE TOP IS A DATED TECHNOLOGY (round 67) ──────────────────────────────────────
+       No classical ship carried a masthead platform: the trireme struck her masts before
+       battle, the Roman lookout stood at the bow, and the earliest tops among this
+       fleet's types are the cog's on the 13th-century town seals. So top platforms
+       (part key 'top', name 'Top' — the crosstrees share the key but not the name) are
+       forbidden before 1100 and REQUIRED on every square lower mast after it. And the
+       corbita hung a corbis — the basket that named her (Festus) — which is DATA:
+       declared it must be drawn at the masthead, drawn it must be declared. */
+    {
+      /* r327 (0y¹⁶⁹): a mast whose record says it carries no top (`top.form 'none'`, the wasen mast) is not
+         required to carry one; A-MASTHEAD-NONE below holds it to what its record names instead */
+      const sq = (H.masts || []).filter(mm => mm.rig === 'square' && !(mm.top && mm.top.form === 'none')).length;
+      const depYear = H.year || v.from || 0;
+      let tops = 0;
+      g.traverse(o => {
+        const p = o.userData && o.userData.part;
+        /* r235: a record-attested basket top ('Basket top') is a masthead platform too */
+        if (p && p.key === 'top' && (p.name === 'Top' || p.name === 'Basket top') && !o.isMesh) tops++;
+      });
+      if (tops && depYear < 1100)
+        say(v.id, 'a top before the evidence',
+            `${tops} masthead platforms on a hull depicted ${depYear} — no classical ` +
+            'ship carried one; the earliest here are the cog seals, 13th century');
+      if (sq && depYear >= 1100 && tops < sq)
+        say(v.id, 'a masthead left bare',
+            `${tops} top platforms for ${sq} square lower masts, depicted ${depYear}`);
+      const nCb = part.corbis ? part.corbis.n : 0;
+      if (H.corbis && !nCb)
+        say(v.id, 'declared but not drawn', 'the corbis at the masthead');
+      if (!H.corbis && nCb)
+        say(v.id, 'a corbis nobody attested',
+            `${nCb} basket meshes on a hull whose record does not carry the corbis field`);
+      if (H.corbis && nCb) {
+        /* the basket hangs at the head of the tallest mast, not adrift down the pole —
+           the floating-fitting class. Expected head height from the mast rule itself. */
+        const maxShare = Math.max(...(H.masts || []).map(mm => mm.height || 0), 0);
+        const head = (H.lwl + H.beam) / 2 * maxShare;
+        if (part.corbis.y[1] < mastDeckY + head * 0.7)
+          say(v.id, 'a corbis adrift down the mast',
+              `basket tops at ${part.corbis.y[1].toFixed(1)} m against a ~${head.toFixed(0)} m masthead`);
+      }
+    }
+
+    /* ── A-MIZZEN-TOPSAIL (round 328, 0y¹⁶³): A LATEEN MIZZEN ON A SQUARE-RIGGED SHIP ANSWERS FOR ITS TOPSAIL ─────
+       Vasa's mizzen (1628) set a square topsail over the lateen. Hollar's fluyt (1647) carries a top and a bare
+       topmast over it and sets nothing there. Master W.A.'s ship (about 1475) carries a bare pole. Each of the three is
+       possible, and until r328 the record of the fluyt and the carrack said nothing either way. TESTS, on every mast
+       with `rig 'lateen'` on a hull that also carries a square mast: (1) `mizzenTopsail` is a boolean and
+       `mizzenTopsailProvenance` opens PLATE READ or CLASS, or the silence convicts; (2) `mizzenTopsail: true` on a
+       lateen pole convicts, because that rig is built as a square mizzen with `lateenMizzen` (r317); (3) where the
+       record carries `lateenTopmast`, exactly one 'Mizzen top' group and one 'Mizzen topmast' mesh are built on that
+       mast. The top stands at `topOfLower` of the lower mast within 5 cm, and the topmast's head stands `headOverTop`
+       of the top's height above the top, within 1%. The top's radius is `topDiaOfTopHeight` of that height over two,
+       within 1%. The topmast's heel stands below the top, and the lower pole's head stands above it, so the two
+       overlap in the doubling. Topmast shrouds are drawn, and no square yard (a 'yard' part wider than 2 m and
+       shallower than 1 m) has its centre above the top within 1.5 m of the axis. (4) A mizzen top or topmast on a
+       mast whose record carries no `lateenTopmast` convicts. */
+    {
+      const anySq = (H.masts || []).some(mm => mm.rig === 'square');
+      g.updateMatrixWorld(true);
+      const lTops = [], lTms = [], lShr = [], yardsAll = [], poles = [];
+      g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+        if (!o.isMesh && p.key === 'top' && o.userData.lateenTop) lTops.push(o);
+        if (o.isMesh && p.key === 'mast' && o.userData.lateenTopmast) lTms.push(o);
+        if (o.isMesh && p.key === 'mast' && !o.userData.lateenTopmast) poles.push(o);
+        if (o.userData.lateenTopmastShrouds) lShr.push(o);
+        if (o.isMesh && p.key === 'yard') yardsAll.push(o); });
+      (H.masts || []).forEach((mm, mi) => {
+        const at = `masts[${mi}]`;
+        const myTops = lTops.filter(o => o.userData.lateenTop.mast === mi);
+        const myTms = lTms.filter(o => o.userData.lateenTopmast.mast === mi);
+        if (!(mm.rig === 'lateen' && anySq)) {
+          if (myTops.length || myTms.length) say(v.id, 'a lateen topmast on a mast that is not a lateen mizzen', `${at}: rig '${mm.rig}'`);
+          return;
+        }
+        if (typeof mm.mizzenTopsail !== 'boolean' || !/^(PLATE READ|CLASS)/.test(mm.mizzenTopsailProvenance || ''))
+          say(v.id, 'a lateen mizzen with no answer for its topsail',
+              `${at}: mizzenTopsail ${JSON.stringify(mm.mizzenTopsail)}, provenance ${mm.mizzenTopsailProvenance ? JSON.stringify(mm.mizzenTopsailProvenance.slice(0, 40)) : 'absent'}`);
+        if (mm.mizzenTopsail === true)
+          say(v.id, 'a mizzen topsail the lateen pole cannot carry', `${at}: build it as rig 'square' with lateenMizzen (r317)`);
+        const LT = mm.lateenTopmast;
+        if (!LT) {
+          if (myTops.length || myTms.length)
+            say(v.id, 'a mizzen topmast nobody recorded', `${at}: ${myTops.length} tops, ${myTms.length} topmasts, no lateenTopmast`);
+          return;
+        }
+        if (myTops.length !== 1 || myTms.length !== 1) {
+          say(v.id, 'a recorded mizzen topmast not built', `${at}: ${myTops.length} mizzen tops and ${myTms.length} mizzen topmasts (want 1 and 1)`);
+          return;
+        }
+        const T = myTops[0].userData.lateenTop, M = myTms[0].userData.lateenTopmast;
+        const hT = T.y - T.base;
+        const tb = new THREE.Box3().setFromObject(myTops[0]);
+        const mb = new THREE.Box3().setFromObject(myTms[0]);
+        const lowM = lowerOf(mm);
+        if (lowM > 0 && Math.abs(hT - LT.topOfLower * lowM) > 0.05)
+          say(v.id, 'a mizzen top off its read height', `${at}: top ${hT.toFixed(2)} m over the mast's foot, read ${(LT.topOfLower * lowM).toFixed(2)} m (topOfLower ${LT.topOfLower} of ${lowM.toFixed(2)} m)`);
+        const wantHead = T.y + LT.headOverTop * hT;
+        if (Math.abs(mb.max.y - wantHead) > 0.01 * hT)
+          say(v.id, 'a mizzen topmast off its read height', `${at}: head ${mb.max.y.toFixed(2)} m, read ${wantHead.toFixed(2)} m (headOverTop ${LT.headOverTop})`);
+        const wantR = LT.topDiaOfTopHeight * hT / 2, builtR = (tb.max.z - tb.min.z) / 2;
+        if (Math.abs(builtR - wantR) > Math.max(0.01 * wantR, 0.03))
+          say(v.id, 'a mizzen top off its read width', `${at}: radius ${builtR.toFixed(3)} m, read ${wantR.toFixed(3)} m`);
+        const myPole = poles.filter(o => { const b = new THREE.Box3().setFromObject(o);
+          return Math.abs((b.min.x + b.max.x) / 2 - (tb.min.x + tb.max.x) / 2) < 1.5 && b.min.y < T.y && b.max.y > T.base; });
+        const poleHead = Math.max(...myPole.map(o => new THREE.Box3().setFromObject(o).max.y), -Infinity);
+        if (!(mb.min.y < T.y) || !(poleHead > T.y))
+          say(v.id, 'a mizzen topmast with no doubling', `${at}: topmast heel ${mb.min.y.toFixed(2)} m, lower head ${poleHead.toFixed(2)} m, top ${T.y.toFixed(2)} m`);
+        if (!lShr.some(o => o.userData.lateenTopmastShrouds.mast === mi))
+          say(v.id, 'a mizzen topmast with no shrouds', at);
+        const axX = (mb.min.x + mb.max.x) / 2;
+        yardsAll.forEach(o => { const b = new THREE.Box3().setFromObject(o);
+          const cx = (b.min.x + b.max.x) / 2, cy = (b.min.y + b.max.y) / 2;
+          if (cy > T.y && Math.abs(cx - axX) < 1.5 && Math.max(b.max.x - b.min.x, b.max.z - b.min.z) > 2 && b.max.y - b.min.y < 1)
+            say(v.id, 'a yard crossed on a mizzen topmast recorded bare', `${at}: '${o.userData.part.name}' at ${cy.toFixed(2)} m`); });
+      });
+    }
+
+    /* ── A-MASTHEAD-NONE (round 327, 0y¹⁶⁹): A MAST THAT CARRIES NO TOP CARRIES WHAT ITS RECORD NAMES ───────────
+       The top was gated on the year alone, and the sekibune of 1597 drew a walled European fighting top with her
+       yard hung under its trestletrees. The Japanese mast carried none: its head carried the semi, the sheave block
+       the halyard runs over (Minamichita wasen museum). A mast's record may now say `top.form 'none'`. TESTS:
+       a `top.form` the builder does not know convicts; a 'none' with no provenance convicts as silence; a top or
+       crosstrees group on that mast (userData.mast, or topmastTop.mast) convicts; the fitting the record names at
+       the head (`top.masthead`, 'semi') must be drawn on that mast, its top face within 5 cm of the mast's head,
+       and a halyard must turn inside it (some halyard vertex inside the block's box, grown by 5 cm); a semi on a
+       mast whose record does not name one convicts. */
+    {
+      const FORMS = ['none', 'basket'];
+      const tops = [], semis = [], hals = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+        if (!o.isMesh && p.key === 'top') tops.push(o);
+        if (!o.isMesh && p.key === 'semi') semis.push(o);
+        if (o.isMesh && p.key === 'halyard') hals.push(o); });
+      const Vh = new THREE.Vector3();
+      (H.masts || []).forEach((mm, mi) => {
+        const tp = mm.top;
+        const mine = semis.filter(o => o.userData.mast === mi);
+        if (tp && tp.form !== undefined && !FORMS.includes(tp.form))
+          say(v.id, 'a top form the builder does not know', `masts[${mi}].top.form '${tp.form}'`);
+        if (!(tp && tp.form === 'none')) {
+          if (mine.length) say(v.id, 'a semi on a mast whose record names none', `masts[${mi}]: ${mine.length} semi groups`);
+          return;
+        }
+        if (!(typeof tp.provenance === 'string' && tp.provenance.length > 40))
+          say(v.id, 'a bare masthead with no source', `masts[${mi}].top.form 'none' carries no provenance`);
+        const onIt = tops.filter(o => o.userData.mast === mi || (o.userData.topmastTop && o.userData.topmastTop.mast === mi));
+        if (onIt.length)
+          say(v.id, 'a top on a mast whose record says it carries none',
+              `masts[${mi}]: ${onIt.map(o => o.userData.part.name).join(', ')}`);
+        if (tp.masthead !== 'semi') {
+          say(v.id, 'a bare masthead that names no fitting', `masts[${mi}].top.masthead is '${tp.masthead}'`);
+          return;
+        }
+        if (mine.length !== 1) {
+          say(v.id, 'a masthead fitting the record names and the drawing lacks', `masts[${mi}]: ${mine.length} semi groups, want 1`);
+          return;
+        }
+        const sm = mine[0], bx = new THREE.Box3().setFromObject(sm), hd = sm.userData.semi;
+        if (!hd || Math.abs(bx.max.y - hd.headY) > 0.05)
+          say(v.id, 'a semi off the masthead',
+              `masts[${mi}]: block top at ${bx.max.y.toFixed(2)} m, the head at ${hd ? hd.headY.toFixed(2) : '?'} m`);
+        const grown = bx.clone().expandByScalar(0.05);
+        let turns = false;
+        for (const hm of hals) {
+          const P = hm.geometry.attributes.position;
+          for (let i = 0; i < P.count && !turns; i++) {
+            Vh.fromBufferAttribute(P, i).applyMatrix4(hm.matrixWorld);
+            if (grown.containsPoint(Vh)) turns = true;
+          }
+          if (turns) break;
+        }
+        if (!turns)
+          say(v.id, 'a semi no halyard runs over',
+              `masts[${mi}]: no halyard vertex inside the block (y ${bx.min.y.toFixed(2)}–${bx.max.y.toFixed(2)} m)`);
+      });
+    }
+
+    /* ── THE ANCIENT MASTHEAD CARRIES ITS OWN GEAR (round 78) ──────────────────────────
+       The other side of the r67 gate: a top is forbidden before 1100, but the masthead
+       was not bare — the yard hoisted, so the head carried the halyard sheave, and its
+       ancient name is the karchesion (Asclepiades of Myrlea in Athenaeus 11.49: heel,
+       neck, and at the head the karchesion). So every single-tier square mast on a hull
+       depicted before 1100 must carry one; one on a hull at or after 1100 — or with no
+       stated year — is the fitting out of its age, the top's mirror rule. And it must
+       stand AT the head, not adrift down the pole. Then the rope: on any hull whose
+       square masts are all single-tier, the one yard IS the hoisting yard, so the
+       halyard must REACH the masthead it hoists to — drawn slings-to-rail direct it
+       was a rope that could hoist nothing, on the trireme, the corbita and the cog. */
+    {
+      const anc = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only === 1);
+      const depYear = H.year || v.from || 0;
+      const headM = mm => lowerOf(mm);
+      /* one karchesion is one tagged GROUP of several meshes — count groups, not meshes,
+         or one drawn masthead would satisfy a two-masted hull's rule by mesh count */
+      let nK = 0;
+      g.traverse(o => { const p = o.userData && o.userData.part;
+                        if (p && p.key === 'karchesion' && !o.isMesh) nK++; });
+      const preTop = H.year !== undefined && H.year < 1100;
+      if (preTop && anc.length && nK < anc.length)
+        say(v.id, 'an ancient masthead with no karchesion',
+            `${nK} karchesion mesh groups for ${anc.length} single-tier square masts ` +
+            `depicted ${depYear} — the yard hoists to a sheave the drawing does not carry`);
+      if (!preTop && nK)
+        say(v.id, 'a karchesion out of its age',
+            `${nK} karchesion meshes on a hull depicted ${depYear || 'undated'} — after ` +
+            '1100 the masthead carries a top, and the two never share a pole');
+      if (preTop && anc.length && nK) {
+        /* the block is the head itself: the tallest one must reach the tallest masthead,
+           and none may sit below the shortest mast's hounds */
+        const heads = anc.map(headM);
+        const hi = Math.max(...heads), lo = Math.min(...heads);
+        if (part.karchesion.y[1] < mastDeckY + hi * 0.80)
+          say(v.id, 'a karchesion adrift down the mast',
+              `karchesion tops at ${part.karchesion.y[1].toFixed(1)} m against a ` +
+              `~${hi.toFixed(0)} m masthead`);
+        if (part.karchesion.y[0] < mastDeckY + lo * 0.45)
+          say(v.id, 'a karchesion below the hounds',
+              `karchesion base at ${part.karchesion.y[0].toFixed(1)} m on masts of ` +
+              `${lo.toFixed(0)}–${hi.toFixed(0)} m`);
+      }
+      const sqAll = (H.masts || []).filter(mm => mm.rig === 'square');
+      if (sqAll.length && sqAll.every(mm => mm.only === 1) && part.halyard) {
+        const hi = Math.max(...sqAll.map(headM));
+        if (part.halyard.y[1] < mastDeckY + hi * 0.85)
+          say(v.id, 'a halyard that reaches no masthead',
+              `halyard tops at ${part.halyard.y[1].toFixed(1)} m against a ` +
+              `~${hi.toFixed(0)} m masthead — the fall must lead over the head sheave`);
+      }
+    }
+
+    /* ── AND THE LAID DECK HAS ITS WATERWAY (round 78) ─────────────────────────────────
+       The margin plank at the deck edge: every laid plank deck carries one — a
+       teak-decked liner as much as a seventy-four — a bare steel deck (deckSteel, a
+       flight deck, a container top) does not, and a hull with no laid deck at all,
+       the record's deckLaid: false, has no margin to plank. Where it exists it stands
+       at the deck EDGE: a band that stops short of the skin, or floats clear of the
+       deck, is the floating-fitting class at deck level. */
+    {
+      const steel = H.build === 'steel' || H.build === 'iron';
+      const steelDeck = steel && (H.deckSteel !== undefined ? H.deckSteel
+                                                            : !!(H.flightDeck || H.containers));
+      const laid = !steelDeck && H.deckLaid !== false;
+      const ww = part.waterway;
+      if (laid && part.deck && !ww)
+        say(v.id, 'a laid deck with no waterway',
+            'a planked weather deck and no margin plank at its edge');
+      if (!laid && ww)
+        say(v.id, 'a margin plank on a deck that has none',
+            `${ww.n} waterway meshes on a ` +
+            (steelDeck ? 'bare steel deck' : 'hull with no laid deck (deckLaid: false)'));
+      if (laid && ww && part.deck) {
+        if (Math.abs(ww.z[1] - part.deck.z[1]) > 0.15 || Math.abs(ww.z[0] - part.deck.z[0]) > 0.15)
+          say(v.id, 'a waterway off the deck edge',
+              `waterway spans z ${ww.z[0].toFixed(2)}..${ww.z[1].toFixed(2)} m against a deck at ` +
+              `${part.deck.z[0].toFixed(2)}..${part.deck.z[1].toFixed(2)} m`);
+        if (ww.y[1] > deckY + 0.25 || ww.y[1] < deckY - 1.5)
+          say(v.id, 'a waterway adrift of its deck',
+              `waterway tops at ${ww.y[1].toFixed(2)} m against a deck crown at ${deckY.toFixed(2)} m`);
+      }
+    }
+
+    /* ── THE HOISTING YARD RIDES A TIE OVER ITS OWN MASTHEAD (round 79) ────────────────
+       Falconer 1780, read verbatim: the lower yards hang in JEERS ("an assemblage of
+       tackles... one [block] fastened to the lower-mast-head, and the other to the middle
+       of the yard"), and every yard above rides a TIE reeved through the sheave-hole in
+       the head of its OWN mast section (his encornail). So the fall count is exact and
+       the record says what it must be: two rope legs per hoisting yard — slings up to
+       the head, head down to the rail — and NONE on a fixed yard (the crossjack, the
+       doubled-rig course, the lower topsail, the lower topgallant). ropeMesh builds every
+       leg as an 8-vertex prism, so legs = vertices / 8, an exact census like the yard
+       gear's. The junk halyard is the same mechanism in Chinese dress: two legs over the
+       sheave in the pole's head (Needham: "sheave pins passing through both masts"), and
+       the sheave itself is drawn-vs-declared both ways like the karchesion. */
+    {
+      const legsOf = key => { let n = 0;
+        g.traverse(o => { if (!o.isMesh) return; const p = tagOf(o);
+          if (p && p.key === key) n += o.geometry.attributes.position.count; });
+        return Math.round(n / 8); };
+      const HOISTY = { top: 1, utop: 1, tg: 1, utg: 1, royal: 1 };
+      const sq = (H.masts || []).filter(m => m.rig === 'square');
+      const jmM = (H.masts || []).filter(m => m.rig === 'junk');
+      if (sq.length || jmM.length) {
+        let want = 0, nHoist = 0;
+        for (const m of sq) {
+          const tiers = m.only ? Math.min(m.only, 3) : 3;
+          const nh = m.yards ? m.yards.filter(nm => HOISTY[nm]).length
+                   : Math.max(1, tiers - 1);
+          nHoist += nh; want += 2 * nh;
+        }
+        nHoist += jmM.length; want += 2 * jmM.length;
+        const got = legsOf('halyard');
+        if (got !== want)
+          say(v.id, 'a hoisting yard without its tie',
+              `${nHoist} hoisting yards want ${want} halyard legs (slings to the head, ` +
+              `head to the rail), ${got} drawn — a count below the mark is a fall that ` +
+              `misses its masthead, above it is a fall on a fixed yard`);
+      }
+      /* jeers: only the classic fidded rig sways its courses up in tackles — a mast with
+         a `yards` list (the doubled rig) sits its lower yards on trusses, and the
+         crossjack (the builder's mizzen) hung in standing slings on every rig.
+         ⚠ the mizzen test replicates the builder's isMizzen (aftermost station, 3+
+         masts, shorter than the main) — if this rule fires when the app looks right,
+         check this test against hull.js's isMizzen FIRST, rule 8. */
+      const vv = m => lowerOf(m);
+      const seg3 = sq.filter(m => !m.yards && (m.only ? Math.min(m.only, 3) : 3) >= 2);
+      let wantJ = 0;
+      if (seg3.length && !H.iron) {
+        const atMax = Math.max(...(H.masts || []).map(m => m.at));
+        const mainH = Math.max(...(H.masts || []).map(vv));
+        wantJ = seg3.filter(m => !((H.masts || []).length >= 3 && m.at === atMax
+                                   && vv(m) < mainH * 0.95)).length;
+      }
+      const gotJ = part.jeers ? part.jeers.n : 0;
+      if (gotJ < wantJ)
+        say(v.id, 'a course without its jeers',
+            `${wantJ} coursed mast(s) on a classic rig want jeer tackles at the lower ` +
+            `masthead, ${gotJ} jeers mesh(es) drawn`);
+      if (gotJ > wantJ)
+        say(v.id, 'jeers out of their age',
+            `${gotJ} jeers mesh(es) for ${wantJ} wanted — the doubled rig sits its ` +
+            `lower yards on trusses, and the crossjack hangs in slings`);
+      if (wantJ && gotJ === wantJ && legsOf('jeers') !== 4 * wantJ)
+        say(v.id, 'jeers short of their tackle',
+            `${legsOf('jeers')} jeer legs for ${wantJ} coursed mast(s) — each pair is ` +
+            `four: block to slings and fall to the deck, both sides`);
+      /* the junk masthead sheave, drawn-vs-declared both ways, and at the HEAD —
+         one tagged GROUP per masthead, the karchesion's own counting rule */
+      let nS = 0;
+      g.traverse(o => { const p = o.userData && o.userData.part;
+                        if (p && p.key === 'sheave' && !o.isMesh) nS++; });
+      if (jmM.length && nS < jmM.length)
+        say(v.id, 'a junk masthead with no sheave',
+            `${nS} sheave groups for ${jmM.length} junk masts — the halyard leads over ` +
+            `a sheave the pole does not carry`);
+      if (!jmM.length && nS)
+        say(v.id, 'a sheave out of its rig',
+            `${nS} through-pole sheave(s) on a hull with no junk mast`);
+      if (jmM.length && part.sheave) {
+        const heads = jmM.map(vv);
+        const hiJ = Math.max(...heads), loJ = Math.min(...heads);
+        if (part.sheave.y[1] < deckY + hiJ * 0.85)
+          say(v.id, 'a sheave adrift down the mast',
+              `sheaves top at ${part.sheave.y[1].toFixed(1)} m against a ` +
+              `~${hiJ.toFixed(0)} m masthead`);
+        if (part.sheave.y[0] < deckY + loJ * 0.55)
+          say(v.id, 'a sheave below the hounds',
+              `sheave base at ${part.sheave.y[0].toFixed(1)} m on poles of ` +
+              `${loJ.toFixed(0)}–${hiJ.toFixed(0)} m`);
+      }
+    }
+
+    /* ── AND THE TOP STANDS ON ITS CHEEKS (round 64) ───────────────────────────────────
+       Every doubled square masthead — one with a topmast to fid, mk.only !== 1 —
+       carries its top on trestletrees, and the trestletrees on two cheek knees bolted
+       to the masthead. Two per doubling, no more and no fewer; a single-tier mast
+       (cog, trireme, corbita) gets none, its top sitting on the hounds of the pole.
+       And each cheek must TOUCH a top from below — a knee adrift down the mast is the
+       floating-fitting class at the masthead. */
+    {
+      const dbl = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only !== 1).length;
+      const nC = part.cheek ? part.cheek.n : 0;
+      if (dbl && nC < dbl * 2)
+        say(v.id, 'a top standing on nothing',
+            `${nC} cheek knees for ${dbl} doubled mastheads — the trestletrees rest on air`);
+      if (!dbl && nC)
+        say(v.id, 'cheeks with no doubling to carry',
+            `${nC} cheek knees on a hull with no doubled square masthead`);
+      if (nC) {
+        const topBoxes = [], cheekBoxes = [];
+        g.traverse(o => {
+          const p = o.userData && o.userData.part;
+          if (!p) return;
+          if (p.key === 'top' && !o.isMesh) topBoxes.push(new THREE.Box3().setFromObject(o));
+          if (p.key === 'cheek' && o.isMesh) cheekBoxes.push(new THREE.Box3().setFromObject(o));
+        });
+        const slack = Math.max(0.8, H.beam * 0.06);
+        cheekBoxes.forEach((cb, i) => {
+          const cbx = cb.clone().expandByScalar(slack);
+          if (!topBoxes.some(tb => cbx.intersectsBox(tb)))
+            say(v.id, 'a cheek carrying nothing',
+                `cheek ${i} at y ${cb.min.y.toFixed(1)}–${cb.max.y.toFixed(1)} m touches no top`);
+        });
+      }
+    }
+
+    /* ── AND NO SHIP GROWS ALL HER MASTS FROM ONE TREE (round 68) ──────────────────────
+       Mast diameter follows the spar's own length (Steel 1794 p.39: an inch to the yard
+       at the partners; the mizzen 3/5 of the main), so masts of clearly different
+       lengths must differ in girth. The old fault drew every mast at beam x 0.06 flat.
+       This measures the DRAWN spars: generic 'Mast' cylinders clustered to the nearest
+       data station, widest mesh per station being the lower mast; where the expected
+       diameters spread by more than a quarter and the drawn ones sit within 8% of each
+       other, every mast came from the same tree. */
+    {
+      const lowersB = (H.masts || []).map(mm => lowerOf(mm));
+      const mainLowerB = Math.max(...lowersB, 0) || 1;
+      const aftAtB = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
+      const mixedSqB = (H.masts || []).some(mm => mm.rig === 'square');
+      const expD = (H.masts || []).map((mm, i) => {
+        const lo = lowersB[i];
+        const mz = mm.at === aftAtB && H.masts.length >= 3 && !H.iron && mixedSqB
+          && lo < mainLowerB * 0.95
+          && (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+        return mz ? Math.min(lo / mainLowerB, 0.60) : lo / mainLowerB;
+      });
+      if ((H.masts || []).length >= 2) {
+        const cols = [];
+        g.traverse(o => {
+          if (!o.isMesh || !o.userData.part) return;
+          if (o.userData.part.key !== 'mast' || o.userData.part.name !== 'Mast') return;
+          const bb = new THREE.Box3().setFromObject(o);
+          /* a short lateen mast is still a mast — the caravel's mizzen column stands
+             2.3 m over her poop — so the stub cut scales with the hull */
+          if (bb.max.y - bb.min.y < Math.min(3, H.beam * 0.35)) return;
+          cols.push({ x: (bb.min.x + bb.max.x) / 2, d: bb.max.z - bb.min.z });
+        });
+        const drawn = (H.masts || []).map(() => 0);
+        cols.forEach(c => {
+          let bi = -1, bd = 1e9;
+          (H.masts || []).forEach((mm, i) => {
+            const dx = Math.abs(c.x - ((mm.at || 0) - 0.5) * H.lwl);
+            if (dx < bd) { bd = dx; bi = i; }
+          });
+          if (bi >= 0 && bd < H.lwl * 0.12) drawn[bi] = Math.max(drawn[bi], c.d);
+        });
+        const seen = drawn.map((d, i) => ({ d, e: expD[i] })).filter(s => s.d > 0);
+        /* uniformity is not the test — an injected carrack draws her lateen mizzen
+           FATTER than her mains (the lateen base is beam x 0.032 against 0.030), so
+           min/max never moves. The test is PAIRWISE: the drawn girth ratio of any two
+           masts must track the ratio their lengths ask, within the lateen/square base
+           difference and the taper. */
+        let worst = null;
+        for (let i = 0; i < seen.length; i++)
+          for (let j = i + 1; j < seen.length; j++) {
+            const r = (seen[i].d / seen[j].d) / (seen[i].e / seen[j].e);
+            const off = Math.abs(Math.log(r));
+            if (!worst || off > worst.off) worst = { off, i, j };
+          }
+        if (worst && worst.off > Math.log(1.35))
+          say(v.id, 'every mast from one tree',
+              `lower masts drawn ${seen.map(s => s.d.toFixed(2)).join('/')} m through ` +
+              `where their lengths ask ${seen.map(s => (H.beam * 0.06 * s.e).toFixed(2)).join('/')} — ` +
+              "diameter follows the spar's own length (Steel 1794 p.39)");
+      }
+    }
+
+    /* ── AND AN IRON MAST IS A TUBE, NOT A TREE (round 69) ─────────────────────────────
+       The wooden law's calibration (beam x 0.06 at the tallest mast) has no authority on
+       a plated tube: the tube's diameter is whatever the builder rolled, which is a record
+       question. The attested set is Great Eastern's six masts (2 ft 9 in – 3 ft 6 in
+       through, the record naming each), and on the model's own measure those tubes hold
+       pole-length / diameter near 55. The drawing takes an attested `diaM` outright and
+       derives the rest at poleM / 55 (Research/IRON-MASTS.md). The audit recomputes both:
+       a drawn iron lower more than 25% off its expected tube — or off its RECORDED
+       diameter where the data declares one — is the tree law creeping back, or a record
+       being ignored. A declared diaM with no drawn mast at its station fires too.
+       (Iron masts carry their own part names — 'Iron mast' / 'Steel mast' — so the
+       one-tree pairwise rule above no longer sees them; THIS rule is their guard, and it
+       is stronger: absolute diameters, not ratios.) */
+    {
+      if (H.iron && (H.masts || []).length) {
+        const colsC = [];
+        g.traverse(o => {
+          if (!o.isMesh || !o.userData.part) return;
+          if (o.userData.part.key !== 'mast') return;
+          if (!/^(Iron|Steel|Wooden) mast$/.test(o.userData.part.name || '')) return;
+          const bb = new THREE.Box3().setFromObject(o);
+          if (bb.max.y - bb.min.y < Math.min(3, H.beam * 0.35)) return;
+          colsC.push({ x: (bb.min.x + bb.max.x) / 2, d: bb.max.z - bb.min.z });
+        });
+        (H.masts || []).forEach((mm, i) => {
+          const lo = lowerOf(mm);
+          /* the same segment stack hull.js builds: square rig adds top and topgallant,
+             a gaff mast its topmast; a pole is its own whole height */
+          const pole = mm.rig === 'square' ? lo * 1.9
+                     : mm.rig === 'gaff' ? (mm.topmast ? lo * 1.52 : lo)
+                     : lo;
+          const expDia = mm.diaM !== undefined ? mm.diaM : pole / 55;
+          let drawn = 0;
+          colsC.forEach(c => {
+            if (Math.abs(c.x - ((mm.at || 0) - 0.5) * H.lwl) < H.lwl * 0.12)
+              drawn = Math.max(drawn, c.d);
+          });
+          if (!drawn)
+            say(v.id, 'a recorded mast not drawn',
+                `mast ${i} at u=${mm.at} declares ${expDia.toFixed(2)} m through and no ` +
+                'iron mast stands at its station');
+          else if (Math.abs(Math.log(drawn / expDia)) > Math.log(1.25))
+            say(v.id, 'an iron mast grown from a tree',
+                `mast ${i} drawn ${drawn.toFixed(2)} m through where ` +
+                (mm.diaM !== undefined ? 'the record says' : 'the tube law derives') +
+                ` ${expDia.toFixed(2)} m — an iron mast's diameter is the record's, or ` +
+                'poleM/55 labelled derived (Research/IRON-MASTS.md)');
+        });
+      }
+    }
+
+    /* ── AND NO YARD IS CUT FROM THE SHIP'S BEAM (round 70) ────────────────────────────
+       A yard's diameter follows the SPAR'S OWN LENGTH, by the spar-maker's own rates:
+       Steel 1794, "Proportional Diameters of Yards" — main and fore yards 7/10 of an inch
+       to every yard of length at the slings, topsail yards 5/8, topgallant yards 6/10,
+       the crossjack at the fore-topsail's rate — and a steel yard is length/50 at the
+       slings, attested twice (Peking's 2017 re-masting delivery list, six spar classes
+       exact; Great Eastern's 1858 iron lower yard at 50.4; Research/IRON-MASTS.md §2).
+       The old fault drew every yard at beam x 0.0035, one girth per ship, L/D 100–500
+       across the fleet. The audit measures the DRAWN spars: a crossed yard lies
+       ATHWARTSHIPS (junk and crab-claw head spars share the 'Yard' name but rake along
+       the ship, and a lateen yard carries its own name); a horizontal spar's box is as
+       tall as its slings diameter, the fattest station; and yards rank by height at
+       their own mast station — lowest is the course (the crossjack, at the topsail rate,
+       on a wooden mizzen), the next two topsails, the rest topgallants and royals. More
+       than 35% off the rate is the beam law creeping back. */
+    {
+      const steelMainD = (H.lwl + H.beam) / 2;
+      const lowersD = (H.masts || []).map(mm =>
+        lowerOf(mm));
+      const mainLowerD = Math.max(...lowersD, 0) || 1;
+      const aftAtD = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
+      const mixedSqD = (H.masts || []).some(mm => mm.rig === 'square');
+      const yardsD = [];
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        const p = tagOf(o);
+        if (!p || p.key !== 'yard' || p.name !== 'Yard') return;
+        const bb = new THREE.Box3().setFromObject(o);
+        const xE = bb.max.x - bb.min.x, yE = bb.max.y - bb.min.y, zE = bb.max.z - bb.min.z;
+        if (zE <= xE || yE > zE * 0.25) return;
+        yardsD.push({ x: (bb.min.x + bb.max.x) / 2, y: (bb.min.y + bb.max.y) / 2,
+                      len: Math.hypot(xE, zE), d: yE });
+      });
+      const byStation = new Map();
+      yardsD.forEach(yd => {
+        let bi = -1, bd = 1e9;
+        (H.masts || []).forEach((mm, i) => {
+          const dx = Math.abs(yd.x - ((mm.at || 0) - 0.5) * H.lwl);
+          if (dx < bd) { bd = dx; bi = i; }
+        });
+        /* 0.18, wider than the mast rules' 0.12 — a hard-raked bow mast (the corbita's
+           artemon) carries its yard well ahead of its own step; unmatched yards drop
+           rather than fire */
+        if (bi < 0 || bd > H.lwl * 0.18) return;
+        if (!byStation.has(bi)) byStation.set(bi, []);
+        byStation.get(bi).push(yd);
+      });
+      byStation.forEach((ys, mi) => {
+        const mm = H.masts[mi];
+        const mz = mm.at === aftAtD && (H.masts || []).length >= 3 && !H.iron && mixedSqD
+          && lowersD[mi] < mainLowerD * 0.95
+          && (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+        ys.sort((a, b) => a.y - b.y).forEach((yd, rank) => {
+          const rate = rank === 0 ? (mz ? 0.625 : 0.700) : rank <= 2 ? 0.625 : 0.600;
+          const exp = H.iron ? yd.len / 50 : yd.len * rate / 36;
+          if (Math.abs(Math.log(yd.d / exp)) > Math.log(1.35))
+            say(v.id, "a yard cut from the ship's beam",
+                `yard at u=${mm.at} tier ${rank}, ${yd.len.toFixed(1)} m long, drawn ` +
+                `${yd.d.toFixed(2)} m through where its own length asks ${exp.toFixed(2)} — ` +
+                (H.iron ? 'a steel yard is length/50 at the slings (Peking 1911, Great Eastern 1858)'
+                        : "yard diameter follows the spar's own length (Steel 1794, " +
+                          '"Proportional Diameters of Yards")'));
+        });
+      });
+    }
+
+    rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
+                parts: Object.keys(part).length,
+                funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });
+  }
+
+  /* ── AND NO TWO VESSELS SHARE A CURVE. ─────────────────────────────────────────────────
+     The r47 derivation gives every hull its own scale, so a byte-identical curve on two
+     vessels means someone pasted a class curve back in — the exact regression this round
+     removed. */
+  {
+    const curveOwner = {};
+    for (const v of list) {
+      if (!v.polar || !v.polar.curve) continue;
+      const k = JSON.stringify(v.polar.curve);
+      if (curveOwner[k]) say(v.id, 'shared polar curve', 'byte-identical with ' + curveOwner[k]);
+      else curveOwner[k] = v.id;
+    }
+  }
+
+  /* ── AND ONE MODEL OF HOW A SHIP MOVES (round 50). ─────────────────────────────────────
+     battle.js carried its own polar interpolator, btPolarSpeed, times a linear force scale
+     — no beat gate, no oar floor, no engine rule — from the day the Action was built until
+     round 50: the B9 fault route.js was cured of in r48, alive in a second consumer. The
+     battle now compiles and evaluates through route.js's own globals at runtime, so the
+     second model must stay dead and the shared one must stay reachable. If btPolarSpeed
+     reappears (the likeliest regression is a revert), or compilePolar / polarSpeed /
+     polarBeat stop being page globals, the battle either lies again or throws at open. */
+  {
+    if (typeof btPolarSpeed !== 'undefined')
+      say('battle', 'a second speed model',
+          'btPolarSpeed exists again — the Action must ask route.js\'s polarSpeed, not its own interpolator');
+    for (const fn of ['compilePolar', 'polarSpeed', 'polarBeat'])
+      if (typeof window[fn] !== 'function')
+        say('battle', 'shared polar model unreachable',
+            fn + ' is not a page global — the battle compiles and evaluates through it at open');
+  }
+
+  /* ── AND A CAMPAIGN IS A COMPLETE RECORD (round 80). ───────────────────────────────────
+     Staging Salamis meant tearing the Armada out of the code: fleets, formations, powder,
+     the year and the board camera are battle DATA now, and the Action opens whatever
+     campaign the data carries. Which means the data can now be wrong in ways the code used
+     to make impossible — a fleet id no vessel answers to draws an EMPTY SEA with a working
+     UI over it, the quietest possible failure. Every field the two consumers read is
+     checked here, per battle, per fleet, per day. */
+  {
+    /* ⚠ bare APP, tested with typeof, same as the audit's own header: `const APP` is a
+       global LEXICAL binding, so window.APP is undefined and a window-guarded read here
+       silently skipped every data rule while the function-source rules still ran */
+    const BATS = (typeof APP !== 'undefined' && APP.battles && APP.battles.battles) || [];
+    const VS = (typeof APP !== 'undefined' && APP.vessels && APP.vessels.vessels) || [];
+    for (const b of BATS) {
+      if (!b.campaign) continue;
+      const bid = 'battle-' + b.id;
+      if (!Array.isArray(b.fleets) || b.fleets.length < 2)
+        say(bid, 'a campaign without its two fleets',
+            'the Action and the board need the two principals in battle.fleets[0] and [1]');
+      else {
+        /* the first two blocks are the PRINCIPALS — the gauge line names FL[0]/FL[1] by
+           index — so neither may re-side itself; every block after them is an attachment
+           (Lepanto's galleasses) and must say which side it fights on, or both views
+           would guess from its index and stage it with the enemy */
+        b.fleets.slice(0, 2).forEach((F, i) => {
+          if (F.side !== undefined && F.side !== i)
+            say(bid, 'a principal fleet on the wrong side',
+                `fleets[${i}] ("${F.name}") declares side ${F.side} — the gauge names FL[0]/FL[1] by index`);
+        });
+        b.fleets.slice(2).forEach(F => {
+          if (F.side !== 0 && F.side !== 1)
+            say(bid, 'an attached fleet with no side',
+                `"${F.name}": a third fleet block must declare side 0 or 1 explicitly`);
+        });
+      }
+      if (typeof b.powder !== 'boolean')
+        say(bid, 'a campaign without an armament record',
+            'powder must be true or false — the gunfire path asks it, and absence is not an answer');
+      if (typeof b.year !== 'number')
+        say(bid, 'a campaign without a year', 'the date line is d.d + btYear(year)');
+      if (!Array.isArray(b.cam) || b.cam.length !== 3 || !b.cam.every(isFinite))
+        say(bid, 'a campaign without a board camera', 'cam is [lon, lat, altitude km]');
+      for (const F of (b.fleets || [])) {
+        const ves = VS.find(x => x.id === F.id);
+        if (!ves || !ves.hull || !ves.polar)
+          say(bid, 'a fleet no vessel answers to',
+              `fleet "${F.name}" asks for vessel "${F.id}" — not in the vessel list with hull ` +
+              'and polar, so the Action would draw an empty sea under a working UI');
+        if (!(F.n >= 1) || !F.name || !/^[0-9a-f]{6}$/i.test(F.color || '') || !F.chip)
+          say(bid, 'a fleet with a broken record',
+              `"${F.id}": n ≥ 1, name, 6-digit color and chip are all required`);
+        const fm = F.form || {};
+        const formOk = fm.shape === 'crescent'
+          ? [fm.front, fm.depth, fm.lead].every(isFinite)
+          : fm.shape === 'ranks'
+            ? [fm.front, fm.rows, fm.gap].every(isFinite) && fm.rows >= 1
+            : false;
+        if (!formOk)
+          say(bid, 'a fleet with no formation',
+              `"${F.id}": form.shape must be crescent (front/depth/lead) or ranks (front/rows/gap)`);
+      }
+      const C = b.campaign;
+      if (C.length < 2)
+        say(bid, 'a campaign of one day', 'the fleet heading is the track\'s own bearing, day to day');
+      C.forEach((day, i) => {
+        for (const k of ['lon', 'lat', 'elon', 'elat'])
+          if (!isFinite(day[k])) say(bid, 'a campaign day off the map', `day ${i} ("${day.d}") ${k}`);
+        if (!(day.rng > 0)) say(bid, 'a campaign day without a range', `day ${i} ("${day.d}")`);
+        if (!(day.w >= 0 && day.w <= 360) || !(day.f >= 0 && day.f <= 12))
+          say(bid, 'a campaign day with impossible weather',
+              `day ${i} ("${day.d}") w=${day.w} f=${day.f}`);
+        if (!day.d || !day.t) say(bid, 'a campaign day with no record', `day ${i}`);
+        if (day.a !== undefined && day.a !== true)
+          say(bid, 'an action flag that is not a flag', `day ${i} ("${day.d}") a=${day.a}`);
+        if (day.hd !== undefined && !(day.hd >= 0 && day.hd <= 360))
+          say(bid, 'a day with an impossible facing',
+              `day ${i} ("${day.d}") hd=${day.hd} — an authored fleet heading is a compass bearing`);
+        /* the tidal stream is a VECTOR of the record (round 158, Myeongnyang): a day that
+           states a rate must state a set and vice versa, or the Action would advect every
+           hull in a direction nobody wrote down */
+        if (day.ck !== undefined || day.cs !== undefined)
+          if (!(day.ck >= 0 && day.ck <= 15) || !(day.cs >= 0 && day.cs <= 360))
+            say(bid, 'a stream that is not a vector',
+                `day ${i} ("${day.d}") cs=${day.cs} ck=${day.ck} — a tidal stream is a set ` +
+                '(degrees toward, 0-360) and a rate (knots), both or neither');
+        /* the anchor is the record's own fact (the diary's "dropped anchor"), and it names
+           WHICH fleet lies to it by side — an anchor that names no fleet holds nothing */
+        if (day.anc !== undefined
+            && (!Array.isArray(day.anc) || !day.anc.length
+                || !day.anc.every(a => a === 0 || a === 1)))
+          say(bid, 'an anchor that names no fleet',
+              `day ${i} ("${day.d}") anc=${JSON.stringify(day.anc)} — anc lists the sides (0/1) lying to anchors`);
+      });
+
+      /* ── A SHORE IS A CHECKED FACT (round 83). ─────────────────────────────────────────
+         A battle may carry a DEM patch (`shore`) and the Action stages the real coast from
+         it — which opens three new ways to be wrong: a mirrored or misplaced patch (the
+         chirality class psgFrame warns about, now visible the moment land exists), a fleet
+         staged on dry land (Salamis day 5 was 44 m up a hillside before round 83 re-laid
+         the anchors), and a patch that silently fails to load, staging the strait on open
+         ocean under a working UI. The record carries named probes — points that must be
+         land and points that must be water — so the data can convict its own placement. */
+      if (b.shore) {
+        const sh = b.shore;
+        if (!sh.src || ![sh.lon0, sh.lat0, sh.lon1, sh.lat1].every(isFinite)
+            || !(sh.lon1 > sh.lon0) || !(sh.lat1 > sh.lat0))
+          say(bid, 'a shore without bounds', 'shore needs src and lon0<lon1, lat0<lat1');
+        const pr = sh.probes || [];
+        if (!pr.some(p => p.land === true) || !pr.some(p => p.land === false))
+          say(bid, 'a shore without witnesses',
+              'probes must name at least one point that is land and one that is water — ' +
+              'a mirrored patch passes any test that only asks one side');
+        for (const p of pr)
+          if (!isFinite(p.lon) || !isFinite(p.lat) || typeof p.land !== 'boolean'
+              || p.lon <= sh.lon0 || p.lon >= sh.lon1 || p.lat <= sh.lat0 || p.lat >= sh.lat1)
+            say(bid, 'a probe off its own patch', `"${p.n}"`);
+        if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function'
+            || typeof SHIPS_BT.btShoreLoad !== 'function')
+          say(bid, 'a shore the Action cannot sample',
+              'SHIPS_BT.btShoreElev / btShoreLoad missing');
+        /* the shore's dress is data too (round 85): `veg` must name a palette the app
+           actually has, or the coast silently wears another climate's colours — which is
+           exactly how the Gravelines chalk shipped dressed in Attic phrygana in r84 */
+        if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.SHORE_PALS
+            && !SHIPS_BT.SHORE_PALS[sh.veg])
+          say(bid, 'a shore in another climate\'s clothes',
+              `shore.veg "${sh.veg}" names no palette in SHORE_PALS — ` +
+              `known: ${Object.keys(SHIPS_BT.SHORE_PALS).join(', ')}`);
+        /* ── THE WITNESSES TESTIFY, ALWAYS (round 84). ─────────────────────────────────
+           The round-83 version ran the probes only "with the grid loaded", and in a
+           standard audit run the Action has no battle open — so the probes had never
+           once fired, and the audit said pass over a CPU grid whose decode was 255x off
+           (the GLSL normalized-channel formula applied to raw bytes: every point on
+           Earth read as +2.8 million metres of land, the grounding rule inert, the live
+           helm refusing every step). A conditional check that cannot run in the standard
+           pass is a green light wired to nothing. The audit now drives the app's own
+           loader — the same fetch, the same decode, the same grid the grounding reads —
+           and the witnesses speak in every audit, on every battle that carries a shore. */
+        else {
+          const B = SHIPS_BT.BT;
+          if (!B.shoreGrid || B.shoreFor !== b.id) {
+            try { SHIPS_BT.btShoreLoad(b); } catch (e) { /* judged by the grid below */ }
+            for (let w = 0; w < 200 && !B.shoreReady; w++)
+              await new Promise(r => setTimeout(r, 50));
+          }
+          if (!B.shoreGrid || B.shoreFor !== b.id)
+            say(bid, 'a shore that did not load',
+                `${sh.src} — no grid after btShoreLoad (staging the strait on open ocean)`);
+          else {
+            for (const p of pr) {
+              const el = SHIPS_BT.btShoreElev(p.lon, p.lat);
+              if (p.land !== (el > 0))
+                say(bid, 'a shore that contradicts its witnesses',
+                    `"${p.n}" (${p.lon}, ${p.lat}) reads ${el.toFixed(1)} m but must be ${p.land ? 'land' : 'water'} — ` +
+                    'mirrored, misplaced or misdecoded patch');
+            }
+            /* every campaign day must anchor in validated water: Salamis day 5 was 44 m
+               up a hillside before round 83, and the Gravelines wiring repeated the class
+               on day 8 within the hour. Outside the patch btShoreElev is -30, open sea. */
+            (b.campaign || []).forEach((d, i) => {
+              const el = SHIPS_BT.btShoreElev(d.lon, d.lat);
+              if (el > -2.0)
+                say(bid, 'a campaign day anchored on dry land',
+                    `day ${i} ("${d.d}") at (${d.lon}, ${d.lat}) reads ${el.toFixed(1)} m`);
+            });
+          }
+          /* and every staged ship floats — only when the Action itself has THIS battle
+             open, so a grid the audit loaded is never paired with another battle's ships */
+          if (B.spec && B.spec.id === b.id && B.shoreFor === b.id && B.shoreGrid) {
+            for (const s of B.ships) {
+              const el = SHIPS_BT.btElevLocal(s.x, s.z);
+              if (el > 0)
+                say(bid, 'a ship on dry land',
+                    `side ${s.side} at local (${s.x.toFixed(0)}, ${s.z.toFixed(0)}) sits on ${el.toFixed(1)} m of ground`);
+            }
+          }
+        }
+        if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.btFrame
+            && !/btElevLocal/.test(String(SHIPS_BT.btFrame)))
+          say(bid, 'a helm that ignores the shore',
+              'btFrame no longer refuses a grounding step — ships will sail up the hillsides');
+      }
+    }
+
+    /* the gunfire path must ask the RECORD. The old test was a regex over the day's prose
+       that fired on "A day of no action" — 5 Aug drew broadsides for as long as the Action
+       existed. The regex must stay dead and the record must be what the frame reads. */
+    if (window.SHIPS_BT) {
+      const src = String(SHIPS_BT.btFrame);
+      if (/GRAVELINES/.test(src))
+        say('battle', 'gunfire by regex again',
+            'btFrame matches the day\'s prose for GRAVELINES — the a flag and powder are the record');
+      if (!/\.a\b/.test(src) || !/powder/.test(src))
+        say('battle', 'gunfire not asking the record',
+            'btFrame must gate its broadsides on the day\'s a flag and the battle\'s powder field');
+      /* one formation implementation, drawn by both views */
+      if (typeof SHIPS_BT.formStation !== 'function')
+        say('battle', 'the formation model unreachable',
+            'SHIPS_BT.formStation is the one implementation both views draw');
+      if (typeof startCampaign === 'function' && !/formStation/.test(String(startCampaign)))
+        say('battle', 'the board keeps its own formation',
+            'startCampaign no longer draws SHIPS_BT.formStation — two shapes for one fleet');
+      /* years BC label as years BC */
+      if (typeof SHIPS_BT.btYear !== 'function' || SHIPS_BT.btYear(-480) !== '480 BC'
+          || SHIPS_BT.btYear(1588) !== '1588')
+        say('battle', 'a year that cannot go BC',
+            'btYear(-480) must read "480 BC" — Salamis is dated like the vessels are');
+      /* the stream must be a FORCE, not a caption (round 158): if any staged day carries
+         a tidal rate, btFrame must advect through it, and if any day states the anchor
+         fact, btFrame must honour it — else Myeongnyang's tide is prose over still water */
+      const src158 = String(SHIPS_BT.btFrame);
+      if (BATS.some(b => (b.campaign || []).some(dd => dd.ck !== undefined))
+          && !/curMs/.test(src158))
+        say('battle', 'a helm that ignores the stream',
+            'a campaign day carries a tidal rate (ck) but btFrame never reads BT.curMs — the tide would be a caption, not a force');
+      if (BATS.some(b => (b.campaign || []).some(dd => dd.anc !== undefined))
+          && !/anchored|\.anc\b/.test(src158))
+        say('battle', 'an anchor the helm never feels',
+            'a campaign day states the anchor fact (anc) but btFrame never reads it — the anchored fleet would drift on the stream its cable holds');
+    }
+
+    /* the BOARD must survive a step of every campaign. No baseline frame can name the
+       globe's campaign board, and that blindness hid a nine-day total failure: the
+       tangentBasis refactor (2026-08-02) deleted the `side` vector its own heel still
+       read, so stepCampaign threw on its first frame and the render loop died whenever
+       any campaign was opened from the globe. Opening and stepping each campaign here is
+       the cheapest watch that class gets. */
+    if (typeof startCampaign === 'function' && typeof stepCampaign === 'function'
+        && typeof clearCampaign === 'function') {
+      for (const b of BATS) {
+        if (!b.campaign || !b.fleets) continue;
+        try {
+          startCampaign(b);
+          stepCampaign(0.001);
+        } catch (e) {
+          say('battle-' + b.id, 'a board that cannot draw its campaign',
+              'startCampaign/stepCampaign threw: ' + e.message);
+        } finally {
+          try { clearCampaign(); } catch (e) { /* already said */ }
+        }
+      }
+    }
+  }
+
+  /* ══ THE ROUTER'S SHORELINE IS THE RENDERER'S (round 123) ═══════════════════════════════
+     buildEraFleet used to take its routing datum from mat.uniforms.uSeaLevel — which onTime
+     writes AFTER buildEraFleet runs, so the router was always one state behind the picture.
+     At a frozen #e=0 boot the uniform still held 0: the first sea crossings were routed on
+     the MODERN coastline while the shader drew the shore 68 m lower, and the crossing to
+     Sahul — the voyage this project exists for — was drawn paddling 200 km of exposed shelf,
+     a near-black field of moonlit dry land in the close-up. route.js's own comment declared
+     this class fixed; the fix read the wrong clock, and nothing was watching the agreement.
+
+     Two arms, driven per era through the app's own selectEra and fleet queue:
+       1. FINE.datum must equal the era's own seaLevelAt(S.year), quantised the way the
+          router quantises it. Anything else means every track in the era was planned on a
+          coastline the viewer is not being shown.
+       2. Every assembled track must lie in water on the fine array — sampled at the points
+          the fleet actually slerps between, plus midpoints. This also convicts the router's
+          stated give-up path (an unroutable leg falls back to its raw waypoints and draws
+          the shortcut across whatever is in the way). The conviction line is the raster's
+          own resolution: samples run ~2 km apart, a texel is 4.9 km, so TWO consecutive
+          ashore samples mean the ship crosses a full texel of land — a fact the field can
+          state. One isolated ashore sample is a corner clip below the texel, which the
+          field cannot resolve into a coastline; those are counted and reported in the
+          detail of any conviction but do not convict alone (measured r123: 23 tracks carry
+          exactly one, at Cape Horn, the Hanish Islands, Mindoro and the like, every one at
+          a strait or headland the 4.9 km raster pinches shut). */
+  if (typeof selectEra === 'function' && typeof seaLevelAt === 'function'
+      && window.SHIPS_ROUTE && typeof S !== 'undefined' && typeof eraTracks !== 'undefined'
+      && APP.chapters && APP.voyages) {
+    const RT = window.SHIPS_ROUTE;
+    const eraHome = S.era;
+    const chs = APP.chapters.chapters || [];
+    const drain = async () => {
+      for (let w = 0; w < 2000 && typeof fleetQueueBusy === 'function' && fleetQueueBusy(); w++) {
+        try { if (typeof pumpFleetQueue === 'function') pumpFleetQueue(24); } catch (e) { break; }
+        await new Promise(r => setTimeout(r, 0));
+      }
+    };
+    for (let e = 0; e < chs.length; e++) {
+      try { selectEra(e); } catch (err) {
+        say('era-' + e, 'an era that cannot build its fleet', 'selectEra threw: ' + err.message);
+        continue;
+      }
+      await drain();
+      const want = Math.round((seaLevelAt(S.year) || 0) / 5) * 5;
+      if (RT.FINE.ready && RT.FINE.datum !== want)
+        say('era-' + e, 'the router and the renderer hold two shorelines',
+            `FINE.datum ${RT.FINE.datum} m against seaLevelAt(${S.year}) = ${want} m — `
+            + 'every track in this era was planned on a coastline the viewer is not shown');
+      for (const tr of eraTracks) {
+        const legs = tr.legs || [];
+        let ashore = 0, total = 0, run = 0, maxRun = 0, at = null;
+        const test = (lon, lat) => {
+          total++;
+          if (!RT.fineIsWater(lon, lat)) {
+            ashore++; run++; if (run > maxRun) maxRun = run;
+            if (!at) at = [lon, lat];
+          } else run = 0;
+        };
+        for (let i = 0; i < legs.length; i++) {
+          test(legs[i].lon, legs[i].lat);
+          if (i < legs.length - 1) {
+            /* midpoint, with the antimeridian unwrapped — a Pacific track's midpoint is
+               not in Africa */
+            const b = legs[i + 1], dl = ((b.lon - legs[i].lon + 540) % 360) - 180;
+            test(legs[i].lon + dl / 2, (legs[i].lat + b.lat) / 2);
+          }
+        }
+        if (maxRun >= 2)
+          say(tr.name || tr.vesselId, 'a voyage drawn on the model\'s own land',
+              `era ${e}: ${ashore} of ${total} track samples ashore at the era's own sea `
+              + `level, longest run ${maxRun}`
+              + (at ? `, first at (${at[0].toFixed(2)}, ${at[1].toFixed(2)})` : ''));
+
+        /* ══ THE CARD CONFESSES THE ROUTER'S GIVE-UP (round 125) ═══════════════════════
+           seaPath's unroutable legs and clearSegments' uncleared stretches ride on the
+           track as tr.give, and rule 10 says a fallback the UI does not label is not a
+           legitimate return. Checked in both directions against the card the viewer
+           actually opens: a track carrying a give-up must show the 'Route fallback' row,
+           and a clean track must not — a caveat printed on every card indicts nothing. */
+        if (typeof showVoyageCard === 'function' && document.getElementById('cRows')) {
+          const vv = ((APP.voyages.voyages || APP.voyages) || [])
+            .find(x => x.name === tr.name);
+          if (vv) {
+            try {
+              showVoyageCard(vv);
+              const rowsTxt = document.getElementById('cRows').textContent || '';
+              const has = rowsTxt.indexOf('Route fallback') >= 0;
+              const need = !!(tr.give && (tr.give.legs || tr.give.unfixed || tr.give.ashore));
+              if (need && !has)
+                say(tr.name, 'a give-up the card does not confess',
+                    `era ${e}: the track carries give ${JSON.stringify(tr.give)} and the `
+                    + 'voyage card shows no Route fallback row');
+              if (!need && has)
+                say(tr.name, 'a caveat on a clean track',
+                    `era ${e}: the card shows a Route fallback row but the track's own `
+                    + 'ledger is clean');
+            } catch (err) {
+              say(tr.name, 'a voyage card that cannot open',
+                  'showVoyageCard threw: ' + err.message);
+            }
+          }
+        }
+      }
+    }
+    try { selectEra(eraHome); await drain(); } catch (e) { /* state restore only */ }
+  }
+
+  /* ══ THE READOUT'S GAZETTEER SPEAKS ONLY IN ITS OWN TIME (round 124) ═══════════════════
+     r123's close-up of the Sahul crossing read "Nearest land: Ujung Pandang · 2 nm SE" —
+     the number was the land scan's answer about the shelf, the name was the port nearest
+     THE SHIP, 528 nm away on a coast the scan never looked at and forty millennia before
+     the city. The fix names land from the port nearest the FOUND coast, gated by
+     portExistsAt. This rule does not trust the gate: it drives the real fillLandRow at the
+     sahul track's own open-water waypoint in era 0 and convicts if the cell contains ANY
+     name from the gazetteer — at 60,000 BP none existed, a fact of the record that needs
+     no predicate — or if the printed range states a distance finer than the fine raster's
+     own texel without saying "under". */
+  if (typeof fillLandRow === 'function' && typeof selectEra === 'function'
+      && window.SHIPS_ROUTE && APP.ports && APP.chapters) {
+    const RT = window.SHIPS_ROUTE;
+    const eraHome2 = S.era;
+    const drain2 = async () => {
+      for (let w = 0; w < 2000 && typeof fleetQueueBusy === 'function' && fleetQueueBusy(); w++) {
+        try { if (typeof pumpFleetQueue === 'function') pumpFleetQueue(24); } catch (e) { break; }
+        await new Promise(r => setTimeout(r, 0));
+      }
+    };
+    try {
+      selectEra(0); await drain2();
+      const cell = document.createElement('div');
+      cell.innerHTML = '<table><tr><td class="pc-land">—</td></tr></table>';
+      if (typeof PSGV !== 'undefined') PSGV.landKey = undefined;
+      fillLandRow(cell, { at: { lon: 126.4, lat: -10.1 } });
+      const txt = cell.querySelector('.pc-land').textContent;
+      for (const p of (APP.ports.ports || []))
+        if (p.name && txt.includes(p.name))
+          say('passage-readout', 'a gazetteer that names a place out of its own time',
+              `era 0, year ${S.year}: the land row reads "${txt}" — "${p.name}" is a port `
+              + 'of the modern record naming a coast sixty millennia before any port existed');
+      const m = txt.match(/^(\d+) nm/);
+      if (m && RT.FINE && RT.FINE.ready) {
+        const texNm = 40075 / RT.FINE.w * Math.cos(-10.1 * Math.PI / 180) / 1.852;
+        if (+m[1] < texNm)
+          say('passage-readout', 'a distance the field cannot state',
+              `the land row reads "${txt}" but the fine raster's texel here is `
+              + `${texNm.toFixed(1)} nm — sub-texel ranges must say "under"`);
+      }
+    } catch (e) {
+      say('passage-readout', 'a land row that cannot be asked', 'fillLandRow threw: ' + e.message);
+    }
+    try { selectEra(eraHome2); await drain2(); } catch (e) { /* state restore only */ }
+  }
+  /* ── A-SIDE-WORD (round 269, 0y⁵³): NO RULE SPELLS A SIDE ITSELF. From r247 to r268 every rule that named a
+     side wrote its own ternary on a sign, and every one read z− as port, the mirror of the app's word (+z is the
+     port beam, b=90; r254/side.json measured it on screen). The word comes from sideOf now, and this reads the
+     audit's own source — the file the page serves, fetched the way the runners fetch it — for a ternary that
+     spells a side off a comparison with zero, or a side word standing in a ternary's else-branch, which is
+     what every one of the twenty-one looked like. The gun-port labels (a port against a wall or a belt) are
+     not sides and do not match. If the source cannot be read, that is said as a problem, not passed. */
+  /* (r270, 0y⁵⁴) AND THE BUILDER'S SOURCE TOO. hull.js spelled a side from a sign in four
+     places (a sheet's side, a standing knee's, a channel wale's, a quarter rudder's), and its
+     one-sided carrier fittings were placed under the mirror reading; its word comes from
+     sideName now, off the same table. In hull.js a side word is also a record VALUE
+     (a sail's side field holds the word), so the shapes there require the ternary's own '?', and the label
+     strings run on past the word ('Port channel wale'), so they match the word's start. */
+  const SOURCES = [
+    { file: 'audit-hulls.js', helper: 'sideOf', shapes: [
+        new RegExp("[<>]=?\\s*0\\s*\\?\\s*'(?:port|starboard|stbd|z[+−])", 'g'),
+        new RegExp(":\\s*'(?:port|starboard|stbd|z[+−])(?: side)?'", 'g') ] },
+    { file: 'js/hull.js', helper: 'sideName', shapes: [
+        new RegExp("[<>]=?\\s*0\\s*\\?\\s*'[,\\s]*(?:port|starboard|stbd|z[+−])\\b", 'gi'),
+        new RegExp("\\?[^:\\n]*:\\s*'[,\\s]*(?:port|starboard|stbd|z[+−])\\b[^']*'", 'gi') ] },
+  ];
+  for (const S of SOURCES) {
+    try {
+      const src = await (await fetch(S.file, { cache: 'no-store' })).text();
+      const lines = new Set();
+      for (const re of S.shapes) { let m; while ((m = re.exec(src))) lines.add(src.slice(0, m.index).split('\n').length); }
+      if (lines.size)
+        say(S.file.replace(/^js\//, ''), 'a side spelled outside ' + S.helper,
+            `${lines.size} line${lines.size === 1 ? '' : 's'} spell${lines.size === 1 ? 's' : ''} a side from a sign (line${lines.size === 1 ? '' : 's'} ${[...lines].sort((a, b) => a - b).join(', ')}); every side-naming message goes through ${S.helper}`);
+    } catch (e) {
+      say(S.file.replace(/^js\//, ''), 'an audit that cannot read its source', `fetch(${S.file}) threw: ` + e.message);
+    }
+  }
+  return { problems, checked: rows.length, rows };
+})()

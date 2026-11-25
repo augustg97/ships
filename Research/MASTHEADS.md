@@ -262,13 +262,13 @@ the masts, bow at the left) draws short lower masts and long topmasts, as Hocker
 
 | Row on the plate | foot (deck) | top | topmast head | pole head |
 |---|---|---|---|---|
-| fore, column 724 | 902 | 600 | 285 | 161 |
+| fore, column 724 | 902 | 563 (r330; r329 read 600) | 285 | 161 |
 | main, column 1143 | 933 | 528 | 192 | 47 |
 | mizzen, column 1501 | 868 | 588 | 424 (r328) | 349 (staff, r328) |
 
 Each height is a share of the distance between the fore and mizzen masts' feet, 777 px on the plate and
 21.53 m on the built hull, as on the East Indiaman and the slave ship (r322). Built over each mast's foot:
-fore top 8.37 m, topmast head 17.10 m, pole head 20.53 m; main 11.22, 20.53, 24.55 m; mizzen top 7.76 m.
+fore top 9.39 m (8.37 m from r329 to r330), topmast head 17.10 m, pole head 20.53 m; main 11.22, 20.53, 24.55 m; mizzen top 7.76 m.
 Before, the tops stood at 13.92, 15.65 and 13.41 m.
 
 - **The deck is read differently at each mast.** At the fore it is the foot of the forecastle rail's lattice.
@@ -289,8 +289,26 @@ Before, the tops stood at 13.92, 15.65 and 13.41 m.
   with the top; before r329 it stood well under the top.
 
 **Confidence.** The tops and topmast heads are **read**, to about 5 px (0.006 of the span), on a plate 27 years
-after the hull's date. The main's deck and the datum are **contested**. The course yards still hang at the
-class 0.60 of the lower mast; Hollar's hang just under the tops (0y¹⁷⁴).
+after the hull's date. The main's deck and the datum are **contested**.
+
+**Round 330 (0y¹⁷⁴): the course yards, and the fore top re-read.** r329 put the fore top on row 600. That is
+the row where the fore course yard crosses the mast's column 724: the yard, traced as a straight line from
+column 660 to 772, gives 600.5 there. The top is the dark band on rows 563–572 at columns 740–758, aft of the
+topsail's leech, with the topmast shrouds' deadeyes above it, drawn as the main top is drawn (band 528–540,
+deadeyes above). The top's upper edge is the row on both masts, so the fore top is 563 and the main stays 528.
+The fore top now stands 9.39 m over the mast's foot; from r329 to r330 it stood 1.02 m too low.
+
+| Course yard (`r330_trace.py`) | traced columns | rms | axis column at the yard | crossing row | deck rows | share of deck-to-top |
+|---|---|---|---|---|---|---|
+| fore | 660–772 | 1.6 px | 708 | 604 | 902 | 0.879 |
+| main | 1065–1205 | 1.4 px | 1159 | 576 | 933 and 963 (hidden deck) | 0.881 and 0.890, mean 0.886 |
+
+The axis at the yard is taken on the line from each mast's foot to its topmast's cap (fore 693, 285; main
+1176, 192). Both yards are drawn sloping, the after yardarm higher, because they are braced round and the ship
+is seen from a little forward of the beam; the model hangs each level at its crossing. Built, the fore course
+yard stands 8.25 m over the mast's foot where it stood 5.57 m, and the main 9.95 m where it stood 7.49 m.
+A-COURSE-READ now holds a course read and a mast read off the same plate to the same top row, and convicts a
+course read at 0.97 of the deck-to-top height or more: r329's fore top would have given the fore course 0.987.
 
 ## Confidence
 

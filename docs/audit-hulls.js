@@ -5561,6 +5561,13 @@ const w = R.rows, a = (w.deckRail - w.yard) / (w.deckRail - w.top), b = (w.deckH
 if (Math.abs((a + b) / 2 - R.ofDeckToTop) > 0.005)
 say(v.id, 'a course read off its own rows', `${at}: rows give ${a.toFixed(3)} and ${b.toFixed(3)} (mean ${((a + b) / 2).toFixed(3)}) against ofDeckToTop ${R.ofDeckToTop}`);
 }
+if (R && typeof R.ofDeckToTop === 'number' && R.ofDeckToTop >= 0.97)
+say(v.id, 'a course read at its own top', `${at}: courseRead.ofDeckToTop ${R.ofDeckToTop}; a course yard hangs in slings under its top, so one of the two rows read is the other feature`);
+{
+const MR = mk.mastHeightsRead, file = s => String(s || '').split(' (')[0];
+if (R && R.rows && MR && MR.rows && typeof MR.rows.top === 'number' && file(R.plate) === file(MR.plate) && Math.abs(R.rows.top - MR.rows.top) > 1)
+say(v.id, 'a course and a mast read that disagree on the top', `${at}: courseRead puts the top on row ${R.rows.top} and mastHeightsRead on row ${MR.rows.top}, off the same plate (${file(R.plate)})`);
+}
 const mine = courseM.filter(o => o.userData.courseAt.mast === mi);
 if (mine.length !== 1) { say(v.id, 'a course that does not say where it hangs', `${at}: ${mine.length} course meshes record where they hang, 1 expected`); return; }
 const o = mine[0], c = o.userData.courseAt;
