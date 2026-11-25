@@ -1,0 +1,6 @@
+1 frames to capture
+    · globe-steam                  http://localhost:8149/?frozen=1#e=5&t=1870
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+captured 1

@@ -30111,3 +30111,21 @@ Proofs, all on :8150 (`webb/`):
 **r331 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r331` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁷⁶), the fluyt's topsail yards, off the same plate.**
 
 **Live stamp: docs/index.html carries data-version 1795642018 at the build.**
+
+**Live stamp VERIFIED: 1795642018 on https://augustg97.github.io/ships/index.html at 13:29 PST. The published `data/vessels.json` carries both course reads (0.879, 0.886) and the fore top's row 563.**
+
+**THE FRAMES (receipt): ALL 65 SCORED; `shipwright`, `shipwright-ahead` and `action-gravelines` ACCEPTED, all three predicted.**
+
+- **The full check** was launched at 13:26:32 and captured the 5 globe frames. It died at frame 6, `shipwright`, on the 150 s ready wait (13:31:07). The 5 were kept (`run1/`, `score-run1.out`).
+- **The other 60** were captured one process per frame from 13:31:22 to 14:07:53, the fluyt's predicted frames first, with no failure (`r330_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). Every frame was scored with r277's offline scorer.
+- **ACCEPTED, predicted** (FRAME-LOG.md):
+  - `shipwright` 0.053% / 0.019: the fluyt's rig at the left edge, x 0–66, rows 732–965. Her course yard stands higher and her course is deeper (`pair-shipwright.png`).
+  - `shipwright-ahead` 0.053% / 0.019, the same pixels.
+  - `action-gravelines` 0.108% / 0.026: the English fleet's rigs, which are drawn with the fluyt model, x 1973–2681, rows 789–973 (`pair-action-gravelines.png`).
+- **Predicted, and inside the gate:** `shipwright-furled` 0.044% / 0.016 (the same as r329's, the furled fluyt at the left edge), `shipwright-astern` 0.000%, `shipwright-hounds` 0.000%, `globe-default` 0.028%.
+- **Capture faults, inside the gate when recaptured alone:**
+  - `globe-steam` 0.116% / 0.059 in the full run: the clippers stood at other points of their voyages (the panel read 23°S 22°W where the baseline reads 30°S 20°W; `crop-globe-steam.png`). No fluyt sails in 1870. Alone it was 0.045%.
+  - `wake-plan` 10.677% with ERR_CONNECTION_RESET in its log, the fault the memory names. Alone it was 0.019%.
+  - `board-salamis` 33.214%, twice, both times with ERR_CONNECTION_RESET: the board drew the coarse terrain level (`pair-board-salamis.png`). Salamis is 480 BC and has no fluyt. A third capture alone, with no reset, was 0.000%.
+- **Inside the gate:** the other 59.
+- **No frames are left unscored for r331.**

@@ -1,0 +1,3 @@
+r330 receipt: all 65 frames scored; shipwright, shipwright-ahead and action-gravelines accepted, all three predicted (the fluyt's raised course yards at the 74's frames' left edge, and the English fleet at Gravelines drawn with the fluyt model); the full check died at shipwright on a transient ready wait and the other 60 were captured one per process with no failure; globe-steam, wake-plan and board-salamis were capture faults (clipper positions, connection resets) and inside the gate alone; live stamp 1795642018 verified
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
