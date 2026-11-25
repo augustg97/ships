@@ -29048,3 +29048,17 @@ No Sea, Action or globe frame shows either hull. The full ratchet was launched o
 **r318 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r318` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁵⁴), the short top poles. Else (0y¹⁵⁶).**
 
 **Live stamp: docs/index.html carries data-version 1795585897 at the build.**
+
+**Live stamp VERIFIED: 1795585897 on https://augustg97.github.io/ships/index.html at 21:54:38 PST, about 90 s after the push. The published `audit-hulls.js` carries A-MIZZEN-SAIL ('a lateen mizzen recorded and not built'), the published `js/hull.js` carries `lateenMizzen`, and the published `js/shipwright.js` carries the new stage-7 clause. First paint is 8.51 MB against the 8.6 MB budget.**
+
+**THE FRAMES (receipt): 57 OF 65 SCORED, 8 LEFT FOR r318.** The full check died at frame 11 (`ship-great-eastern`). `r317_resume.py` then ran three times; each run died on the 150 s FRAME_READY wait, at `aboard`, `sea-magnified` and `action-lepanto`. `page_errors.py` opened `aboard` clean, and the load was 2–7 throughout. A user Chrome was open from about 22:14. Every run was scored with r277's offline scorer (`score-run1.out` to `score-run4.out`).
+
+- **Predicted, ACCEPTED** (FRAME-LOG.md):
+  - `ship-slave-ship` 1.721% / 1.037: her lateen and her card;
+  - `shipwright` and `shipwright-ahead` 0.472% / 0.242: the 74's card, the East Indiaman's lateen at the left edge, and the steamer's r316 yards at the right edge (r316 scored them at 0.048%, inside the gate);
+  - `ship-preussen` 0.137%, `shipwright-astern` 0.126%, `shipwright-hounds` 0.123%, `ship-clipper` 0.121%: the card naming the spanker. On `shipwright-astern` there are also 207 px at the top-left edge, a spar tip from the next berth.
+
+  Recaptured after acceptance, `shipwright` scores 0.000%, and so does every accepted frame in run 2.
+- **`board-salamis` 33.214% / 9.455: capture fault.** It is the documented second-browser fault and reproduces to the pixel (memory: second-browser-fault-repeats-to-the-pixel). The frame draws no hull, so this round cannot reach it. **r318: recapture it alone** with `check --frame board-salamis`.
+- **The other 49 frames are inside the gate.** These include every berth neighbour of the two changed hulls (`ship-carrack`, `ship-galley`, `ship-galleass`, `ship-panokseon`, `ship-sekibune`) and `shipwright-furled`.
+- **UNSCORED, for r318:** `action-lepanto`, `action-myeongnyang`, `wake-plan`, `ship-ever-given`, `sea-ever-given`, `passage-sahul`, `sea-dugout-floor`, `sea-canoe-floor`. None of them draws the East Indiaman, the slave ship or a square-rigged three-master's card. Score them with `r317_resume.py <dir> run1-current run2-current run3-current run4-current`, then with r277's scorer.
