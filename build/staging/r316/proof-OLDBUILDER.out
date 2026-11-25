@@ -1,0 +1,157 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[0] (station 0.115), yard 'tg': its spar's foot -4.34 m over the cap of section 1 (38.19), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.115), yard 'ltop': drawn from 'plan' at 0.5 of the truck, y 23.66"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.115), yard 'utop': drawn from 'plan' at 0.62 of the truck, y 28.42"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.115), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 33.97"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.115), yard 'royal': drawn from 'plan' at 0.92 of the truck, y 40.31"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[1] (station 0.556), yard 'tg': its spar's foot -4.83 m over the cap of section 1 (41.73), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.556), yard 'ltop': drawn from 'plan' at 0.5 of the truck, y 25.53"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.556), yard 'utop': drawn from 'plan' at 0.62 of the truck, y 30.84"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.556), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 37.03"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.556), yard 'royal': drawn from 'plan' at 0.92 of the truck, y 44.11"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[2] (station 0.85), yard 'tg': its spar's foot -4.15 m over the cap of section 1 (36.58), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.85), yard 'ltop': drawn from 'plan' at 0.5 of the truck, y 22.65"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.85), yard 'utop': drawn from 'plan' at 0.62 of the truck, y 27.22"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.85), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 32.54"
+ },
+ {
+  "id": "clipper",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.85), yard 'royal': drawn from 'plan' at 0.92 of the truck, y 38.63"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[0] (station 0.13), yard 'tg': its spar's foot -4.03 m over the cap of section 1 (38.39), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.13), yard 'ltop': drawn from 'plan' at 0.5 of the truck, y 24.97"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.13), yard 'utop': drawn from 'plan' at 0.62 of the truck, y 29.36"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.13), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 34.50"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[1] (station 0.38), yard 'tg': its spar's foot -4.63 m over the cap of section 1 (42.58), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.38), yard 'ltop': drawn from 'plan' at 0.5 of the truck, y 27.14"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.38), yard 'utop': drawn from 'plan' at 0.62 of the truck, y 32.20"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[1] (station 0.38), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 38.10"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[2] (station 0.61), yard 'tg': its spar's foot -4.23 m over the cap of section 1 (39.39), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.61), yard 'ltop': drawn from 'plan' at 0.5 of the truck, y 25.29"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.61), yard 'utop': drawn from 'plan' at 0.62 of the truck, y 29.91"
+ },
+ {
+  "id": "steamer",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[2] (station 0.61), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 35.30"
+ },
+ {
+  "id": "endurance",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[0] (station 0.209), yard 'top': its spar's foot -1.27 m over the cap of section 0 (21.01), under which a yard riding section 1 cannot travel"
+ },
+ {
+  "id": "endurance",
+  "rule": "a set hoisting yard inside the doubling",
+  "detail": "masts[0] (station 0.209), yard 'tg': its spar's foot -3.52 m over the cap of section 1 (30.03), under which a yard riding section 2 cannot travel"
+ },
+ {
+  "id": "endurance",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.209), yard 'top': drawn from 'plan' at 0.55 of the truck, y 19.86"
+ },
+ {
+  "id": "endurance",
+  "rule": "a doubled-rig yard hung at the plan's fraction",
+  "detail": "masts[0] (station 0.209), yard 'tg': drawn from 'plan' at 0.76 of the truck, y 26.61"
+ }
+]

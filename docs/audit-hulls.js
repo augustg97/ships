@@ -5245,9 +5245,44 @@ if (want === null && f.from === 'record')
 say(v.id, 'a yard fraction drawn with no record', `${tk}: drawn as the record's ${f.frac} and the record gives no fraction for this yard`);
 if (Math.abs(o.position.y - f.y) > 0.02)
 say(v.id, 'a yard drawn off its record', `${tk}: the mesh sits at y ${o.position.y.toFixed(3)} and its own record says ${f.y.toFixed(3)}`);
-if (f.hoist === 'fixed' && Math.abs(o.position.y - (f.base + f.T * f.frac)) > 0.05)
+if (f.hoist === 'fixed' && f.from !== 'section' && Math.abs(o.position.y - (f.base + f.T * f.frac)) > 0.05)
 say(v.id, 'a fixed yard off its fraction', `${tk}: at y ${o.position.y.toFixed(3)}; base ${f.base.toFixed(2)} + T ${f.T.toFixed(2)} x ${f.frac} = ${(f.base + f.T * f.frac).toFixed(3)}`);
 }
+});
+}
+{
+const segBy = {}; g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg) (segBy[sg.mi] = segBy[sg.mi] || [])[sg.si] = sg; });
+const yd = []; g.traverse(o => { if (o.isMesh && (o.userData.yardFrac || o.userData.lowered) && o.userData.slung) yd.push(o); });
+const HO = { utop: 1, top: 1, tg: 2, utg: 2, royal: 2 }, FX = { ltop: 0, ltg: 1 };
+(H.masts || []).forEach((mk, mi) => {
+if (mk.rig !== 'square') return;
+const sg = (segBy[mi] || []).filter(Boolean), last = sg.length - 1, at = `masts[${mi}] (station ${mk.at})`;
+const mine = yd.filter(o => (o.userData.yardFrac ? o.userData.yardFrac.mast : o.userData.lowered.mast) === mi);
+for (const o of mine) {
+const L = o.userData.lowered, f = o.userData.yardFrac;
+if (!L || L.lowered !== false || (f && f.from === 'record')) continue;
+const sc = Math.min(L.tie, last); if (sc < 1 || !sg[sc - 1]) continue;
+const R = o.userData.slung.yardR, clear = o.position.y - R - sg[sc - 1].headY;
+if (clear < 0.05)
+say(v.id, 'a set hoisting yard inside the doubling', `${at}, yard '${f ? f.name : 'tier ' + L.tie}': its spar's foot ${clear.toFixed(2)} m over the cap of section ${sc - 1} (${sg[sc - 1].headY.toFixed(2)}), under which a yard riding section ${sc} cannot travel`);
+}
+if (!Array.isArray(mk.yards) || last < 1) return;
+const rec = mk.yardFracs || {};
+if (Object.keys(rec).some(nm => nm !== 'course' && mk.yards.includes(nm))) return;
+const groups = {};
+for (const o of mine) {
+const f = o.userData.yardFrac; if (!f || f.name === 'course') continue;
+const tk = `${at}, yard '${f.name}'`, R = o.userData.slung.yardR, y = o.position.y;
+if (f.from !== 'section') { say(v.id, "a doubled-rig yard hung at the plan's fraction", `${tk}: drawn from '${f.from}' at ${f.frac} of the truck, y ${y.toFixed(2)}`); continue; }
+if (FX[f.name] !== undefined) { const k = FX[f.name]; if (k >= last) continue;
+const want = sg[k].headY + R + 0.02;
+if (Math.abs(y - want) > 0.03) say(v.id, 'a fixed yard off its cap', `${tk}: y ${y.toFixed(3)}, the cap of section ${k} at ${sg[k].headY.toFixed(3)} puts it at ${want.toFixed(3)}`);
+} else if (HO[f.name]) { const sc = Math.min(HO[f.name], last); (groups[sc] = groups[sc] || []).push(o); }
+}
+Object.keys(groups).forEach(k => { const sc = +k, top = groups[k].reduce((a, b) => b.position.y > a.position.y ? b : a);
+const want = sg[sc].headY - 0.12 * (sg[sc].headY - sg[sc].footY);
+if (Math.abs(top.position.y - want) > 0.03)
+say(v.id, 'a set hoisting yard not atrip', `${at}, yard '${top.userData.yardFrac.name}': y ${top.position.y.toFixed(3)}, 0.88 of section ${sc} is ${want.toFixed(3)}`); });
 });
 }
 const yardLowerRead = (G, STATE) => {
@@ -7548,7 +7583,7 @@ if (out < 0) say(v.id, 'a furled lateen roll hung inboard of its yard', `the rol
 {
 const furlsF = [];
 gf.traverse(o => { if (o.isMesh && o.geometry && o.userData.kind === 'furl') {
-const pts = YF.hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsF.push({ c: fc, pts }); } });
+const pts = YF.hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsF.push({ c: fc, pts, on: o.userData.onYard || null }); } });
 for (const yd of YF.yards) {
 if (!(yd.athwart || yd.slung)) continue;
 const c = yd.c; let seg = null, n = null;
@@ -7557,7 +7592,8 @@ if (!n || d < n.d) n = { m, d }; if (d <= 1.5 && t >= -0.02 && t <= m.span + 0.0
 if (!n || n.d > 1.5) continue;
 const m = (seg || n).m;
 const at = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)}`;
-const rolls = furlsF.filter(f => Math.abs(f.c.y - c.y) <= 1.5 && Math.abs(f.c.x - c.x) <= 1.5 && Math.abs(f.c.z - c.z) <= 1.5);
+const rolls = furlsF.filter(f => Math.abs(f.c.y - c.y) <= 1.5 && Math.abs(f.c.x - c.x) <= 1.5 && Math.abs(f.c.z - c.z) <= 1.5
+&& (!f.on || (Math.abs(f.on.y - c.y) <= 0.05 && Math.abs(f.on.x - c.x) <= 0.05)));
 if (yd.bare) continue;
 if (!rolls.length) { say(v.id, 'a furled square yard with no roll on it', `${at} has no furled roll within 1.5 m of its centre`); continue; }
 for (const f of rolls) {

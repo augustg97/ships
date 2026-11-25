@@ -2659,6 +2659,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
          fraction hangs the yard inside the doubling) cannot come down and is recorded as not lowered.
          The roll keeps the cloth of the SET sail, so its size is read from where the yard is hoisted to
          set, and the sail below keeps its own depth. CLASS: one plate reads it, for one ship. */
+      /* r316 (0y¹⁵⁰): a doubled rig's fixed yard rests on its cap, one radius plus 0.02 m over it: the rest a
+         lowered yard takes (below), so the two rules read one height */
+      if (fracRec && typeof fracRec.onCap === 'number') yy = fracRec.onCap + slingsD / 2 + 0.02;
       const setY = yy;
       let loweredRec = null;
       const readHere = !!(fracRec && fracRec.from === 'record');
@@ -2864,7 +2867,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
       } else if (FURLED) {
         /* the roll lies along the braced yard itself, between its arms, bunt at the slings */
         const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
-        sails.push(makeFurl(
+        /* r316 (0y¹⁵⁰): the roll records the yard it is bent to. A lowered upper topsail yard now rests 1.1 m over the
+           fixed lower topsail yard, so two rolls lie within reach of each yard, and only the record says which is whose */
+        const onYard = fm => { fm.userData.onYard = { x: +ym.position.x.toFixed(3), y: +yY.toFixed(3), mast: mi }; return fm; };
+        sails.push(onYard(makeFurl(
           new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
           new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
           (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true,
@@ -2877,7 +2883,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
                     lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs,
                     card: 'A square sail is rolled onto the TOP of its yard and the gaskets passed '
                       + 'round both; the bunt, the body of the cloth, is triced up at the slings, on '
-                      + 'the yard before the mast.' } }));
+                      + 'the yard before the mast.' } })));
       } else {
         /* ── THE TIER'S REEF BANDS (r284, 0y⁸⁹) ────────────────────────────────────────────
            A square sail is shortened by REEFING: a band of doubled cloth is sewn across it at the
@@ -3550,13 +3556,56 @@ function buildRig(S, group, mats, FINE, FURLED) {
          is here so a plate read of any yard's height goes into the record and not into this table. The order of the
          yards up the mast follows the fractions actually used, so a record cannot cross them out of sequence silently. */
       const fracOf = nm => (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? mk.yardFracs[nm] : PLAN[nm][0];
-      mk.yards.filter(nm => PLAN[nm])
-        .sort((a, b) => fracOf(a) - fracOf(b))
-        .forEach(nm => { const [, r, kind] = PLAN[nm], f = fracOf(nm);
-          crossYard(base + T * f, courseL * r,
-                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm,
-                    { name: nm, kind, frac: f, from: (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? 'record' : 'plan',
-                      base, T, hoist: HOIST[nm] === 'fixed' ? 'fixed' : 'tie', mast: mi }); });
+      const isRec = nm => !!(mk.yardFracs && typeof mk.yardFracs[nm] === 'number');
+      const order = mk.yards.filter(nm => PLAN[nm]).sort((a, b) => fracOf(a) - fracOf(b));
+      /* ── r316 (0y¹⁵⁰): ABOVE THE COURSE, A DOUBLED RIG'S YARDS HANG FROM THE MAST'S OWN SECTIONS ─────────
+         The plan's fractions of the truck were written for a stack whose caps stand at about 0.50 and 0.73 of
+         it, which is where they put the lower topsail and lower topgallant, the yards fixed at the caps. The
+         builder's stack puts the caps higher: the clipper's fore lower cap at 0.59 of the truck, her topmast
+         cap at 0.87. So the lower topsail yard hung 3.4 m under the cap it is fixed to, the upper topsail
+         came down 1.1-1.3 m onto that cap when furled, and the topgallant and Endurance's topsail and
+         topgallant hung inside the doublings, under the cap of the section below the one they ride, where
+         no yard can travel. Now:
+         - a FIXED yard (ltop, ltg) rests on the cap of the section it is fixed to: Howes' rig hangs the
+           lower topsail yard on the lower cap, the lower topgallant on the topmast cap (Research/MASTHEADS.md §4).
+         - a HOISTING yard is set ATRIP: Falconer 1769, "The top-sails are said to be atrip, when they are
+           hoisted up to the mast-head, or to their utmost extent" (build/staging/r172/falconer.txt line
+           2121). The highest hoisting yard on a section stands at 0.88 of that section, under the heel of
+           the section above, which is where the one-yard-per-segment rig already sets every upper yard
+           (y + seg x 0.88, above), so both rig paths set the same spar at the same height. Two hoisting
+           yards on one section (the clipper's topgallant and royal share her top pole) divide its run
+           above the cap below in equal parts, the higher at 0.88: CLASS, no plate read.
+         The course keeps its plan fraction or its plate read. A mast whose record reads any yard above the
+         course off a plate (Preussen) keeps every yard where the record hangs it. */
+      const anyRead = order.some(nm => nm !== 'course' && isRec(nm));
+      const FIXED_ON = { ltop: 0, ltg: 1 };
+      const placed = {};
+      const lastSec = segHeads.length - 1;
+      if (!anyRead && lastSec >= 1) {
+        const groups = {};
+        order.forEach(nm => {
+          if (nm === 'course') return;
+          if (FIXED_ON[nm] !== undefined) {
+            const k = FIXED_ON[nm];
+            if (k < lastSec) placed[nm] = { onCap: segHeads[k], sec: k + 1, rule: 'fixed on the cap of section ' + k };
+            return;
+          }
+          const sc = Math.min(HOIST[nm].tie, lastSec);
+          (groups[sc] = groups[sc] || []).push(nm);
+        });
+        Object.keys(groups).forEach(k => { const sc = +k, G = groups[k];
+          const atrip = segHeads[sc] - 0.12 * segs[sc], floor = segHeads[sc - 1];
+          G.forEach((nm, i) => { placed[nm] = { atY: floor + (atrip - floor) * (i + 1) / G.length, sec: sc, atrip, floor,
+            rule: G.length === 1 ? 'atrip at 0.88 of section ' + sc : 'section ' + sc + ' shared by ' + G.length + ' hoisting yards, ' + (i + 1) + ' of ' + G.length + ' parts of its run over the cap below' }; });
+        });
+      }
+      order.forEach(nm => { const [, r, kind] = PLAN[nm], f = fracOf(nm), pl = placed[nm];
+          const rec = { name: nm, kind, frac: f, from: isRec(nm) ? 'record' : pl ? 'section' : 'plan',
+                        base, T, hoist: HOIST[nm] === 'fixed' ? 'fixed' : 'tie', mast: mi };
+          if (pl) Object.assign(rec, { sec: pl.sec, rule: pl.rule, planY: +(base + T * f).toFixed(3) },
+                                     pl.onCap !== undefined ? { onCap: +pl.onCap.toFixed(3) } : { atrip: +pl.atrip.toFixed(3), floorY: +pl.floor.toFixed(3) });
+          crossYard(pl && pl.atY !== undefined ? pl.atY : base + T * f, courseL * r,
+                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm, rec); });
     }
 
     /* ── THE GEAR THE YARDS ARE WORKED BY ──────────────────────────────────────────────

@@ -1,0 +1,10 @@
+OLDBUILDER-OLDAUDIT rc=0 checked 33 hulls, 0 problems
+OLDBUILDER rc=1 checked 33 hulls, 31 problems
+variant NOTATRIP
+NOTATRIP rc=1 checked 33 hulls, 14 problems
+variant OFFCAP
+OFFCAP rc=1 checked 33 hulls, 6 problems
+variant NOROLLREC
+NOROLLREC rc=1 checked 33 hulls, 18 problems
+FINAL rc=0 checked 33 hulls, 0 problems
+restored

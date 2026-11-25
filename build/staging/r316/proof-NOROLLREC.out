@@ -1,0 +1,92 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (-24.85, 27.23) on the mast at foot x -24.45 comes no nearer than 0.955 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (-24.85, 28.34) on the mast at foot x -24.45 has its centre 0.776 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (-24.93, 38.32) on the mast at foot x -24.66 comes no nearer than 0.610 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (-24.91, 39.05) on the mast at foot x -24.66 comes no nearer than 0.053 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (-24.91, 39.05) on the mast at foot x -24.66 has its centre 0.507 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (3.89, 30.73) on the mast at foot x 4.10 has its centre 0.841 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (4.39, 41.89) on the mast at foot x 4.58 comes no nearer than 0.670 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (4.45, 42.68) on the mast at foot x 4.58 comes no nearer than 0.066 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (4.45, 42.68) on the mast at foot x 4.58 has its centre 0.548 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (23.06, 26.08) on the mast at foot x 23.11 comes no nearer than 0.978 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (23.17, 27.19) on the mast at foot x 23.11 comes no nearer than 0.084 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (23.17, 27.19) on the mast at foot x 23.11 has its centre 0.793 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (24.09, 36.73) on the mast at foot x 24.14 comes no nearer than 0.614 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the yard centred at (24.18, 37.46) on the mast at foot x 24.14 comes no nearer than 0.117 m to the yard's surface"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (24.18, 37.46) on the mast at foot x 24.14 has its centre 0.520 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "steamer",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (-34.33, 29.41) on the mast at foot x -34.14 has its centre 0.730 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "steamer",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (-10.51, 32.19) on the mast at foot x -10.28 has its centre 0.789 m BELOW the yard's along the mast's axis"
+ },
+ {
+  "id": "steamer",
+  "rule": "a furled roll hung under its yard",
+  "detail": "the roll on the yard centred at (10.60, 29.93) on the mast at foot x 10.81 has its centre 0.750 m BELOW the yard's along the mast's axis"
+ }
+]

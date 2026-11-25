@@ -1,0 +1,32 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a fixed yard off its cap",
+  "detail": "masts[0] (station 0.115), yard 'ltop': y 27.465, the cap of section 0 at 27.057 puts it at 27.241"
+ },
+ {
+  "id": "clipper",
+  "rule": "a fixed yard off its cap",
+  "detail": "masts[1] (station 0.556), yard 'ltop': y 29.747, the cap of section 0 at 29.301 puts it at 29.504"
+ },
+ {
+  "id": "clipper",
+  "rule": "a fixed yard off its cap",
+  "detail": "masts[2] (station 0.85), yard 'ltop': y 26.311, the cap of section 0 at 25.877 puts it at 26.055"
+ },
+ {
+  "id": "steamer",
+  "rule": "a fixed yard off its cap",
+  "detail": "masts[0] (station 0.13), yard 'ltop': y 28.520, the cap of section 0 at 28.083 puts it at 28.278"
+ },
+ {
+  "id": "steamer",
+  "rule": "a fixed yard off its cap",
+  "detail": "masts[1] (station 0.38), yard 'ltop': y 31.193, the cap of section 0 at 30.728 puts it at 30.949"
+ },
+ {
+  "id": "steamer",
+  "rule": "a fixed yard off its cap",
+  "detail": "masts[2] (station 0.61), yard 'ltop': y 29.011, the cap of section 0 at 28.564 puts it at 28.768"
+ }
+]

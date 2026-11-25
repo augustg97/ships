@@ -1501,6 +1501,7 @@ const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
 : yardLen * (RATE[kind] || 0.625) / 36;
+if (fracRec && typeof fracRec.onCap === 'number') yy = fracRec.onCap + slingsD / 2 + 0.02;
 const setY = yy;
 let loweredRec = null;
 const readHere = !!(fracRec && fracRec.from === 'record');
@@ -1621,7 +1622,8 @@ mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: s
 if (bareRec) {
 } else if (FURLED) {
 const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
-sails.push(makeFurl(
+const onYard = fm => { fm.userData.onYard = { x: +ym.position.x.toFixed(3), y: +yY.toFixed(3), mast: mi }; return fm; };
+sails.push(onYard(makeFurl(
 new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
 new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
 (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true,
@@ -1630,7 +1632,7 @@ sparRAt: t => (slingsD / 2) * taperK(Math.min(1, Math.abs(2 * t - 1) * 0.96)),
 lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs,
 card: 'A square sail is rolled onto the TOP of its yard and the gaskets passed '
 + 'round both; the bunt, the body of the cloth, is triced up at the slings, on '
-+ 'the yard before the mast.' } }));
++ 'the yard before the mast.' } })));
 } else {
 const RF = (mk.reefs && (mk.reefs[listName || kind] || mk.reefs[kind])) || null;
 const rbands = RF && Array.isArray(RF.bands) ? RF.bands.filter(b => b > 0.02 && b < 0.98) : [];
@@ -1988,13 +1990,37 @@ top: { tie: 1 }, utop: { tie: 1 },
 tg: { tie: 2 }, utg: { tie: 2 }, royal: { tie: 2 } };
 const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
 const fracOf = nm => (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? mk.yardFracs[nm] : PLAN[nm][0];
-mk.yards.filter(nm => PLAN[nm])
-.sort((a, b) => fracOf(a) - fracOf(b))
-.forEach(nm => { const [, r, kind] = PLAN[nm], f = fracOf(nm);
-crossYard(base + T * f, courseL * r,
-kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm,
-{ name: nm, kind, frac: f, from: (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? 'record' : 'plan',
-base, T, hoist: HOIST[nm] === 'fixed' ? 'fixed' : 'tie', mast: mi }); });
+const isRec = nm => !!(mk.yardFracs && typeof mk.yardFracs[nm] === 'number');
+const order = mk.yards.filter(nm => PLAN[nm]).sort((a, b) => fracOf(a) - fracOf(b));
+const anyRead = order.some(nm => nm !== 'course' && isRec(nm));
+const FIXED_ON = { ltop: 0, ltg: 1 };
+const placed = {};
+const lastSec = segHeads.length - 1;
+if (!anyRead && lastSec >= 1) {
+const groups = {};
+order.forEach(nm => {
+if (nm === 'course') return;
+if (FIXED_ON[nm] !== undefined) {
+const k = FIXED_ON[nm];
+if (k < lastSec) placed[nm] = { onCap: segHeads[k], sec: k + 1, rule: 'fixed on the cap of section ' + k };
+return;
+}
+const sc = Math.min(HOIST[nm].tie, lastSec);
+(groups[sc] = groups[sc] || []).push(nm);
+});
+Object.keys(groups).forEach(k => { const sc = +k, G = groups[k];
+const atrip = segHeads[sc] - 0.12 * segs[sc], floor = segHeads[sc - 1];
+G.forEach((nm, i) => { placed[nm] = { atY: floor + (atrip - floor) * (i + 1) / G.length, sec: sc, atrip, floor,
+rule: G.length === 1 ? 'atrip at 0.88 of section ' + sc : 'section ' + sc + ' shared by ' + G.length + ' hoisting yards, ' + (i + 1) + ' of ' + G.length + ' parts of its run over the cap below' }; });
+});
+}
+order.forEach(nm => { const [, r, kind] = PLAN[nm], f = fracOf(nm), pl = placed[nm];
+const rec = { name: nm, kind, frac: f, from: isRec(nm) ? 'record' : pl ? 'section' : 'plan',
+base, T, hoist: HOIST[nm] === 'fixed' ? 'fixed' : 'tie', mast: mi };
+if (pl) Object.assign(rec, { sec: pl.sec, rule: pl.rule, planY: +(base + T * f).toFixed(3) },
+pl.onCap !== undefined ? { onCap: +pl.onCap.toFixed(3) } : { atrip: +pl.atrip.toFixed(3), floorY: +pl.floor.toFixed(3) });
+crossYard(pl && pl.atY !== undefined ? pl.atY : base + T * f, courseL * r,
+kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm, rec); });
 }
 if (FINE && mk.rig === 'square' && mastYards.length) {
 const mx = mxA;

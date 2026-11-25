@@ -1,0 +1,72 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[0] (station 0.115), yard 'utop': y 35.404, 0.88 of section 1 is 36.523"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[0] (station 0.115), yard 'royal': y 42.087, 0.88 of section 2 is 42.647"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[1] (station 0.556), yard 'utop': y 38.637, 0.88 of section 1 is 39.868"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[1] (station 0.556), yard 'royal': y 46.091, 0.88 of section 2 is 46.706"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[2] (station 0.85), yard 'utop': y 33.928, 0.88 of section 1 is 34.975"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[2] (station 0.85), yard 'royal': y 40.341, 0.88 of section 2 is 40.862"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[0] (station 0.13), yard 'utop': y 35.826, 0.88 of section 1 is 36.846"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[0] (station 0.13), yard 'tg': y 42.009, 0.88 of section 2 is 42.517"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[1] (station 0.38), yard 'utop': y 39.633, 0.88 of section 1 is 40.806"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[1] (station 0.38), yard 'tg': y 46.743, 0.88 of section 2 is 47.327"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[2] (station 0.61), yard 'utop': y 36.695, 0.88 of section 1 is 37.766"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[2] (station 0.61), yard 'tg': y 43.187, 0.88 of section 2 is 43.720"
+ },
+ {
+  "id": "endurance",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[0] (station 0.209), yard 'top': y 27.772, 0.88 of section 1 is 28.679"
+ },
+ {
+  "id": "endurance",
+  "rule": "a set hoisting yard not atrip",
+  "detail": "masts[0] (station 0.209), yard 'tg': y 33.188, 0.88 of section 2 is 33.642"
+ }
+]
