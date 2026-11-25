@@ -29711,3 +29711,16 @@ The rule's three proofs:
 **r326 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r326` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁶⁸).**
 
 **Live stamp: docs/index.html carries data-version 1795620710 at the build.**
+
+**Live stamp VERIFIED: 1795620710 on https://augustg97.github.io/ships/index.html at about 07:40 PST. The Pages deploy finished in 1 min 43 s after the push at 07:32. The published `vessels.json` carries `topmastTop.ofLowerTop` 0.462 / 0.476 on both ships' fore and main.**
+
+**For (0y¹⁶⁸):** the square sail's cloth is built by `makeSail` (hull.js, about line 5844), called from `crossYard` (about line 2936) with the yard's x and height and the sail's width and depth. `sailPt` (about line 3778) samples the same belly for the clewlines and buntlines, so a change to the cloth's shape must be made there too, or the lines will stand off the cloth. The tops' heights and radii are on `userData` (`topmastTop` on the new tops; the lower top is `buildTop` at 0.90 of the lower mast, radius beam × 0.20).
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The full check was launched at 07:31 and captured 27 frames. It died at frame 28, `aboard-off`, on the 150 s ready wait (07:50), as r320's to r324's runs did. The 27 were kept (`run1/`, `score-run1.out`). The 38 it never reached were captured one process per frame with no failure (`r325_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). Every frame was scored with r277's offline scorer.
+
+- **ACCEPTED, predicted** (FRAME-LOG.md): `ship-slave-ship`, 0.254% / 0.137. On the fore and main topmasts a small round walled top replaces the crosstrees bar and stands about 0.8 m lower (`pair-ship-slave-ship.png`, before on the left).
+- **CAPTURE FAULT:** `wake-plan`, 10.677% / 4.807 in `run2`. The container ship stood at 8°32′S 110°38′E where the baseline has 2°30′S 99°14′E, and the capture log shows `ERR_CONNECTION_RESET` and `ERR_SOCKET_NOT_CONNECTED` on resource loads. This round's change cannot reach that ship. Recaptured alone at 08:13, it is 0.019% / 0.004, inside the gate (`run3/`, `score-run3.out`). Not accepted.
+- **Predicted, and did not move:** `ship-galley`, `ship-galleass`, `ship-carrack`, `shipwright`, `shipwright-ahead`, `shipwright-astern`, `shipwright-furled`, `shipwright-hounds` and `globe-default`, all inside the gate.
+- **Inside the gate:** the other 63.
+- The run did not reach its end, so the harness's console-error list was not printed.
+- **No frames are left unscored for r326.**
