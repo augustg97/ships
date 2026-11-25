@@ -9,7 +9,12 @@
   aboard-wyoming                 0.000%  0.000 ok
   aboard-yamato                  0.020%  0.005 ok
   aboard                         0.015%  0.004 ok
+  action-gravelines              0.002%  0.000 ok
+  action-lepanto                 0.003%  0.001 ok
+  action-myeongnyang             0.033%  0.006 ok
+  action-salamis                 0.002%  0.001 ok
   action                         0.002%  0.001 ok
+  board-salamis                  0.000%  0.000 ok
   descent-coast                  0.016%  0.003 ok
   descent-high                   0.013%  0.003 ok
   descent                        0.014%  0.004 ok
@@ -50,4 +55,4 @@
   shipwright-furled              0.000%  0.000 ok
   shipwright-hounds              0.000%  0.000 ok
   shipwright                     0.000%  0.000 ok
-52 frames scored offline, 1 beyond the gate
+57 frames scored offline, 1 beyond the gate
