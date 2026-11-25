@@ -354,6 +354,8 @@
     const HSlo = (H.masts || []).some(mk => mk.truckWLM !== undefined) ? SHIPS_HULL.hullSurface(H) : null;
     const lowerOf = mk => {
       if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;   // r318
+      if (mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+        return mk.mastHeightsM.top / mk.lateenTopmast.topOfLower;   // r329, hull.js mastLowerOf
       if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
         return mk.truckM * mk.capFrac;                       // r304, hull.js mastLowerOf
       if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
@@ -7737,7 +7739,7 @@
           if (!/^(READ|RECORD|CONTESTED|CLASS)/.test(pv || '')) { say(v.id, 'a mast beside a Vasa read with no height answer', `${at}: mastHeightsProvenance is ${pv ? "'" + pv.slice(0, 12) + "'" : 'absent'}`); return; }
           if (/^READ/.test(pv) !== !!rd) { say(v.id, 'a mast read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and mastHeightsRead is ${rd ? 'present' : 'absent'}`); return; }
           if (!rd) return;
-          const sh = rd.ofForeMizzenSpacing || {}, span = rd.feetPx[0] - rd.feetPx[1], MH = mk.mastHeightsM || {};
+          const sh = rd.ofForeMizzenSpacing || {}, span = Math.abs(rd.feetPx[0] - rd.feetPx[1]), MH = mk.mastHeightsM || {};   /* r329: Hollar's bow is at the left */
           for (const k of Object.keys(sh)) {
             const fromRows = (rd.foot[1] - rd.rows[k]) / span;
             if (Math.abs(fromRows - sh[k]) > 0.0005)

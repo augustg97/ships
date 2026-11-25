@@ -2306,6 +2306,10 @@ function squareStackOf(mk, lower) {
 }
 function mastLowerOf(mk, steelMain, footY) {
   if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
+  /* r329 (0y¹⁷¹): a lateen mizzen that carries a top (lateenTopmast, r328) and a recorded top height is drawn to it:
+     the top stands at its own topOfLower share of the lower pole, so the pole is the top's height over that share. */
+  if (mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+    return mk.mastHeightsM.top / mk.lateenTopmast.topOfLower;
   if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
     return mk.truckM * mk.capFrac;
   if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))

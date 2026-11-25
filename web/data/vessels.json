@@ -2784,9 +2784,39 @@
             "shrouds": 4,
             "only": 3,
             "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
-            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together.",
+            "mastHeightsProvenance": "READ, r329 (0y¹⁷¹): the top 8.37 m, the topmast's head 17.1 m and the head of the pole above it (built as the topgallant mast) 20.53 m over the foot of the mast. Each is a share of the distance between the fore and mizzen masts' feet (0.3887, 0.7941, 0.9537), times that distance on this hull's built masts (21.53 m). Read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left): the fore and mizzen masts meet the deck at columns 724 and 1501, 777 px apart; the deck at this mast is taken at the foot of the forecastle rail's lattice, where the mast stands on the forecastle deck (row 902, to about 8 px); the top platform is on row 600, the topmast's head, where its shrouds meet under the cap, on row 285, and the head of the pole above it on row 161. Under sail Hollar draws that pole bare, with a pennant on it and no yard crossed; his second fluyt plate of 1647 (the fluyts at anchor, 'vulgo VLIETEN', build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant masts with yards crossed on the fore and the main. So the pole is built as the topgallant mast, and the three tiers stand. The tops and caps are read to about 5 px, 0.006 of the span. The datum is the masts' feet, as on the East Indiaman and the slave ship (r322). CONTESTED datum: the plate's own spacing of the main between the fore and the mizzen (0.539 of the span) differs from this hull's stations (0.606), and Hollar draws the ship a little from forward of the beam, so the horizontal span is foreshortened and these heights may be a few per cent high. Until r329 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 150 years later; the lower tops stood 4.4 to 5.7 m higher. The hull is dated 1620 and the plate 1647.",
             "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it.",
-            "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read."
+            "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read.",
+            "mastHeightsM": {
+              "top": 8.37,
+              "crosstrees": 17.1,
+              "truck": 20.53
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.3887,
+                "crosstrees": 0.7941,
+                "truck": 0.9537
+              },
+              "spacingM": 21.53,
+              "rows": {
+                "top": 600,
+                "crosstrees": 285,
+                "truck": 161
+              },
+              "foot": [
+                724,
+                902
+              ],
+              "feetPx": [
+                724,
+                1501
+              ],
+              "boundOfSpacing": 0.006,
+              "boundM": 0.05,
+              "plate": "build/staging/r328/dl/hollar-flute.jpg (Hollar 1647, 1920 px)",
+              "script": "build/staging/r329/r329_edit.py"
+            }
           },
           {
             "at": 0.556,
@@ -2796,9 +2826,39 @@
             "shrouds": 5,
             "only": 3,
             "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
-            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together.",
+            "mastHeightsProvenance": "READ, r329 (0y¹⁷¹): the top 11.22 m, the topmast's head 20.53 m and the head of the pole above it (built as the topgallant mast) 24.55 m over the foot of the mast. Each is a share of the distance between the fore and mizzen masts' feet (0.5212, 0.9537, 1.1403), times that distance on this hull's built masts (21.53 m). Read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left): the fore and mizzen masts meet the deck at columns 724 and 1501, 777 px apart; the deck at this mast is taken at the waist rail, where the mast comes out from behind it (row 933). The waist deck is hidden behind the bulwark, and the men in the waist show only their heads over the rail, so the deck may lie up to about 30 px (0.8 m) lower; the top platform is on row 528, the topmast's head, where its shrouds meet under the cap, on row 192, and the head of the pole above it on row 47. Under sail Hollar draws that pole bare, with a pennant on it and no yard crossed; his second fluyt plate of 1647 (the fluyts at anchor, 'vulgo VLIETEN', build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant masts with yards crossed on the fore and the main. So the pole is built as the topgallant mast, and the three tiers stand. The pole's head is drawn against the plate's top border line (row 43), so it may stand a few pixels higher than read. The tops and caps are read to about 5 px, 0.006 of the span. The datum is the masts' feet, as on the East Indiaman and the slave ship (r322). CONTESTED datum: the plate's own spacing of the main between the fore and the mizzen (0.539 of the span) differs from this hull's stations (0.606), and Hollar draws the ship a little from forward of the beam, so the horizontal span is foreshortened and these heights may be a few per cent high. Until r329 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 150 years later; the lower tops stood 4.4 to 5.7 m higher. The hull is dated 1620 and the plate 1647.",
             "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it.",
-            "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read."
+            "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read.",
+            "mastHeightsM": {
+              "top": 11.22,
+              "crosstrees": 20.53,
+              "truck": 24.55
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.5212,
+                "crosstrees": 0.9537,
+                "truck": 1.1403
+              },
+              "spacingM": 21.53,
+              "rows": {
+                "top": 528,
+                "crosstrees": 192,
+                "truck": 47
+              },
+              "foot": [
+                1143,
+                933
+              ],
+              "feetPx": [
+                724,
+                1501
+              ],
+              "boundOfSpacing": 0.006,
+              "boundM": 0.05,
+              "plate": "build/staging/r328/dl/hollar-flute.jpg (Hollar 1647, 1920 px)",
+              "script": "build/staging/r329/r329_edit.py"
+            }
           },
           {
             "at": 0.85,
@@ -2850,7 +2910,7 @@
               }
             },
             "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1595-1700 and has no plate of its own; the read is Vasa's, applied to it.",
-            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together.",
+            "mastHeightsProvenance": "READ, r329 (0y¹⁷¹): the top 7.76 m over the foot of the mast. Each is a share of the distance between the fore and mizzen masts' feet (0.3604), times that distance on this hull's built masts (21.53 m). Read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left): the fore and mizzen masts meet the deck at columns 724 and 1501, 777 px apart; the deck at this mast is taken at row 868, between the row where the pole comes out of the poop rail (860) and the feet of the men on the poop (878), as r328 read it; the top platform is on row 588. The topmast above the top keeps its own read (lateenTopmast, r328), which is a share of this height, so it comes down with it. The tops and caps are read to about 5 px, 0.006 of the span. The datum is the masts' feet, as on the East Indiaman and the slave ship (r322). CONTESTED datum: the plate's own spacing of the main between the fore and the mizzen (0.539 of the span) differs from this hull's stations (0.606), and Hollar draws the ship a little from forward of the beam, so the horizontal span is foreshortened and these heights may be a few per cent high. Until r329 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 150 years later; the lower tops stood 4.4 to 5.7 m higher. The hull is dated 1620 and the plate 1647.",
             "lateenTopmast": {
               "topOfLower": 0.9,
               "headOverTop": 0.586,
@@ -2873,7 +2933,31 @@
               "pxPerM": 37
             },
             "mizzenTopsail": false,
-            "mizzenTopsailProvenance": "PLATE READ, r328 (0y¹⁶³): read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET' (etching, 1647; Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, about 37 px/m along the hull at the record's 32 m). The mizzen sets a lateen from a lower pole. At the pole's head is a small round top, 40 px wide. Above the top stands a topmast with shrouds to its head and a pennant staff over it, and it crosses no yard. So the fluyt sets no mizzen topsail, and she carries a top and a bare topmast. Rows on that copy: the top at 588; the topmast's head, where its shrouds meet, at 424; the staff's end at 349. The deck at the mizzen is hidden behind the poop rail. It is taken at 868 ± 10, between the row where the pole comes out of the rail (860) and the feet of the men standing on the poop (878). The topmast's head therefore stands 0.586 (0.556-0.620) of the top's height over the deck above the top. The top is 0.143 of that height across. The top stands at 0.90 of the lower mast, the height the r321 lateen read already keys the yard to; the plate cannot set it independently, because the deck is hidden. The pennant staff is not drawn. Hollar's plate is dated 1647 and the hull 1620."
+            "mizzenTopsailProvenance": "PLATE READ, r328 (0y¹⁶³): read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET' (etching, 1647; Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, about 37 px/m along the hull at the record's 32 m). The mizzen sets a lateen from a lower pole. At the pole's head is a small round top, 40 px wide. Above the top stands a topmast with shrouds to its head and a pennant staff over it, and it crosses no yard. So the fluyt sets no mizzen topsail, and she carries a top and a bare topmast. Rows on that copy: the top at 588; the topmast's head, where its shrouds meet, at 424; the staff's end at 349. The deck at the mizzen is hidden behind the poop rail. It is taken at 868 ± 10, between the row where the pole comes out of the rail (860) and the feet of the men standing on the poop (878). The topmast's head therefore stands 0.586 (0.556-0.620) of the top's height over the deck above the top. The top is 0.143 of that height across. The top stands at 0.90 of the lower mast, the height the r321 lateen read already keys the yard to; the plate cannot set it independently, because the deck is hidden. The pennant staff is not drawn. Hollar's plate is dated 1647 and the hull 1620.",
+            "mastHeightsM": {
+              "top": 7.76
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.3604
+              },
+              "spacingM": 21.53,
+              "rows": {
+                "top": 588
+              },
+              "foot": [
+                1501,
+                868
+              ],
+              "feetPx": [
+                724,
+                1501
+              ],
+              "boundOfSpacing": 0.006,
+              "boundM": 0.05,
+              "plate": "build/staging/r328/dl/hollar-flute.jpg (Hollar 1647, 1920 px)",
+              "script": "build/staging/r329/r329_edit.py"
+            }
           }
         ],
         "build": "frame",

@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a mast read without its figures",
+  "detail": "masts[2] (station 0.85): provenance opens 'READ, r329 (' and mastHeightsRead is absent"
+ }
+]

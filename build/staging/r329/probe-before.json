@@ -1,0 +1,54 @@
+{
+ "fluyt": {
+  "masts": [
+   {
+    "at": 0.115,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": -11.499,
+    "footY": 3.577,
+    "heads": [
+     15.465,
+     22.887,
+     26.413
+    ],
+    "MH": null
+   },
+   {
+    "at": 0.556,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": 1.54,
+    "footY": 3.002,
+    "heads": [
+     17.391,
+     25.739,
+     29.704
+    ],
+    "MH": null
+   },
+   {
+    "at": 0.85,
+    "rig": "lateen",
+    "only": null,
+    "nseg": 0,
+    "footX": null,
+    "footY": null,
+    "heads": [],
+    "MH": null
+   }
+  ],
+  "lateen": [
+   {
+    "slingY": 7.996,
+    "baseY": 3.332,
+    "d2t": 13.412,
+    "slingOfD2T": 0.348,
+    "mastHeadY": 18.184,
+    "spacing": 8.489
+   }
+  ]
+ }
+}

@@ -253,6 +253,45 @@ cannot resolve a small top. The fluyt's top and bare topmast are **read**, from 
 date; the height ratio is bound by the hidden deck. The fluyt's top form is the fleet's class top (round,
 before 1710); Hollar draws it with a lower rim than the class top has.
 
+## 7. The fluyt's three masts, read off Hollar's fluyt under sail (round 329)
+
+Until r329 the fluyt's masts were Steel's 1794 proportions: a lower mast that is a share of Steel's main,
+a topmast 0.60 of it and a topgallant half the topmast. Hollar's etching of a fluyt under sail (1647, *Navis
+Mercatoria Hollandica, vulgo VLIET*, `build/staging/r328/dl/hollar-flute.jpg`, 1920 px, about 36 px/m at
+the masts, bow at the left) draws short lower masts and long topmasts, as Hocker's Vasa diagram does.
+
+| Row on the plate | foot (deck) | top | topmast head | pole head |
+|---|---|---|---|---|
+| fore, column 724 | 902 | 600 | 285 | 161 |
+| main, column 1143 | 933 | 528 | 192 | 47 |
+| mizzen, column 1501 | 868 | 588 | 424 (r328) | 349 (staff, r328) |
+
+Each height is a share of the distance between the fore and mizzen masts' feet, 777 px on the plate and
+21.53 m on the built hull, as on the East Indiaman and the slave ship (r322). Built over each mast's foot:
+fore top 8.37 m, topmast head 17.10 m, pole head 20.53 m; main 11.22, 20.53, 24.55 m; mizzen top 7.76 m.
+Before, the tops stood at 13.92, 15.65 and 13.41 m.
+
+- **The deck is read differently at each mast.** At the fore it is the foot of the forecastle rail's lattice.
+  At the main it is the waist rail, where the mast comes out from behind it. The waist deck is hidden, and
+  the men in the waist show only their heads over the rail, so the deck may be up to 0.8 m lower. At the
+  mizzen it is r328's 868 ± 10.
+- **The pole above each topmast is built as the topgallant mast.** Under sail Hollar draws it bare, with a
+  pennant on it and no yard crossed. His second plate of the same year (the fluyts at anchor, *vulgo VLIETEN*,
+  `fleuten-1647.jpg`, 644 px wide) draws topgallant masts with yards crossed on the fore and the main. So the
+  three tiers stand.
+- **The main's pole head touches the plate's top border line** (row 43), so it may stand a few pixels higher.
+- **The stations disagree.** The plate puts the main 0.539 of the way from the fore to the mizzen; the hull's
+  stations put it at 0.606. Hollar draws the ship a little from forward of the beam, so the span is
+  foreshortened and every height may be a few per cent high. Both are CONTESTED in the record.
+- The lateen mizzen takes its lower pole from the recorded top over `lateenTopmast.topOfLower` (`mastLowerOf`),
+  so the r328 topmast, keyed to the top's height, came down with it. The lateen yard is keyed to the stations
+  (r321) and did not move. Its peak now stands just above the mizzen top, where Hollar draws it about level
+  with the top; before r329 it stood well under the top.
+
+**Confidence.** The tops and topmast heads are **read**, to about 5 px (0.006 of the span), on a plate 27 years
+after the hull's date. The main's deck and the datum are **contested**. The course yards still hang at the
+class 0.60 of the lower mast; Hollar's hang just under the tops (0y¹⁷⁴).
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent

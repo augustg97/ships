@@ -1,0 +1,12 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a mizzen top off its read height",
+  "detail": "masts[2]: top 13.41 m over the mast's foot, read 7.76 m (topOfLower 0.9 of 8.62 m)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "every mast from one tree",
+  "detail": "lower masts drawn 0.24/0.32/0.42 m through where their lengths ask 0.30/0.40/0.24 \u2014 diameter follows the spar's own length (Steel 1794 p.39)"
+ }
+]

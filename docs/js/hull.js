@@ -1366,6 +1366,8 @@ return { top: lower * 0.60, tg: lower * 0.30, from: 'steel' };
 }
 function mastLowerOf(mk, steelMain, footY) {
 if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
+if (mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+return mk.mastHeightsM.top / mk.lateenTopmast.topOfLower;
 if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
 return mk.truckM * mk.capFrac;
 if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))

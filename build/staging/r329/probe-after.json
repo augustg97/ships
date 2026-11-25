@@ -1,0 +1,64 @@
+{
+ "fluyt": {
+  "masts": [
+   {
+    "at": 0.115,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": -11.499,
+    "footY": 3.577,
+    "heads": [
+     9.3,
+     17.1,
+     20.53
+    ],
+    "MH": {
+     "top": 8.37,
+     "crosstrees": 17.1,
+     "truck": 20.53
+    }
+   },
+   {
+    "at": 0.556,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": 1.54,
+    "footY": 3.002,
+    "heads": [
+     12.467,
+     20.53,
+     24.55
+    ],
+    "MH": {
+     "top": 11.22,
+     "crosstrees": 20.53,
+     "truck": 24.55
+    }
+   },
+   {
+    "at": 0.85,
+    "rig": "lateen",
+    "only": null,
+    "nseg": 0,
+    "footX": null,
+    "footY": null,
+    "heads": [],
+    "MH": {
+     "top": 7.76
+    }
+   }
+  ],
+  "lateen": [
+   {
+    "slingY": 7.996,
+    "baseY": 3.332,
+    "d2t": 7.76,
+    "slingOfD2T": 0.601,
+    "mastHeadY": 11.98,
+    "spacing": 8.489
+   }
+  ]
+ }
+}

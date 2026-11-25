@@ -1,0 +1,47 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[0] (station 0.115): top rows give -0.3887 of the spacing, the read says 0.3887"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[0] (station 0.115): crosstrees rows give -0.7941 of the spacing, the read says 0.7941"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[0] (station 0.115): truck rows give -0.9537 of the spacing, the read says 0.9537"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[1] (station 0.556): top rows give -0.5212 of the spacing, the read says 0.5212"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[1] (station 0.556): crosstrees rows give -0.9537 of the spacing, the read says 0.9537"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[1] (station 0.556): truck rows give -1.1403 of the spacing, the read says 1.1403"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast read that disagrees with its own rows",
+  "detail": "masts[2] (station 0.85): top rows give -0.3604 of the spacing, the read says 0.3604"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mizzen top off its read height",
+  "detail": "masts[2]: top 7.76 m over the mast's foot, read 13.41 m (topOfLower 0.9 of 14.90 m)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "every mast from one tree",
+  "detail": "lower masts drawn 0.29/0.38/0.25 m through where their lengths ask 0.25/0.33/0.40 \u2014 diameter follows the spar's own length (Steel 1794 p.39)"
+ }
+]
