@@ -1,0 +1,17 @@
+OLDALL-OLDAUDIT rc=0 checked 33 hulls, 0 problems
+OLDALL rc=1 checked 33 hulls, 5 problems
+RECORDNOTBUILT rc=1 checked 33 hulls, 2 problems
+Traceback (most recent call last):
+  File "/Users/augustgweon/Ships/build/staging/r317/r317_variant.py", line 6, in <module>
+    mk = v['hull'].get('masts', [{}])[-1] if v.get('hull') else {}
+IndexError: list index out of range
+cp: v-nosource.json: No such file or directory
+NOSOURCE rc=0 checked 33 hulls, 0 problems
+CLIPPERLATEEN ok
+CLIPPERLATEEN rc=1 checked 33 hulls, 2 problems
+OLDCARD rc=1 checked 33 hulls, 7 problems
+SEAMBIAS ok
+SEAMBIAS rc=1 checked 33 hulls, 4 problems
+FINAL rc=0 checked 33 hulls, 0 problems
+web-unchanged
+NOSOURCE(rerun) rc=1 checked 33 hulls, 2 problems

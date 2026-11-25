@@ -2241,7 +2241,8 @@ group.add(tag(stp, 'mast', 'Spotting top',
 }
 let lateenHead = null;
 let crabHead = null;
-if (mk.rig === 'lateen') {
+const lateenMizzen = mk.rig === 'square' && mk.lateenMizzen === true;
+if (mk.rig === 'lateen' || lateenMizzen) {
 const mixed = (S.masts || []).some(m => m.rig === 'square');
 const yardLen = mixed ? lower * 1.15 : L * mScale;
 const th = mixed ? 0.98 : 0.785;
@@ -2262,14 +2263,18 @@ const slingY = heel[1] + dir[1] * sAlong;
 const slingX = mxL(slingY);
 const headroom = Math.max(0.45, 10 * rYs);
 const hounds = mixed ? Math.max(slingY + headroom * 0.5, base + lower * 0.97) : slingY + headroom * 0.5;
-const mh = mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
+const mh = lateenMizzen ? lower
+: mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
 const mRtop = B * 0.020 * dScale[0], mRbot = B * 0.032 * dScale[0];
-const mastRl = h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
+const mastRl = lateenMizzen ? mastRAt
+: h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
 const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh / Math.cos(rakeRad), 18), woodDark);
 mm.position.set(mxL(base + mh / 2), base + mh / 2, 0);
 mm.rotation.z = -rakeRad;
+if (!lateenMizzen) {
 group.add(tag(mm, 'mast'));
 lateenHead = { y: base + mh, hounds, x: mxL(hounds), rakeDeg: mk.rake || 0 };
+}
 const ym = new THREE.Mesh(new THREE.CylinderGeometry(rYpeak, rYheel, ylen, 14), woodDark);
 ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
 ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
@@ -2292,6 +2297,7 @@ group.add(beside);
 ym.userData.lateen = {
 mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), slingX: +slingX.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
 rakeDeg: mk.rake || 0, mastHeadX: +mxL(base + mh).toFixed(3),
+onSquareMast: lateenMizzen, mast: mi,
 headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
 off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
 rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,

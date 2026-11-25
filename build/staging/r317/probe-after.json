@@ -1,0 +1,174 @@
+{
+"carrack": {
+"yards": [
+{
+"mastX": 12.931,
+"slingY": 12.131,
+"slingX": 13.43,
+"mastHeadY": 23.466,
+"rakeDeg": 4,
+"mastHeadX": 14.223,
+"onSquareMast": false,
+"mast": 2,
+"headroom": 0.989,
+"headroomFrom": "class: ten yard-radii at the sling, not under 0.45 m; no plate reads it",
+"off": 0.279,
+"mastR": 0.181,
+"yardR": 0.099,
+"rollR": 0,
+"furled": false,
+"side": "port",
+"sideFrom": "class: to leeward of the fleet's wind, the side every fore-and-aft cloth is sheeted to; no record names the side",
+"sheetDeg": 29.2,
+"stow": null
+}
+],
+"segs": []
+},
+"fluyt": {
+"yards": [
+{
+"mastX": 10.029,
+"slingY": 8.959,
+"slingX": 10.423,
+"mastHeadY": 18.184,
+"rakeDeg": 4,
+"mastHeadX": 11.068,
+"onSquareMast": false,
+"mast": 2,
+"headroom": 0.796,
+"headroomFrom": "class: ten yard-radii at the sling, not under 0.45 m; no plate reads it",
+"off": 0.188,
+"mastR": 0.109,
+"yardR": 0.08,
+"rollR": 0,
+"furled": false,
+"side": "port",
+"sideFrom": "class: to leeward of the fleet's wind, the side every fore-and-aft cloth is sheeted to; no record names the side",
+"sheetDeg": 29.2,
+"stow": null
+}
+],
+"segs": []
+},
+"east-indiaman": {
+"yards": [
+{
+"mastX": 15.722,
+"slingY": 13.657,
+"slingX": 16.333,
+"mastHeadY": 27.729,
+"rakeDeg": 4,
+"mastHeadX": 17.317,
+"onSquareMast": true,
+"mast": 2,
+"headroom": 1.217,
+"headroomFrom": "class: ten yard-radii at the sling, not under 0.45 m; no plate reads it",
+"off": 0.319,
+"mastR": 0.198,
+"yardR": 0.122,
+"rollR": 0,
+"furled": false,
+"side": "port",
+"sideFrom": "class: to leeward of the fleet's wind, the side every fore-and-aft cloth is sheeted to; no record names the side",
+"sheetDeg": 29.2,
+"stow": null
+}
+],
+"segs": [
+{
+"si": 0,
+"footY": 4.93152556317267,
+"headY": 27.728625563172667,
+"geo": "CylinderGeometry",
+"p": {
+"rt": 0.15624,
+"rb": 0.22319999999999998,
+"h": 22.85276819474629
+}
+},
+{
+"si": 1,
+"footY": 24.99297356317267,
+"headY": 38.67123356317266,
+"geo": "CylinderGeometry",
+"p": {
+"rt": 0.12151999999999999,
+"rb": 0.1736,
+"h": 13.711660916847777
+}
+},
+{
+"si": 2,
+"footY": 37.02984236317267,
+"headY": 43.86897236317267,
+"geo": "CylinderGeometry",
+"p": {
+"rt": 0.07898799999999999,
+"rb": 0.11284,
+"h": 6.855830458423881
+}
+}
+]
+},
+"slave-ship": {
+"yards": [
+{
+"mastX": 9.5,
+"slingY": 8.698,
+"slingX": 9.883,
+"mastHeadY": 17.501,
+"rakeDeg": 4,
+"mastHeadX": 10.499,
+"onSquareMast": true,
+"mast": 2,
+"headroom": 0.762,
+"headroomFrom": "class: ten yard-radii at the sling, not under 0.45 m; no plate reads it",
+"off": 0.204,
+"mastR": 0.127,
+"yardR": 0.076,
+"rollR": 0,
+"furled": false,
+"side": "port",
+"sideFrom": "class: to leeward of the fleet's wind, the side every fore-and-aft cloth is sheeted to; no record names the side",
+"sheetDeg": 29.2,
+"stow": null
+}
+],
+"segs": [
+{
+"si": 0,
+"footY": 3.2210170421151134,
+"headY": 17.501017042115112,
+"geo": "CylinderGeometry",
+"p": {
+"rt": 0.10079999999999999,
+"rb": 0.144,
+"h": 14.314870304599136
+}
+},
+{
+"si": 1,
+"footY": 15.787417042115113,
+"headY": 24.355417042115114,
+"geo": "CylinderGeometry",
+"p": {
+"rt": 0.07839999999999998,
+"rb": 0.11199999999999999,
+"h": 8.588922182759482
+}
+},
+{
+"si": 2,
+"footY": 23.327257042115114,
+"headY": 27.611257042115113,
+"geo": "CylinderGeometry",
+"p": {
+"rt": 0.05095999999999999,
+"rb": 0.07279999999999999,
+"h": 4.294461091379738
+}
+}
+]
+}
+}

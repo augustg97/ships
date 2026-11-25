@@ -500,6 +500,9 @@ if (who === 'her mast') return w + ' on her mast';
 if (who === 'both masts' || /^all /.test(who)) return w + ' on ' + who;
 return w + ' on ' + who;
 });
+const aft = n === 3 ? 'the mizzen' : 'the aftermost mast';
+if ((H.masts || []).some(m => m.rig === 'square' && m.lateenMizzen)) parts7.push('a lateen sail on ' + aft + ' under its topsail');
+if ((H.masts || []).some(m => m.rig === 'square' && m.spanker)) parts7.push('a gaff spanker on ' + aft);
 if (H.headsails) parts7.push(H.headsails === 1 ? 'a headsail on a stay forward'
 : swNum(H.headsails) + ' headsails on the stays forward');
 let t = 'The sails are bent on: ' + swAnd(parts7) + '.';
@@ -541,7 +544,9 @@ let bare = false;
 built.traverse(o => { if (o.userData && o.userData.bare) bare = true; });
 if (bare) how.push('the crossjack (the mizzen\u2019s lowest yard) carries no sail');
 }
-if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
+if (rigs.has('lateen')) how.push('each lateen sail is brailed up and furled along its yard, which stays aloft');
+if (((spec.hull || {}).masts || []).some(m => m.rig === 'square' && m.lateenMizzen))
+how.push('the mizzen\u2019s lateen sail is brailed up and furled along its yard, which stays aloft');
 const gm = ((spec.hull || {}).masts || []).filter(m => m.rig === 'gaff');
 const gBr = gm.filter(m => m.gaffStow === 'brailed' || m.furlStow === 'brailed').length;
 if (gm.length && gBr === gm.length) how.push('the gaff sails are brailed in to their masts under gaffs left aloft');

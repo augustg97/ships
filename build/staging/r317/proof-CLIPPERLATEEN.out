@@ -1,0 +1,12 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a square mizzen with two fore-and-aft sails",
+  "detail": "the mizzen (mast 2): both spanker and lateenMizzen"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lateen mizzen after its period",
+  "detail": "the mizzen (mast 2): lateenMizzen on a hull dated 1869"
+ }
+]

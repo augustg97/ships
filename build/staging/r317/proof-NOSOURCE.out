@@ -1,0 +1,12 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen mizzen with no source",
+  "detail": "the mizzen (mast 2): mizzenSailProvenance absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen mizzen with no source",
+  "detail": "the mizzen (mast 2): mizzenSailProvenance absent"
+ }
+]

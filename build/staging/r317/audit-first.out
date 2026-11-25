@@ -1,0 +1,22 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen yard through its mast",
+  "detail": "yard 26.2 m on the mast at x 15.72, crossing its station at y 13.66: offset 0.305 m from the axis, the mast 0.216 m and the yard 0.123 m in radius there"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen yard through its mast (furled build)",
+  "detail": "yard 26.2 m on the mast at x 15.72, crossing its station at y 13.66: offset 0.305 m from the axis, the mast 0.216 m and the yard 0.123 m in radius there"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen yard through its mast",
+  "detail": "yard 16.4 m on the mast at x 9.50, crossing its station at y 8.70: offset 0.194 m from the axis, the mast 0.139 m and the yard 0.077 m in radius there"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen yard through its mast (furled build)",
+  "detail": "yard 16.4 m on the mast at x 9.50, crossing its station at y 8.70: offset 0.194 m from the axis, the mast 0.139 m and the yard 0.077 m in radius there"
+ }
+]

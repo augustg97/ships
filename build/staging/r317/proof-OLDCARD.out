@@ -1,0 +1,37 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 7: the card omits the lateen rig, which the built hull adds here: \"Bent on \u2014 The sails are bent on: square sails on all three masts.\""
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled card that misnames her rig",
+  "detail": "the lateen rig is carried and not named: \"Bent on, furled \u2014 The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets. This is\""
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 7: the card omits the gaff rig, which the built hull adds here: \"Bent on \u2014 The sails are bent on: square sails on all three masts and two headsails on the stays forward.\""
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 7: the card omits the lateen rig, which the built hull adds here: \"Bent on \u2014 The sails are bent on: square sails on all three masts.\""
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled card that misnames her rig",
+  "detail": "the lateen rig is carried and not named: \"Bent on, furled \u2014 The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets. This is\""
+ },
+ {
+  "id": "preussen",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 7: the card omits the gaff rig, which the built hull adds here: \"Bent on \u2014 The sails are bent on: square sails on all five masts and four headsails on the stays forward.\""
+ },
+ {
+  "id": "clipper",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 7: the card omits the gaff rig, which the built hull adds here: \"Bent on \u2014 The sails are bent on: square sails on all three masts and four headsails on the stays forward.\""
+ }
+]

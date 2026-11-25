@@ -703,6 +703,12 @@ function swSailCard(spec, stage, parts) {
       if (who === 'both masts' || /^all /.test(who)) return w + ' on ' + who;
       return w + ' on ' + who;
     });
+    /* r317 (0y¹⁵²): a square mizzen's fore-and-aft sail, from the record. The card said "square
+       sails on all three masts" on the 74, the clipper and Preussen, which set a spanker there, and
+       on the East Indiaman and the slave ship, which now set a lateen under the mizzen topsail. */
+    const aft = n === 3 ? 'the mizzen' : 'the aftermost mast';
+    if ((H.masts || []).some(m => m.rig === 'square' && m.lateenMizzen)) parts7.push('a lateen sail on ' + aft + ' under its topsail');
+    if ((H.masts || []).some(m => m.rig === 'square' && m.spanker)) parts7.push('a gaff spanker on ' + aft);
     if (H.headsails) parts7.push(H.headsails === 1 ? 'a headsail on a stay forward'
                                                    : swNum(H.headsails) + ' headsails on the stays forward');
     let t = 'The sails are bent on: ' + swAnd(parts7) + '.';
@@ -754,7 +760,11 @@ function swFurledCard(spec, built) {
     built.traverse(o => { if (o.userData && o.userData.bare) bare = true; });
     if (bare) how.push('the crossjack (the mizzen\u2019s lowest yard) carries no sail');
   }
-  if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
+  /* r317: the builder keeps a lateen yard aloft and brails the cloth up to it (r260); the card had
+     said the yard is lowered */
+  if (rigs.has('lateen')) how.push('each lateen sail is brailed up and furled along its yard, which stays aloft');
+  if (((spec.hull || {}).masts || []).some(m => m.rig === 'square' && m.lateenMizzen))
+    how.push('the mizzen\u2019s lateen sail is brailed up and furled along its yard, which stays aloft');
   /* r308: a gaff sail stowed by its brails keeps its gaff aloft (gaffStow or furlStow
      'brailed'); only the others are lowered onto their booms */
   const gm = ((spec.hull || {}).masts || []).filter(m => m.rig === 'gaff');

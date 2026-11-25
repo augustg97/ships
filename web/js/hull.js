@@ -3969,7 +3969,18 @@ function buildRig(S, group, mats, FINE, FURLED) {
     /* r264 (0y⁴³): the crab-claw block hands the shroud block its pole — the top, the axis, the radius and the
        record's band under the head where the shrouds leave it — so both read one pole */
     let crabHead = null;
-    if (mk.rig === 'lateen') {
+    /* ── r317 (0y¹⁵²): A SQUARE MIZZEN OF THE SEVENTEENTH CENTURY SETS A LATEEN UNDER ITS TOPSAIL ──
+       Waters, The Art of Navigation in England in Elizabethan and Early Stuart Times (1958): on the
+       larger ships "the fore and main masts each carried a course and a top-sail ... the mizzen mast
+       carried a lateen-sail. This rig remained typical of merchant ships well into the eighteenth"
+       century. The East Indiaman (1620) and the slave ship (1590) cross a bare crossjack (r315) and
+       square sails above it, and until r317 set nothing below it. `lateenMizzen` on a square mast's
+       record builds the lateen block's yard, parrel and cloth against the square mast's own lower
+       section: the pole is the square stack's, so no lateen pole is drawn and the shrouds are the
+       square mast's. The yard's length, angle and sling are the mixed-hull lateen mizzen's (the
+       carrack's and the fluyt's), read from no plate of either hull. */
+    const lateenMizzen = mk.rig === 'square' && mk.lateenMizzen === true;
+    if (mk.rig === 'lateen' || lateenMizzen) {
       /* ── THE LATEEN IS DETERMINED BY THE SHIP, NOT BY THE MAST ─────
          Three sourced facts, and together they leave NO free parameters:
            (1) the yard is as long as the hull.  Pâris (*Essai sur la construction navale des
@@ -4068,19 +4079,23 @@ function buildRig(S, group, mats, FINE, FURLED) {
          pole as a residual: it stands at two fifths of the mast, and no plate has been read
          for it). An all-lateen pole stands a masthead's room over its sling. */
       const hounds = mixed ? Math.max(slingY + headroom * 0.5, base + lower * 0.97) : slingY + headroom * 0.5;
-      const mh = mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
+      const mh = lateenMizzen ? lower        // r317: the square stack's lower mast is the pole the yard is slung to
+               : mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
       /* the same per-mast thickness rule as the square masts above — a caravel's three
          lateens are three different trees — and the spar is tagged like every other mast */
       const mRtop = B * 0.020 * dScale[0], mRbot = B * 0.032 * dScale[0];
-      const mastRl = h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
+      const mastRl = lateenMizzen ? mastRAt   // r317: the square mast's own radius at the sling
+                   : h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
       /* the pole lies along the raked axis: its length is the height over cos(rake), so the
          head stands at base + mh exactly and the axis passes through (x, base) and
          mxL(base + mh) — the same placement the square block gives its segments */
       const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh / Math.cos(rakeRad), 18), woodDark);
       mm.position.set(mxL(base + mh / 2), base + mh / 2, 0);
       mm.rotation.z = -rakeRad;
-      group.add(tag(mm, 'mast'));
-      lateenHead = { y: base + mh, hounds, x: mxL(hounds), rakeDeg: mk.rake || 0 };
+      if (!lateenMizzen) {                    // r317: a square mizzen's pole is its own lower mast
+        group.add(tag(mm, 'mast'));
+        lateenHead = { y: base + mh, hounds, x: mxL(hounds), rakeDeg: mk.rake || 0 };
+      }
       const ym = new THREE.Mesh(new THREE.CylinderGeometry(rYpeak, rYheel, ylen, 14), woodDark);
       ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
       ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
@@ -4151,6 +4166,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       ym.userData.lateen = {
         mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), slingX: +slingX.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
         rakeDeg: mk.rake || 0, mastHeadX: +mxL(base + mh).toFixed(3),
+        onSquareMast: lateenMizzen, mast: mi,  // r317: under a square mizzen's topsail (record `lateenMizzen`)
         headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
         off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
         rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
