@@ -537,6 +537,9 @@ if (L && L.setY !== undefined) { const k = NAME[L.name] || L.name; if (!kinds.in
 const ORDER = ['topsail', 'upper topsail', 'topgallant', 'upper topgallant', 'royal'];
 kinds.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
 if (kinds.length) how.push('the ' + swAnd(kinds) + ' yards are lowered onto the caps below them');
+let bare = false;
+built.traverse(o => { if (o.userData && o.userData.bare) bare = true; });
+if (bare) how.push('the crossjack (the mizzen\u2019s lowest yard) carries no sail');
 }
 if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
 const gm = ((spec.hull || {}).masts || []).filter(m => m.rig === 'gaff');

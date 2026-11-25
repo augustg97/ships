@@ -1,0 +1,13 @@
+trireme              set:  2 cloths    94.9 m2 tacks 2 bare 0 | furled: rolls  2 tacks 2 bare 0
+corbita              set:  2 cloths   139.7 m2 tacks 2 bare 0 | furled: rolls  2 tacks 2 bare 0
+cog                  set:  1 cloths   191.6 m2 tacks 1 bare 0 | furled: rolls  1 tacks 1 bare 0
+carrack              set:  4 cloths   715.1 m2 tacks 2 bare 0 | furled: rolls  5 tacks 2 bare 0
+sekibune             set:  1 cloths   104.5 m2 tacks 1 bare 0 | furled: rolls  1 tacks 1 bare 0
+fluyt                set:  6 cloths   505.7 m2 tacks 2 bare 0 | furled: rolls  7 tacks 2 bare 0
+east-indiaman        set:  8 cloths  1477.3 m2 tacks 2 bare 1 | furled: rolls  8 tacks 2 bare 1
+ship-of-the-line     set:  8 cloths  2177.8 m2 tacks 2 bare 1 | furled: rolls 15 tacks 2 bare 1
+slave-ship           set:  8 cloths   578.9 m2 tacks 2 bare 1 | furled: rolls  8 tacks 2 bare 1
+preussen             set: 30 cloths  5569.5 m2 tacks 5 bare 0 | furled: rolls 47 tacks 5 bare 0
+clipper              set: 15 cloths  1646.0 m2 tacks 3 bare 0 | furled: rolls 26 tacks 3 bare 0
+steamer              set: 12 cloths  1347.0 m2 tacks 3 bare 0 | furled: rolls 20 tacks 3 bare 0
+endurance            set:  3 cloths   287.0 m2 tacks 1 bare 0 | furled: rolls  7 tacks 1 bare 0

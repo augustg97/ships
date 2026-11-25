@@ -1504,6 +1504,9 @@ const slingsD = S.iron ? yardLen / 50
 const setY = yy;
 let loweredRec = null;
 const readHere = !!(fracRec && fracRec.from === 'record');
+const bareRec = (courseRec && isMizzen && mk.crossjackSail !== true)
+? { mast: mi, sail: false, from: mk.crossjackProvenance ? mk.crossjackProvenance.split(':')[0] : 'class (r315)' }
+: null;
 if (FURLED && hoist && typeof hoist === 'object' && hoist.tie >= 1 && !readHere) {
 const capBelow = segHeads[hoist.tie - 1] !== undefined ? segHeads[hoist.tie - 1] : -Infinity;
 const floor = Math.max(capBelow, lastYardTop);
@@ -1535,7 +1538,7 @@ ym.quaternion
 .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
 .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
 const mastRs = mastRAt(yy);
-const rRoll = FURLED
+const rRoll = FURLED && !bareRec
 ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((setY - prevYard) * 0.97) * 0.055)
 / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
 : 0;
@@ -1544,6 +1547,7 @@ const nX = -Math.cos(rakeRad), nY = Math.sin(rakeRad);
 const dX = Math.sin(rakeRad), dY = Math.cos(rakeRad);
 const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
 ym.position.set(yX, yY, 0);
+if (bareRec) ym.userData.bare = Object.assign(bareRec, { y: +yY.toFixed(3) });
 const HELD = (S.iron && hoist === 'fixed') ? 'truss' : 'parrel';
 ym.userData.slung = { mastX: +x.toFixed(3), axisX: +mxA(yy).toFixed(3), axisY: +yy.toFixed(3),
 off: +OFF.toFixed(3), mastR: +mastRs.toFixed(3), yardR: +(slingsD / 2).toFixed(3),
@@ -1613,8 +1617,9 @@ if (par) group.add(tag(par, 'parrel'));
 const drop = setY - prevYard;
 prevYard = setY;
 lastYardTop = yY + slingsD / 2 + 2 * rRoll;
-mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind });
-if (FURLED) {
+mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind, bare: !!bareRec });
+if (bareRec) {
+} else if (FURLED) {
 const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
 sails.push(makeFurl(
 new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
@@ -2018,15 +2023,17 @@ const clews = {};
 for (const sgn of [1, -1]) {
 const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2); clews[sgn] = clew;
 if (k === 0) {
+if (!yd.bare) {
 lead(sheets, clew, u + 0.17, sgn, 'sheet');
 lead(tacks, clew, u - 0.15, sgn, 'tack');
+}
 } else {
 const below = mastYards[k - 1];
 sheets.push([clew, V3(below.cx + sgn * sT * below.half, below.yy,
 sgn * cT * below.half)]);
 }
 }
-if (fifeHere) {
+if (fifeHere && !yd.bare) {
 const buntAt = (Array.isArray(CG.buntlineAt) && CG.buntlineAt.length) ? CG.buntlineAt : (k <= 1 ? [0.30, 0.65] : [0.40]);
 const width = yd.half * 2 * 0.96, height = yd.drop * 0.97, half = yd.half;
 const sailPt = (sgn, t, v, proud) => {

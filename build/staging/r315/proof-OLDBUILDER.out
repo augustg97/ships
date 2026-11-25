@@ -1,0 +1,47 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a crossjack not crossed bare",
+  "detail": "the mizzen (mast 2): 0 yard(s) recorded bare"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "yard gear missing",
+  "detail": "2 tack mesh(es) for 3 square mast(s), 3 drawn"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a crossjack not crossed bare",
+  "detail": "the mizzen (mast 2): 0 yard(s) recorded bare (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a crossjack not crossed bare",
+  "detail": "the mizzen (mast 2): 0 yard(s) recorded bare"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "yard gear missing",
+  "detail": "2 tack mesh(es) for 3 square mast(s), 3 drawn"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a crossjack not crossed bare",
+  "detail": "the mizzen (mast 2): 0 yard(s) recorded bare (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a crossjack not crossed bare",
+  "detail": "the mizzen (mast 2): 0 yard(s) recorded bare"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "yard gear missing",
+  "detail": "2 tack mesh(es) for 3 square mast(s), 3 drawn"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a crossjack not crossed bare",
+  "detail": "the mizzen (mast 2): 0 yard(s) recorded bare (furled build)"
+ }
+]

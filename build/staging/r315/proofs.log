@@ -1,0 +1,16 @@
+variant OLDBUILDER
+OLDBUILDER-OLDAUDIT rc=0 checked 33 hulls, 0 problems
+OLDBUILDER rc=1 checked 33 hulls, 9 problems
+variant CLOTH
+CLOTH rc=1 checked 33 hulls, 6 problems
+variant SILENCE
+SILENCE rc=1 checked 33 hulls, 1 problems
+variant CARD
+CARD rc=1 checked 33 hulls, 3 problems
+FINAL rc=0 checked 33 hulls, 0 problems
+restored
+-- r315 card reworded at 18:59; CARD and FINAL re-run
+variant CARD
+CARD rc=1 checked 33 hulls, 3 problems
+FINAL rc=0 checked 33 hulls, 0 problems
+restored

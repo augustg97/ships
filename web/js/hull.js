@@ -2662,6 +2662,19 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const setY = yy;
       let loweredRec = null;
       const readHere = !!(fracRec && fracRec.from === 'record');
+      /* ── r315 (0y¹⁴⁹): THE CROSSJACK IS A BARE SPAR ────────────────────────────────────────────
+         On a one-yard-per-segment rig the mizzen's lowest yard is the crossjack, and it spread the foot of
+         the mizzen topsail. Falconer 1769, CROSS-JACK: "a sail extended on the lower yard of the mizen-mast
+         ... This sail, however, has generally been found of little service, and is therefore very seldom
+         used." Eckersberg's 1828 Asow at anchor shows the 74's crossjack bare: a pale spar, rows 1430-1449,
+         with nothing rolled on it. So the yard is crossed with no sail set from it and no roll on it, and
+         with none of a course's gear: no sheets, no tacks, no clew garnets, no buntlines. It keeps its
+         lifts and braces, and the mizzen topsail still sheets to its arms. The record says why on the mast
+         (crossjackProvenance); `crossjackSail: true` would bend one. A doubled rig's mizzen course (the
+         clipper's, Preussen's) is drawn from its own record's yard list and is not this yard. */
+      const bareRec = (courseRec && isMizzen && mk.crossjackSail !== true)
+        ? { mast: mi, sail: false, from: mk.crossjackProvenance ? mk.crossjackProvenance.split(':')[0] : 'class (r315)' }
+        : null;
       if (FURLED && hoist && typeof hoist === 'object' && hoist.tie >= 1 && !readHere) {
         const capBelow = segHeads[hoist.tie - 1] !== undefined ? segHeads[hoist.tie - 1] : -Infinity;
         const floor = Math.max(capBelow, lastYardTop);
@@ -2728,7 +2741,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          read the spar's own centre (mastYards, spars) as they always have. No plate reads
          the offset — the fitting is the rig's own — and the record says so (userData.slung). */
       const mastRs = mastRAt(yy);
-      const rRoll = FURLED
+      const rRoll = FURLED && !bareRec
         ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((setY - prevYard) * 0.97) * 0.055)
                                    / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
         : 0;
@@ -2739,6 +2752,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const dX = Math.sin(rakeRad), dY = Math.cos(rakeRad);    // up the axis
       const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
       ym.position.set(yX, yY, 0);
+      if (bareRec) ym.userData.bare = Object.assign(bareRec, { y: +yY.toFixed(3) });   // r315: the crossjack carries no cloth
       /* r258: what holds the yard there — the iron hull's fixed lower yard hangs in chain
          slings on an iron truss; every hoisting yard, and every yard of the wooden rig, is
          held to the mast by a rope parrel (Falconer 1780) */
@@ -2844,8 +2858,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const drop = setY - prevYard;       // r314: the SET depth; a lowered yard keeps its sail's cloth
       prevYard = setY;
       lastYardTop = yY + slingsD / 2 + 2 * rRoll;
-      mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind });   // r281: the yard's radius, for the clew garnet's block; r283: the tier's names (the record's and the plan's), for its own gear figures
-      if (FURLED) {
+      mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind, bare: !!bareRec });   // r281: the yard's radius, for the clew garnet's block; r283: the tier's names (the record's and the plan's), for its own gear figures
+      if (bareRec) {
+        /* r315 (0y¹⁴⁹): the crossjack is crossed bare, set or furled */
+      } else if (FURLED) {
         /* the roll lies along the braced yard itself, between its arms, bunt at the slings */
         const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
         sails.push(makeFurl(
@@ -3600,8 +3616,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
         for (const sgn of [1, -1]) {
           const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2); clews[sgn] = clew;
           if (k === 0) {
-            lead(sheets, clew, u + 0.17, sgn, 'sheet');
-            lead(tacks, clew, u - 0.15, sgn, 'tack');
+            if (!yd.bare) {   // r315: a bare crossjack has no clews to sheet or tack
+              lead(sheets, clew, u + 0.17, sgn, 'sheet');
+              lead(tacks, clew, u - 0.15, sgn, 'tack');
+            }
           } else {
             const below = mastYards[k - 1];
             sheets.push([clew, V3(below.cx + sgn * sT * below.half, below.yy,
@@ -3633,7 +3651,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
            and are a named residual, because their falls need the deck-beside-the-mast end and
            a full ratchet. Furled: the clew hangs under its garnet block and the buntlines run
            from the roll to their blocks, hauled up. */
-        if (fifeHere) {
+        if (fifeHere && !yd.bare) {   // r315: no clewlines or buntlines on a yard with no sail
           /* ── r283 (0y⁸⁶): EVERY TIER'S CLEWLINES AND BUNTLINES, ON A HULL WITH A FIFE RAIL ───
              r281 drew the course's and left the topsail and the topgallant bare, with the fife rail's
              pins standing empty. An upper square sail is taken in the same way, by lines a plate shows

@@ -1,0 +1,32 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a sail set from a bare crossjack",
+  "detail": "the mizzen (mast 2): a square sail hangs from y 18.63, the bare crossjack at 18.64"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.44 m from the crossjack's centre (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail set from a bare crossjack",
+  "detail": "the mizzen (mast 2): a square sail hangs from y 27.15, the bare crossjack at 27.14"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.56 m from the crossjack's centre (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail set from a bare crossjack",
+  "detail": "the mizzen (mast 2): a square sail hangs from y 11.80, the bare crossjack at 11.80"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.32 m from the crossjack's centre (furled build)"
+ }
+]

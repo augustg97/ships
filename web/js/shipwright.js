@@ -749,6 +749,10 @@ function swFurledCard(spec, built) {
     const ORDER = ['topsail', 'upper topsail', 'topgallant', 'upper topgallant', 'royal'];
     kinds.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     if (kinds.length) how.push('the ' + swAnd(kinds) + ' yards are lowered onto the caps below them');
+    /* r315 (0y¹⁴⁹): the crossjack is crossed bare, read off the built ship (userData.bare) */
+    let bare = false;
+    built.traverse(o => { if (o.userData && o.userData.bare) bare = true; });
+    if (bare) how.push('the crossjack (the mizzen\u2019s lowest yard) carries no sail');
   }
   if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
   /* r308: a gaff sail stowed by its brails keeps its gaff aloft (gaffStow or furlStow
