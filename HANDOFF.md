@@ -30194,3 +30194,14 @@ Proofs, all on :8150 (`webb/`):
 **r332 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r332` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁷⁷), the fluyt's topgallant sails.**
 
 **Live stamp: docs/index.html carries data-version 1795646304 at the build.**
+
+**Live stamp VERIFIED: 1795646304 on https://augustg97.github.io/ships/index.html at 14:40 PST. The published `data/vessels.json` carries the fore topsail read (0.9115).**
+
+**THE FRAMES (receipt): ALL 65 SCORED, ALL INSIDE THE GATE; NONE ACCEPTED.**
+
+- **The full check** was launched at 14:37:03 and captured 6 frames, the 5 globe frames and `shipwright`. It died at frame 7, `action`, on the 150 s ready wait (14:42:28), as r329's and r330's did. The 6 were kept (`run1/`, `score-run1.out`).
+- **The other 59** were captured one process per frame from 14:42:45 to 15:17:50, the predicted movers first, with no failure (`r331_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). Every frame was scored with r277's offline scorer.
+- **Predicted, and inside the gate:** `shipwright` 0.032% / 0.012, the change confined to x 0–50, rows 678–953, the fluyt's rig at the frame's left edge (`pair-shipwright.png`); `shipwright-ahead` 0.032% / 0.012; `shipwright-furled` 0.044% / 0.016, the same as r330's; `action-gravelines` 0.031% / 0.008.
+- **The largest of the rest:** `passage-sahul` 0.047%, `ship-yamato` 0.036%, `aboard-preussen` 0.036%, all inside the gate.
+- **No capture faults** this round: no connection resets, and `board-salamis` and `wake-plan` were inside the gate in the run.
+- **No frames are left unscored for r332.**
