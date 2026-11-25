@@ -5501,6 +5501,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const platR = B * 0.20;
         const mxAt = mxA;
         const topHead = base + lower * 0.88 + top * 0.97;
+        /* ── r325 (0y¹⁶⁷): A TOPMAST TOP WHERE THE RECORD READS ONE ─────────────────────────────
+           Before about 1700 a topmast carried a small round top of its own, under its cap, where the
+           18th century put open crosstrees. Hocker's rig diagram of Vasa (1628) draws one on the fore
+           and the main topmast, about half the lower top's width, at 0.945 and 0.943 of the height from
+           the mast's foot to the topmast's head. A record carries the read as `topmastTop`:
+           `ofFootToHead`, the same measure as `hoistRead`, and `ofLowerTop`, the top's width over the
+           lower top's on the same plate. Such a mast draws the top (buildTop, so round before 1710 and
+           walled like the lower top), sets its topmast shrouds up under it at the hounds where they
+           ran to the cap through the platform, and sets its topgallant shrouds up at its rim. Every
+           other three-tier mast keeps the crosstrees and says why in `topmastTopProvenance`.
+           Without the field, byte-identical. */
+        const TT = mk.topmastTop && typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0 ? mk.topmastTop : null;
+        const tmHeadY = base + lower * 0.88 + top;
+        const ttY = TT ? base + TT.ofFootToHead * (tmHeadY - base) : 0;
+        const ttR = TT ? platR * TT.ofLowerTop : 0;
+        const shHead = TT ? ttY - ttR * 0.25 : topHead;          // under the trestletrees (buildTop: underside at -0.22 r)
         const futt = [], upPts = [[], []], upSegs = [], upRats = [], tgSegs = [];
         for (let s = 0; s < mk.shrouds; s++) {
           const f = (s + 1) / (mk.shrouds + 1);
@@ -5517,21 +5533,38 @@ function buildRig(S, group, mats, FINE, FURLED) {
           [1, -1].forEach((side, si2) => {
             const a = new THREE.Vector3(platX + (f - 0.5) * platR * 1.0,
                                         platY + B * 0.01, side * platR * 0.85);
-            const b = new THREE.Vector3(mxAt(topHead), topHead, side * B * 0.022);
+            const b = new THREE.Vector3(mxAt(shHead), shHead, side * B * 0.022);
             upSegs.push([a, b]);
             upPts[si2].push([a, b]);
           });
         }
         upPts.forEach(side => {
           if (side.length < 2) return;
-          const rise = topHead - platY;
+          const rise = shHead - platY;
           for (let h = RAT; h < rise * 0.86; h += RAT) {
             const t = h / rise;
             const pts = side.map(([a, b]) => new THREE.Vector3().lerpVectors(a, b, t));
             for (let i = 0; i < pts.length - 1; i++) upRats.push([pts[i], pts[i + 1]]);
           }
         });
-        if (tiersDrawn >= 3) {
+        if (tiersDrawn >= 3 && TT) {
+          const tp = buildTop(ttR, mats.woodPale, (segR[1] ? segR[1].b : B * 0.014), S.year);
+          tp.position.set(mxAt(ttY), ttY, 0);
+          tp.userData.topmastTop = { mast: mi, y: +ttY.toFixed(4), base: +base.toFixed(4), head: +tmHeadY.toFixed(4),
+                                     r: +ttR.toFixed(4), lowerR: +platR.toFixed(4), shroudHeadY: +shHead.toFixed(4), from: 'record' };
+          group.add(tag(tp, 'top', 'Topmast top',
+            'A small round top on the topmast, under its cap, about half the width of the lower top. '
+            + 'Ships carried one before about 1700; it spreads the topgallant shrouds, which set up at its rim. '
+            + "Read off Hocker's rig diagram of Vasa (1628)."));
+          const tgHead = base + (lower + top) * 0.88 + tg * 0.95;
+          const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
+          for (let s = 0; s < nG; s++) {
+            const f = (s + 1) / (nG + 1);
+            for (const side of [1, -1])
+              tgSegs.push([new THREE.Vector3(mxAt(ttY) + (f - 0.5) * ttR, ttY + ttR * 0.05, side * ttR * 0.85),
+                           new THREE.Vector3(mxAt(tgHead), tgHead, side * B * 0.014)]);
+          }
+        } else if (tiersDrawn >= 3) {
           const ctR = B * 0.085;
           /* the crosstrees at the topmast head — the spread without which a topgallant
              shroud would run straight down its own mast and stay nothing */
@@ -5543,6 +5576,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
             bar.position.set(mxAt(topHead) + dx * B * 0.020, topHead, 0);
             ct.add(bar);
           }
+          ct.userData.mast = mi;
           group.add(tag(ct, 'top', 'Crosstrees',
             'The light spreaders at the topmast head — trestletrees and crosstrees without '
             + 'a platform. They spread the topgallant shrouds the way the top spreads the '
@@ -5560,7 +5594,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const fu = ropeMesh(futt, 0.014 + B * 0.0006, ropeMat);
         if (fu) group.add(tag(fu, 'shroud', 'Futtock shrouds'));
         const up = ropeMesh(upSegs, 0.014 + B * 0.0007, ropeMat);
-        if (up) group.add(tag(up, 'shroud', 'Topmast shrouds'));
+        if (up) { up.userData.topmastShrouds = { mast: mi, headY: +shHead.toFixed(4) }; group.add(tag(up, 'shroud', 'Topmast shrouds')); }
         const ur = ropeMesh(upRats, 0.014 + B * 0.0005, ropeMat);
         if (ur) group.add(tag(ur, 'ratline', 'Topmast ratlines'));
         const tgm = ropeMesh(tgSegs, 0.010 + B * 0.0004, ropeMat);

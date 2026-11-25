@@ -1,0 +1,62 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a topmast head with no answer",
+  "detail": "masts[0] (station 0.115): a topmast on a hull dated 1620 carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[0] (station 0.115): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a topmast head with no answer",
+  "detail": "masts[1] (station 0.556): a topmast on a hull dated 1620 carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[1] (station 0.556): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast head with no answer",
+  "detail": "masts[0] (station 0.115): a topmast on a hull dated 1620 carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[0] (station 0.115): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast head with no answer",
+  "detail": "masts[1] (station 0.556): a topmast on a hull dated 1620 carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[1] (station 0.556): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast head with no answer",
+  "detail": "masts[0] (station 0.115): a topmast on a hull dated 1590 carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[0] (station 0.115): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast head with no answer",
+  "detail": "masts[1] (station 0.556): a topmast on a hull dated 1590 carries crosstrees and the record says nothing of whether it carried a top (topmastTopProvenance opening PLATE READ with a topmastTop, or UNREAD)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[1] (station 0.556): 0 crosstrees and no topmast top"
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[0] (station 0.115): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a topmast head with nothing to spread its shrouds",
+  "detail": "masts[1] (station 0.556): 0 crosstrees and no topmast top"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast top read not drawn",
+  "detail": "masts[0] (station 0.115): 0 topmast tops and 0 crosstrees; the read wants one top and no crosstrees"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast top read not drawn",
+  "detail": "masts[1] (station 0.556): 0 topmast tops and 0 crosstrees; the read wants one top and no crosstrees"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast top read not drawn",
+  "detail": "masts[0] (station 0.115): 0 topmast tops and 0 crosstrees; the read wants one top and no crosstrees"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast top read not drawn",
+  "detail": "masts[1] (station 0.556): 0 topmast tops and 0 crosstrees; the read wants one top and no crosstrees"
+ }
+]

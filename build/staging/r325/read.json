@@ -1,0 +1,46 @@
+{
+ "fore-topmast-top": {
+  "rowTop": 364,
+  "rowBottom": 370,
+  "row": 367.0,
+  "widthPx": 43,
+  "axis": {
+   "slope": -0.0291,
+   "rmsPx": 1.86,
+   "n": 62
+  }
+ },
+ "fore-lower-top": {
+  "rowTop": 678,
+  "rowBottom": 691,
+  "row": 684.5,
+  "widthPx": 93,
+  "axis": {
+   "slope": -0.0565,
+   "rmsPx": 3.2,
+   "n": 70
+  }
+ },
+ "main-topmast-top": {
+  "rowTop": 333,
+  "rowBottom": 345,
+  "row": 339.0,
+  "widthPx": 40,
+  "axis": {
+   "slope": 0.0466,
+   "rmsPx": 1.48,
+   "n": 52
+  }
+ },
+ "main-lower-top": {
+  "rowTop": 674,
+  "rowBottom": 690,
+  "row": 682.0,
+  "widthPx": 84,
+  "axis": {
+   "slope": 0.0354,
+   "rmsPx": 3.82,
+   "n": 42
+  }
+ }
+}

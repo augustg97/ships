@@ -2778,7 +2778,8 @@
             "only": 3,
             "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
             "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together.",
-            "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it."
+            "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it.",
+            "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read."
           },
           {
             "at": 0.556,
@@ -2789,7 +2790,8 @@
             "only": 3,
             "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
             "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together.",
-            "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it."
+            "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it.",
+            "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read."
           },
           {
             "at": 0.85,
@@ -3066,7 +3068,28 @@
               "boundPm": 0.01,
               "script": "build/staging/r324/r324_read.py, r324_record.py"
             },
-            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The fore topsail yard crosses the mast's axis at row 396.8 (its line fitted on 75 columns, rms 0.45 px), under the head of the topmast at row 330, over the foot at row 1005: 0.901 of the height from the foot to that head; the fore topgallant yard crosses the mast's axis at row 247.3 (its line fitted on 69 columns, rms 0.39 px), under the head of the topgallant mast at row 220, over the foot at row 1005: 0.9652 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1620; the read is Vasa's, applied to it."
+            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The fore topsail yard crosses the mast's axis at row 396.8 (its line fitted on 75 columns, rms 0.45 px), under the head of the topmast at row 330, over the foot at row 1005: 0.901 of the height from the foot to that head; the fore topgallant yard crosses the mast's axis at row 247.3 (its line fitted on 69 columns, rms 0.39 px), under the head of the topgallant mast at row 220, over the foot at row 1005: 0.9652 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1620; the read is Vasa's, applied to it.",
+            "topmastTop": {
+              "ofFootToHead": 0.9452,
+              "ofLowerTop": 0.462,
+              "rows": {
+                "foot": 1005,
+                "head": 330,
+                "top": 367.0,
+                "topFrom": 364,
+                "topTo": 370
+              },
+              "widthPx": {
+                "top": 43,
+                "lowerTop": 93,
+                "lowerTopRow": 684.5
+              },
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "boundPm": 0.01,
+              "ratioBound": 0.06,
+              "script": "build/staging/r325/r325_read.py, r325_record.py"
+            },
+            "topmastTopProvenance": "PLATE READ, r325 (0y¹⁶⁷): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The fore topmast carries a small round top: its widest rows are 364-370 (centre 367.0), under the topmast's head at row 330, over the mast's foot at row 1005: 0.9452 of the height from the foot to the topmast's head. Its widest run across the mast is 43 px, and the fore lower top's on the same plate, by the same test, is 93 px (rows 678-691): 0.462 of the lower top's width. Each run is read through the mast's axis, fitted on the spar's centres in rows clear of the top. A 2 px reading error is 0.003 of the height and 0.05 of the width ratio; the bounds are 0.01 and 0.06. This hull is dated 1620; the read is Vasa's, applied to it."
           },
           {
             "at": 0.556,
@@ -3163,7 +3186,28 @@
               "boundPm": 0.01,
               "script": "build/staging/r324/r324_read.py, r324_record.py"
             },
-            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The main topsail yard crosses the mast's axis at row 381.8 (its line fitted on 144 columns, rms 0.4 px), under the head of the topmast at row 298, over the foot at row 1012: 0.8826 of the height from the foot to that head; the main topgallant yard crosses the mast's axis at row 175.5 (its line fitted on 114 columns, rms 0.44 px), under the head of the topgallant mast at row 132, over the foot at row 1012: 0.9506 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1620; the read is Vasa's, applied to it."
+            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The main topsail yard crosses the mast's axis at row 381.8 (its line fitted on 144 columns, rms 0.4 px), under the head of the topmast at row 298, over the foot at row 1012: 0.8826 of the height from the foot to that head; the main topgallant yard crosses the mast's axis at row 175.5 (its line fitted on 114 columns, rms 0.44 px), under the head of the topgallant mast at row 132, over the foot at row 1012: 0.9506 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1620; the read is Vasa's, applied to it.",
+            "topmastTop": {
+              "ofFootToHead": 0.9426,
+              "ofLowerTop": 0.476,
+              "rows": {
+                "foot": 1012,
+                "head": 298,
+                "top": 339.0,
+                "topFrom": 333,
+                "topTo": 345
+              },
+              "widthPx": {
+                "top": 40,
+                "lowerTop": 84,
+                "lowerTopRow": 682.0
+              },
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "boundPm": 0.01,
+              "ratioBound": 0.06,
+              "script": "build/staging/r325/r325_read.py, r325_record.py"
+            },
+            "topmastTopProvenance": "PLATE READ, r325 (0y¹⁶⁷): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The main topmast carries a small round top: its widest rows are 333-345 (centre 339.0), under the topmast's head at row 298, over the mast's foot at row 1012: 0.9426 of the height from the foot to the topmast's head. Its widest run across the mast is 40 px, and the main lower top's on the same plate, by the same test, is 84 px (rows 674-690): 0.476 of the lower top's width. Each run is read through the mast's axis, fitted on the spar's centres in rows clear of the top. A 2 px reading error is 0.003 of the height and 0.05 of the width ratio; the bounds are 0.01 and 0.06. This hull is dated 1620; the read is Vasa's, applied to it."
           },
           {
             "at": 0.85,
@@ -3718,7 +3762,28 @@
               "boundPm": 0.01,
               "script": "build/staging/r324/r324_read.py, r324_record.py"
             },
-            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The fore topsail yard crosses the mast's axis at row 396.8 (its line fitted on 75 columns, rms 0.45 px), under the head of the topmast at row 330, over the foot at row 1005: 0.901 of the height from the foot to that head; the fore topgallant yard crosses the mast's axis at row 247.3 (its line fitted on 69 columns, rms 0.39 px), under the head of the topgallant mast at row 220, over the foot at row 1005: 0.9652 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1590; the read is Vasa's, applied to it."
+            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The fore topsail yard crosses the mast's axis at row 396.8 (its line fitted on 75 columns, rms 0.45 px), under the head of the topmast at row 330, over the foot at row 1005: 0.901 of the height from the foot to that head; the fore topgallant yard crosses the mast's axis at row 247.3 (its line fitted on 69 columns, rms 0.39 px), under the head of the topgallant mast at row 220, over the foot at row 1005: 0.9652 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1590; the read is Vasa's, applied to it.",
+            "topmastTop": {
+              "ofFootToHead": 0.9452,
+              "ofLowerTop": 0.462,
+              "rows": {
+                "foot": 1005,
+                "head": 330,
+                "top": 367.0,
+                "topFrom": 364,
+                "topTo": 370
+              },
+              "widthPx": {
+                "top": 43,
+                "lowerTop": 93,
+                "lowerTopRow": 684.5
+              },
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "boundPm": 0.01,
+              "ratioBound": 0.06,
+              "script": "build/staging/r325/r325_read.py, r325_record.py"
+            },
+            "topmastTopProvenance": "PLATE READ, r325 (0y¹⁶⁷): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The fore topmast carries a small round top: its widest rows are 364-370 (centre 367.0), under the topmast's head at row 330, over the mast's foot at row 1005: 0.9452 of the height from the foot to the topmast's head. Its widest run across the mast is 43 px, and the fore lower top's on the same plate, by the same test, is 93 px (rows 678-691): 0.462 of the lower top's width. Each run is read through the mast's axis, fitted on the spar's centres in rows clear of the top. A 2 px reading error is 0.003 of the height and 0.05 of the width ratio; the bounds are 0.01 and 0.06. This hull is dated 1590; the read is Vasa's, applied to it."
           },
           {
             "at": 0.556,
@@ -3815,7 +3880,28 @@
               "boundPm": 0.01,
               "script": "build/staging/r324/r324_read.py, r324_record.py"
             },
-            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The main topsail yard crosses the mast's axis at row 381.8 (its line fitted on 144 columns, rms 0.4 px), under the head of the topmast at row 298, over the foot at row 1012: 0.8826 of the height from the foot to that head; the main topgallant yard crosses the mast's axis at row 175.5 (its line fitted on 114 columns, rms 0.44 px), under the head of the topgallant mast at row 132, over the foot at row 1012: 0.9506 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1590; the read is Vasa's, applied to it."
+            "hoistProvenance": "PLATE READ, r324 (0y¹⁶⁶): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The main topsail yard crosses the mast's axis at row 381.8 (its line fitted on 144 columns, rms 0.4 px), under the head of the topmast at row 298, over the foot at row 1012: 0.8826 of the height from the foot to that head; the main topgallant yard crosses the mast's axis at row 175.5 (its line fitted on 114 columns, rms 0.44 px), under the head of the topgallant mast at row 132, over the foot at row 1012: 0.9506 of the height from the foot to that head. Each yard's row is where its fitted centre line crosses the mast's axis, itself fitted on the mast's centres above and below the yard; the main's yards are drawn cocked, and the model hangs them level at that height. The foot and head rows are r322's (mastHeightsRead). A 3 px reading error is under 0.007 of any of these spans, and the bound is 0.01. Until r324 each of these yards was set at the class 0.88 of its section, higher than the plate draws it. This hull is dated 1590; the read is Vasa's, applied to it.",
+            "topmastTop": {
+              "ofFootToHead": 0.9426,
+              "ofLowerTop": 0.476,
+              "rows": {
+                "foot": 1012,
+                "head": 298,
+                "top": 339.0,
+                "topFrom": 333,
+                "topTo": 345
+              },
+              "widthPx": {
+                "top": 40,
+                "lowerTop": 84,
+                "lowerTopRow": 682.0
+              },
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "boundPm": 0.01,
+              "ratioBound": 0.06,
+              "script": "build/staging/r325/r325_read.py, r325_record.py"
+            },
+            "topmastTopProvenance": "PLATE READ, r325 (0y¹⁶⁷): read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull). The main topmast carries a small round top: its widest rows are 333-345 (centre 339.0), under the topmast's head at row 298, over the mast's foot at row 1012: 0.9426 of the height from the foot to the topmast's head. Its widest run across the mast is 40 px, and the main lower top's on the same plate, by the same test, is 84 px (rows 674-690): 0.476 of the lower top's width. Each run is read through the mast's axis, fitted on the spar's centres in rows clear of the top. A 2 px reading error is 0.003 of the height and 0.05 of the width ratio; the bounds are 0.01 and 0.06. This hull is dated 1590; the read is Vasa's, applied to it."
           },
           {
             "at": 0.85,

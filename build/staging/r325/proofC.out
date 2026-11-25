@@ -1,0 +1,22 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast top off its plate read",
+  "detail": "masts[0] (station 0.115): the top stands 0.9840 of the way from the mast's foot (y 5.3697) to the topmast's head (y 32.9697); the plate reads 0.9452"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast top off its plate read",
+  "detail": "masts[1] (station 0.556): the top stands 0.9836 of the way from the mast's foot (y 4.602) to the topmast's head (y 33.802); the plate reads 0.9426"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast top off its plate read",
+  "detail": "masts[0] (station 0.115): the top stands 0.9840 of the way from the mast's foot (y 3.5772) to the topmast's head (y 20.2072); the plate reads 0.9452"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast top off its plate read",
+  "detail": "masts[1] (station 0.556): the top stands 0.9836 of the way from the mast's foot (y 3.0013) to the topmast's head (y 20.5913); the plate reads 0.9426"
+ }
+]
