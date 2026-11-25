@@ -28943,3 +28943,21 @@ The full ratchet was launched on the final geometry at 20:18:33. The 20:19 recor
 **r317 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r317` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁵²), the missing driver. Else (0y¹⁵⁴).**
 
 **Live stamp: docs/index.html carries data-version 1795580408 at the build.**
+
+**Live stamp VERIFIED: 1795580408 on https://augustg97.github.io/ships/index.html at 20:21:51 PST, about 90 s after the push. The published `audit-hulls.js` carries A-YARD-SECTION, the published `js/hull.js` carries the cap rest (`fracRec.onCap`), and the published `data/provenance.json` carries the new yard provenance. First paint is 8.51 MB against the 8.6 MB budget.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The run was captured on the final tree. The full check launched at 20:18:33 died at `ship-endurance` on the 150 s FRAME_READY wait; `page_errors.py` then opened that page clean. `r316_resume.py` run 1 recaptured `globe-default` first, then died at `sea-canoe-floor`; run 2 captured the last three. Each run was scored with r277's offline scorer (`score-run1.out`, `score-run2.out`, `score-run3.out`).
+
+- **Predicted, ACCEPTED** (FRAME-LOG.md; pairs in `pair-<frame>.png`):
+  - `ship-steamer` 3.111% / 1.277;
+  - `ship-clipper` 2.221% / 0.869;
+  - `ship-endurance` 0.688% / 0.306;
+  - `aboard-clipper` 0.214% / 0.072;
+  - `aboard` 0.176% / 0.064, the steamer's Sea close-up;
+  - `ship-great-eastern` 0.059% / 0.022, the clipper's rig in the next berth at the left edge.
+  
+  In each one the changed pixels are the re-hung yards and sails.
+- **`globe-default`: capture fault.** It scored 11.148% / 3.119 as the run's first frame, captured while this round's site build and record edit ran. In the faulted capture the voyage list's positions differ by a degree (Zheng He 46°E against 47°E). Recaptured first in resume run 1, with no other browser running, it scores 0.027%. No hull is drawn in it.
+- The other 58 frames are inside the gate. `shipwright-furled` is among them, so its edge neighbour is not one of the three changed hulls. The largest is `passage-sahul` at 0.047%, as in r314 and r315.
+
+No frame is left unscored for r317.

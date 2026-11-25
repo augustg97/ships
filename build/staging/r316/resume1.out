@@ -1,0 +1,57 @@
+15 frames to capture
+    · globe-default                http://localhost:8149/?frozen=1#v=sea
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+    · action-myeongnyang           http://localhost:8149/?frozen=1#v=action&bt=myeongnyang&day=3&cb=45&cd=1100&ch=13
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+    · sea-canoe-floor              http://localhost:8149/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25
+Traceback (most recent call last):
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 169, in capture_frames
+    page.wait_for_function(expr, timeout=ready.get("timeout_ms", 45000))
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/sync_api/_generated.py", line 12761, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_page.py", line 1151, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_frame.py", line 940, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 150000ms exceeded.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/augustgweon/Ships/build/staging/r316/r316_resume.py", line 17, in <module>
+    names = fb.capture_frames(p, m, out)
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 171, in capture_frames
+    raise RuntimeError(
+    ...<3 lines>...
+    ) from exc
+RuntimeError: frame 'sea-canoe-floor': readiness expression never became true ("window.__FRAME_READY === true && (!document.fonts || document.fonts.status === 'loaded')"). The app must set it after its first real render, or the manifest must drop it. Original error: Page.wait_for_function: Timeout 150000ms exceeded.
+RESUME EXIT 1
