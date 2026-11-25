@@ -730,14 +730,26 @@ function swStageCard(spec, stage, parts) {
 }
 window.SW_STAGE_CARD = swStageCard;
 /* the audit asks the furled card too (r302) */
-window.SW_FURLED_CARD = (spec) => swFurledCard(spec);
+window.SW_FURLED_CARD = (spec, built) => swFurledCard(spec, built);
 
 /* the furled card names only the rigs this hull carries (r302): it used to tell every
    sailing hull about square sails, gaff sails and a junk's battens at once */
-function swFurledCard(spec) {
+function swFurledCard(spec, built) {
   const rigs = new Set(((spec.hull || {}).masts || []).map(m => m.rig));
   const how = [];
   if (rigs.has('square')) how.push('the square sails are rolled up on their yards and tied with gaskets');
+  /* r314 (0y¹⁴⁶): the yards the furled build lowers onto their caps, named by kind, read off the built
+     ship (userData.lowered); without a built ship the card says nothing of them */
+  if (built) {
+    const NAME = { top: 'topsail', topsail: 'topsail', utop: 'upper topsail', tg: 'topgallant',
+                   topgallant: 'topgallant', utg: 'upper topgallant', royal: 'royal' };
+    const kinds = [];
+    built.traverse(o => { const L = o.userData && o.userData.lowered;
+      if (L && L.setY !== undefined) { const k = NAME[L.name] || L.name; if (!kinds.includes(k)) kinds.push(k); } });
+    const ORDER = ['topsail', 'upper topsail', 'topgallant', 'upper topgallant', 'royal'];
+    kinds.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+    if (kinds.length) how.push('the ' + swAnd(kinds) + ' yards are lowered onto the caps below them');
+  }
   if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
   /* r308: a gaff sail stowed by its brails keeps its gaff aloft (gaffStow or furlStow
      'brailed'); only the others are lowered onto their booms */
@@ -839,7 +851,7 @@ function swApplyStage() {
   /* the stage card says which STATE the canvas is in, because the picture does */
   const cloth = !engine;
   if (SW.stage === 7 && SW.furled && cloth)
-    nm = swFurledCard(SW.spec);
+    nm = swFurledCard(SW.spec, SW.ship);
   document.getElementById('swStageName').textContent = nm[0];
   document.getElementById('swStageWhat').textContent = nm[1];
   document.getElementById('swOrder').textContent = trad.label;

@@ -1496,10 +1496,27 @@ let capY = base;
 const mastYards = [];
 const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
+let lastYardTop = -Infinity;
 const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
 : yardLen * (RATE[kind] || 0.625) / 36;
+const setY = yy;
+let loweredRec = null;
+const readHere = !!(fracRec && fracRec.from === 'record');
+if (FURLED && hoist && typeof hoist === 'object' && hoist.tie >= 1 && !readHere) {
+const capBelow = segHeads[hoist.tie - 1] !== undefined ? segHeads[hoist.tie - 1] : -Infinity;
+const floor = Math.max(capBelow, lastYardTop);
+const yl = floor + slingsD / 2 + 0.02;
+if (isFinite(floor) && yl < yy) {
+loweredRec = { mast: mi, name: listName || kind, setY: +setY.toFixed(3), onto: lastYardTop > capBelow ? 'the yard below' : 'the cap',
+floorY: +floor.toFixed(3), tie: hoist.tie,
+from: 'class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg\'s 1828 Asow '
++ '(main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); '
++ 'applied to every yard that rides a tie over section 1 or higher' };
+yy = yl;
+}
+}
 const yg = new THREE.CylinderGeometry(slingsD / 2, slingsD / 2, yardLen, 16, 8);
 const ym = new THREE.Mesh(yg, woodDark);
 const yp = yg.attributes.position;
@@ -1519,7 +1536,7 @@ ym.quaternion
 .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
 const mastRs = mastRAt(yy);
 const rRoll = FURLED
-? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((yy - prevYard) * 0.97) * 0.055)
+? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((setY - prevYard) * 0.97) * 0.055)
 / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
 : 0;
 const OFF = mastRs + slingsD / 2;
@@ -1546,6 +1563,10 @@ stowFrom: 'class (round 259): the harbour stow rolls the cloth onto the top of t
 + 'plate reads it' } : null };
 if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
 if (courseRec) ym.userData.courseAt = Object.assign(courseRec, { y: yY, yPlan: yy });
+if (hoist && typeof hoist === 'object' && hoist.tie >= 1)
+ym.userData.lowered = loweredRec ? Object.assign(loweredRec, { y: +yY.toFixed(3) })
+: { mast: mi, furled: FURLED, lowered: false, tie: hoist.tie, y: +yY.toFixed(3),
+why: !FURLED ? 'set' : readHere ? 'record: the plate reads where this yard hangs' : 'set at or under its rest' };
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1589,8 +1610,9 @@ const par = ropeMesh(segs, rPar, ropeMat);
 if (par) group.add(tag(par, 'parrel'));
 }
 }
-const drop = yy - prevYard;
-prevYard = yy;
+const drop = setY - prevYard;
+prevYard = setY;
+lastYardTop = yY + slingsD / 2 + 2 * rRoll;
 mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind });
 if (FURLED) {
 const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;

@@ -2602,6 +2602,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
     const segHeads = [];
     /* a braced sail reaches about a tenth of the hull either side of its own mast */
     let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
+    /* r314 (0y¹⁴⁶): the top of the last yard crossed on this mast, its furled roll included: what a lowered
+       hoisting yard above it comes to rest on (crossYard, below) */
+    let lastYardTop = -Infinity;
 
     /* ── ONE CROSSED YARD, WITH ITS SAIL ──────────────────────────────────────────────
        Factored out because a mast may cross three yards — one per fidded segment, the
@@ -2639,6 +2642,39 @@ function buildRig(S, group, mats, FINE, FURLED) {
          ONE height segment, so its only ring vertices sit at the two ENDS — t was 1 at
          every vertex, the whole profile collapsed to its arm value, and each yard drew as
          a uniform stick. A per-vertex profile needs vertices along the length to land on. */
+      /* ── r314 (0y¹⁴⁶): A FURLED HOISTING YARD IS LOWERED ONTO THE CAP ─────────────────────────
+         A topsail is taken in by letting go its halyard: the yard comes down its mast until it rests on
+         the cap of the section below, and the sail is clewed up and furled there. Eckersberg's 1828
+         painting of the Russian 74 Asow at anchor (build/staging/r312/plates/asow.jpg, about 30 px/m at
+         the mizzen) shows every topsail yard down on its lower cap: the main topsail yard at row about
+         1190 over the main cap at about 1215, the mizzen's at 1260 over its cap at 1283, the fore's at
+         about 1315 over its cap at about 1340. Until r314 every hoisting yard stayed hoisted in the furled
+         build. Every yard that rides a TIE over the head of section 1 or higher now comes down to the head
+         of the section below it, or onto the yard below it with its roll where that stands higher (the
+         upper topsail of a doubled rig comes down onto the lower topsail yard, which is fixed at the cap).
+         A single-yard mast's yard (tie 0) is not lowered: no plate of a furled one-sail ship is read. A yard
+         whose height the record reads off a plate (`yardFracs`, Preussen's from a print of her at anchor)
+         stays where the plate puts it. A yard whose set height is already at or under the cap below it (the
+         clipper's and the steamer's topgallants, Endurance's topsail and topgallant, where the plan's class
+         fraction hangs the yard inside the doubling) cannot come down and is recorded as not lowered.
+         The roll keeps the cloth of the SET sail, so its size is read from where the yard is hoisted to
+         set, and the sail below keeps its own depth. CLASS: one plate reads it, for one ship. */
+      const setY = yy;
+      let loweredRec = null;
+      const readHere = !!(fracRec && fracRec.from === 'record');
+      if (FURLED && hoist && typeof hoist === 'object' && hoist.tie >= 1 && !readHere) {
+        const capBelow = segHeads[hoist.tie - 1] !== undefined ? segHeads[hoist.tie - 1] : -Infinity;
+        const floor = Math.max(capBelow, lastYardTop);
+        const yl = floor + slingsD / 2 + 0.02;
+        if (isFinite(floor) && yl < yy) {
+          loweredRec = { mast: mi, name: listName || kind, setY: +setY.toFixed(3), onto: lastYardTop > capBelow ? 'the yard below' : 'the cap',
+            floorY: +floor.toFixed(3), tie: hoist.tie,
+            from: 'class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg\'s 1828 Asow '
+              + '(main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); '
+              + 'applied to every yard that rides a tie over section 1 or higher' };
+          yy = yl;
+        }
+      }
       const yg = new THREE.CylinderGeometry(slingsD / 2, slingsD / 2, yardLen, 16, 8);
       const ym = new THREE.Mesh(yg, woodDark);
       const yp = yg.attributes.position;
@@ -2693,7 +2729,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          the offset — the fitting is the rig's own — and the record says so (userData.slung). */
       const mastRs = mastRAt(yy);
       const rRoll = FURLED
-        ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((yy - prevYard) * 0.97) * 0.055)
+        ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((setY - prevYard) * 0.97) * 0.055)
                                    / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
         : 0;
       /* r259 (0y²⁶, 0y²⁸): the two radii in BOTH states — the parrel or the truss holds the
@@ -2730,6 +2766,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
       if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
       /* r313 (0y¹⁴³): a course on a segment rig records where it hangs, the record's read or the class figure (A-COURSE-READ) */
       if (courseRec) ym.userData.courseAt = Object.assign(courseRec, { y: yY, yPlan: yy });
+      /* r314 (0y¹⁴⁶): a hoisting yard records whether it is lowered, and from where (A-YARD-LOWERED) */
+      if (hoist && typeof hoist === 'object' && hoist.tie >= 1)
+        ym.userData.lowered = loweredRec ? Object.assign(loweredRec, { y: +yY.toFixed(3) })
+          : { mast: mi, furled: FURLED, lowered: false, tie: hoist.tie, y: +yY.toFixed(3),
+              why: !FURLED ? 'set' : readHere ? 'record: the plate reads where this yard hangs' : 'set at or under its rest' };
       group.add(tag(ym, 'yard'));
       /* the steel yard's card carries its provenance, the iron-mast rule: no tube record
          was in reach for these spars, so the RATE is the record's and the figure derived */
@@ -2800,8 +2841,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
          the sail plan of a square-rigger reads as one continuous wall of canvas rather than
          as separate flags. The course's "tier below" is the deck, less the clearance a foot
          needs so the sail can be handled. */
-      const drop = yy - prevYard;
-      prevYard = yy;
+      const drop = setY - prevYard;       // r314: the SET depth; a lowered yard keeps its sail's cloth
+      prevYard = setY;
+      lastYardTop = yY + slingsD / 2 + 2 * rRoll;
       mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind });   // r281: the yard's radius, for the clew garnet's block; r283: the tier's names (the record's and the plan's), for its own gear figures
       if (FURLED) {
         /* the roll lies along the braced yard itself, between its arms, bunt at the slings */

@@ -1,0 +1,2493 @@
+{
+"trireme": [
+{
+"furled": false,
+"mast": null,
+"y": 11.362,
+"rec": null,
+"rollR": 0,
+"r": 0.094
+},
+{
+"furled": false,
+"mast": null,
+"y": 7.235,
+"rec": null,
+"rollR": 0,
+"r": 0.051
+},
+{
+"furled": true,
+"mast": null,
+"y": 11.362,
+"rec": null,
+"rollR": 0.378,
+"r": 0.094
+},
+{
+"furled": true,
+"mast": null,
+"y": 7.235,
+"rec": null,
+"rollR": 0.267,
+"r": 0.051
+}
+],
+"corbita": [
+{
+"furled": false,
+"mast": null,
+"y": 14.678,
+"rec": null,
+"rollR": 0,
+"r": 0.116
+},
+{
+"furled": false,
+"mast": null,
+"y": 8.709,
+"rec": null,
+"rollR": 0,
+"r": 0.056
+},
+{
+"furled": true,
+"mast": null,
+"y": 14.678,
+"rec": null,
+"rollR": 0.422,
+"r": 0.116
+},
+{
+"furled": true,
+"mast": null,
+"y": 8.709,
+"rec": null,
+"rollR": 0.281,
+"r": 0.056
+}
+],
+"cog": [
+{
+"furled": false,
+"mast": null,
+"y": 14.906,
+"rec": null,
+"rollR": 0,
+"r": 0.175
+},
+{
+"furled": true,
+"mast": null,
+"y": 14.906,
+"rec": null,
+"rollR": 0.442,
+"r": 0.175
+}
+],
+"carrack": [
+{
+"furled": false,
+"mast": null,
+"y": 19.186,
+"rec": null,
+"rollR": 0,
+"r": 0.164
+},
+{
+"furled": false,
+"mast": 0,
+"y": 32.422,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 32.422,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.104
+},
+{
+"furled": false,
+"mast": null,
+"y": 19.978,
+"rec": null,
+"rollR": 0,
+"r": 0.184
+},
+{
+"furled": false,
+"mast": 1,
+"y": 34.849,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 34.849,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.117
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.186,
+"rec": null,
+"rollR": 0.422,
+"r": 0.164
+},
+{
+"furled": true,
+"mast": 0,
+"y": 24.699,
+"rec": {
+"mast": 0,
+"setY": 32.435,
+"onto": "the cap",
+"floorY": 24.59,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 24.699
+},
+"rollR": 0.474,
+"r": 0.104
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.978,
+"rec": null,
+"rollR": 0.464,
+"r": 0.184
+},
+{
+"furled": true,
+"mast": 1,
+"y": 26.166,
+"rec": {
+"mast": 1,
+"setY": 34.844,
+"onto": "the cap",
+"floorY": 26.023,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 26.166
+},
+"rollR": 0.503,
+"r": 0.117
+}
+],
+"sekibune": [
+{
+"furled": false,
+"mast": null,
+"y": 13.1,
+"rec": null,
+"rollR": 0,
+"r": 0.111
+},
+{
+"furled": true,
+"mast": null,
+"y": 13.1,
+"rec": null,
+"rollR": 0.412,
+"r": 0.111
+}
+],
+"fluyt": [
+{
+"furled": false,
+"mast": null,
+"y": 12.846,
+"rec": null,
+"rollR": 0,
+"r": 0.132
+},
+{
+"furled": false,
+"mast": 0,
+"y": 25.345,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 25.345,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.084
+},
+{
+"furled": false,
+"mast": 0,
+"y": 29.43,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 29.43,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.054
+},
+{
+"furled": false,
+"mast": null,
+"y": 13.442,
+"rec": null,
+"rollR": 0,
+"r": 0.148
+},
+{
+"furled": false,
+"mast": 1,
+"y": 27.492,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 27.492,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.094
+},
+{
+"furled": false,
+"mast": 1,
+"y": 32.082,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 32.082,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.06
+},
+{
+"furled": true,
+"mast": null,
+"y": 12.846,
+"rec": null,
+"rollR": 0.338,
+"r": 0.132
+},
+{
+"furled": true,
+"mast": 0,
+"y": 19.139,
+"rec": {
+"mast": 0,
+"setY": 25.351,
+"onto": "the cap",
+"floorY": 19.042,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 19.139
+},
+"rollR": 0.461,
+"r": 0.084
+},
+{
+"furled": true,
+"mast": 0,
+"y": 26.534,
+"rec": {
+"mast": 0,
+"setY": 29.434,
+"onto": "the cap",
+"floorY": 26.464,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 26.534
+},
+"rollR": 0.263,
+"r": 0.054
+},
+{
+"furled": true,
+"mast": null,
+"y": 13.442,
+"rec": null,
+"rollR": 0.372,
+"r": 0.148
+},
+{
+"furled": true,
+"mast": 1,
+"y": 20.511,
+"rec": {
+"mast": 1,
+"setY": 27.488,
+"onto": "the cap",
+"floorY": 20.393,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 20.511
+},
+"rollR": 0.488,
+"r": 0.094
+},
+{
+"furled": true,
+"mast": 1,
+"y": 28.823,
+"rec": {
+"mast": 1,
+"setY": 32.08,
+"onto": "the cap",
+"floorY": 28.741,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 28.823
+},
+"rollR": 0.279,
+"r": 0.06
+}
+],
+"east-indiaman": [
+{
+"furled": false,
+"mast": null,
+"y": 19.53,
+"rec": null,
+"rollR": 0,
+"r": 0.201
+},
+{
+"furled": false,
+"mast": 0,
+"y": 38.628,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 38.628,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.128
+},
+{
+"furled": false,
+"mast": 0,
+"y": 44.869,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 44.869,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.082
+},
+{
+"furled": false,
+"mast": null,
+"y": 20.566,
+"rec": null,
+"rollR": 0,
+"r": 0.226
+},
+{
+"furled": false,
+"mast": 1,
+"y": 42.049,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 42.049,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.144
+},
+{
+"furled": false,
+"mast": 1,
+"y": 49.067,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 49.067,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.092
+},
+{
+"furled": false,
+"mast": null,
+"y": 18.635,
+"rec": null,
+"rollR": 0,
+"r": 0.173
+},
+{
+"furled": false,
+"mast": 2,
+"y": 37.047,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 37.047,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.124
+},
+{
+"furled": false,
+"mast": 2,
+"y": 43.06,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 43.06,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.079
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.53,
+"rec": null,
+"rollR": 0.42,
+"r": 0.201
+},
+{
+"furled": true,
+"mast": 0,
+"y": 29.134,
+"rec": {
+"mast": 0,
+"setY": 38.638,
+"onto": "the cap",
+"floorY": 28.998,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 29.134
+},
+"rollR": 0.569,
+"r": 0.128
+},
+{
+"furled": true,
+"mast": 0,
+"y": 40.434,
+"rec": {
+"mast": 0,
+"setY": 44.876,
+"onto": "the cap",
+"floorY": 40.339,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 40.434
+},
+"rollR": 0.325,
+"r": 0.082
+},
+{
+"furled": true,
+"mast": null,
+"y": 20.566,
+"rec": null,
+"rollR": 0.46,
+"r": 0.226
+},
+{
+"furled": true,
+"mast": 1,
+"y": 31.365,
+"rec": {
+"mast": 1,
+"setY": 42.043,
+"onto": "the cap",
+"floorY": 31.194,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 31.365
+},
+"rollR": 0.604,
+"r": 0.144
+},
+{
+"furled": true,
+"mast": 1,
+"y": 44.075,
+"rec": {
+"mast": 1,
+"setY": 49.064,
+"onto": "the cap",
+"floorY": 43.958,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 44.075
+},
+"rollR": 0.345,
+"r": 0.092
+},
+{
+"furled": true,
+"mast": null,
+"y": 18.635,
+"rec": null,
+"rollR": 0.42,
+"r": 0.173
+},
+{
+"furled": true,
+"mast": 2,
+"y": 27.892,
+"rec": {
+"mast": 2,
+"setY": 37.03,
+"onto": "the cap",
+"floorY": 27.729,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 27.892
+},
+"rollR": 0.559,
+"r": 0.124
+},
+{
+"furled": true,
+"mast": 2,
+"y": 38.783,
+"rec": {
+"mast": 2,
+"setY": 43.048,
+"onto": "the cap",
+"floorY": 38.671,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 38.783
+},
+"rollR": 0.32,
+"r": 0.079
+}
+],
+"ship-of-the-line": [
+{
+"furled": false,
+"mast": null,
+"y": 23.742,
+"rec": null,
+"rollR": 0,
+"r": 0.248
+},
+{
+"furled": false,
+"mast": 0,
+"y": 47.31,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 47.31,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.158
+},
+{
+"furled": false,
+"mast": 0,
+"y": 55.012,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 55.012,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.101
+},
+{
+"furled": false,
+"mast": null,
+"y": 25.093,
+"rec": null,
+"rollR": 0,
+"r": 0.279
+},
+{
+"furled": false,
+"mast": 1,
+"y": 51.591,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 51.591,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.178
+},
+{
+"furled": false,
+"mast": 1,
+"y": 60.248,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 60.248,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.114
+},
+{
+"furled": false,
+"mast": null,
+"y": 27.145,
+"rec": null,
+"rollR": 0,
+"r": 0.214
+},
+{
+"furled": false,
+"mast": 2,
+"y": 45.336,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 45.336,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.152
+},
+{
+"furled": false,
+"mast": 2,
+"y": 52.748,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 52.748,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.098
+},
+{
+"furled": true,
+"mast": null,
+"y": 23.742,
+"rec": null,
+"rollR": 0.468,
+"r": 0.248
+},
+{
+"furled": true,
+"mast": 0,
+"y": 35.589,
+"rec": {
+"mast": 0,
+"setY": 47.322,
+"onto": "the cap",
+"floorY": 35.425,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 35.589
+},
+"rollR": 0.633,
+"r": 0.158
+},
+{
+"furled": true,
+"mast": 0,
+"y": 49.534,
+"rec": {
+"mast": 0,
+"setY": 55.02,
+"onto": "the cap",
+"floorY": 49.421,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 49.534
+},
+"rollR": 0.362,
+"r": 0.101
+},
+{
+"furled": true,
+"mast": null,
+"y": 25.093,
+"rec": null,
+"rollR": 0.511,
+"r": 0.279
+},
+{
+"furled": true,
+"mast": 1,
+"y": 38.408,
+"rec": {
+"mast": 1,
+"setY": 51.584,
+"onto": "the cap",
+"floorY": 38.202,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 38.408
+},
+"rollR": 0.671,
+"r": 0.178
+},
+{
+"furled": true,
+"mast": 1,
+"y": 54.085,
+"rec": {
+"mast": 1,
+"setY": 60.244,
+"onto": "the cap",
+"floorY": 53.946,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 54.085
+},
+"rollR": 0.383,
+"r": 0.114
+},
+{
+"furled": true,
+"mast": null,
+"y": 27.145,
+"rec": null,
+"rollR": 0.543,
+"r": 0.214
+},
+{
+"furled": true,
+"mast": 2,
+"y": 34.044,
+"rec": {
+"mast": 2,
+"setY": 45.31,
+"onto": "the cap",
+"floorY": 33.841,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 34.044
+},
+"rollR": 0.556,
+"r": 0.152
+},
+{
+"furled": true,
+"mast": 2,
+"y": 47.471,
+"rec": {
+"mast": 2,
+"setY": 52.731,
+"onto": "the cap",
+"floorY": 47.334,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 47.471
+},
+"rollR": 0.355,
+"r": 0.098
+}
+],
+"slave-ship": [
+{
+"furled": false,
+"mast": null,
+"y": 12.451,
+"rec": null,
+"rollR": 0,
+"r": 0.126
+},
+{
+"furled": false,
+"mast": 0,
+"y": 24.419,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 24.419,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.08
+},
+{
+"furled": false,
+"mast": 0,
+"y": 28.33,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 28.33,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.051
+},
+{
+"furled": false,
+"mast": null,
+"y": 13.003,
+"rec": null,
+"rollR": 0,
+"r": 0.142
+},
+{
+"furled": false,
+"mast": 1,
+"y": 26.462,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 26.462,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.09
+},
+{
+"furled": false,
+"mast": 1,
+"y": 30.859,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 30.859,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.058
+},
+{
+"furled": false,
+"mast": null,
+"y": 11.805,
+"rec": null,
+"rollR": 0,
+"r": 0.108
+},
+{
+"furled": false,
+"mast": 2,
+"y": 23.338,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 23.338,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.077
+},
+{
+"furled": false,
+"mast": 2,
+"y": 27.104,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 27.104,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.05
+},
+{
+"furled": true,
+"mast": null,
+"y": 12.451,
+"rec": null,
+"rollR": 0.331,
+"r": 0.126
+},
+{
+"furled": true,
+"mast": 0,
+"y": 18.477,
+"rec": {
+"mast": 0,
+"setY": 24.425,
+"onto": "the cap",
+"floorY": 18.384,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 18.477
+},
+"rollR": 0.451,
+"r": 0.08
+},
+{
+"furled": true,
+"mast": 0,
+"y": 25.558,
+"rec": {
+"mast": 0,
+"setY": 28.335,
+"onto": "the cap",
+"floorY": 25.492,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 25.558
+},
+"rollR": 0.258,
+"r": 0.051
+},
+{
+"furled": true,
+"mast": null,
+"y": 13.003,
+"rec": null,
+"rollR": 0.364,
+"r": 0.142
+},
+{
+"furled": true,
+"mast": 1,
+"y": 19.776,
+"rec": {
+"mast": 1,
+"setY": 26.459,
+"onto": "the cap",
+"floorY": 19.661,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 19.776
+},
+"rollR": 0.478,
+"r": 0.09
+},
+{
+"furled": true,
+"mast": 1,
+"y": 27.739,
+"rec": {
+"mast": 1,
+"setY": 30.857,
+"onto": "the cap",
+"floorY": 27.658,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 27.739
+},
+"rollR": 0.273,
+"r": 0.058
+},
+{
+"furled": true,
+"mast": null,
+"y": 11.805,
+"rec": null,
+"rollR": 0.332,
+"r": 0.108
+},
+{
+"furled": true,
+"mast": 2,
+"y": 17.611,
+"rec": {
+"mast": 2,
+"setY": 23.327,
+"onto": "the cap",
+"floorY": 17.501,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 17.611
+},
+"rollR": 0.443,
+"r": 0.077
+},
+{
+"furled": true,
+"mast": 2,
+"y": 24.433,
+"rec": {
+"mast": 2,
+"setY": 27.097,
+"onto": "the cap",
+"floorY": 24.355,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 24.433
+},
+"rollR": 0.253,
+"r": 0.05
+}
+],
+"preussen": [
+{
+"furled": false,
+"mast": null,
+"y": 18.204,
+"rec": null,
+"rollR": 0,
+"r": 0.32
+},
+{
+"furled": false,
+"mast": null,
+"y": 26.573,
+"rec": null,
+"rollR": 0,
+"r": 0.298
+},
+{
+"furled": false,
+"mast": 0,
+"y": 34.942,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 34.942,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.272
+},
+{
+"furled": false,
+"mast": null,
+"y": 42.75,
+"rec": null,
+"rollR": 0,
+"r": 0.234
+},
+{
+"furled": false,
+"mast": 0,
+"y": 49.442,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 49.442,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.198
+},
+{
+"furled": false,
+"mast": 0,
+"y": 56.131,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 56.131,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": false,
+"mast": null,
+"y": 19.437,
+"rec": null,
+"rollR": 0,
+"r": 0.32
+},
+{
+"furled": false,
+"mast": null,
+"y": 27.556,
+"rec": null,
+"rollR": 0,
+"r": 0.298
+},
+{
+"furled": false,
+"mast": 1,
+"y": 35.674,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 35.674,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.272
+},
+{
+"furled": false,
+"mast": null,
+"y": 43.788,
+"rec": null,
+"rollR": 0,
+"r": 0.234
+},
+{
+"furled": false,
+"mast": 1,
+"y": 50.743,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 50.743,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.198
+},
+{
+"furled": false,
+"mast": 1,
+"y": 57.693,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 57.693,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": false,
+"mast": null,
+"y": 18.529,
+"rec": null,
+"rollR": 0,
+"r": 0.32
+},
+{
+"furled": false,
+"mast": null,
+"y": 27.092,
+"rec": null,
+"rollR": 0,
+"r": 0.298
+},
+{
+"furled": false,
+"mast": 2,
+"y": 35.085,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 35.085,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.272
+},
+{
+"furled": false,
+"mast": null,
+"y": 42.503,
+"rec": null,
+"rollR": 0,
+"r": 0.234
+},
+{
+"furled": false,
+"mast": 2,
+"y": 49.922,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 49.922,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.198
+},
+{
+"furled": false,
+"mast": 2,
+"y": 56.765,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 56.765,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": false,
+"mast": null,
+"y": 15.421,
+"rec": null,
+"rollR": 0,
+"r": 0.32
+},
+{
+"furled": false,
+"mast": null,
+"y": 23.916,
+"rec": null,
+"rollR": 0,
+"r": 0.298
+},
+{
+"furled": false,
+"mast": 3,
+"y": 32.942,
+"rec": {
+"mast": 3,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 32.942,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.272
+},
+{
+"furled": false,
+"mast": null,
+"y": 39.309,
+"rec": null,
+"rollR": 0,
+"r": 0.234
+},
+{
+"furled": false,
+"mast": 3,
+"y": 46.739,
+"rec": {
+"mast": 3,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 46.739,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.198
+},
+{
+"furled": false,
+"mast": 3,
+"y": 53.103,
+"rec": {
+"mast": 3,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 53.103,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": false,
+"mast": null,
+"y": 14.709,
+"rec": null,
+"rollR": 0,
+"r": 0.32
+},
+{
+"furled": false,
+"mast": null,
+"y": 21.698,
+"rec": null,
+"rollR": 0,
+"r": 0.298
+},
+{
+"furled": false,
+"mast": 4,
+"y": 29.619,
+"rec": {
+"mast": 4,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 29.619,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.272
+},
+{
+"furled": false,
+"mast": null,
+"y": 35.671,
+"rec": null,
+"rollR": 0,
+"r": 0.234
+},
+{
+"furled": false,
+"mast": 4,
+"y": 41.725,
+"rec": {
+"mast": 4,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 41.725,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.198
+},
+{
+"furled": false,
+"mast": 4,
+"y": 47.308,
+"rec": {
+"mast": 4,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 47.308,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": null,
+"y": 18.204,
+"rec": null,
+"rollR": 0.395,
+"r": 0.32
+},
+{
+"furled": true,
+"mast": null,
+"y": 26.573,
+"rec": null,
+"rollR": 0.377,
+"r": 0.298
+},
+{
+"furled": true,
+"mast": 0,
+"y": 34.942,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 1,
+"y": 34.942,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.377,
+"r": 0.272
+},
+{
+"furled": true,
+"mast": null,
+"y": 42.75,
+"rec": null,
+"rollR": 0.364,
+"r": 0.234
+},
+{
+"furled": true,
+"mast": 0,
+"y": 49.442,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 49.442,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.337,
+"r": 0.198
+},
+{
+"furled": true,
+"mast": 0,
+"y": 56.131,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 56.131,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.337,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.437,
+"rec": null,
+"rollR": 0.433,
+"r": 0.32
+},
+{
+"furled": true,
+"mast": null,
+"y": 27.556,
+"rec": null,
+"rollR": 0.371,
+"r": 0.298
+},
+{
+"furled": true,
+"mast": 1,
+"y": 35.674,
+"rec": {
+"mast": 1,
+"furled": true,
+"lowered": false,
+"tie": 1,
+"y": 35.674,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.371,
+"r": 0.272
+},
+{
+"furled": true,
+"mast": null,
+"y": 43.788,
+"rec": null,
+"rollR": 0.371,
+"r": 0.234
+},
+{
+"furled": true,
+"mast": 1,
+"y": 50.743,
+"rec": {
+"mast": 1,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 50.743,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.344,
+"r": 0.198
+},
+{
+"furled": true,
+"mast": 1,
+"y": 57.693,
+"rec": {
+"mast": 1,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 57.693,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.344,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": null,
+"y": 18.529,
+"rec": null,
+"rollR": 0.422,
+"r": 0.32
+},
+{
+"furled": true,
+"mast": null,
+"y": 27.092,
+"rec": null,
+"rollR": 0.381,
+"r": 0.298
+},
+{
+"furled": true,
+"mast": 2,
+"y": 35.085,
+"rec": {
+"mast": 2,
+"furled": true,
+"lowered": false,
+"tie": 1,
+"y": 35.085,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.368,
+"r": 0.272
+},
+{
+"furled": true,
+"mast": null,
+"y": 42.503,
+"rec": null,
+"rollR": 0.355,
+"r": 0.234
+},
+{
+"furled": true,
+"mast": 2,
+"y": 49.922,
+"rec": {
+"mast": 2,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 49.922,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.355,
+"r": 0.198
+},
+{
+"furled": true,
+"mast": 2,
+"y": 56.765,
+"rec": {
+"mast": 2,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 56.765,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.341,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": null,
+"y": 15.421,
+"rec": null,
+"rollR": 0.357,
+"r": 0.32
+},
+{
+"furled": true,
+"mast": null,
+"y": 23.916,
+"rec": null,
+"rollR": 0.38,
+"r": 0.298
+},
+{
+"furled": true,
+"mast": 3,
+"y": 32.942,
+"rec": {
+"mast": 3,
+"furled": true,
+"lowered": false,
+"tie": 1,
+"y": 32.942,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.392,
+"r": 0.272
+},
+{
+"furled": true,
+"mast": null,
+"y": 39.309,
+"rec": null,
+"rollR": 0.329,
+"r": 0.234
+},
+{
+"furled": true,
+"mast": 3,
+"y": 46.739,
+"rec": {
+"mast": 3,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 46.739,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.355,
+"r": 0.198
+},
+{
+"furled": true,
+"mast": 3,
+"y": 53.103,
+"rec": {
+"mast": 3,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 53.103,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.329,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": null,
+"y": 14.709,
+"rec": null,
+"rollR": 0.342,
+"r": 0.32
+},
+{
+"furled": true,
+"mast": null,
+"y": 21.698,
+"rec": null,
+"rollR": 0.345,
+"r": 0.298
+},
+{
+"furled": true,
+"mast": 4,
+"y": 29.619,
+"rec": {
+"mast": 4,
+"furled": true,
+"lowered": false,
+"tie": 1,
+"y": 29.619,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.367,
+"r": 0.272
+},
+{
+"furled": true,
+"mast": null,
+"y": 35.671,
+"rec": null,
+"rollR": 0.321,
+"r": 0.234
+},
+{
+"furled": true,
+"mast": 4,
+"y": 41.725,
+"rec": {
+"mast": 4,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 41.725,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.321,
+"r": 0.198
+},
+{
+"furled": true,
+"mast": 4,
+"y": 47.308,
+"rec": {
+"mast": 4,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 47.308,
+"why": "record: the plate reads where this yard hangs"
+},
+"rollR": 0.308,
+"r": 0.16
+}
+],
+"clipper": [
+{
+"furled": false,
+"mast": null,
+"y": 18.115,
+"rec": null,
+"rollR": 0,
+"r": 0.197
+},
+{
+"furled": false,
+"mast": null,
+"y": 23.663,
+"rec": null,
+"rollR": 0,
+"r": 0.164
+},
+{
+"furled": false,
+"mast": 0,
+"y": 28.419,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 28.419,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.15
+},
+{
+"furled": false,
+"mast": 0,
+"y": 33.968,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 33.968,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.115
+},
+{
+"furled": false,
+"mast": 0,
+"y": 40.309,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 40.309,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.085
+},
+{
+"furled": false,
+"mast": null,
+"y": 19.343,
+"rec": null,
+"rollR": 0,
+"r": 0.22
+},
+{
+"furled": false,
+"mast": null,
+"y": 25.535,
+"rec": null,
+"rollR": 0,
+"r": 0.183
+},
+{
+"furled": false,
+"mast": 1,
+"y": 30.841,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 30.841,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.167
+},
+{
+"furled": false,
+"mast": 1,
+"y": 37.032,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 37.032,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.128
+},
+{
+"furled": false,
+"mast": 1,
+"y": 44.107,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 44.107,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.094
+},
+{
+"furled": false,
+"mast": null,
+"y": 17.317,
+"rec": null,
+"rollR": 0,
+"r": 0.169
+},
+{
+"furled": false,
+"mast": null,
+"y": 22.648,
+"rec": null,
+"rollR": 0,
+"r": 0.158
+},
+{
+"furled": false,
+"mast": 2,
+"y": 27.216,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 27.216,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.144
+},
+{
+"furled": false,
+"mast": 2,
+"y": 32.544,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 32.544,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.111
+},
+{
+"furled": false,
+"mast": 2,
+"y": 38.633,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 38.633,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.081
+},
+{
+"furled": true,
+"mast": null,
+"y": 18.115,
+"rec": null,
+"rollR": 0.429,
+"r": 0.197
+},
+{
+"furled": true,
+"mast": null,
+"y": 23.663,
+"rec": null,
+"rollR": 0.307,
+"r": 0.164
+},
+{
+"furled": true,
+"mast": 0,
+"y": 27.221,
+"rec": {
+"mast": 0,
+"setY": 28.425,
+"onto": "the cap",
+"floorY": 27.057,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 27.221
+},
+"rollR": 0.284,
+"r": 0.15
+},
+{
+"furled": true,
+"mast": 0,
+"y": 33.968,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 33.968,
+"why": "set at or under its rest"
+},
+"rollR": 0.307,
+"r": 0.115
+},
+{
+"furled": true,
+"mast": 0,
+"y": 38.294,
+"rec": {
+"mast": 0,
+"setY": 40.313,
+"onto": "the cap",
+"floorY": 38.193,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 38.294
+},
+"rollR": 0.328,
+"r": 0.085
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.343,
+"rec": null,
+"rollR": 0.461,
+"r": 0.22
+},
+{
+"furled": true,
+"mast": null,
+"y": 25.535,
+"rec": null,
+"rollR": 0.324,
+"r": 0.183
+},
+{
+"furled": true,
+"mast": 1,
+"y": 29.501,
+"rec": {
+"mast": 1,
+"setY": 30.828,
+"onto": "the cap",
+"floorY": 29.301,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 29.501
+},
+"rollR": 0.3,
+"r": 0.167
+},
+{
+"furled": true,
+"mast": 1,
+"y": 37.032,
+"rec": {
+"mast": 1,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 37.032,
+"why": "set at or under its rest"
+},
+"rollR": 0.324,
+"r": 0.128
+},
+{
+"furled": true,
+"mast": 1,
+"y": 41.855,
+"rec": {
+"mast": 1,
+"setY": 44.099,
+"onto": "the cap",
+"floorY": 41.733,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 41.855
+},
+"rollR": 0.347,
+"r": 0.094
+},
+{
+"furled": true,
+"mast": null,
+"y": 17.317,
+"rec": null,
+"rollR": 0.425,
+"r": 0.169
+},
+{
+"furled": true,
+"mast": null,
+"y": 22.648,
+"rec": null,
+"rollR": 0.301,
+"r": 0.158
+},
+{
+"furled": true,
+"mast": 2,
+"y": 26.066,
+"rec": {
+"mast": 2,
+"setY": 27.192,
+"onto": "the cap",
+"floorY": 25.877,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 26.066
+},
+"rollR": 0.279,
+"r": 0.144
+},
+{
+"furled": true,
+"mast": 2,
+"y": 32.544,
+"rec": {
+"mast": 2,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 32.544,
+"why": "set at or under its rest"
+},
+"rollR": 0.301,
+"r": 0.111
+},
+{
+"furled": true,
+"mast": 2,
+"y": 36.697,
+"rec": {
+"mast": 2,
+"setY": 38.618,
+"onto": "the cap",
+"floorY": 36.581,
+"tie": 2,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 36.697
+},
+"rollR": 0.322,
+"r": 0.081
+}
+],
+"steamer": [
+{
+"furled": false,
+"mast": null,
+"y": 19.829,
+"rec": null,
+"rollR": 0,
+"r": 0.188
+},
+{
+"furled": false,
+"mast": null,
+"y": 24.965,
+"rec": null,
+"rollR": 0,
+"r": 0.175
+},
+{
+"furled": false,
+"mast": 0,
+"y": 29.361,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 29.361,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": false,
+"mast": 0,
+"y": 34.495,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 34.495,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.128
+},
+{
+"furled": false,
+"mast": null,
+"y": 21.237,
+"rec": null,
+"rollR": 0,
+"r": 0.216
+},
+{
+"furled": false,
+"mast": null,
+"y": 27.143,
+"rec": null,
+"rollR": 0,
+"r": 0.201
+},
+{
+"furled": false,
+"mast": 1,
+"y": 32.198,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 32.198,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.184
+},
+{
+"furled": false,
+"mast": 1,
+"y": 38.102,
+"rec": {
+"mast": 1,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 38.102,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.147
+},
+{
+"furled": false,
+"mast": null,
+"y": 19.898,
+"rec": null,
+"rollR": 0,
+"r": 0.197
+},
+{
+"furled": false,
+"mast": null,
+"y": 25.291,
+"rec": null,
+"rollR": 0,
+"r": 0.184
+},
+{
+"furled": false,
+"mast": 2,
+"y": 29.906,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 29.906,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.168
+},
+{
+"furled": false,
+"mast": 2,
+"y": 35.297,
+"rec": {
+"mast": 2,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 35.297,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.134
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.829,
+"rec": null,
+"rollR": 0.409,
+"r": 0.188
+},
+{
+"furled": true,
+"mast": null,
+"y": 24.965,
+"rec": null,
+"rollR": 0.295,
+"r": 0.175
+},
+{
+"furled": true,
+"mast": 0,
+"y": 28.274,
+"rec": {
+"mast": 0,
+"setY": 29.349,
+"onto": "the cap",
+"floorY": 28.083,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 28.274
+},
+"rollR": 0.273,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": 0,
+"y": 34.495,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 34.495,
+"why": "set at or under its rest"
+},
+"rollR": 0.295,
+"r": 0.128
+},
+{
+"furled": true,
+"mast": null,
+"y": 21.237,
+"rec": null,
+"rollR": 0.449,
+"r": 0.216
+},
+{
+"furled": true,
+"mast": null,
+"y": 27.143,
+"rec": null,
+"rollR": 0.317,
+"r": 0.201
+},
+{
+"furled": true,
+"mast": 1,
+"y": 30.945,
+"rec": {
+"mast": 1,
+"setY": 32.184,
+"onto": "the cap",
+"floorY": 30.728,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 30.945
+},
+"rollR": 0.293,
+"r": 0.184
+},
+{
+"furled": true,
+"mast": 1,
+"y": 38.102,
+"rec": {
+"mast": 1,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 38.102,
+"why": "set at or under its rest"
+},
+"rollR": 0.317,
+"r": 0.147
+},
+{
+"furled": true,
+"mast": null,
+"y": 19.898,
+"rec": null,
+"rollR": 0.43,
+"r": 0.197
+},
+{
+"furled": true,
+"mast": null,
+"y": 25.291,
+"rec": null,
+"rollR": 0.303,
+"r": 0.184
+},
+{
+"furled": true,
+"mast": 2,
+"y": 28.764,
+"rec": {
+"mast": 2,
+"setY": 29.894,
+"onto": "the cap",
+"floorY": 28.564,
+"tie": 1,
+"from": "class (r314): a furled topsail yard is lowered onto its cap; read off Eckersberg's 1828 Asow (main, fore and mizzen topsail yards on their lower caps, rows 1190/1215, 1315/1340, 1260/1283); applied to every yard that rides a tie over section 1 or higher",
+"y": 28.764
+},
+"rollR": 0.28,
+"r": 0.168
+},
+{
+"furled": true,
+"mast": 2,
+"y": 35.297,
+"rec": {
+"mast": 2,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 35.297,
+"why": "set at or under its rest"
+},
+"rollR": 0.303,
+"r": 0.134
+}
+],
+"endurance": [
+{
+"furled": false,
+"mast": null,
+"y": 13.441,
+"rec": null,
+"rollR": 0,
+"r": 0.16
+},
+{
+"furled": false,
+"mast": 0,
+"y": 19.864,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 1,
+"y": 19.864,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.126
+},
+{
+"furled": false,
+"mast": 0,
+"y": 26.609,
+"rec": {
+"mast": 0,
+"furled": false,
+"lowered": false,
+"tie": 2,
+"y": 26.609,
+"why": "set"
+},
+"rollR": 0,
+"r": 0.093
+},
+{
+"furled": true,
+"mast": null,
+"y": 13.441,
+"rec": null,
+"rollR": 0.381,
+"r": 0.16
+},
+{
+"furled": true,
+"mast": 0,
+"y": 19.864,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 1,
+"y": 19.864,
+"why": "set at or under its rest"
+},
+"rollR": 0.33,
+"r": 0.126
+},
+{
+"furled": true,
+"mast": 0,
+"y": 26.609,
+"rec": {
+"mast": 0,
+"furled": true,
+"lowered": false,
+"tie": 2,
+"y": 26.609,
+"why": "set at or under its rest"
+},
+"rollR": 0.338,
+"r": 0.093
+}
+]
+}

@@ -1,0 +1,167 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 24.70: recorded lowered from 32.435"
+ },
+ {
+  "id": "carrack",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 26.17: recorded lowered from 34.844"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 19.14: recorded lowered from 25.351"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 26.53: recorded lowered from 29.434"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 20.51: recorded lowered from 27.488"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 28.82: recorded lowered from 32.08"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 29.13: recorded lowered from 38.638"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 40.43: recorded lowered from 44.876"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 31.36: recorded lowered from 42.043"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 44.07: recorded lowered from 49.064"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 27.89: recorded lowered from 37.03"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 38.78: recorded lowered from 43.048"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 35.59: recorded lowered from 47.322"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 49.53: recorded lowered from 55.02"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 38.41: recorded lowered from 51.584"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 54.08: recorded lowered from 60.244"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 34.04: recorded lowered from 45.31"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 47.47: recorded lowered from 52.731"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 18.48: recorded lowered from 24.425"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 25.56: recorded lowered from 28.335"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 19.78: recorded lowered from 26.459"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 27.74: recorded lowered from 30.857"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 17.61: recorded lowered from 23.327"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 24.43: recorded lowered from 27.097"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 27.22: recorded lowered from 28.425"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 38.29: recorded lowered from 40.313"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 29.50: recorded lowered from 30.828"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 41.86: recorded lowered from 44.099"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 26.07: recorded lowered from 27.192"
+ },
+ {
+  "id": "clipper",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 36.70: recorded lowered from 38.618"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 28.27: recorded lowered from 29.349"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 30.95: recorded lowered from 32.184"
+ },
+ {
+  "id": "steamer",
+  "rule": "a set ship with a lowered yard",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 28.76: recorded lowered from 29.894"
+ }
+]

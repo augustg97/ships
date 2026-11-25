@@ -523,11 +523,21 @@ return swHullSetsSail(spec.hull || {}) ? swSailCard(spec, stage, parts || [])
 : swPowerCard(spec, stage, parts || []);
 }
 window.SW_STAGE_CARD = swStageCard;
-window.SW_FURLED_CARD = (spec) => swFurledCard(spec);
-function swFurledCard(spec) {
+window.SW_FURLED_CARD = (spec, built) => swFurledCard(spec, built);
+function swFurledCard(spec, built) {
 const rigs = new Set(((spec.hull || {}).masts || []).map(m => m.rig));
 const how = [];
 if (rigs.has('square')) how.push('the square sails are rolled up on their yards and tied with gaskets');
+if (built) {
+const NAME = { top: 'topsail', topsail: 'topsail', utop: 'upper topsail', tg: 'topgallant',
+topgallant: 'topgallant', utg: 'upper topgallant', royal: 'royal' };
+const kinds = [];
+built.traverse(o => { const L = o.userData && o.userData.lowered;
+if (L && L.setY !== undefined) { const k = NAME[L.name] || L.name; if (!kinds.includes(k)) kinds.push(k); } });
+const ORDER = ['topsail', 'upper topsail', 'topgallant', 'upper topgallant', 'royal'];
+kinds.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+if (kinds.length) how.push('the ' + swAnd(kinds) + ' yards are lowered onto the caps below them');
+}
 if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
 const gm = ((spec.hull || {}).masts || []).filter(m => m.rig === 'gaff');
 const gBr = gm.filter(m => m.gaffStow === 'brailed' || m.furlStow === 'brailed').length;
@@ -588,7 +598,7 @@ if (trad['s' + SW.stage]) nm = trad['s' + SW.stage];
 else if (trad.s3 && SW.stage > 3 && SW.stage < 7) nm = trad.s3;
 const cloth = !engine;
 if (SW.stage === 7 && SW.furled && cloth)
-nm = swFurledCard(SW.spec);
+nm = swFurledCard(SW.spec, SW.ship);
 document.getElementById('swStageName').textContent = nm[0];
 document.getElementById('swStageWhat').textContent = nm[1];
 document.getElementById('swOrder').textContent = trad.label;

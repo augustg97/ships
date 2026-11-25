@@ -1,0 +1,167 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 32.42: not lowered, 7.72 m over its rest at 24.590 (furled build)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 34.85: not lowered, 8.68 m over its rest at 26.023 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 25.35: not lowered, 6.21 m over its rest at 19.042 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 29.43: not lowered, 2.90 m over its rest at 26.464 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 27.49: not lowered, 6.98 m over its rest at 20.393 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 32.08: not lowered, 3.26 m over its rest at 28.741 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 38.63: not lowered, 9.49 m over its rest at 28.998 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 44.87: not lowered, 4.43 m over its rest at 40.339 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 42.05: not lowered, 10.69 m over its rest at 31.194 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 49.07: not lowered, 4.99 m over its rest at 43.958 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 37.05: not lowered, 9.16 m over its rest at 27.729 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 43.06: not lowered, 4.28 m over its rest at 38.671 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 47.31: not lowered, 11.72 m over its rest at 35.425 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 55.01: not lowered, 5.48 m over its rest at 49.421 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 51.59: not lowered, 13.18 m over its rest at 38.202 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 60.25: not lowered, 6.16 m over its rest at 53.946 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 45.34: not lowered, 11.30 m over its rest at 33.841 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 52.75: not lowered, 5.28 m over its rest at 47.334 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 24.42: not lowered, 5.94 m over its rest at 18.384 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 28.33: not lowered, 2.77 m over its rest at 25.492 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 26.46: not lowered, 6.69 m over its rest at 19.661 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 30.86: not lowered, 3.12 m over its rest at 27.658 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 23.34: not lowered, 5.73 m over its rest at 17.501 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 27.10: not lowered, 2.67 m over its rest at 24.355 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 28.42: not lowered, 1.20 m over its rest at 27.057 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 40.31: not lowered, 2.01 m over its rest at 38.193 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 30.84: not lowered, 1.34 m over its rest at 29.301 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 44.11: not lowered, 2.25 m over its rest at 41.733 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 27.22: not lowered, 1.15 m over its rest at 25.877 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 38.63: not lowered, 1.94 m over its rest at 36.581 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 29.36: not lowered, 1.09 m over its rest at 28.083 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 32.20: not lowered, 1.25 m over its rest at 30.728 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a furled hoisting yard left hoisted",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 29.91: not lowered, 1.14 m over its rest at 28.564 (furled build)"
+ }
+]

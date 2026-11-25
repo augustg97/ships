@@ -1,0 +1,9 @@
+HOISTED ok
+HOISTED-OLDAUDIT rc=0 checked 33 hulls, 0 problems
+HOISTED rc=1 checked 33 hulls, 33 problems
+THROUGHCAP ok
+THROUGHCAP rc=1 checked 33 hulls, 66 problems
+SETLEAK ok
+SETLEAK rc=1 checked 33 hulls, 33 problems
+FINAL rc=0 checked 33 hulls, 0 problems
+restored

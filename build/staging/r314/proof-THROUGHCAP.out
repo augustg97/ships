@@ -1,0 +1,332 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 24.27: its lowest point y 24.170 under the head of section 0 at 24.590 (furled build)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 24.27: centre 24.274, its rest at 24.590 puts it at 24.698 (furled build)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 25.73: its lowest point y 25.612 under the head of section 0 at 26.023 (furled build)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 25.73: centre 25.730, its rest at 26.023 puts it at 26.167 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 18.73: its lowest point y 18.650 under the head of section 0 at 19.042 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 18.73: centre 18.734, its rest at 19.042 puts it at 19.138 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 26.16: its lowest point y 26.106 under the head of section 1 at 26.464 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 26.16: centre 26.160, its rest at 26.464 puts it at 26.533 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 20.10: its lowest point y 20.003 under the head of section 0 at 20.393 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 20.10: centre 20.097, its rest at 20.393 puts it at 20.511 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 28.44: its lowest point y 28.383 under the head of section 1 at 28.741 (furled build)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 28.44: centre 28.443, its rest at 28.741 puts it at 28.824 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 28.69: its lowest point y 28.557 under the head of section 0 at 28.998 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 28.69: centre 28.685, its rest at 28.998 puts it at 29.133 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 40.03: its lowest point y 39.949 under the head of section 1 at 40.339 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 40.03: centre 40.031, its rest at 40.339 puts it at 40.433 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 30.90: its lowest point y 30.757 under the head of section 0 at 31.194 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 30.90: centre 30.901, its rest at 31.194 puts it at 31.365 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 43.66: its lowest point y 43.570 under the head of section 1 at 43.958 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 43.66: centre 43.663, its rest at 43.958 puts it at 44.075 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 27.45: its lowest point y 27.325 under the head of section 0 at 27.729 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 27.45: centre 27.448, its rest at 27.729 puts it at 27.892 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 38.39: its lowest point y 38.306 under the head of section 1 at 38.671 (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 38.39: centre 38.385, its rest at 38.671 puts it at 38.784 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 35.11: its lowest point y 34.952 under the head of section 0 at 35.425 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 35.11: centre 35.110, its rest at 35.425 puts it at 35.588 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 49.11: its lowest point y 49.010 under the head of section 1 at 49.421 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 49.11: centre 49.112, its rest at 49.421 puts it at 49.533 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 37.91: its lowest point y 37.733 under the head of section 0 at 38.202 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 37.91: centre 37.910, its rest at 38.202 puts it at 38.408 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 53.65: its lowest point y 53.538 under the head of section 1 at 53.946 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 53.65: centre 53.652, its rest at 53.946 puts it at 54.085 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 33.57: its lowest point y 33.418 under the head of section 0 at 33.841 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 33.57: centre 33.571, its rest at 33.841 puts it at 34.043 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 47.05: its lowest point y 46.957 under the head of section 1 at 47.334 (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 47.05: centre 47.055, its rest at 47.334 puts it at 47.472 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 18.08: its lowest point y 17.996 under the head of section 0 at 18.384 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 18.08: centre 18.076, its rest at 18.384 puts it at 18.476 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 25.19: its lowest point y 25.135 under the head of section 1 at 25.492 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 25.19: centre 25.186, its rest at 25.492 puts it at 25.558 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 19.37: its lowest point y 19.275 under the head of section 0 at 19.661 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 19.37: centre 19.366, its rest at 19.661 puts it at 19.776 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 27.36: its lowest point y 27.303 under the head of section 1 at 27.658 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 27.36: centre 27.361, its rest at 27.658 puts it at 27.739 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 17.21: its lowest point y 17.136 under the head of section 0 at 17.501 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 17.21: centre 17.214, its rest at 17.501 puts it at 17.611 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 24.06: its lowest point y 24.015 under the head of section 1 at 24.355 (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 24.06: centre 24.064, its rest at 24.355 puts it at 24.434 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 26.75: its lowest point y 26.601 under the head of section 0 at 27.057 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 26.75: centre 26.751, its rest at 27.057 puts it at 27.221 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 37.89: its lowest point y 37.804 under the head of section 1 at 38.193 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 2, its centre at y 37.89: centre 37.889, its rest at 38.193 puts it at 38.294 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 29.01: its lowest point y 28.848 under the head of section 0 at 29.301 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 29.01: centre 29.015, its rest at 29.301 puts it at 29.502 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 41.44: its lowest point y 41.347 under the head of section 1 at 41.733 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 2, its centre at y 41.44: centre 41.442, its rest at 41.733 puts it at 41.856 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 25.60: its lowest point y 25.458 under the head of section 0 at 25.877 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 25.60: centre 25.601, its rest at 25.877 puts it at 26.065 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 36.30: its lowest point y 36.216 under the head of section 1 at 36.581 (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 2, its centre at y 36.30: centre 36.297, its rest at 36.581 puts it at 36.699 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 27.80: its lowest point y 27.641 under the head of section 0 at 28.083 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 0 riding a tie over section 1, its centre at y 27.80: centre 27.801, its rest at 28.083 puts it at 28.280 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 30.45: its lowest point y 30.265 under the head of section 0 at 30.728 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 1 riding a tie over section 1, its centre at y 30.45: centre 30.448, its rest at 30.728 puts it at 30.952 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a lowered yard through the cap below",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 28.28: its lowest point y 28.115 under the head of section 0 at 28.564 (furled build)"
+ },
+ {
+  "id": "steamer",
+  "rule": "a lowered yard standing off its rest",
+  "detail": "the yard on mast 2 riding a tie over section 1, its centre at y 28.28: centre 28.283, its rest at 28.564 puts it at 28.771 (furled build)"
+ }
+]
