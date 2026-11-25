@@ -1,0 +1,90 @@
+{
+ "carrack": {
+  "4": [
+   "Masts stepped",
+   "Three masts are stepped. The forward two are each built in two pieces, lower mast and topmast; the aftermost mast is a single pole. Each piece above the lowest stands in the doubling at the head of the one below, held up by an iron fid through its heel, so it can be lowered to the deck. Also added: wooldings round the lower masts, tops at the lower mastheads, a bowsprit, the forecastle and the aftcastle."
+  ],
+  "5": [
+   "Rigged",
+   "Shrouds run from each masthead down to the hull and hold each mast against the sideways pull of the sail. Stays hold them fore and aft. Ratlines across the shrouds make a ladder for the crew to climb aloft. Also added: channels outside the hull and deadeyes with their lanyards."
+  ],
+  "6": [
+   "Yards crossed",
+   "The square-rigged masts cross four yards; the square sails hang from them. Braces at the yardarms swing the yards round to trim the sails to the wind. The lateen mast gets one long yard, slung slantwise across it; the sail is laced along the yard. The running rigging is rove: halyards, sheets, tacks and two more kinds of line. Also added: parrels, outlicker and lateen sheet."
+  ],
+  "7": [
+   "Bent on",
+   "The sails are bent on: square sails on the forward two and a lateen sail on the aftermost mast."
+  ],
+  "furled": [
+   "Bent on, furled",
+   "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the topsail yards are lowered onto the caps below them and each lateen sail is brailed up and furled along its yard, which stays aloft. This is how she lay in harbour and at anchor."
+  ]
+ },
+ "fluyt": {
+  "4": [
+   "Masts stepped",
+   "Three masts are stepped. The forward two are each built in three pieces, lower mast, topmast and topgallant mast; the aftermost mast is a single pole. Each piece above the lowest stands in the doubling at the head of the one below, held up by an iron fid through its heel, so it can be lowered to the deck. Also added: tops at the lower mastheads, crosstrees at the topmast heads, a bowsprit and the beakhead at the bow."
+  ],
+  "5": [
+   "Rigged",
+   "Shrouds run from each masthead down to the hull and hold each mast against the sideways pull of the sail. Stays hold them fore and aft. Ratlines across the shrouds make a ladder for the crew to climb aloft. Also added: channels outside the hull and deadeyes with their lanyards."
+  ],
+  "6": [
+   "Yards crossed",
+   "The square-rigged masts cross six yards; the square sails hang from them. Braces at the yardarms swing the yards round to trim the sails to the wind. The lateen mast gets one long yard, slung slantwise across it; the sail is laced along the yard. The running rigging is rove: halyards, sheets, tacks and two more kinds of line. Also added: parrels, outlicker and lateen sheet."
+  ],
+  "7": [
+   "Bent on",
+   "The sails are bent on: square sails on the forward two and a lateen sail on the aftermost mast."
+  ],
+  "furled": [
+   "Bent on, furled",
+   "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the topsail and topgallant yards are lowered onto the caps below them and each lateen sail is brailed up and furled along its yard, which stays aloft. This is how she lay in harbour and at anchor."
+  ]
+ },
+ "east-indiaman": {
+  "4": [
+   "Masts stepped",
+   "Three masts are stepped. The forward two are each built in three pieces, lower mast, topmast and topgallant mast; the aftermost mast is built in two pieces, lower mast and topmast. Each piece above the lowest stands in the doubling at the head of the one below, held up by an iron fid through its heel, so it can be lowered to the deck. Also added: wooldings round the lower masts, tops at the lower mastheads, crosstrees at the topmast heads, a bowsprit and the beakhead at the bow."
+  ],
+  "5": [
+   "Rigged",
+   "Shrouds run from each masthead down to the hull and hold each mast against the sideways pull of the sail. Stays hold them fore and aft. Ratlines across the shrouds make a ladder for the crew to climb aloft. Also added: channels outside the hull and deadeyes with their lanyards."
+  ],
+  "6": [
+   "Yards crossed",
+   "The square-rigged masts cross eight yards; the square sails hang from them. Braces at the yardarms swing the yards round to trim the sails to the wind. The mizzen also gets a lateen yard, slung slantwise under its topsail; the lateen sail is laced along it. The running rigging is rove: halyards, sheets, tacks and two more kinds of line. Also added: parrels, outlicker and lateen sheet."
+  ],
+  "7": [
+   "Bent on",
+   "The sails are bent on: square sails on all three masts and a lateen sail on the mizzen under its topsail."
+  ],
+  "furled": [
+   "Bent on, furled",
+   "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the topsail and topgallant yards are lowered onto the caps below them, the crossjack (the mizzen\u2019s lowest yard) carries no sail and the mizzen\u2019s lateen sail is brailed up and furled along its yard, which stays aloft. This is how she lay in harbour and at anchor."
+  ]
+ },
+ "slave-ship": {
+  "4": [
+   "Masts stepped",
+   "Three masts are stepped. The forward two are each built in three pieces, lower mast, topmast and topgallant mast; the aftermost mast is built in two pieces, lower mast and topmast. Each piece above the lowest stands in the doubling at the head of the one below, held up by an iron fid through its heel, so it can be lowered to the deck. Also added: tops at the lower mastheads, crosstrees at the topmast heads, a bowsprit and the beakhead at the bow."
+  ],
+  "5": [
+   "Rigged",
+   "Shrouds run from each masthead down to the hull and hold each mast against the sideways pull of the sail. Stays hold them fore and aft. Ratlines across the shrouds make a ladder for the crew to climb aloft. Also added: channels outside the hull and deadeyes with their lanyards."
+  ],
+  "6": [
+   "Yards crossed",
+   "The square-rigged masts cross eight yards; the square sails hang from them. Braces at the yardarms swing the yards round to trim the sails to the wind. The mizzen also gets a lateen yard, slung slantwise under its topsail; the lateen sail is laced along it. The running rigging is rove: halyards, sheets, tacks and two more kinds of line. Also added: parrels, outlicker and lateen sheet."
+  ],
+  "7": [
+   "Bent on",
+   "The sails are bent on: square sails on all three masts and a lateen sail on the mizzen under its topsail."
+  ],
+  "furled": [
+   "Bent on, furled",
+   "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the topsail and topgallant yards are lowered onto the caps below them, the crossjack (the mizzen\u2019s lowest yard) carries no sail and the mizzen\u2019s lateen sail is brailed up and furled along its yard, which stays aloft. This is how she lay in harbour and at anchor."
+  ]
+ }
+}

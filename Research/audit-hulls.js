@@ -7661,6 +7661,51 @@
         }
       }
     }
+    /* ── A-LATEEN-READ (round 321, 0y¹⁵⁸): A MIZZEN LATEEN YARD IS BUILT AS ITS RECORD SAYS, AND THE RECORD ANSWERS.
+       Until r321 every lateen mizzen on a square-rigged hull took the builder's class yard (1.15 of the lower mast, 56°
+       from the horizontal, slung a third of its length from the heel), read from no plate. Hocker's Vasa rig diagram
+       (Vasa II, 2023, p. 31) draws a 1628 mizzen yard at 42.1°, 1.576 times the main-to-mizzen spacing, its heel 0.531
+       of that spacing before the mizzen. RECORD: every lateen mizzen on a hull that carries square canvas says where its
+       yard comes from (`lateenYardProvenance`); the SILENCE convicts. A 'PLATE READ' carries `lateenRead`, and one
+       without it, or a `lateenRead` under any other answer, convicts. READ: the shares agree with the plate rows they
+       came from within 0.005 (and the angle within 0.1°): 'a lateen read that disagrees with its own rows'. BUILT, on
+       the set build, off the yard mesh's own end centres: the yard's length over the spacing of this mast's and the next
+       mast forward's stations, the angle, and the heel's distance before the mast over that spacing each stand within the
+       read's bound: 'a lateen yard off its read'. */
+    {
+      g.updateMatrixWorld(true);
+      const mixedH = (H.masts || []).some(m2 => m2.rig === 'square');
+      const ly = {};
+      g.traverse(o => { if (o.isMesh && o.userData.lateen && !o.userData.lateen.furled) ly[o.userData.lateen.mast] = o; });
+      const hs = SHIPS_HULL.hullSurface(H), Lh = H.lwl;
+      const stX = u => (u - 0.5) * Lh + hs.rake(u);
+      (H.masts || []).forEach((mk, mi) => {
+        if (!mixedH || !(mk.rig === 'lateen' || mk.lateenMizzen === true)) return;
+        const at = `masts[${mi}] (station ${mk.at}, lateen mizzen)`;
+        const pv = mk.lateenYardProvenance, rd = mk.lateenRead;
+        if (!pv) { say(v.id, 'a lateen mizzen yard with no answer', `${at}: lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from`); return; }
+        const isRead = /^PLATE READ/.test(pv);
+        if (isRead !== !!rd) { say(v.id, 'a lateen read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and lateenRead is ${rd ? 'present' : 'absent'}`); return; }
+        if (!rd) return;
+        const R = rd.rows, sp = R.mainFoot[0] - R.mizzenFoot[0];
+        const yl = Math.hypot(R.heel[0] - R.peak[0], R.heel[1] - R.peak[1]);
+        const ang = Math.atan2(R.heel[1] - R.peak[1], R.heel[0] - R.peak[0]) * 180 / Math.PI;
+        const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / sp - rd.heelAheadOfMastSpacing)];
+        if (Math.max(...dRows) > 0.005 || Math.abs(ang - rd.angleDeg) > 0.1)
+          say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / sp).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
+        const o = ly[mi];
+        if (!o) { say(v.id, 'a lateen read with no yard', `${at}: no set lateen yard records this mast`); return; }
+        const fwd = (H.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
+        const spB = stX(mk.at) - stX(fwd.at);
+        const hh = o.geometry.parameters.height;
+        const e1 = new THREE.Vector3(0, -hh / 2, 0).applyMatrix4(o.matrixWorld), e2 = new THREE.Vector3(0, hh / 2, 0).applyMatrix4(o.matrixWorld);
+        const lo = e1.y < e2.y ? e1 : e2, hi = e1.y < e2.y ? e2 : e1;
+        const bAng = Math.atan2(hi.y - lo.y, Math.abs(hi.x - lo.x)) * 180 / Math.PI;
+        const bYard = hh / spB, bHeel = (stX(mk.at) - lo.x) / spB, b = rd.boundPm || 0.03;
+        if (Math.abs(bYard - rd.yardOfMastSpacing) > b || Math.abs(bHeel - rd.heelAheadOfMastSpacing) > b || Math.abs(bAng - rd.angleDeg) > (rd.boundAngleDeg || 1))
+          say(v.id, 'a lateen yard off its read', `${at}: built yard ${bYard.toFixed(3)} and heel ${bHeel.toFixed(3)} of the ${spB.toFixed(2)} m spacing at ${bAng.toFixed(2)}°; the read is ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}° ± ${b}`);
+      });
+    }
     /* ── A-MIZZEN-TIERS (round 320, 0y¹⁵⁷): A LATEEN MIZZEN OF THE 1590s-1620s CROSSES NO TOPGALLANT.
        A square mizzen that sets a lateen (`lateenMizzen`, r317) carried one square sail, the topsail, over the crossjack
        that spreads its foot. Vasa's rig (Hocker, Vasa II, 2023, p. 31) names a topgallant mast on the fore and the main and

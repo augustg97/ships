@@ -5464,6 +5464,40 @@ if (dE > 0.2) say(v.id, 'a sheet that does not reach its outlicker', `${at}: the
 }
 }
 {
+g.updateMatrixWorld(true);
+const mixedH = (H.masts || []).some(m2 => m2.rig === 'square');
+const ly = {};
+g.traverse(o => { if (o.isMesh && o.userData.lateen && !o.userData.lateen.furled) ly[o.userData.lateen.mast] = o; });
+const hs = SHIPS_HULL.hullSurface(H), Lh = H.lwl;
+const stX = u => (u - 0.5) * Lh + hs.rake(u);
+(H.masts || []).forEach((mk, mi) => {
+if (!mixedH || !(mk.rig === 'lateen' || mk.lateenMizzen === true)) return;
+const at = `masts[${mi}] (station ${mk.at}, lateen mizzen)`;
+const pv = mk.lateenYardProvenance, rd = mk.lateenRead;
+if (!pv) { say(v.id, 'a lateen mizzen yard with no answer', `${at}: lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from`); return; }
+const isRead = /^PLATE READ/.test(pv);
+if (isRead !== !!rd) { say(v.id, 'a lateen read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and lateenRead is ${rd ? 'present' : 'absent'}`); return; }
+if (!rd) return;
+const R = rd.rows, sp = R.mainFoot[0] - R.mizzenFoot[0];
+const yl = Math.hypot(R.heel[0] - R.peak[0], R.heel[1] - R.peak[1]);
+const ang = Math.atan2(R.heel[1] - R.peak[1], R.heel[0] - R.peak[0]) * 180 / Math.PI;
+const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / sp - rd.heelAheadOfMastSpacing)];
+if (Math.max(...dRows) > 0.005 || Math.abs(ang - rd.angleDeg) > 0.1)
+say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / sp).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
+const o = ly[mi];
+if (!o) { say(v.id, 'a lateen read with no yard', `${at}: no set lateen yard records this mast`); return; }
+const fwd = (H.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
+const spB = stX(mk.at) - stX(fwd.at);
+const hh = o.geometry.parameters.height;
+const e1 = new THREE.Vector3(0, -hh / 2, 0).applyMatrix4(o.matrixWorld), e2 = new THREE.Vector3(0, hh / 2, 0).applyMatrix4(o.matrixWorld);
+const lo = e1.y < e2.y ? e1 : e2, hi = e1.y < e2.y ? e2 : e1;
+const bAng = Math.atan2(hi.y - lo.y, Math.abs(hi.x - lo.x)) * 180 / Math.PI;
+const bYard = hh / spB, bHeel = (stX(mk.at) - lo.x) / spB, b = rd.boundPm || 0.03;
+if (Math.abs(bYard - rd.yardOfMastSpacing) > b || Math.abs(bHeel - rd.heelAheadOfMastSpacing) > b || Math.abs(bAng - rd.angleDeg) > (rd.boundAngleDeg || 1))
+say(v.id, 'a lateen yard off its read', `${at}: built yard ${bYard.toFixed(3)} and heel ${bHeel.toFixed(3)} of the ${spB.toFixed(2)} m spacing at ${bAng.toFixed(2)}°; the read is ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}° ± ${b}`);
+});
+}
+{
 const segN = {}, slung = [], lat = {};
 g.traverse(o => { if (!o.isMesh) return; const u = o.userData;
 if (u.seg) segN[u.seg.mi] = Math.max(segN[u.seg.mi] || 0, u.seg.si + 1);

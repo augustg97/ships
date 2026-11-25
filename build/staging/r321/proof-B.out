@@ -1,0 +1,17 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a lateen yard off its read",
+  "detail": "masts[2] (station 0.85, lateen mizzen): built yard 2.019 and heel 0.375 of the 8.49 m spacing at 56.15\u00b0; the read is 1.576, 0.531, 42.1\u00b0 \u00b1 0.03"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen yard off its read",
+  "detail": "masts[2] (station 0.85, lateen mizzen): built yard 1.969 and heel 0.366 of the 13.31 m spacing at 56.15\u00b0; the read is 1.576, 0.531, 42.1\u00b0 \u00b1 0.03"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen yard off its read",
+  "detail": "masts[2] (station 0.85, lateen mizzen): built yard 2.042 and heel 0.379 of the 8.04 m spacing at 56.15\u00b0; the read is 1.576, 0.531, 42.1\u00b0 \u00b1 0.03"
+ }
+]

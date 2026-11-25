@@ -1864,7 +1864,8 @@
             "height": 0.806,
             "rig": "lateen",
             "rake": 4,
-            "shrouds": 3
+            "shrouds": 3,
+            "lateenYardProvenance": "CLASS, r321 (0y¹⁵⁸): the lateen yard is 1.15 of the lower mast, 56° from the horizontal, slung a third of its length from the heel; these are the builder's mixed-hull figures and were read from no plate. The fluyt, the East Indiaman and the slave ship take Hocker's Vasa diagram of 1628 (Vasa II, 2023, p. 31) instead. This hull is dated 1450-1600, a century before Vasa, and no plate of a carrack's mizzen yard has been read, so the Vasa read is not applied to her."
           }
         ],
         "build": "frame",
@@ -2789,7 +2790,51 @@
             "height": 0.874,
             "rig": "lateen",
             "rake": 4,
-            "shrouds": 3
+            "shrouds": 3,
+            "lateenRead": {
+              "angleDeg": 42.1,
+              "topAtOfLower": 0.9,
+              "boundPm": 0.03,
+              "boundAngleDeg": 1.0,
+              "rows": {
+                "mizzenFoot": [
+                  323.7,
+                  944
+                ],
+                "mainFoot": [
+                  655.6,
+                  1012
+                ],
+                "top": 700,
+                "peak": [
+                  112,
+                  599
+                ],
+                "heel": [
+                  500,
+                  950
+                ],
+                "crossing": [
+                  299.7,
+                  769
+                ],
+                "taffrail": 88
+              },
+              "plateRakeDeg": 7.8,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "script": "build/staging/r321/r321_read.py",
+              "yardOfMastSpacing": 1.576,
+              "heelAheadOfMastSpacing": 0.531,
+              "mastSpacingPx": 331.9,
+              "vasaShares": {
+                "yardOfDeckToTop": 2.143,
+                "heelAheadOfDeckToTop": 0.723,
+                "slingOfDeckToTop": 0.717,
+                "slingFromHeelOfYard": 0.516,
+                "deckToTopOfHullL": 0.168
+              }
+            },
+            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1595-1700 and has no plate of its own; the read is Vasa's, applied to it."
           }
         ],
         "build": "frame",
@@ -2948,7 +2993,7 @@
             "crossjackSail": false,
             "crossjackProvenance": "CLASS, r315 (0y¹⁴⁹): the crossjack is crossed bare, with no sail set from it and none rolled on it. No plate of this hull's mizzen has been read. Class source: Falconer, An Universal Dictionary of the Marine (1769), CROSS-JACK: 'a sail extended on the lower yard of the mizen-mast, which is hence called the cross-jack yard ... This sail, however, has generally been found of little service, and is therefore very seldom used.' The Asow plate (Eckersberg 1828) shows a 74's crossjack bare at anchor; this hull takes the same rule unread.",
             "lateenMizzen": true,
-            "mizzenSailProvenance": "CLASS, r317 (0y¹⁵²): the mizzen sets a lateen under its topsail, from a yard slung to the lower mast. This hull is dated 1620; no plate of its mizzen has been read. Class source: Waters, D. W., The Art of Navigation in England in Elizabethan and Early Stuart Times (London, 1958), ch. I: 'The larger vessels were square-rigged only, or \"cross-sailed\" as it was termed, with three masts and a bowsprit. The fore and main masts each carried a course and a top-sail, the bow-sprit a sprit-sail; all these were \"cross-sails\"; the mizzen mast carried a lateen-sail. This rig remained typical of merchant ships well into the eighteenth' century (archive.org in.ernet.dli.2015.51856, full text). Falconer 1769, MIZEN, still describes the mizzen as 'extended sometimes by a gaff, and sometimes by a yard which crosses the mast obliquely'. The yard's length (1.15 of the lower mast), its angle (56° from the horizontal) and its sling a third of its length from the heel are the builder's mixed-hull lateen mizzen, the same figures the carrack and the fluyt take, read from no plate of this hull.",
+            "mizzenSailProvenance": "CLASS, r317 (0y¹⁵²): the mizzen sets a lateen under its topsail, from a yard slung to the lower mast. This hull is dated 1620; no plate of its mizzen has been read. Class source: Waters, D. W., The Art of Navigation in England in Elizabethan and Early Stuart Times (London, 1958), ch. I: 'The larger vessels were square-rigged only, or \"cross-sailed\" as it was termed, with three masts and a bowsprit. The fore and main masts each carried a course and a top-sail, the bow-sprit a sprit-sail; all these were \"cross-sails\"; the mizzen mast carried a lateen-sail. This rig remained typical of merchant ships well into the eighteenth' century (archive.org in.ernet.dli.2015.51856, full text). Falconer 1769, MIZEN, still describes the mizzen as 'extended sometimes by a gaff, and sometimes by a yard which crosses the mast obliquely'. The yard's length, angle and heel are read off Vasa's rig diagram (lateenYardProvenance, r321).",
             "tiersProvenance": "PLATE READ, r320 (0y¹⁵⁷): the mizzen crosses two square yards, the crossjack under the top and the topsail on the topmast, and no topgallant. Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg) names the masts and spars of a 1628 ship: \"(i) mizzenmast; (j) mizzen topmast\", and the sails \"(9) mizzen; (10) mizzen topsail\". Fore and main each carry a topgallant mast, (e) and (h); the mizzen has none. This hull is dated 1620 and has no plate of its own; Vasa is the nearest ship of the period whose rig is recovered, and the rule is read from her.",
             "courseRead": {
               "ofDeckToTop": 0.848,
@@ -2968,7 +3013,51 @@
               ],
               "topAtOfLower": 0.9,
               "spanPx": 244
-            }
+            },
+            "lateenRead": {
+              "angleDeg": 42.1,
+              "topAtOfLower": 0.9,
+              "boundPm": 0.03,
+              "boundAngleDeg": 1.0,
+              "rows": {
+                "mizzenFoot": [
+                  323.7,
+                  944
+                ],
+                "mainFoot": [
+                  655.6,
+                  1012
+                ],
+                "top": 700,
+                "peak": [
+                  112,
+                  599
+                ],
+                "heel": [
+                  500,
+                  950
+                ],
+                "crossing": [
+                  299.7,
+                  769
+                ],
+                "taffrail": 88
+              },
+              "plateRakeDeg": 7.8,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "script": "build/staging/r321/r321_read.py",
+              "yardOfMastSpacing": 1.576,
+              "heelAheadOfMastSpacing": 0.531,
+              "mastSpacingPx": 331.9,
+              "vasaShares": {
+                "yardOfDeckToTop": 2.143,
+                "heelAheadOfDeckToTop": 0.723,
+                "slingOfDeckToTop": 0.717,
+                "slingFromHeelOfYard": 0.516,
+                "deckToTopOfHullL": 0.168
+              }
+            },
+            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1620 and has no plate of its own; the read is Vasa's, applied to it."
           }
         ],
         "build": "frame",
@@ -3326,7 +3415,7 @@
             "crossjackSail": false,
             "crossjackProvenance": "CLASS, r315 (0y¹⁴⁹): the crossjack is crossed bare, with no sail set from it and none rolled on it. No plate of this hull's mizzen has been read. Class source: Falconer, An Universal Dictionary of the Marine (1769), CROSS-JACK: 'a sail extended on the lower yard of the mizen-mast, which is hence called the cross-jack yard ... This sail, however, has generally been found of little service, and is therefore very seldom used.' The Asow plate (Eckersberg 1828) shows a 74's crossjack bare at anchor; this hull takes the same rule unread.",
             "lateenMizzen": true,
-            "mizzenSailProvenance": "CLASS, r317 (0y¹⁵²): the mizzen sets a lateen under its topsail, from a yard slung to the lower mast. This hull is dated 1590; no plate of its mizzen has been read. Class source: Waters, D. W., The Art of Navigation in England in Elizabethan and Early Stuart Times (London, 1958), ch. I: 'The larger vessels were square-rigged only, or \"cross-sailed\" as it was termed, with three masts and a bowsprit. The fore and main masts each carried a course and a top-sail, the bow-sprit a sprit-sail; all these were \"cross-sails\"; the mizzen mast carried a lateen-sail. This rig remained typical of merchant ships well into the eighteenth' century (archive.org in.ernet.dli.2015.51856, full text). Falconer 1769, MIZEN, still describes the mizzen as 'extended sometimes by a gaff, and sometimes by a yard which crosses the mast obliquely'. The yard's length (1.15 of the lower mast), its angle (56° from the horizontal) and its sling a third of its length from the heel are the builder's mixed-hull lateen mizzen, the same figures the carrack and the fluyt take, read from no plate of this hull.",
+            "mizzenSailProvenance": "CLASS, r317 (0y¹⁵²): the mizzen sets a lateen under its topsail, from a yard slung to the lower mast. This hull is dated 1590; no plate of its mizzen has been read. Class source: Waters, D. W., The Art of Navigation in England in Elizabethan and Early Stuart Times (London, 1958), ch. I: 'The larger vessels were square-rigged only, or \"cross-sailed\" as it was termed, with three masts and a bowsprit. The fore and main masts each carried a course and a top-sail, the bow-sprit a sprit-sail; all these were \"cross-sails\"; the mizzen mast carried a lateen-sail. This rig remained typical of merchant ships well into the eighteenth' century (archive.org in.ernet.dli.2015.51856, full text). Falconer 1769, MIZEN, still describes the mizzen as 'extended sometimes by a gaff, and sometimes by a yard which crosses the mast obliquely'. The yard's length, angle and heel are read off Vasa's rig diagram (lateenYardProvenance, r321).",
             "tiersProvenance": "PLATE READ, r320 (0y¹⁵⁷): the mizzen crosses two square yards, the crossjack under the top and the topsail on the topmast, and no topgallant. Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg) names the masts and spars of a 1628 ship: \"(i) mizzenmast; (j) mizzen topmast\", and the sails \"(9) mizzen; (10) mizzen topsail\". Fore and main each carry a topgallant mast, (e) and (h); the mizzen has none. This hull is dated 1590 and has no plate of its own; Vasa is the nearest ship of the period whose rig is recovered, and the rule is read from her.",
             "courseRead": {
               "ofDeckToTop": 0.848,
@@ -3346,7 +3435,51 @@
               ],
               "topAtOfLower": 0.9,
               "spanPx": 244
-            }
+            },
+            "lateenRead": {
+              "angleDeg": 42.1,
+              "topAtOfLower": 0.9,
+              "boundPm": 0.03,
+              "boundAngleDeg": 1.0,
+              "rows": {
+                "mizzenFoot": [
+                  323.7,
+                  944
+                ],
+                "mainFoot": [
+                  655.6,
+                  1012
+                ],
+                "top": 700,
+                "peak": [
+                  112,
+                  599
+                ],
+                "heel": [
+                  500,
+                  950
+                ],
+                "crossing": [
+                  299.7,
+                  769
+                ],
+                "taffrail": 88
+              },
+              "plateRakeDeg": 7.8,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (1920 px thumbnail of Commons File:Vasa_rig_diagram.jpg, Hocker 2023 p. 31)",
+              "script": "build/staging/r321/r321_read.py",
+              "yardOfMastSpacing": 1.576,
+              "heelAheadOfMastSpacing": 0.531,
+              "mastSpacingPx": 331.9,
+              "vasaShares": {
+                "yardOfDeckToTop": 2.143,
+                "heelAheadOfDeckToTop": 0.723,
+                "slingOfDeckToTop": 0.717,
+                "slingFromHeelOfYard": 0.516,
+                "deckToTopOfHullL": 0.168
+              }
+            },
+            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1590 and has no plate of its own; the read is Vasa's, applied to it."
           }
         ],
         "build": "frame",

@@ -2253,11 +2253,18 @@ let crabHead = null;
 const lateenMizzen = mk.rig === 'square' && mk.lateenMizzen === true;
 if (mk.rig === 'lateen' || lateenMizzen) {
 const mixed = (S.masts || []).some(m => m.rig === 'square');
-const yardLen = mixed ? lower * 1.15 : L * mScale;
-const th = mixed ? 0.98 : 0.785;
+const lr = (mixed && mk.lateenRead && typeof mk.lateenRead.yardOfMastSpacing === 'number') ? mk.lateenRead : null;
+const d2t = lr ? lower * (lr.topAtOfLower || 0.90) : 0;
+let spacing = 0;
+if (lr) {
+const fwd = (S.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
+spacing = fwd ? x - ((fwd.at - 0.5) * L + H.rake(fwd.at)) : 0;
+}
+const yardLen = lr ? lr.yardOfMastSpacing * spacing : mixed ? lower * 1.15 : L * mScale;
+const th = lr ? lr.angleDeg * Math.PI / 180 : mixed ? 0.98 : 0.785;
 const dir = [Math.cos(th), Math.sin(th)];
 const sling = [x, base + dir[1] * yardLen / 3];
-const heelX = x - dir[0] * yardLen / 3;
+const heelX = lr ? x - lr.heelAheadOfMastSpacing * spacing : x - dir[0] * yardLen / 3;
 const heelU = Math.max(0, Math.min(1, heelX / L + 0.5));
 const heel = [heelX, deckMax(heelU, u) + B * 0.045];
 const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
@@ -2312,6 +2319,10 @@ ym.userData.lateen = {
 mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), slingX: +slingX.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
 rakeDeg: mk.rake || 0, mastHeadX: +mxL(base + mh).toFixed(3),
 onSquareMast: lateenMizzen, mast: mi,
+yardLen: +yardLen.toFixed(3), angleDeg: +(th * 180 / Math.PI).toFixed(2), baseY: +base.toFixed(3),
+heel: [+heel[0].toFixed(3), +heel[1].toFixed(3)], peak: [+peakPt[0].toFixed(3), +peakPt[1].toFixed(3)],
+d2t: lr ? +d2t.toFixed(3) : null, spacing: lr ? +spacing.toFixed(3) : null, slingOfD2T: lr ? +((slingY - base) / d2t).toFixed(3) : null,
+yardFrom: lr ? 'record lateenRead' : (mixed ? 'class: mixed-hull lateen mizzen, read from no plate' : 'class: lateen main'),
 headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
 off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
 rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,

@@ -4033,7 +4033,25 @@ function buildRig(S, group, mats, FINE, FURLED) {
          the first galley arrived with NaN in both masts, both yards and both sails, a
          black canvas with working panels. mScale is the identical ratio computed from
          whichever form the record actually carries. */
-      const yardLen = mixed ? lower * 1.15 : L * mScale;
+      /* ── r321 (0y¹⁵⁸): A MIZZEN LATEEN YARD READ OFF A PLATE ──────────────────────────
+         The mixed-hull figures below (1.15 of the lower mast, 56° from the horizontal, slung a
+         third of its length from the heel) were read from no plate. Hocker's Vasa rig diagram
+         (Vasa II, 2023, p. 31) draws the mizzen lateen yard of a 1628 ship at 42° from the
+         horizontal, 1.58 times the distance between the main and mizzen masts' feet, with its heel
+         on the deck 0.53 of that distance before the mizzen, so its peak stands over the taffrail.
+         The yard is keyed to the two masts' stations and not to the mizzen's height: the 1620
+         hulls' lower masts are Steel's 1794 proportions, 0.46 of the hull's length from the deck to
+         the mizzen top where Vasa's is 0.17, and Vasa's 2.14 deck-to-top heights on that mast gave
+         a 44 m yard on a 45 m hull, its peak 9 m past the stern. Where the yard crosses this mast
+         falls out of the heel, the angle and the length (userData.lateen.slingOfD2T; Vasa's 0.72). */
+      const lr = (mixed && mk.lateenRead && typeof mk.lateenRead.yardOfMastSpacing === 'number') ? mk.lateenRead : null;
+      const d2t = lr ? lower * (lr.topAtOfLower || 0.90) : 0;
+      let spacing = 0;
+      if (lr) {
+        const fwd = (S.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
+        spacing = fwd ? x - ((fwd.at - 0.5) * L + H.rake(fwd.at)) : 0;
+      }
+      const yardLen = lr ? lr.yardOfMastSpacing * spacing : mixed ? lower * 1.15 : L * mScale;
       /* θ is the OBSERVABLE, and it is about 45°: that is the angle in every plate of Pâris's
          and in every photograph of a working boom or baghla. Deriving θ instead from the mast's
          fore-and-aft position (which is what the first attempt did) forced it to 65° and the
@@ -4042,7 +4060,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          hull, slung a third of the way along at a mast set well forward, has its HEEL PROJECTING
          OUT BEYOND THE STEM. It is not an artefact — it is the most recognisable thing about
          the rig, and it falls straight out of (1) and (2) once θ is fixed. */
-      const th = mixed ? 0.98 : 0.785;   // a mizzen is peaked up steeper than a dhow's main
+      const th = lr ? lr.angleDeg * Math.PI / 180 : mixed ? 0.98 : 0.785;   // a mizzen is peaked up steeper than a dhow's main
       const dir = [Math.cos(th), Math.sin(th)];          // +x is AFT, so the yard rises aft
       const sling = [x, base + dir[1] * yardLen / 3];
       /* ── ⚠ THE YARD'S HEEL WAS SET TO THE DECK AT THE MAST ─────────────────────────
@@ -4051,7 +4069,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          at the mast — drove the heel through the deck on every lateen and settee hull, and on
          the dhow it finished 0.66 m under the planking and forward of the stem. The heel is
          bowsed down ONTO the deck, not through it; take the height from the deck beneath it. */
-      const heelX = x - dir[0] * yardLen / 3;
+      const heelX = lr ? x - lr.heelAheadOfMastSpacing * spacing : x - dir[0] * yardLen / 3;
       const heelU = Math.max(0, Math.min(1, heelX / L + 0.5));
       const heel = [heelX, deckMax(heelU, u) + B * 0.045];
       const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
@@ -4199,6 +4217,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
         mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), slingX: +slingX.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
         rakeDeg: mk.rake || 0, mastHeadX: +mxL(base + mh).toFixed(3),
         onSquareMast: lateenMizzen, mast: mi,  // r317: under a square mizzen's topsail (record `lateenMizzen`)
+        /* r321 (0y¹⁵⁸): the yard as built, for A-LATEEN-READ */
+        yardLen: +yardLen.toFixed(3), angleDeg: +(th * 180 / Math.PI).toFixed(2), baseY: +base.toFixed(3),
+        heel: [+heel[0].toFixed(3), +heel[1].toFixed(3)], peak: [+peakPt[0].toFixed(3), +peakPt[1].toFixed(3)],
+        d2t: lr ? +d2t.toFixed(3) : null, spacing: lr ? +spacing.toFixed(3) : null, slingOfD2T: lr ? +((slingY - base) / d2t).toFixed(3) : null,
+        yardFrom: lr ? 'record lateenRead' : (mixed ? 'class: mixed-hull lateen mizzen, read from no plate' : 'class: lateen main'),
         headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
         off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
         rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,

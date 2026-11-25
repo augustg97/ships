@@ -1,0 +1,22 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a lateen mizzen yard with no answer",
+  "detail": "masts[2] (station 0.85, lateen mizzen): lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lateen mizzen yard with no answer",
+  "detail": "masts[2] (station 0.85, lateen mizzen): lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen mizzen yard with no answer",
+  "detail": "masts[2] (station 0.85, lateen mizzen): lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen mizzen yard with no answer",
+  "detail": "masts[2] (station 0.85, lateen mizzen): lateenYardProvenance is absent; the record does not say where the yard's length, angle and heel come from"
+ }
+]
