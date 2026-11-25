@@ -1,0 +1,12 @@
+[
+ {
+  "id": "sekibune",
+  "rule": "a semi off the masthead",
+  "detail": "masts[0]: block top at 13.40 m, the head at 14.40 m"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a semi no halyard runs over",
+  "detail": "masts[0]: no halyard vertex inside the block (y 13.02\u201313.40 m)"
+ }
+]

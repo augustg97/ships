@@ -3266,7 +3266,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
          absence of data does not invent furniture. (Bronze Age crow's nests existed —
          Medinet Habu — but no hull here carries a mast in that gap. Research/MASTHEADS.md.)
          The TOP sits at the head of the lower mast, and the topmast is fidded through it. */
-      if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100) {
+      /* r327 (0y¹⁶⁹): THE GATE WAS A DATE, AND THE TOP IS A TRADITION'S FITTING. The year alone gave the
+         sekibune of 1597 a walled European fighting top, her yard hung under its trestletrees. The Japanese
+         mast carried none. A mast whose record says `top.form 'none'` draws no top here, and draws what its
+         record names at the head instead (the semi, below). Every other square mast keeps the gate as it was. */
+      const topNone = !!(mk.top && mk.top.form === 'none');
+      if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100 && !topNone) {
         const topR = B * 0.20, headR = radii[0] * 0.7;
         /* r235: THE RECORD MAY ATTEST THE TOP'S FORM. The class platform (round and walled
            before 1710, D-shaped after) is a great ship's fighting top, sized off the beam;
@@ -3391,6 +3396,49 @@ function buildRig(S, group, mats, FINE, FURLED) {
         kg.position.set(mxA(hY), hY, 0);
         kg.rotation.z = -rakeRad;
         group.add(tag(kg, 'karchesion'));
+      }
+
+      /* ── THE SEMI: THE SHEAVE BLOCK AT THE HEAD OF A JAPANESE MAST (round 327, 0y¹⁶⁹) ──────────────
+         The wasen mast carried no top. Its head carried the semi (蝉, "cicada"), a sheave block: the Minamichita
+         wasen museum, "帆桁や伝馬船、碇に取り付けられた綱は帆柱上端の蝉（滑車）を通り" (the ropes on the yard,
+         the boat and the anchor run through the semi, the sheave at the mast's upper end). The halyard runs from
+         the yard's slings over this sheave and down to the deck; the rig's halyard already turns at the head
+         (segHeads), so the block is drawn where the rope turns. The block's top face is the truck, as the
+         karchesion's is. Its form and size are DERIVED from the pole: no Sengoku masthead survives, and the
+         Busan scroll of 1593 draws the head in too few pixels to show a block. The semi is attested for the
+         Edo wasen; on a ship drawn at 1597 it is inferred from the tradition, and the record says so. */
+      if (FINE && si === 0 && topNone && mk.top.masthead === 'semi') {
+        const hR = segR[0].b;                          // the pole at the head
+        const sg3 = new THREE.Group();
+        const blkH = hR * 3.6, blkD = hR * 2.8, blkW = hR * 2.3;
+        /* the shell: two cheeks either side of the sheave, joined over and under it */
+        const cheekW = (blkW - hR * 0.5) / 2;
+        for (const zz of [1, -1]) {
+          const ck = new THREE.Mesh(new THREE.BoxGeometry(blkD, blkH, cheekW), mastMat);
+          ck.position.z = zz * (hR * 0.25 + cheekW / 2);
+          sg3.add(ck);
+        }
+        for (const yy of [1, -1]) {
+          const cap = new THREE.Mesh(new THREE.BoxGeometry(blkD, hR * 0.55, hR * 0.5), mastMat);
+          cap.position.y = yy * (blkH / 2 - hR * 0.275);
+          sg3.add(cap);
+        }
+        /* the sheave in its slot, dark, fore and aft through the block, and the pin it turns on */
+        const slotMat3 = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+          { color: 0x17120c, roughness: 0.95 }));
+        const shv = new THREE.Mesh(new THREE.CylinderGeometry(blkH * 0.30, blkH * 0.30, hR * 0.46, 16), slotMat3);
+        shv.rotation.x = Math.PI / 2;
+        sg3.add(shv);
+        const pin3 = new THREE.Mesh(new THREE.CylinderGeometry(hR * 0.22, hR * 0.22, blkW * 1.12, 8), slotMat3);
+        pin3.rotation.x = Math.PI / 2;
+        sg3.add(pin3);
+        const hY = y + seg - blkH / 2;
+        sg3.position.set(mxA(hY), hY, 0);
+        sg3.rotation.z = -rakeRad;
+        sg3.userData.mast = mi;
+        sg3.userData.semi = { mast: mi, headY: +(y + seg).toFixed(3), blkH: +blkH.toFixed(3), poleR: +hR.toFixed(3),
+                              from: 'derived from the pole (r327); the place is the record\'s, the form the tradition\'s' };
+        group.add(tag(sg3, 'semi'));
       }
 
       /* ── THE JUNK MASTHEAD IS A SHEAVE THROUGH THE POLE ──────────────────────────────
@@ -7031,6 +7079,14 @@ const PARTS = {
                   + 'falls to the rail. No ancient masthead survives, so the block\'s form and '
                   + 'size here are DERIVED from the pole; the reconstruction Olympias carries '
                   + 'the same gear in the same place.' },
+  semi:     { stage: 4, name: 'Semi (masthead sheave block)',
+              what: 'The sheave block at the head of a Japanese mast, called the semi, the cicada. '
+                  + 'A Japanese mast carried no top. The halyard that hoists the yard runs up from '
+                  + 'the yard, over the sheave in this block and down to the deck; on the Edo cargo '
+                  + 'ships the lines that lifted the boat and the anchor ran through it too. No '
+                  + 'Sengoku masthead survives, and the Busan scroll of 1593 draws this one too '
+                  + 'small to show a block, so the block is drawn as the Edo ships carried it and '
+                  + 'its form and size are derived from the pole.' },
   deadeye:  { stage: 5, name: 'Deadeyes',
               what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
                   + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '

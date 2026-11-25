@@ -11302,7 +11302,9 @@
        corbita hung a corbis — the basket that named her (Festus) — which is DATA:
        declared it must be drawn at the masthead, drawn it must be declared. */
     {
-      const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
+      /* r327 (0y¹⁶⁹): a mast whose record says it carries no top (`top.form 'none'`, the wasen mast) is not
+         required to carry one; A-MASTHEAD-NONE below holds it to what its record names instead */
+      const sq = (H.masts || []).filter(mm => mm.rig === 'square' && !(mm.top && mm.top.form === 'none')).length;
       const depYear = H.year || v.from || 0;
       let tops = 0;
       g.traverse(o => {
@@ -11332,6 +11334,67 @@
           say(v.id, 'a corbis adrift down the mast',
               `basket tops at ${part.corbis.y[1].toFixed(1)} m against a ~${head.toFixed(0)} m masthead`);
       }
+    }
+
+    /* ── A-MASTHEAD-NONE (round 327, 0y¹⁶⁹): A MAST THAT CARRIES NO TOP CARRIES WHAT ITS RECORD NAMES ───────────
+       The top was gated on the year alone, and the sekibune of 1597 drew a walled European fighting top with her
+       yard hung under its trestletrees. The Japanese mast carried none: its head carried the semi, the sheave block
+       the halyard runs over (Minamichita wasen museum). A mast's record may now say `top.form 'none'`. TESTS:
+       a `top.form` the builder does not know convicts; a 'none' with no provenance convicts as silence; a top or
+       crosstrees group on that mast (userData.mast, or topmastTop.mast) convicts; the fitting the record names at
+       the head (`top.masthead`, 'semi') must be drawn on that mast, its top face within 5 cm of the mast's head,
+       and a halyard must turn inside it (some halyard vertex inside the block's box, grown by 5 cm); a semi on a
+       mast whose record does not name one convicts. */
+    {
+      const FORMS = ['none', 'basket'];
+      const tops = [], semis = [], hals = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+        if (!o.isMesh && p.key === 'top') tops.push(o);
+        if (!o.isMesh && p.key === 'semi') semis.push(o);
+        if (o.isMesh && p.key === 'halyard') hals.push(o); });
+      const Vh = new THREE.Vector3();
+      (H.masts || []).forEach((mm, mi) => {
+        const tp = mm.top;
+        const mine = semis.filter(o => o.userData.mast === mi);
+        if (tp && tp.form !== undefined && !FORMS.includes(tp.form))
+          say(v.id, 'a top form the builder does not know', `masts[${mi}].top.form '${tp.form}'`);
+        if (!(tp && tp.form === 'none')) {
+          if (mine.length) say(v.id, 'a semi on a mast whose record names none', `masts[${mi}]: ${mine.length} semi groups`);
+          return;
+        }
+        if (!(typeof tp.provenance === 'string' && tp.provenance.length > 40))
+          say(v.id, 'a bare masthead with no source', `masts[${mi}].top.form 'none' carries no provenance`);
+        const onIt = tops.filter(o => o.userData.mast === mi || (o.userData.topmastTop && o.userData.topmastTop.mast === mi));
+        if (onIt.length)
+          say(v.id, 'a top on a mast whose record says it carries none',
+              `masts[${mi}]: ${onIt.map(o => o.userData.part.name).join(', ')}`);
+        if (tp.masthead !== 'semi') {
+          say(v.id, 'a bare masthead that names no fitting', `masts[${mi}].top.masthead is '${tp.masthead}'`);
+          return;
+        }
+        if (mine.length !== 1) {
+          say(v.id, 'a masthead fitting the record names and the drawing lacks', `masts[${mi}]: ${mine.length} semi groups, want 1`);
+          return;
+        }
+        const sm = mine[0], bx = new THREE.Box3().setFromObject(sm), hd = sm.userData.semi;
+        if (!hd || Math.abs(bx.max.y - hd.headY) > 0.05)
+          say(v.id, 'a semi off the masthead',
+              `masts[${mi}]: block top at ${bx.max.y.toFixed(2)} m, the head at ${hd ? hd.headY.toFixed(2) : '?'} m`);
+        const grown = bx.clone().expandByScalar(0.05);
+        let turns = false;
+        for (const hm of hals) {
+          const P = hm.geometry.attributes.position;
+          for (let i = 0; i < P.count && !turns; i++) {
+            Vh.fromBufferAttribute(P, i).applyMatrix4(hm.matrixWorld);
+            if (grown.containsPoint(Vh)) turns = true;
+          }
+          if (turns) break;
+        }
+        if (!turns)
+          say(v.id, 'a semi no halyard runs over',
+              `masts[${mi}]: no halyard vertex inside the block (y ${bx.min.y.toFixed(2)}–${bx.max.y.toFixed(2)} m)`);
+      });
     }
 
     /* ── THE ANCIENT MASTHEAD CARRIES ITS OWN GEAR (round 78) ──────────────────────────

@@ -1,0 +1,7 @@
+[
+ {
+  "id": "sekibune",
+  "rule": "a bare masthead with no source",
+  "detail": "masts[0].top.form 'none' carries no provenance"
+ }
+]

@@ -197,6 +197,34 @@ no sheave drawn in the pole, no fall to haul on.
   running rigging is rope everywhere in this model. A known simplification, applied to the
   whole class.
 
+## 5. The Japanese mast carries no top; its head carries the semi (round 327)
+
+From round 67 the top was gated on the depicted year alone: every square lower mast dated
+1100 or later drew one. Every such hull in the fleet but one is European. The sekibune,
+dated 1597, therefore drew a walled round fighting top of the European kind, with her one
+yard hung under its trestletrees. That was reported in r326 as (0y¹⁶⁹), a yard inside the
+trestletrees, and the top itself was the fault.
+
+- **No top.** The sekibune's own plate, the Busan boat-barrier scroll of 1593 (University of
+  Tokyo; Commons `File:Atakebune4.jpg`, 2095 px across, about 16 px/m at the ships), draws one
+  rigged mast in the fleet, the atakebune's. Her yard is slung at the head, about 17 px (about
+  1 m) of bare pole stands above it, stays run down from the head, and there is no platform
+  (`build/staging/r327/plate-masthead-3x.png`). The scale cannot resolve a block.
+- **The semi.** The Minamichita wasen museum (minamichita-museum.com/wasen/ship.html): the ropes
+  on the yard, the boat and the anchor run through the semi, the sheave at the mast's upper end
+  (帆柱上端の蝉（滑車）). The same statement appears on the Fleet Seven wasen page and in a
+  Japanese dictionary entry for せみ (a small sheave used to haul things aloft; on a wasen the
+  halyard is rove through it).
+
+The record carries this as `masts[i].top = { form: 'none', masthead: 'semi', provenance }`.
+The builder draws no top on such a mast and draws the block at the head, its top face the
+truck. A-MASTHEAD-NONE in the audit holds the mast to its record; the r67 rule no longer
+requires a top on it.
+
+Confidence: no top, **sourced** for the tradition and **read** off the class's own plate at
+the plate's resolution. The semi on a ship of 1597: **inferred** from the tradition, because
+the sources attest it for the Edo wasen. Its form and size: **derived** from the pole.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent

@@ -1,0 +1,12 @@
+[
+ {
+  "id": "sekibune",
+  "rule": "a top on a mast whose record says it carries none",
+  "detail": "masts[0]: Top"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a masthead fitting the record names and the drawing lacks",
+  "detail": "masts[0]: 0 semi groups, want 1"
+ }
+]

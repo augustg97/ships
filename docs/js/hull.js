@@ -1842,7 +1842,8 @@ nest.position.set(mxA(y + seg * 0.66), y + seg * 0.66, 0);
 group.add(tag(nest, 'mast', "Crow's nest", nestWhat));
 }
 }
-if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100) {
+const topNone = !!(mk.top && mk.top.form === 'none');
+if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100 && !topNone) {
 const topR = B * 0.20, headR = radii[0] * 0.7;
 const bsk = mk.top && mk.top.form === 'basket' ? mk.top : null;
 if (bsk) {
@@ -1923,6 +1924,37 @@ const hY = y + seg - blkH / 2;
 kg.position.set(mxA(hY), hY, 0);
 kg.rotation.z = -rakeRad;
 group.add(tag(kg, 'karchesion'));
+}
+if (FINE && si === 0 && topNone && mk.top.masthead === 'semi') {
+const hR = segR[0].b;
+const sg3 = new THREE.Group();
+const blkH = hR * 3.6, blkD = hR * 2.8, blkW = hR * 2.3;
+const cheekW = (blkW - hR * 0.5) / 2;
+for (const zz of [1, -1]) {
+const ck = new THREE.Mesh(new THREE.BoxGeometry(blkD, blkH, cheekW), mastMat);
+ck.position.z = zz * (hR * 0.25 + cheekW / 2);
+sg3.add(ck);
+}
+for (const yy of [1, -1]) {
+const cap = new THREE.Mesh(new THREE.BoxGeometry(blkD, hR * 0.55, hR * 0.5), mastMat);
+cap.position.y = yy * (blkH / 2 - hR * 0.275);
+sg3.add(cap);
+}
+const slotMat3 = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+{ color: 0x17120c, roughness: 0.95 }));
+const shv = new THREE.Mesh(new THREE.CylinderGeometry(blkH * 0.30, blkH * 0.30, hR * 0.46, 16), slotMat3);
+shv.rotation.x = Math.PI / 2;
+sg3.add(shv);
+const pin3 = new THREE.Mesh(new THREE.CylinderGeometry(hR * 0.22, hR * 0.22, blkW * 1.12, 8), slotMat3);
+pin3.rotation.x = Math.PI / 2;
+sg3.add(pin3);
+const hY = y + seg - blkH / 2;
+sg3.position.set(mxA(hY), hY, 0);
+sg3.rotation.z = -rakeRad;
+sg3.userData.mast = mi;
+sg3.userData.semi = { mast: mi, headY: +(y + seg).toFixed(3), blkH: +blkH.toFixed(3), poleR: +hR.toFixed(3),
+from: 'derived from the pole (r327); the place is the record\'s, the form the tradition\'s' };
+group.add(tag(sg3, 'semi'));
 }
 if (FINE && mk.rig === 'junk' && si === 0) {
 const hR = segR[0].b;
@@ -4203,6 +4235,14 @@ what: 'The masthead itself, by its ancient name. Asclepiades of Myrlea, quoted '
 + 'falls to the rail. No ancient masthead survives, so the block\'s form and '
 + 'size here are DERIVED from the pole; the reconstruction Olympias carries '
 + 'the same gear in the same place.' },
+semi:     { stage: 4, name: 'Semi (masthead sheave block)',
+what: 'The sheave block at the head of a Japanese mast, called the semi, the cicada. '
++ 'A Japanese mast carried no top. The halyard that hoists the yard runs up from '
++ 'the yard, over the sheave in this block and down to the deck; on the Edo cargo '
++ 'ships the lines that lifted the boat and the anchor ran through it too. No '
++ 'Sengoku masthead survives, and the Busan scroll of 1593 draws this one too '
++ 'small to show a block, so the block is drawn as the Edo ships carried it and '
++ 'its form and size are derived from the pole.' },
 deadeye:  { stage: 5, name: 'Deadeyes',
 what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
 + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '

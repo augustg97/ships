@@ -2613,7 +2613,12 @@
             "rig": "square",
             "rake": 0,
             "shrouds": 0,
-            "only": 1
+            "only": 1,
+            "top": {
+              "form": "none",
+              "masthead": "semi",
+              "provenance": "RECORDED for the tradition, READ for the class. The wasen mast carried no top: the Minamichita wasen museum (minamichita-museum.com/wasen/ship.html) says the ropes on the yard, the boat and the anchor run through the semi, the sheave at the mast's upper end (帆柱上端の蝉（滑車）). The sekibune's own plate, the Busan boat-barrier scroll of 1593 (University of Tokyo; Commons File:Atakebune4.jpg, 2095 px across, about 16 px/m at the ships), draws one rigged mast in the fleet, the atakebune's: the yard slung at the head, about 17 px (about 1 m) of bare pole above it, stays running down from the head, and no platform. At that scale a block cannot be resolved. The semi is attested for the Edo wasen; on a sekibune of 1597 it is INFERRED from the tradition, and its form and size are derived from the pole (r327)."
+            }
           }
         ],
         "build": "shell",
