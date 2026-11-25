@@ -29618,7 +29618,7 @@ The rule's three proofs:
 **WHAT IS STILL OPEN.**
 
 - **(0y¹⁶⁶) is closed** for the East Indiaman and the slave ship. Every square yard on both hulls now hangs where Vasa's plate draws it.
-- **(0y¹⁶⁷), NEW: Vasa's topmast tops.** The plate draws a small round top on each topmast, under the cap. By eye it sits at about row 365 on the fore (cap 330), 338 on the main (cap 298) and 482 on the mizzen (cap 459). With the model's topmast heel at 0.88 of the lower mast, that is about 0.90 of the topmast's length, the same share as the lower top on the lower mast. The model draws crosstrees at 0.97 of the topmast (`topHead`, hull.js about line 5482). Fit the rows by pixel as this round did, and probe the built crosstrees, before deciding whether to draw a topmast top on these two hulls.
+- **(0y¹⁶⁷), NEW: Vasa's topmast tops.** The plate draws a small round top on each topmast, under the cap. `r324_tops.py` (run on the plate during the ratchet, no browser) finds the run through the mast at its widest at rows 364–370 on the fore, centre 367 (cap 330), and 333–345 on the main, centre 339 (cap 298). The same test puts the fore lower top at 684.5, where r322 read 683. On the mizzen (about row 482 by eye, cap 459) and on the topgallant masts the run is only 6–13 px wide, so the test cannot resolve a top there; read those by eye or by another test. With the model's topmast heel at 0.88 of the lower mast, that is 0.897 of the topmast's length on the fore and 0.895 on the main, the same share as the lower top on the lower mast. The model draws crosstrees at 0.97 of the topmast (`topHead`, hull.js about line 5482). Fit the rows by pixel as this round did, and probe the built crosstrees, before deciding whether to draw a topmast top on these two hulls.
 - **(0y¹⁶³)**: the fluyt's and the carrack's mizzen topsail. Once it is decided, read the fluyt's three masts off the same plate. Her masts' `hoistProvenance` is UNREAD now and would turn with them.
 - `ship-treasure` captures the globe in a full run (r318, r319); r320's next step stands. **(0y¹⁶¹)**, **(0y¹⁶²)**, **(0y¹⁵⁹)**, **(0y¹⁶⁰)**, **(0y¹⁵³)**, **(0y¹⁵⁵)**, **(0y¹⁵¹)**, and **(0y¹⁴⁵)** to **(0y⁹⁴)** and the named residuals stand as r294 to r323 list them.
 
@@ -29634,3 +29634,15 @@ The full ratchet was launched on the final tree at 06:24, at load 5.6, after the
 **r325 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r325` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁶⁷) off the same Vasa drawing.**
 
 **Live stamp: docs/index.html carries data-version 1795616674 at the build.**
+
+**Live stamp VERIFIED: 1795616674 on https://augustg97.github.io/ships/index.html at about 06:33 PST. The Pages deploy finished at 06:27, about two minutes after the push. The published `vessels.json` carries `hoistRead` 0.901 / 0.9652, 0.8826 / 0.9506 and 0.9054 on the East Indiaman's three masts.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The full check was launched at 06:24 and captured 55 frames. It died at frame 56, `action-lepanto`, on the 150 s ready wait (07:01), as r320's to r323's runs did. The 55 were kept (`run1/`, `score-run1.out`). The 10 it never reached were captured one process per frame with no failure (`r324_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). Every frame was scored with r277's offline scorer.
+
+- **ACCEPTED, predicted** (FRAME-LOG.md):
+  - `ship-slave-ship`, 0.796% / 0.366. The fore and main topsail and topgallant yards and the mizzen topsail yard are 0.2–0.9 m lower. The truck is unchanged, so the frame is not reframed.
+  - `ship-galley`, 0.082% / 0.033. The slave ship's main topsail yard and the head of her topsail are lower, at the right edge behind the fleet panel (`pair-ship-galley.png`).
+- **Predicted, and did not move:** `shipwright`, `shipwright-ahead`, `shipwright-astern`, `shipwright-furled`, `shipwright-hounds`, `ship-galleass`, `ship-carrack` and `globe-default`, all inside the gate.
+- **Inside the gate:** the other 63. No frame was a capture fault this round: `aboard-coast`, `aboard-carrier` and `board-salamis` passed in the full run.
+- The run did not reach its end, so the harness's console-error list was not printed.
+- **No frames are left unscored for r325.**
