@@ -7442,10 +7442,13 @@
         if (MH) {
           if (!/^(READ|RECORD|CONTESTED)/.test(mk.mastHeightsProvenance || ''))
             say(v.id, 'mast heights with no source', `${at}: mastHeightsM ${JSON.stringify(MH)} and no mastHeightsProvenance`);
-          if (sg.length < 3) say(v.id, 'mast heights recorded and not built', `${at}: ${sg.length} segments drawn for a top, crosstrees and truck`);
+          /* r322: a mast built in two pieces (`only` 2) records a top and crosstrees and no truck */
+          const twoPiece = mk.only === 2 && MH.truck === undefined, need = twoPiece ? 2 : 3;
+          if (sg.length < need) say(v.id, 'mast heights recorded and not built', `${at}: ${sg.length} segments drawn for ${twoPiece ? 'a top and crosstrees' : 'a top, crosstrees and truck'}`);
+          else if (twoPiece && sg.length > 2) say(v.id, 'mast heights recorded and not built', `${at}: ${sg.length} segments drawn for a two-piece mast`);
           else {
             const foot = sg[0].footY, got = { top: 0.90 * (sg[0].headY - foot), crosstrees: sg[1].headY - foot, truck: sg[sg.length - 1].headY - foot };
-            for (const k of ['top', 'crosstrees', 'truck'])
+            for (const k of (twoPiece ? ['top', 'crosstrees'] : ['top', 'crosstrees', 'truck']))
               if (Math.abs(got[k] - MH[k]) > 0.05)
                 say(v.id, 'a mast drawn off its recorded heights', `${at}: ${k} ${got[k].toFixed(2)} m over the foot, record ${MH[k]} m`);
           }
@@ -7540,7 +7543,7 @@
         if (o.userData.kind === 'furl' && !o.userData.brailed) {
           const a = o.geometry.attributes.position, V = new THREE.Vector3(), c = new THREE.Vector3();
           for (let k = 0; k < a.count; k++) c.add(V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv));
-          furls.push(c.divideScalar(a.count));
+          const f = c.divideScalar(a.count); f.onYard = o.userData.onYard || null; furls.push(f);
         }
         if (o.userData.courseGear && Array.isArray(o.userData.courseGear.tiers)) for (const t of o.userData.courseGear.tiers) if (t.yard) gearTiers.push(t);
       });
@@ -7557,7 +7560,10 @@
         const B = mine[0], yY = B.rec.y, mx = B.o.userData.slung ? B.o.userData.slung.mastX : null;
         for (const o of cloth) if (Math.abs(o.userData.yardY - yY) < 0.3 && (mx === null || Math.abs(o.userData.mastX - mx) < 1.5))
           say(v.id, 'a sail set from a bare crossjack', `${at}: a square sail hangs from y ${o.userData.yardY.toFixed(2)}, the bare crossjack at ${yY.toFixed(2)}${SB}`);
-        if (STATE === 'furled') for (const f of furls) if (f.distanceTo(B.c) <= 1.5)
+        /* r322: a roll is on the crossjack when it RECORDS that yard. Every roll on a square yard records it
+           (userData.onYard, r316, crossYard's one furl path); a lateen's roll records none. A reach of 1.5 m convicted
+           the lateen's own roll once Vasa's heights put the lateen's crossing 1.05 m under the crossjack. */
+        if (STATE === 'furled') for (const f of furls) if (f.onYard && f.onYard.mast === mi && Math.abs(f.onYard.y - yY) < 0.05)
           say(v.id, 'a roll on a bare crossjack', `${at}: a furled roll centred ${f.distanceTo(B.c).toFixed(2)} m from the crossjack's centre${SB}`);
         for (const t of gearTiers) if (Math.abs(t.yard.yy - B.c.y) < 0.3 && (mx === null || Math.abs(t.yard.cx - B.c.x) < 1.5))
           say(v.id, 'gear for a sail the crossjack does not carry', `${at}: a clewline/buntline tier recorded on the yard at y ${t.yard.yy}${SB}`);
@@ -7706,6 +7712,44 @@
           say(v.id, 'a lateen yard off its read', `${at}: built yard ${bYard.toFixed(3)} and heel ${bHeel.toFixed(3)} of the ${spB.toFixed(2)} m spacing at ${bAng.toFixed(2)}°; the read is ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}° ± ${b}`);
       });
     }
+    /* ── A-MAST-READ (round 322, 0y¹⁶⁴): THE MASTS OF A HULL WHOSE LATEEN YARD IS READ OFF VASA ANSWER FOR THEIR HEIGHTS,
+       AND A READ HEIGHT IS ITS SHARE OF THE BUILT STATIONS. Until r322 the East Indiaman's and the slave ship's masts were
+       Steel's 1794 proportions, and the East Indiaman's mizzen stood 0.45 of her waterline from the deck to its top, where
+       Vasa's stands 0.17 of hers. Hocker's Vasa rig diagram (Vasa II, 2023, p. 31) gives each mast's top, topmast cap
+       and topgallant cap as shares of the distance between the fore and mizzen masts' feet.
+       RECORD: on a hull whose lateen mizzen carries `lateenRead`, every mast says where its heights come from
+       (`mastHeightsProvenance`, READ, RECORD, CONTESTED or CLASS); the SILENCE convicts: 'a mast beside a Vasa read with no
+       height answer'. A READ carries `mastHeightsRead`, and one without it convicts.
+       READ: each share agrees with the plate rows it came from, (foot row - row) / (fore foot column - mizzen foot column),
+       within 0.0005: 'a mast read that disagrees with its own rows'.
+       BUILT: each recorded height is its share times the spacing of this hull's fore and aftermost stations, as the
+       builder places them, within `boundM`: 'mast heights off their read'. A-MAST-HEIGHTS checks the segments against
+       the metres; this rule checks the metres against the stations, so a moved station cannot leave stale heights. */
+    {
+      const lrH = (H.masts || []).some(m2 => m2.lateenRead && typeof m2.lateenRead.yardOfMastSpacing === 'number');
+      if (lrH) {
+        const hs = SHIPS_HULL.hullSurface(H), Lh = H.lwl;
+        const stX = u => (u - 0.5) * Lh + hs.rake(u);
+        const ats = (H.masts || []).map(m2 => m2.at);
+        const spB = stX(Math.max(...ats)) - stX(Math.min(...ats));
+        (H.masts || []).forEach((mk, mi) => {
+          const at = `masts[${mi}] (station ${mk.at})`, pv = mk.mastHeightsProvenance, rd = mk.mastHeightsRead;
+          if (!/^(READ|RECORD|CONTESTED|CLASS)/.test(pv || '')) { say(v.id, 'a mast beside a Vasa read with no height answer', `${at}: mastHeightsProvenance is ${pv ? "'" + pv.slice(0, 12) + "'" : 'absent'}`); return; }
+          if (/^READ/.test(pv) !== !!rd) { say(v.id, 'a mast read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and mastHeightsRead is ${rd ? 'present' : 'absent'}`); return; }
+          if (!rd) return;
+          const sh = rd.ofForeMizzenSpacing || {}, span = rd.feetPx[0] - rd.feetPx[1], MH = mk.mastHeightsM || {};
+          for (const k of Object.keys(sh)) {
+            const fromRows = (rd.foot[1] - rd.rows[k]) / span;
+            if (Math.abs(fromRows - sh[k]) > 0.0005)
+              say(v.id, 'a mast read that disagrees with its own rows', `${at}: ${k} rows give ${fromRows.toFixed(4)} of the spacing, the read says ${sh[k]}`);
+            if (MH[k] === undefined || Math.abs(MH[k] - sh[k] * spB) > (rd.boundM || 0.05))
+              say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded; ${sh[k]} of the built ${spB.toFixed(3)} m fore-to-mizzen spacing is ${(sh[k] * spB).toFixed(2)} m`);
+          }
+          for (const k of Object.keys(MH)) if (sh[k] === undefined)
+            say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded with no share read for it`);
+        });
+      }
+    }
     /* ── A-MIZZEN-TIERS (round 320, 0y¹⁵⁷): A LATEEN MIZZEN OF THE 1590s-1620s CROSSES NO TOPGALLANT.
        A square mizzen that sets a lateen (`lateenMizzen`, r317) carried one square sail, the topsail, over the crossjack
        that spreads its foot. Vasa's rig (Hocker, Vasa II, 2023, p. 31) names a topgallant mast on the fore and the main and
@@ -7810,7 +7854,7 @@
             say(v.id, "the card's rig height is one segment",
                 `the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
           const mk = H.masts[tmi] || {};
-          const wantRecord = (mk.rig === 'square' && !!mk.mastHeightsM) || (mk.truckM !== undefined && (mk.rig === 'square' || (mk.rig === 'gaff' && mk.capFrac !== undefined))) || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
+          const wantRecord = (mk.rig === 'square' && !!mk.mastHeightsM && !mk.mastHeightsRead) ||   /* r322: a height read off ANOTHER ship's plate is derived for this hull */ (mk.truckM !== undefined && (mk.rig === 'square' || (mk.rig === 'gaff' && mk.capFrac !== undefined))) || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
           if (!U.rigTruckFrom)
             say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
           else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)

@@ -2774,7 +2774,8 @@
             "rake": -2,
             "shrouds": 4,
             "only": 3,
-            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
+            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together."
           },
           {
             "at": 0.556,
@@ -2783,7 +2784,8 @@
             "rake": 1,
             "shrouds": 5,
             "only": 3,
-            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
+            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together."
           },
           {
             "at": 0.85,
@@ -2834,7 +2836,8 @@
                 "deckToTopOfHullL": 0.168
               }
             },
-            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1595-1700 and has no plate of its own; the read is Vasa's, applied to it."
+            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1595-1700 and has no plate of its own; the read is Vasa's, applied to it.",
+            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together."
           }
         ],
         "build": "frame",
@@ -2971,7 +2974,40 @@
             "rake": -2,
             "shrouds": 6,
             "only": 3,
-            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
+            "mastHeightsM": {
+              "top": 13.17,
+              "crosstrees": 27.6,
+              "truck": 32.1
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.3899,
+                "crosstrees": 0.8173,
+                "truck": 0.9505
+              },
+              "spacingM": 33.774,
+              "rows": {
+                "top": 683,
+                "crosstrees": 330,
+                "truck": 220,
+                "staff": 158
+              },
+              "foot": [
+                1149.6,
+                1005
+              ],
+              "feetPx": [
+                1149.6,
+                323.7
+              ],
+              "boundOfSpacing": 0.004,
+              "staffOfSpacing": 1.0255,
+              "boundM": 0.05,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (Hocker 2023 p. 31)",
+              "script": "build/staging/r322/r322_read.py, r322_record.py"
+            },
+            "mastHeightsProvenance": "READ, r322 (0y¹⁶⁴): the top 13.17 m, the topmast's head (cap) 27.6 m and the truck 32.1 m over the foot of the mast. These are Vasa's foremast heights as shares of the distance between her fore and mizzen masts' feet (0.3899, 0.8173, 0.9505), times that distance on this hull's built masts (33.774 m). Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull): the fore and mizzen masts meet the hull at columns 1149.6 and 323.7, 825.9 px apart; this mast meets it at row 1005; the top platform is centred on row 683, the cap of the topmast's head on row 330, and the cap of the topgallant mast's head on row 220. Above that cap Vasa's foremast carries a bare staff to row 158 (1.0255); no sail is set on it and it is not built. Each row is read to 3 px, which is 0.004 of the span. The heights are keyed to the masts' feet, the same datum as the mizzen lateen yard (r321), because the stations are a hull datum the builder carries. CONTESTED datum: keyed to the hull's length overall instead (taffrail to beakhead, 1447 px on the plate), the heights come out 0.86-0.88 of these. Until r322 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 170 years later. This hull is dated 1620 and has no plate of its own; the read is Vasa's (1628), applied to it."
           },
           {
             "at": 0.556,
@@ -2980,7 +3016,40 @@
             "rake": 1,
             "shrouds": 8,
             "only": 3,
-            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
+            "mastHeightsM": {
+              "top": 13.5,
+              "crosstrees": 29.2,
+              "truck": 35.99
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.3996,
+                "crosstrees": 0.8645,
+                "truck": 1.0655
+              },
+              "spacingM": 33.774,
+              "rows": {
+                "top": 682,
+                "crosstrees": 298,
+                "truck": 132,
+                "staff": 50
+              },
+              "foot": [
+                655.6,
+                1012
+              ],
+              "feetPx": [
+                1149.6,
+                323.7
+              ],
+              "boundOfSpacing": 0.004,
+              "staffOfSpacing": 1.1648,
+              "boundM": 0.05,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (Hocker 2023 p. 31)",
+              "script": "build/staging/r322/r322_read.py, r322_record.py"
+            },
+            "mastHeightsProvenance": "READ, r322 (0y¹⁶⁴): the top 13.5 m, the topmast's head (cap) 29.2 m and the truck 35.99 m over the foot of the mast. These are Vasa's mainmast heights as shares of the distance between her fore and mizzen masts' feet (0.3996, 0.8645, 1.0655), times that distance on this hull's built masts (33.774 m). Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull): the fore and mizzen masts meet the hull at columns 1149.6 and 323.7, 825.9 px apart; this mast meets it at row 1012; the top platform is centred on row 682, the cap of the topmast's head on row 298, and the cap of the topgallant mast's head on row 132. Above that cap Vasa's mainmast carries a bare staff to row 50 (1.1648); no sail is set on it and it is not built. Each row is read to 3 px, which is 0.004 of the span. The heights are keyed to the masts' feet, the same datum as the mizzen lateen yard (r321), because the stations are a hull datum the builder carries. CONTESTED datum: keyed to the hull's length overall instead (taffrail to beakhead, 1447 px on the plate), the heights come out 0.86-0.88 of these. Until r322 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 170 years later. This hull is dated 1620 and has no plate of its own; the read is Vasa's (1628), applied to it."
           },
           {
             "at": 0.85,
@@ -3057,7 +3126,37 @@
                 "deckToTopOfHullL": 0.168
               }
             },
-            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1620 and has no plate of its own; the read is Vasa's, applied to it."
+            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. The yard is keyed to the masts' stations and not to the mizzen's height: in r321 this hull's masts were still Steel's 1794 proportions, and keying the yard to that mizzen drew a 44 m yard on a 45 m hull. Since r322 the mizzen takes Vasa's heights too (mastHeightsProvenance), and the yard crosses it at 0.743 of the height from the deck to the top, 0.026 above Vasa's 0.717. The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1620 and has no plate of its own; the read is Vasa's, applied to it.",
+            "mastHeightsM": {
+              "top": 9.98,
+              "crosstrees": 19.83
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.2954,
+                "crosstrees": 0.5872
+              },
+              "spacingM": 33.774,
+              "rows": {
+                "top": 700,
+                "crosstrees": 459,
+                "staff": 366
+              },
+              "foot": [
+                323.7,
+                944
+              ],
+              "feetPx": [
+                1149.6,
+                323.7
+              ],
+              "boundOfSpacing": 0.004,
+              "staffOfSpacing": 0.6998,
+              "boundM": 0.05,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (Hocker 2023 p. 31)",
+              "script": "build/staging/r322/r322_read.py, r322_record.py"
+            },
+            "mastHeightsProvenance": "READ, r322 (0y¹⁶⁴): the top 9.98 m and the topmast's head (cap) 19.83 m over the foot of the mast. These are Vasa's mizzen heights as shares of the distance between her fore and mizzen masts' feet (0.2954, 0.5872), times that distance on this hull's built masts (33.774 m). Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull): the fore and mizzen masts meet the hull at columns 1149.6 and 323.7, 825.9 px apart; this mast meets it at row 944; the top platform is centred on row 700, the cap of the topmast's head on row 459. Above the cap Vasa's mizzen carries a bare staff to row 366 (0.6998); no sail is set on it and it is not built (the mast is built in two pieces, `only` 2). Each row is read to 3 px, which is 0.004 of the span. The heights are keyed to the masts' feet, the same datum as the mizzen lateen yard (r321), because the stations are a hull datum the builder carries. CONTESTED datum: keyed to the hull's length overall instead (taffrail to beakhead, 1447 px on the plate), the heights come out 0.86-0.88 of these. Until r322 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 170 years later. This hull is dated 1620 and has no plate of its own; the read is Vasa's (1628), applied to it."
           }
         ],
         "build": "frame",
@@ -3393,7 +3492,40 @@
             "rake": -2,
             "shrouds": 5,
             "only": 3,
-            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
+            "mastHeightsM": {
+              "top": 7.93,
+              "crosstrees": 16.63,
+              "truck": 19.34
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.3899,
+                "crosstrees": 0.8173,
+                "truck": 0.9505
+              },
+              "spacingM": 20.343,
+              "rows": {
+                "top": 683,
+                "crosstrees": 330,
+                "truck": 220,
+                "staff": 158
+              },
+              "foot": [
+                1149.6,
+                1005
+              ],
+              "feetPx": [
+                1149.6,
+                323.7
+              ],
+              "boundOfSpacing": 0.004,
+              "staffOfSpacing": 1.0255,
+              "boundM": 0.05,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (Hocker 2023 p. 31)",
+              "script": "build/staging/r322/r322_read.py, r322_record.py"
+            },
+            "mastHeightsProvenance": "READ, r322 (0y¹⁶⁴): the top 7.93 m, the topmast's head (cap) 16.63 m and the truck 19.34 m over the foot of the mast. These are Vasa's foremast heights as shares of the distance between her fore and mizzen masts' feet (0.3899, 0.8173, 0.9505), times that distance on this hull's built masts (20.343 m). Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull): the fore and mizzen masts meet the hull at columns 1149.6 and 323.7, 825.9 px apart; this mast meets it at row 1005; the top platform is centred on row 683, the cap of the topmast's head on row 330, and the cap of the topgallant mast's head on row 220. Above that cap Vasa's foremast carries a bare staff to row 158 (1.0255); no sail is set on it and it is not built. Each row is read to 3 px, which is 0.004 of the span. The heights are keyed to the masts' feet, the same datum as the mizzen lateen yard (r321), because the stations are a hull datum the builder carries. CONTESTED datum: keyed to the hull's length overall instead (taffrail to beakhead, 1447 px on the plate), the heights come out 0.86-0.88 of these. Until r322 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 170 years later. This hull is dated 1590 and has no plate of its own; the read is Vasa's (1628), applied to it."
           },
           {
             "at": 0.556,
@@ -3402,7 +3534,40 @@
             "rake": 1,
             "shrouds": 6,
             "only": 3,
-            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read.",
+            "mastHeightsM": {
+              "top": 8.13,
+              "crosstrees": 17.59,
+              "truck": 21.68
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.3996,
+                "crosstrees": 0.8645,
+                "truck": 1.0655
+              },
+              "spacingM": 20.343,
+              "rows": {
+                "top": 682,
+                "crosstrees": 298,
+                "truck": 132,
+                "staff": 50
+              },
+              "foot": [
+                655.6,
+                1012
+              ],
+              "feetPx": [
+                1149.6,
+                323.7
+              ],
+              "boundOfSpacing": 0.004,
+              "staffOfSpacing": 1.1648,
+              "boundM": 0.05,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (Hocker 2023 p. 31)",
+              "script": "build/staging/r322/r322_read.py, r322_record.py"
+            },
+            "mastHeightsProvenance": "READ, r322 (0y¹⁶⁴): the top 8.13 m, the topmast's head (cap) 17.59 m and the truck 21.68 m over the foot of the mast. These are Vasa's mainmast heights as shares of the distance between her fore and mizzen masts' feet (0.3996, 0.8645, 1.0655), times that distance on this hull's built masts (20.343 m). Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull): the fore and mizzen masts meet the hull at columns 1149.6 and 323.7, 825.9 px apart; this mast meets it at row 1012; the top platform is centred on row 682, the cap of the topmast's head on row 298, and the cap of the topgallant mast's head on row 132. Above that cap Vasa's mainmast carries a bare staff to row 50 (1.1648); no sail is set on it and it is not built. Each row is read to 3 px, which is 0.004 of the span. The heights are keyed to the masts' feet, the same datum as the mizzen lateen yard (r321), because the stations are a hull datum the builder carries. CONTESTED datum: keyed to the hull's length overall instead (taffrail to beakhead, 1447 px on the plate), the heights come out 0.86-0.88 of these. Until r322 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 170 years later. This hull is dated 1590 and has no plate of its own; the read is Vasa's (1628), applied to it."
           },
           {
             "at": 0.85,
@@ -3479,7 +3644,37 @@
                 "deckToTopOfHullL": 0.168
               }
             },
-            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1590 and has no plate of its own; the read is Vasa's, applied to it."
+            "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. The yard is keyed to the masts' stations and not to the mizzen's height: in r321 this hull's masts were still Steel's 1794 proportions, and keying the yard to the East Indiaman's mizzen drew a 44 m yard on a 45 m hull. Since r322 the mizzen takes Vasa's heights too (mastHeightsProvenance), and the yard crosses it at 0.749 of the height from the deck to the top, 0.032 above Vasa's 0.717. The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1590 and has no plate of its own; the read is Vasa's, applied to it.",
+            "mastHeightsM": {
+              "top": 6.01,
+              "crosstrees": 11.95
+            },
+            "mastHeightsRead": {
+              "ofForeMizzenSpacing": {
+                "top": 0.2954,
+                "crosstrees": 0.5872
+              },
+              "spacingM": 20.343,
+              "rows": {
+                "top": 700,
+                "crosstrees": 459,
+                "staff": 366
+              },
+              "foot": [
+                323.7,
+                944
+              ],
+              "feetPx": [
+                1149.6,
+                323.7
+              ],
+              "boundOfSpacing": 0.004,
+              "staffOfSpacing": 0.6998,
+              "boundM": 0.05,
+              "plate": "build/staging/r320/dl/vasa-rig.jpg (Hocker 2023 p. 31)",
+              "script": "build/staging/r322/r322_read.py, r322_record.py"
+            },
+            "mastHeightsProvenance": "READ, r322 (0y¹⁶⁴): the top 6.01 m and the topmast's head (cap) 11.95 m over the foot of the mast. These are Vasa's mizzen heights as shares of the distance between her fore and mizzen masts' feet (0.2954, 0.5872), times that distance on this hull's built masts (20.343 m). Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's hull): the fore and mizzen masts meet the hull at columns 1149.6 and 323.7, 825.9 px apart; this mast meets it at row 944; the top platform is centred on row 700, the cap of the topmast's head on row 459. Above the cap Vasa's mizzen carries a bare staff to row 366 (0.6998); no sail is set on it and it is not built (the mast is built in two pieces, `only` 2). Each row is read to 3 px, which is 0.004 of the span. The heights are keyed to the masts' feet, the same datum as the mizzen lateen yard (r321), because the stations are a hull datum the builder carries. CONTESTED datum: keyed to the hull's length overall instead (taffrail to beakhead, 1447 px on the plate), the heights come out 0.86-0.88 of these. Until r322 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 170 years later. This hull is dated 1590 and has no plate of its own; the read is Vasa's (1628), applied to it."
           }
         ],
         "build": "frame",

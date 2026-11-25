@@ -1,0 +1,186 @@
+{
+ "fluyt": {
+  "masts": [
+   {
+    "at": 0.115,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": -11.499,
+    "footY": 3.577,
+    "heads": [
+     15.465,
+     22.887,
+     26.413
+    ],
+    "MH": null
+   },
+   {
+    "at": 0.556,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": 1.54,
+    "footY": 3.002,
+    "heads": [
+     17.391,
+     25.739,
+     29.704
+    ],
+    "MH": null
+   },
+   {
+    "at": 0.85,
+    "rig": "lateen",
+    "only": null,
+    "nseg": 0,
+    "footX": null,
+    "footY": null,
+    "heads": [],
+    "MH": null
+   }
+  ],
+  "lateen": [
+   {
+    "slingY": 7.996,
+    "baseY": 3.332,
+    "d2t": 13.412,
+    "slingOfD2T": 0.348,
+    "mastHeadY": 18.184,
+    "spacing": 8.489
+   }
+  ]
+ },
+ "east-indiaman": {
+  "masts": [
+   {
+    "at": 0.115,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": -18.052,
+    "footY": 5.37,
+    "heads": [
+     14.633,
+     27.6,
+     32.1
+    ],
+    "MH": {
+     "top": 13.17,
+     "crosstrees": 27.6,
+     "truck": 32.1
+    }
+   },
+   {
+    "at": 0.556,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": 2.408,
+    "footY": 4.602,
+    "heads": [
+     15,
+     29.2,
+     35.99
+    ],
+    "MH": {
+     "top": 13.5,
+     "crosstrees": 29.2,
+     "truck": 35.99
+    }
+   },
+   {
+    "at": 0.85,
+    "rig": "square",
+    "only": 2,
+    "nseg": 2,
+    "footX": 15.722,
+    "footY": 4.932,
+    "heads": [
+     11.088,
+     19.83
+    ],
+    "MH": {
+     "top": 9.98,
+     "crosstrees": 19.83
+    }
+   }
+  ],
+  "lateen": [
+   {
+    "slingY": 12.346,
+    "baseY": 4.932,
+    "d2t": 9.98,
+    "slingOfD2T": 0.743,
+    "mastHeadY": 16.02,
+    "spacing": 13.314
+   }
+  ]
+ },
+ "slave-ship": {
+  "masts": [
+   {
+    "at": 0.115,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": -10.843,
+    "footY": 3.577,
+    "heads": [
+     8.811,
+     16.63,
+     19.34
+    ],
+    "MH": {
+     "top": 7.93,
+     "crosstrees": 16.63,
+     "truck": 19.34
+    }
+   },
+   {
+    "at": 0.556,
+    "rig": "square",
+    "only": 3,
+    "nseg": 3,
+    "footX": 1.456,
+    "footY": 3.001,
+    "heads": [
+     9.034,
+     17.59,
+     21.68
+    ],
+    "MH": {
+     "top": 8.13,
+     "crosstrees": 17.59,
+     "truck": 21.68
+    }
+   },
+   {
+    "at": 0.85,
+    "rig": "square",
+    "only": 2,
+    "nseg": 2,
+    "footX": 9.5,
+    "footY": 3.221,
+    "heads": [
+     6.678,
+     11.95
+    ],
+    "MH": {
+     "top": 6.01,
+     "crosstrees": 11.95
+    }
+   }
+  ],
+  "lateen": [
+   {
+    "slingY": 7.725,
+    "baseY": 3.221,
+    "d2t": 6.01,
+    "slingOfD2T": 0.749,
+    "mastHeadY": 9.899,
+    "spacing": 8.044
+   }
+  ]
+ }
+}

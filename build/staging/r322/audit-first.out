@@ -1,0 +1,12 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 1.21 m from the crossjack's centre (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.70 m from the crossjack's centre (furled build)"
+ }
+]

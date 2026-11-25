@@ -2291,12 +2291,16 @@ function gaffTopmastOf(mk, lower) {
    the topmast's head, the truck on the topgallant mast's head, each heel at 0.88 of the segment below. So
      lower = top / 0.90;  topmast = crosstrees - 0.88 lower;  topgallant = truck - 0.88 (lower + topmast).
    The record keeps the source's three heights, not the solved lengths, for the reason the truckM note
-   above gives. */
+   above gives.
+   r322 (0y¹⁶⁴): a mast built in two pieces (`only` 2: Vasa's mizzen, and the 1590-1620 hulls' mizzens that take
+   its heights) records a top and crosstrees and no truck, because no topgallant mast is built on it; its topmast
+   is solved the same way and the third piece, which is never drawn, keeps Steel's half. */
 function squareStackOf(mk, lower) {
   const MH = mk.mastHeightsM;
-  if (mk.rig === 'square' && MH && MH.top > 0 && MH.crosstrees > MH.top && MH.truck > MH.crosstrees) {
+  const twoPiece = mk.only === 2 && MH && MH.truck === undefined;
+  if (mk.rig === 'square' && MH && MH.top > 0 && MH.crosstrees > MH.top && (MH.truck > MH.crosstrees || twoPiece)) {
     const top = MH.crosstrees - 0.88 * lower;
-    return { top, tg: MH.truck - 0.88 * (lower + top), from: 'mastHeightsM' };
+    return { top, tg: twoPiece ? top * 0.50 : MH.truck - 0.88 * (lower + top), from: 'mastHeightsM' };
   }
   return { top: lower * 0.60, tg: lower * 0.30, from: 'steel' };
 }
@@ -4039,11 +4043,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
          (Vasa II, 2023, p. 31) draws the mizzen lateen yard of a 1628 ship at 42° from the
          horizontal, 1.58 times the distance between the main and mizzen masts' feet, with its heel
          on the deck 0.53 of that distance before the mizzen, so its peak stands over the taffrail.
-         The yard is keyed to the two masts' stations and not to the mizzen's height: the 1620
-         hulls' lower masts are Steel's 1794 proportions, 0.46 of the hull's length from the deck to
+         The yard is keyed to the two masts' stations and not to the mizzen's height: in r321 the
+         1620 hulls' masts were Steel's 1794 proportions, 0.46 of the hull's length from the deck to
          the mizzen top where Vasa's is 0.17, and Vasa's 2.14 deck-to-top heights on that mast gave
          a 44 m yard on a 45 m hull, its peak 9 m past the stern. Where the yard crosses this mast
-         falls out of the heel, the angle and the length (userData.lateen.slingOfD2T; Vasa's 0.72). */
+         falls out of the heel, the angle and the length (userData.lateen.slingOfD2T; Vasa's 0.72).
+         Since r322 the East Indiaman's and the slave ship's masts take Vasa's heights as well
+         (mastHeightsM, keyed to the same stations), and the crossing comes out at 0.743 and 0.749. */
       const lr = (mixed && mk.lateenRead && typeof mk.lateenRead.yardOfMastSpacing === 'number') ? mk.lateenRead : null;
       const d2t = lr ? lower * (lr.topAtOfLower || 0.90) : 0;
       let spacing = 0;
@@ -17545,7 +17551,8 @@ function buildShip(S, opts) {
         rigDeckY = foot; rigTruckY = head;
         const mk = (S.masts || [])[topSeg.mi] || {};
         rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
-                     : (mk.mastHeightsM && mk.rig === 'square') ? 'record: mastHeightsM, top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + ', truck ' + mk.mastHeightsM.truck + ' m over the deck, the stack solved for them'
+                     : (mk.mastHeightsM && mk.rig === 'square' && mk.mastHeightsRead) ? 'derived: another ship\'s plate, read and applied to this hull (mastHeightsRead, r322): top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + (mk.mastHeightsM.truck !== undefined ? ', truck ' + mk.mastHeightsM.truck : '') + ' m over the deck, the stack solved for them'
+                     : (mk.mastHeightsM && mk.rig === 'square') ? 'record: mastHeightsM, top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + (mk.mastHeightsM.truck !== undefined ? ', truck ' + mk.mastHeightsM.truck : '') + ' m over the deck, the stack solved for them'
                      : (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
                      : (mk.truckM !== undefined && mk.rig === 'gaff' && mk.capFrac !== undefined) ? 'record: truckM ' + mk.truckM + ' m deck to truck, the cap at the plate-read ' + mk.capFrac + ' of it'
                      : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'

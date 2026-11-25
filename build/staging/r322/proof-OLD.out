@@ -1,0 +1,47 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[0] (station 0.115): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[1] (station 0.556): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[2] (station 0.85): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[0] (station 0.115): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[1] (station 0.556): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[2] (station 0.85): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[0] (station 0.115): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[1] (station 0.556): mastHeightsProvenance is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a mast beside a Vasa read with no height answer",
+  "detail": "masts[2] (station 0.85): mastHeightsProvenance is absent"
+ }
+]

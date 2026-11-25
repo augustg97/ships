@@ -1,0 +1,52 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a sail set from a bare crossjack",
+  "detail": "the mizzen (mast 2): a square sail hangs from y 13.41, the bare crossjack at 13.41"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.30 m from the crossjack's centre (furled build)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the lateen yard from (8.65, 5.49) to (24.22, 19.56) on the mast at foot x 15.72 comes no nearer than 0.838 m to the yard's surface"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a furled lateen roll hung inboard of its yard",
+  "detail": "the roll on the lateen yard from (8.65, 5.49) to (24.22, 19.56) on the mast at foot x 15.72 has its centre 0.256 m INBOARD of the yard's axis, toward the mast"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail set from a bare crossjack",
+  "detail": "the mizzen (mast 2): a square sail hangs from y 27.15, the bare crossjack at 27.14"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.56 m from the crossjack's centre (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail set from a bare crossjack",
+  "detail": "the mizzen (mast 2): a square sail hangs from y 8.33, the bare crossjack at 8.33"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a roll on a bare crossjack",
+  "detail": "the mizzen (mast 2): a furled roll centred 0.22 m from the crossjack's centre (furled build)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled roll floating off its yard",
+  "detail": "the roll on the lateen yard from (5.23, 3.58) to (14.63, 12.08) on the mast at foot x 9.50 comes no nearer than 0.463 m to the yard's surface"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a furled lateen roll hung inboard of its yard",
+  "detail": "the roll on the lateen yard from (5.23, 3.58) to (14.63, 12.08) on the mast at foot x 9.50 has its centre 0.163 m INBOARD of the yard's axis, toward the mast"
+ }
+]

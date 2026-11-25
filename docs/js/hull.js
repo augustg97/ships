@@ -1357,9 +1357,10 @@ return (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac
 }
 function squareStackOf(mk, lower) {
 const MH = mk.mastHeightsM;
-if (mk.rig === 'square' && MH && MH.top > 0 && MH.crosstrees > MH.top && MH.truck > MH.crosstrees) {
+const twoPiece = mk.only === 2 && MH && MH.truck === undefined;
+if (mk.rig === 'square' && MH && MH.top > 0 && MH.crosstrees > MH.top && (MH.truck > MH.crosstrees || twoPiece)) {
 const top = MH.crosstrees - 0.88 * lower;
-return { top, tg: MH.truck - 0.88 * (lower + top), from: 'mastHeightsM' };
+return { top, tg: twoPiece ? top * 0.50 : MH.truck - 0.88 * (lower + top), from: 'mastHeightsM' };
 }
 return { top: lower * 0.60, tg: lower * 0.30, from: 'steel' };
 }
@@ -11324,7 +11325,8 @@ if (foot < Infinity && head > -Infinity) {
 rigDeckY = foot; rigTruckY = head;
 const mk = (S.masts || [])[topSeg.mi] || {};
 rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
-: (mk.mastHeightsM && mk.rig === 'square') ? 'record: mastHeightsM, top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + ', truck ' + mk.mastHeightsM.truck + ' m over the deck, the stack solved for them'
+: (mk.mastHeightsM && mk.rig === 'square' && mk.mastHeightsRead) ? 'derived: another ship\'s plate, read and applied to this hull (mastHeightsRead, r322): top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + (mk.mastHeightsM.truck !== undefined ? ', truck ' + mk.mastHeightsM.truck : '') + ' m over the deck, the stack solved for them'
+: (mk.mastHeightsM && mk.rig === 'square') ? 'record: mastHeightsM, top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + (mk.mastHeightsM.truck !== undefined ? ', truck ' + mk.mastHeightsM.truck : '') + ' m over the deck, the stack solved for them'
 : (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
 : (mk.truckM !== undefined && mk.rig === 'gaff' && mk.capFrac !== undefined) ? 'record: truckM ' + mk.truckM + ' m deck to truck, the cap at the plate-read ' + mk.capFrac + ' of it'
 : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
