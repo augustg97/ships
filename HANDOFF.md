@@ -28832,3 +28832,21 @@ Scored with r277's offline scorer as the capture ran (`score-early.out`, the fir
 **r316 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r316` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁵⁰), the doubled rigs' fixed yards. Else (0y¹⁵²).**
 
 **Live stamp: docs/index.html carries data-version 1795575914 at the build.**
+
+**Live stamp VERIFIED: 1795575914 on https://augustg97.github.io/ships/index.html at 19:07:00 PST, about 80 s after the push. The published `audit-hulls.js` carries A-CROSSJACK-BARE, the published `js/shipwright.js` carries the crossjack clause, and the published `data/vessels.json` carries `crossjackSail: false` on all three mizzens. First paint is 8.51 MB against the 8.6 MB budget.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** Captured on the final tree by `run-resume.sh` (runs 1 and 2, which died on FRAME_READY waits at `ship-wyoming` and `aboard-treasure`), then by `r315_resume.py` runs 4 and 5 with only the missing frames (run 4 died at `board-salamis`). Faulted frames were recaptured alone by `r315_recap.py`. Scored with r277's offline scorer (`r315_scoreall.sh`, `score-all.out`, `score-r3.out`).
+
+- `shipwright`, `shipwright-astern`, `shipwright-hounds`, `shipwright-ahead`, `ship-slave-ship`: accepted in the close, as above.
+- `shipwright-furled` 3.300% / 3.569: **predicted, ACCEPTED.** It was recaptured alone in run 2 at 19:20, after the card's rewording. The roll under the mizzen top has gone, and the crossjack shows as a thin bare spar (`pair-shipwright-furled-mizzen.png`). The card is one line taller with the new clause (`pair-shipwright-furled.png`).
+- **Capture faults, each recaptured with no other browser alive and then inside the gate:**
+  - `globe-crossing`: 9.825% → 0.020%;
+  - `globe-modern`: 5.541% → 0.036%. Both were first captured beside the proofs' browser.
+  - `action-lepanto`: 98.012%, the globe in place of the battle, as in r303 → 0.003%;
+  - `sea-ever-given`: 13.643% → 0.024%;
+  - `board-salamis`: 33.214% twice, the dropped-tile figure from r308–r313 → 0.000% on the third capture.
+  
+  None of these frames builds the 74, the East Indiaman or the slave ship.
+- The other 54 frames are inside the gate, as predicted. The largest are `globe-steam` at 0.042%, `globe-era-card` at 0.041% and `ship-steamer` (the 74's berth neighbour) at 0.040%.
+
+No frame is left unscored for r316.
