@@ -183,6 +183,7 @@ const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
 'sheet', 'tack', 'ratline', 'oar', 'mast', 'parrel']);
 const HSlo = (H.masts || []).some(mk => mk.truckWLM !== undefined) ? SHIPS_HULL.hullSurface(H) : null;
 const lowerOf = mk => {
+if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
 if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
 return mk.truckM * mk.capFrac;
 if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
@@ -5285,6 +5286,36 @@ if (Math.abs(top.position.y - want) > 0.03)
 say(v.id, 'a set hoisting yard not atrip', `${at}, yard '${top.userData.yardFrac.name}': y ${top.position.y.toFixed(3)}, 0.88 of section ${sc} is ${want.toFixed(3)}`); });
 });
 }
+{
+const segBy = {}; g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg) (segBy[sg.mi] = segBy[sg.mi] || [])[sg.si] = sg; });
+const yd = []; g.traverse(o => { if (o.isMesh && o.userData.yardFrac && o.userData.slung) yd.push(o); });
+(H.masts || []).forEach((mk, mi) => {
+if (mk.rig !== 'square') return;
+const at = `masts[${mi}] (station ${mk.at})`, sg = (segBy[mi] || []).filter(Boolean), MH = mk.mastHeightsM;
+if (MH) {
+if (!/^(READ|RECORD|CONTESTED)/.test(mk.mastHeightsProvenance || ''))
+say(v.id, 'mast heights with no source', `${at}: mastHeightsM ${JSON.stringify(MH)} and no mastHeightsProvenance`);
+if (sg.length < 3) say(v.id, 'mast heights recorded and not built', `${at}: ${sg.length} segments drawn for a top, crosstrees and truck`);
+else {
+const foot = sg[0].footY, got = { top: 0.90 * (sg[0].headY - foot), crosstrees: sg[1].headY - foot, truck: sg[sg.length - 1].headY - foot };
+for (const k of ['top', 'crosstrees', 'truck'])
+if (Math.abs(got[k] - MH[k]) > 0.05)
+say(v.id, 'a mast drawn off its recorded heights', `${at}: ${k} ${got[k].toFixed(2)} m over the foot, record ${MH[k]} m`);
+}
+}
+const mine = yd.filter(o => o.userData.yardFrac.mast === mi).sort((a, b) => a.position.y - b.position.y);
+if (mine.length < 3) return;
+const depth = new Map(); mine.forEach((o, k) => { if (k > 0) depth.set(o, o.position.y - mine[k - 1].position.y); });
+const tops = mine.filter(o => /top/.test(o.userData.yardFrac.name) && o.userData.yardFrac.hoist === 'tie' && depth.has(o));
+if (!tops.length) return;
+const deep = Math.max(...tops.map(o => depth.get(o)));
+const bySec = {}; mine.forEach(o => { const f = o.userData.yardFrac; if (f.from === 'section' && f.atrip !== undefined) (bySec[f.sec] = bySec[f.sec] || []).push(o); });
+Object.keys(bySec).forEach(sc => { if (bySec[sc].length < 2) return;
+for (const o of bySec[sc]) { const d = depth.get(o);
+if (d !== undefined && d < 0.5 * deep)
+say(v.id, 'two yards on a pole too short for them', `${at}, yard '${o.userData.yardFrac.name}' on section ${sc}: its sail ${d.toFixed(2)} m deep against the deepest hoisting topsail's ${deep.toFixed(2)} m`); } });
+});
+}
 const yardLowerRead = (G, STATE) => {
 const SB = STATE === 'furled' ? ' (furled build)' : '';
 const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
@@ -5449,7 +5480,7 @@ if (Math.abs(U.rigDeckY - tallest.foot) > 0.02 || Math.abs(U.rigTruckY - tallest
 say(v.id, "the card's rig height is one segment",
 `the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
 const mk = H.masts[tmi] || {};
-const wantRecord = (mk.truckM !== undefined && (mk.rig === 'square' || (mk.rig === 'gaff' && mk.capFrac !== undefined))) || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
+const wantRecord = (mk.rig === 'square' && !!mk.mastHeightsM) || (mk.truckM !== undefined && (mk.rig === 'square' || (mk.rig === 'gaff' && mk.capFrac !== undefined))) || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
 if (!U.rigTruckFrom)
 say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
 else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)

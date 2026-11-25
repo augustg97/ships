@@ -5860,6 +5860,10 @@
           "hull 64.8 m, beam 10.97 m, 963 gross register tons"
         ],
         [
+          "*Cutty Sark*'s masts, deck to truck",
+          "fore 39.6 m, main 44.5 m, mizzen 33.2 m, as rigged for the tea trade (Lubbock's spar table); the model's masts are drawn to these heights"
+        ],
+        [
           "Sail area",
           "~2,970 m²; crew 28–35"
         ],
@@ -5892,7 +5896,7 @@
       "attestation": "generated",
       "confidence": "good",
       "text": "The fastest commercial sailing ships ever built, and they were obsolete almost immediately.\n\nThe Suez Canal opened in 1869, the year *Cutty Sark* was launched. It cut London–Bombay from about 10,600 nautical miles to 6,200 — and **sail could not use it**, because there is no wind in a cut and towage was charged. So the clippers were driven onto the routes the canal did not help: Australian wool, and Chilean nitrate round the Horn. They were the best answer to a question that had just stopped being asked.\n\nThe rival record is worth the argument it causes. *Andrew Jackson*'s 89 days 4 hours in 1860 was measured pilot-to-pilot at the Farallones, after which she lay all night waiting for a pilot; Cutler put her anchor-to-anchor time at possibly 89 days 20 hours. The two figures are not commensurable.",
-      "cite": "Cutler, *Greyhounds of the Sea*; Royal Museums Greenwich.",
+      "cite": "Cutler, *Greyhounds of the Sea*; Royal Museums Greenwich; Lubbock, *The Log of the Cutty Sark* (1924).",
       "from": 1843,
       "polar": {
         "beatLight": 80,
@@ -5945,7 +5949,6 @@
         "masts": [
           {
             "at": 0.115,
-            "heightM": 23.2,
             "rig": "square",
             "rake": -1,
             "shrouds": 7,
@@ -5960,11 +5963,17 @@
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
             },
-            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; the course is crossed at the plan's class 0.36 of the truck, which is the silence named, not a read. Above it the yards hang from the mast's own sections (r316, 0y150): the lower topsail yard is fixed on the lower cap, as Howes' rig fixes it, and each hoisting yard is set atrip, at 0.88 of the section it rides (Falconer 1769, ATRIP: 'hoisted up to the mast-head, or to their utmost extent'); a topgallant and a royal on one pole divide its run over the cap below in two equal parts. Until r316 the plan's fractions (ltop 0.50, utop 0.62, tg 0.76, royal 0.92) hung the lower topsail yard 3.1-3.8 m under its cap and the topgallant inside the topmast's doubling. CLASS: no plate read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; the course is crossed at the plan's class 0.36 of the truck, which is the silence named, not a read. Above it the yards hang from the mast's own sections (r316, 0y150): the lower topsail yard is fixed on the lower cap, as Howes' rig fixes it, and each hoisting yard is set atrip, at 0.88 of the section it rides (Falconer 1769, ATRIP: 'hoisted up to the mast-head, or to their utmost extent'); a topgallant and a royal on one pole divide its run over the cap below in two equal parts. Until r316 the plan's fractions (ltop 0.50, utop 0.62, tg 0.76, royal 0.92) hung the lower topsail yard 3.1-3.8 m under its cap and the topgallant inside the topmast's doubling. CLASS: no plate read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03.",
+            "mastHeightsM": {
+              "top": 18.8,
+              "crosstrees": 29.8,
+              "truck": 39.6
+            },
+            "mastHeightsProvenance": "RECORD, r318 (0y154): Cutty Sark's tea rig, fore: top 18.8, topgallant 29.8, royal 39.6 m over the deck. Lubbock, The Log of the Cutty Sark (1924), Appendix III, the spar plan of the tea rig, as tabulated in metres by J. Sankey, 'The Ship Cutty Sark' (johnsankey.ca/cuttysark.html, 'compared to the original lengths quoted in The Log of the Cutty Sark'; saved as build/staging/r318/dl/sankey.html) and by Wikipedia's 'Mast specifications' table, which cites the same appendix. The appendix itself is a fold-out that the archive.org OCR does not read (build/staging/r318/dl/bwb.txt), so the figures are Sankey's conversion of it. Lubbock's text checks the main: 'Her mainmast from load line to truck was 151 feet in length' (46.0 m; bwb.txt line 2196), which leaves 1.5 m from the load line to the deck under a 44.5 m truck. Until r318 the lower mast was a recorded 23.2 m carried up by Steel's 1794 proportions, a topmast 0.60 of it and a topgallant mast half the topmast, which left two yards on a pole sized for one. CONTESTED: the table names each height by a sail (top, topgallant, royal, skysail) and not by a fitting. The builder reads the first as the top's platform, the second as the topmast crosstrees and the last as the truck. If the first is the lower cap instead, every lower mast is 10% shorter than drawn. The fore course yard, 23.8 m, is from the same table; until r318 it was 0.875 of the lower mast. The yards above it keep the plan's shares of it.",
+            "courseYardM": 23.8
           },
           {
             "at": 0.556,
-            "heightM": 25.9,
             "rig": "square",
             "rake": 2,
             "shrouds": 9,
@@ -5980,11 +5989,17 @@
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
             },
-            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; the course is crossed at the plan's class 0.36 of the truck, which is the silence named, not a read. Above it the yards hang from the mast's own sections (r316, 0y150): the lower topsail yard is fixed on the lower cap, as Howes' rig fixes it, and each hoisting yard is set atrip, at 0.88 of the section it rides (Falconer 1769, ATRIP: 'hoisted up to the mast-head, or to their utmost extent'); a topgallant and a royal on one pole divide its run over the cap below in two equal parts. Until r316 the plan's fractions (ltop 0.50, utop 0.62, tg 0.76, royal 0.92) hung the lower topsail yard 3.1-3.8 m under its cap and the topgallant inside the topmast's doubling. CLASS: no plate read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; the course is crossed at the plan's class 0.36 of the truck, which is the silence named, not a read. Above it the yards hang from the mast's own sections (r316, 0y150): the lower topsail yard is fixed on the lower cap, as Howes' rig fixes it, and each hoisting yard is set atrip, at 0.88 of the section it rides (Falconer 1769, ATRIP: 'hoisted up to the mast-head, or to their utmost extent'); a topgallant and a royal on one pole divide its run over the cap below in two equal parts. Until r316 the plan's fractions (ltop 0.50, utop 0.62, tg 0.76, royal 0.92) hung the lower topsail yard 3.1-3.8 m under its cap and the topgallant inside the topmast's doubling. CLASS: no plate read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03.",
+            "mastHeightsM": {
+              "top": 19.8,
+              "crosstrees": 31.9,
+              "truck": 44.5
+            },
+            "mastHeightsProvenance": "RECORD, r318 (0y154): Cutty Sark's tea rig, main: top 19.8, topgallant 31.9, skysail 44.5 m over the deck. The tea rig set a main skysail over the royal; this record names no skysail yard, so the royal sets atrip under the skysail masthead (open, 0y159). Lubbock, The Log of the Cutty Sark (1924), Appendix III, the spar plan of the tea rig, as tabulated in metres by J. Sankey, 'The Ship Cutty Sark' (johnsankey.ca/cuttysark.html, 'compared to the original lengths quoted in The Log of the Cutty Sark'; saved as build/staging/r318/dl/sankey.html) and by Wikipedia's 'Mast specifications' table, which cites the same appendix. The appendix itself is a fold-out that the archive.org OCR does not read (build/staging/r318/dl/bwb.txt), so the figures are Sankey's conversion of it. Lubbock's text checks the main: 'Her mainmast from load line to truck was 151 feet in length' (46.0 m; bwb.txt line 2196), which leaves 1.5 m from the load line to the deck under a 44.5 m truck. Until r318 the lower mast was a recorded 25.9 m carried up by Steel's 1794 proportions, a topmast 0.60 of it and a topgallant mast half the topmast, which left two yards on a pole sized for one. CONTESTED: the table names each height by a sail (top, topgallant, royal, skysail) and not by a fitting. The builder reads the first as the top's platform, the second as the topmast crosstrees and the last as the truck. If the first is the lower cap instead, every lower mast is 10% shorter than drawn. The main course yard, 23.8 m, is from the same table; until r318 it was 0.875 of the lower mast. The yards above it keep the plan's shares of it.",
+            "courseYardM": 23.8
           },
           {
             "at": 0.85,
-            "heightM": 22.3,
             "rig": "square",
             "rake": 5,
             "shrouds": 6,
@@ -6003,7 +6018,14 @@
             },
             "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; the course is crossed at the plan's class 0.36 of the truck, which is the silence named, not a read. Above it the yards hang from the mast's own sections (r316, 0y150): the lower topsail yard is fixed on the lower cap, as Howes' rig fixes it, and each hoisting yard is set atrip, at 0.88 of the section it rides (Falconer 1769, ATRIP: 'hoisted up to the mast-head, or to their utmost extent'); a topgallant and a royal on one pole divide its run over the cap below in two equal parts. Until r316 the plan's fractions (ltop 0.50, utop 0.62, tg 0.76, royal 0.92) hung the lower topsail yard 3.1-3.8 m under its cap and the topgallant inside the topmast's doubling. CLASS: no plate read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03.",
             "furlStow": "lowered",
-            "furlStowProvenance": "READ, r310 (0y¹³⁸): LOWERED. The plate is the State Library of Queensland's John Oxley Library negative 146359, 'The Cutty Sark waiting in Sydney Harbour for the new season's wool', 1885-94 (Commons 'StateLibQld 1 146359 Cutty Sark (ship).jpg', 706 x 1000 px), taken from high on her port quarter at anchor. At the mizzen it is about 11 px/m: 167 px from the poop to the mizzen top. A gaff 0.25 m thick and over 10 m long would show at 3 px by 110 px or more, as her 0.3 m yards do. No gaff stands on the mizzen: the lower mast is bare from the crossjack yard down to the poop, and no brailed bundle lies along its after side. The poop is covered by an awning whose ridge runs aft from the mast at the height a boom would stand. So the gaff is down, either lowered to the boom or struck, and the builder's lowered stowage is the nearer of the two it draws. CONTESTED: this is one plate of one ship, the Cutty Sark whose dimensions this class hull carries, at anchor in port 16 to 25 years after her launch and after her 1880 re-rig. It does not show where the gaff lies, and other clippers may have kept a standing gaff."
+            "furlStowProvenance": "READ, r310 (0y¹³⁸): LOWERED. The plate is the State Library of Queensland's John Oxley Library negative 146359, 'The Cutty Sark waiting in Sydney Harbour for the new season's wool', 1885-94 (Commons 'StateLibQld 1 146359 Cutty Sark (ship).jpg', 706 x 1000 px), taken from high on her port quarter at anchor. At the mizzen it is about 11 px/m: 167 px from the poop to the mizzen top. A gaff 0.25 m thick and over 10 m long would show at 3 px by 110 px or more, as her 0.3 m yards do. No gaff stands on the mizzen: the lower mast is bare from the crossjack yard down to the poop, and no brailed bundle lies along its after side. The poop is covered by an awning whose ridge runs aft from the mast at the height a boom would stand. So the gaff is down, either lowered to the boom or struck, and the builder's lowered stowage is the nearer of the two it draws. CONTESTED: this is one plate of one ship, the Cutty Sark whose dimensions this class hull carries, at anchor in port 16 to 25 years after her launch and after her 1880 re-rig. It does not show where the gaff lies, and other clippers may have kept a standing gaff.",
+            "mastHeightsM": {
+              "top": 17.0,
+              "crosstrees": 25.7,
+              "truck": 33.2
+            },
+            "mastHeightsProvenance": "RECORD, r318 (0y154): Cutty Sark's tea rig, mizzen: top 17.0, topgallant 25.7, royal 33.2 m over the deck. Lubbock, The Log of the Cutty Sark (1924), Appendix III, the spar plan of the tea rig, as tabulated in metres by J. Sankey, 'The Ship Cutty Sark' (johnsankey.ca/cuttysark.html, 'compared to the original lengths quoted in The Log of the Cutty Sark'; saved as build/staging/r318/dl/sankey.html) and by Wikipedia's 'Mast specifications' table, which cites the same appendix. The appendix itself is a fold-out that the archive.org OCR does not read (build/staging/r318/dl/bwb.txt), so the figures are Sankey's conversion of it. Lubbock's text checks the main: 'Her mainmast from load line to truck was 151 feet in length' (46.0 m; bwb.txt line 2196), which leaves 1.5 m from the load line to the deck under a 44.5 m truck. Until r318 the lower mast was a recorded 22.3 m carried up by Steel's 1794 proportions, a topmast 0.60 of it and a topgallant mast half the topmast, which left two yards on a pole sized for one. CONTESTED: the table names each height by a sail (top, topgallant, royal, skysail) and not by a fitting. The builder reads the first as the top's platform, the second as the topmast crosstrees and the last as the truck. If the first is the lower cap instead, every lower mast is 10% shorter than drawn. The mizzen course yard, 18.3 m, is from the same table; until r318 it was 0.875 of the lower mast. The yards above it keep the plan's shares of it.",
+            "courseYardM": 18.3
           }
         ],
         "build": "frame",

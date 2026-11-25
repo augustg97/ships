@@ -1,0 +1,32 @@
+[
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[0] (station 0.115), yard 'tg' on section 2: its sail 3.90 m deep against the deepest hoisting topsail's 9.28 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[0] (station 0.115), yard 'royal' on section 2: its sail 2.23 m deep against the deepest hoisting topsail's 9.28 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[1] (station 0.556), yard 'tg' on section 2: its sail 4.35 m deep against the deepest hoisting topsail's 10.36 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[1] (station 0.556), yard 'royal' on section 2: its sail 2.48 m deep against the deepest hoisting topsail's 10.36 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[2] (station 0.85), yard 'tg' on section 2: its sail 3.74 m deep against the deepest hoisting topsail's 8.92 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[2] (station 0.85), yard 'royal' on section 2: its sail 2.14 m deep against the deepest hoisting topsail's 8.92 m"
+ }
+]

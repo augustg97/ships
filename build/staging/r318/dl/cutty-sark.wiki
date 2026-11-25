@@ -1,0 +1,495 @@
+{{short description|British clipper ship, on display at Greenwich, England}}
+{{About|the ship|other uses}}
+{{Use dmy dates|date=September 2024}}
+{{Use British English|date=August 2012}}
+
+{{Infobox ship
+|display_title = ital
+|infobox_caption = ''Cutty Sark''
+|section1={{Infobox ship/image
+ |image = Northeast View of the Cutty Sark in Greenwich.jpg
+ |image_caption = ''Cutty Sark'' on display at [[Greenwich]]
+ }}
+
+|section2={{Infobox ship/career
+ |hide_header = 
+ |country = United Kingdom
+ |flag = {{shipboxflag|UK|civil}}
+ |name = ''Cutty Sark'' (1869–1895)
+ |namesake = [[Cutty-sark (witch)|Cutty-sark]]
+ |owner = John "Jock" Willis (1869–1895)
+ |registry = 
+ |route = 
+ |ordered = 1 February 1869
+ |builder = {{ubl|[[Scott & Linton]]|[[William Denny and Brothers]]}} <!-- Just the builder. The location goes in the main text. -->
+ |original_cost = £16,150{{r|MacGregor 1983|p=196}}
+ |yard_number = 
+ |way_number = 
+ |laid_down = 1869
+ |launched = 22 November 1869
+ |sponsor = Mrs. George Moodie
+ |christened = 
+ |completed = 
+ |maiden_voyage = 
+ |in_service = 16 February 1870
+ |homeport = London
+ |identification = UK Official Number: 63557<ref name=Lloyds>{{cite web|url=http://www.plimsollshipdata.org/pdffile.php?name=30a0082.pdf|title=Lloyd's Register, Navires a Voiles|website=Plimsoll Ship Data|access-date=13 March 2009|archive-url=https://web.archive.org/web/20090320072434/http://www.plimsollshipdata.org/pdffile.php?name=30a0082.pdf|archive-date=20 March 2009}}</ref>
+ |motto = "When there's a will is a way"
+ |fate = Sold 1895
+ }}
+
+|section3={{Infobox ship/career
+ |hide_header = title
+ |country = Portugal
+ |flag = {{shipboxflag|Portugal|civil}} {{shipboxflag|Portugal}}
+ |name = ''Ferreira''
+ |namesake = Joaquim Antunes Ferreira
+ |owner = Joaquim Antunes Ferreira & Co. (1895–1922)
+ |acquired = 22 July 1895
+ |fate = Sold 1922
+ |homeport = [[Lisbon]], Portugal
+ |nickname = {{lang|pt|Pequena Camisola}} ("Little shirt")
+ }}
+
+|section4={{Infobox ship/career
+ |hide_header = title
+ |country = Portugal
+ |flag = {{shipboxflag|Portugal}}
+ |name = ''Maria do Amparo''
+ |namesake = [[Refugium Peccatorum|Mary, Refuge of Sinners]]
+ |owner = Companhia Nacional de Navegação
+ |acquired = 1922
+ |fate = Sold 1922
+ |homeport = [[Lisbon]], Portugal
+ |nickname = 
+ }}
+
+|section5={{Infobox ship/career
+ |hide_header = title
+ |country = United Kingdom
+ |flag = {{shipboxflag|UK|civil}}
+ |name = ''Cutty Sark''
+ |namesake = 
+ |owner = Wilfred Dowman
+ |acquired = 1922
+ |fate = Sold 1938
+ |homeport = [[Falmouth, Cornwall|Falmouth]], Cornwall
+ |nickname = 
+ }}
+
+|section6={{Infobox ship/career
+ |hide_header = title
+ |country = United Kingdom
+ |flag = {{shipboxflag|UK|civil}}
+ |name = ''Cutty Sark''
+ |namesake = 
+ |owner = Thames Nautical Training College
+ |acquired = 1938
+ |fate = Sold 1953
+ |homeport = [[Greenhithe, Kent]]
+ |nickname = 
+ }}
+
+|section7={{Infobox ship/career
+ |hide_header = title
+ |country = United Kingdom
+ |flag = [[File:UK NHS Fleet Ensign.svg|100px]]
+ |name = ''Cutty Sark''
+ |namesake = 
+ |owner = Cutty Sark Preservation Society
+ |acquired = 1953
+ |out_of_service = Became museum December 1954
+ |status = [[Museum ship]]
+ |homeport = 
+ |nickname = 
+ }}
+
+|section8={{Infobox ship/characteristics
+ |hide_header = 
+ |header_caption = 
+ |class = [[Clipper]]
+ |tonnage = *{{GRT|963}}
+            *{{NRT|921}}{{r|MacGregor 1983|p=195}}
+ |displacement = 2,100 tons (2,133.7 tonnes) at {{cvt|20|ft}} draught<ref name="Scott 1941">{{cite journal|last=Scott|first=J. L.|title=A Survey of Thecutty Sarkin 1937|journal=The Mariner's Mirror|date=January 1941|volume=27|issue=3|pages=180–205|doi=10.1080/00253359.1941.10658765}}</ref>
+ |tons_burthen = 
+ |length = *Hull: {{cvt|212.5|ft|2}}<ref name="LloydsRegister">{{Cite book|title=Lloyd's Register of Shipping, 1870|year=1870|url=https://archive.org/details/lloydsregisters80unkngoog|access-date=3 December 2014|publisher=Wyman & Sons}}</ref>
+           *[[Length overall|LOA]]: {{cvt|280|ft|2}}{{r|Scott 1941|p=194}}
+ |beam = {{cvt|36|ft|2}}<ref name=LloydsRegister/>
+ |draught = 
+ |draft = 
+ |hold_depth = {{cvt|21|ft|2}}<ref name=LloydsRegister/>
+ |depth = 
+ |propulsion = {{cvt|32000|ft2}} sail (3,000 hp)
+ |sail_plan = *1870: [[Full-rigged ship|ship rig]]
+              *1916: [[barquentine]] rig
+ |complement = 28–35
+ |armament = 
+ |speed = {{convert|17.5|kn|kph}} maximum achieved{{r|MacGregor 1983|p=196}}
+ }}
+}}
+'''''Cutty Sark''''' is a British [[clipper]] ship. Built on the [[River Leven, Dunbartonshire|River Leven]], Dumbarton, Scotland in 1869 for the [[Jock Willis Shipping Line]], she was one of the last [[tea clipper]]s to be built and one of the fastest, at the end of a long period of design development for this type of vessel, which ended as [[steamship]]s took over their routes. She was named after the fictional witch who wore only a short [[Chemise|shift]] (a "cutty sark" in the [[Scots language]]) in [[Robert Burns]]'s poem [[Tam o' Shanter (poem)|''Tam o' Shanter'']], first published in 1791. The witch Cutty Sark ran after Tam o' Shanter, who was fleeing on his horse, and caught the horse's tail at the [[Brig o' Doon]]. The name was an association between the speed of the fictional witch and that of the clipper ship.
+
+After the [[SS Agamemnon (1865)|big improvement]] in the [[fuel efficiency]] of steamships in 1866, the opening of the [[Suez Canal]] in 1869 gave them a shorter route to China, so ''Cutty Sark'' spent only a few years on the tea trade before turning to the trade in [[wool]] from [[Australia]]. [[SS Aberdeen (1881)|Continuing improvements]] in steam technology early in the 1880s meant that steamships also came to dominate the longer sailing route to Australia, and the ship was sold to the Portuguese company Ferreira and Co. in 1895. She was renamed ''Ferreira''. She continued as a cargo ship until purchased in 1922 by retired sea captain Wilfred Dowman, who used her as a training ship operating from [[Falmouth, Cornwall]]. After his death, ''Cutty Sark'' was transferred to the [[Thames Nautical Training College]], Greenhithe, in 1938 where she became an auxiliary cadet training ship alongside [[HMS Frederick William (1860)|HMS ''Worcester'']]. By 1954, she had ceased to be useful as a cadet ship and was transferred to permanent dry dock at [[Greenwich]], London, for public display.
+
+''Cutty Sark'' is listed by [[National Historic Ships]] as part of the [[National Historic Fleet]] (the nautical equivalent of a [[Grade I listed building]]). She is one of only three remaining intact [[Composite ship|composite construction]] (wooden hull on an iron frame) ships from the nineteenth century, the others being the clipper {{ship||City of Adelaide|1864|2}}, now in [[Port Adelaide]], South Australia, and the warship {{ship|HMS|Gannet|1878|6}} in [[Chatham, Kent|Chatham]]. The beached skeleton of ''[[Ambassador (clipper)|Ambassador]]'', of 1869 lying near [[Punta Arenas]], Chile, is the only other significant remnant of this construction method.
+
+The ship has been damaged by fire twice in recent years, first on 21 May 2007 while undergoing conservation. She was restored and was reopened to the public on 25 April 2012.<ref>{{cite news|title=Cutty Sark: Queen reopens Greenwich tea clipper|url=https://www.bbc.co.uk/news/uk-england-london-17835225|publisher=[[BBC News]]|date=25 April 2012}}</ref> Funders for the Cutty Sark conservation project include: the [[National Lottery Heritage Fund|Heritage Lottery Fund]], the House of Commons [[Digital, Culture, Media and Sport Committee]], [[Sammy Ofer]] Foundation, Greenwich Council, [[Greater London Authority]], [[Stavros Niarchos Foundation|The Stavros Niarchos Foundation]], [[Berry Bros. & Rudd|Berry Brothers & Rudd]], Michael Edwards and [[Alisher Usmanov]].<ref>{{Cite web|date=2012-05-11|title=Her Majesty The Queen reopens Cutty Sark {{!}} The National Lottery Heritage Fund|url=https://www.heritagefund.org.uk/news/her-majesty-queen-reopens-cutty-sark|access-date=2021-12-18|website=heritagefund.org.uk}}</ref>
+
+On 19 October 2014 she was damaged in a smaller fire.<ref name="FireOnDeck">{{cite news|title=Cutty Sark damaged in fire on deck|url=https://www.bbc.co.uk/news/uk-england-london-29680243|date=19 October 2014|access-date=26 October 2014|publisher=BBC News}}</ref>
+
+[[Cutty Sark (whisky)|''Cutty Sark'' whisky]] derives its name from the ship. An image of the clipper appears on the label, and the maker formerly sponsored the [[Tall Ships Races|Cutty Sark Tall Ships Race]]. The ship also inspired the name of the [[Saunders-Roe|Saunders Roe]] [[Saro Cutty Sark|Cutty Sark]] flying boat.
+
+==Construction==
+[[File:Cutty Sark (ship, 1869) - SLV H91.250-164.jpg|thumb|left|''Cutty Sark'' photographed at sea by Captain Woodget using a camera balanced on two of the ship's boats lashed together]]
+''Cutty Sark'' was ordered by ship-owner John Willis, who operated a shipping company founded by his father. The company had several ships in the tea trade from China to Britain. Speed was an advantage to vessels carrying a high-value, seasonal product, such as tea. Faster ships could obtain higher rates of freight (the price paid to transport the cargo), and tea merchants would use the names of fast-sailing ships that had carried their products in their advertising.{{r|MacGregor 1983|p=13}} ''Cutty Sark'' was ordered during a boom in building tea clippers in the period 1865–1869—something that was attributed to a substantial reduction in the import duties for tea.<ref name="Shewan">{{cite book|last=Shewan|first=Andrew|date=1996|title=The Great Days of Sail, Reminiscences of a Tea-clipper Captain|location=London|publisher=Conway Maritime Press Limited|orig-date=reprint of 1927 ed.|isbn=0-85177-699-X}}</ref>{{rp|introduction}} In 1868 the brand-new [[Aberdeen]]-built clipper, ''[[Thermopylae (clipper)|Thermopylae]]'', set a record time of 61 days port to port on her maiden voyage from London to [[Melbourne]] and it was this design that Willis set out to better.<ref>{{cite book|editor-last=Dear|editor-first=I. C. B|editor-last2=Kemp|editor-first2=Peter|editor-link=I. C. B. Dear|title=Oxford Companion to Ships and the Sea|publisher=Oxford University Press|date=2005|edition=2nd|isbn=978-0-19-860616-1}}</ref>
+
+It is uncertain how the hull shape for ''Cutty Sark'' was chosen. Willis chose [[Hercules Linton]] to design and build the ship but Willis already possessed another ship, ''[[Punjaub (ship)|The Tweed]]'', which he considered to have exceptional performance. ''The Tweed'' (originally ''Punjaub'') was a [[frigate]] designed by Oliver Lang based on the lines of an old French frigate, built in [[Bombay]] for the [[East India Company]] as a combination sail/paddle steamer. She and a sister ship were purchased by Willis, who promptly sold the second ship plus engines from ''The Tweed'' for more than he paid for both. ''The Tweed'' was then lengthened and operated as a fast sailing vessel, but was considered too big for the tea runs. Willis also commissioned two all-iron clippers with designs based upon ''The Tweed'', [[Hallowe'en (clipper)|''Hallowe'en'']] and [[Blackadder (clipper)|''Blackadder'']]. Linton was taken to view ''The Tweed'' in [[dry dock]].
+
+Willis considered that ''The Tweed''{{'}}s [[bow (watercraft)|bow]] shape was responsible for her notable performance, and this form seems to have been adopted for ''Cutty Sark''. Linton, however, felt that the [[stern]] was too [[barrel]] shaped and so gave ''Cutty Sark'' a squarer stern with less [[tumblehome]]. The broader stern increased the buoyancy of the ship's stern, making it lift more in heavy seas so it was less likely that waves would break over the stern, and over the helmsman at the wheel.<ref name="Lubbock 1945">{{cite book|last=Lubbock|first=Basil|title=The Log of the Cutty Sark|date=1945|publisher=Brown, Son and Ferguson|edition=second|location=Glasgow|author-link=Basil Lubbock}}</ref>{{rp|20–24}}<ref>Villiers pp. 17–19</ref> ''Cutty Sark'' was given masts that followed the design of ''The Tweed'', with similar good rake and the foremast on both placed further aft than usual.<ref name="Lubbock">{{cite book|last=Lubbock|first=Basil|author-link=Basil Lubbock|title=The China Clippers|publisher=Brown, Son and Ferguson|year=1981|isbn=0-85174-109-6|location=Glasgow|orig-date=1914}}</ref>{{rp|page=291}}
+
+A contract for ''Cutty Sark''{{'}}s construction was signed on 1 February 1869 with the firm of [[Scott & Linton]], which had only been formed in May 1868. Their shipyard was at [[Dumbarton]] on the [[River Leven, Dunbartonshire|River Leven]] on a site previously occupied by shipbuilders [[William Denny & Brothers]]. The contract required the ship to be completed within six months at a contracted price of £17 per ton and maximum size of 950 tons. This was a highly competitive price for an experimental, state-of-the-art vessel, and for a customer requiring the highest standards. Payment would be made in seven instalments as the ship progressed, but with a penalty of £5 for every day the ship was late. The ship was to be built to [[Lloyd's Register|Lloyd's]] A1 standard and her construction was supervised on behalf of Willis by Captain George Moodie, who would command her when completed. Construction delays occurred when the Lloyd's inspectors required additional strengthening in the ship.<ref>Brettle</ref>
+
+Work on the ship was suspended when Scott and Linton ran out of money to continue. Rather than simply liquidate the company, an arrangement was made for Denny's to take over the contract and complete the ship, which was finally launched on 22 November 1869 by Captain Moodie's wife. The ship was moved to Denny's yard to have her masts fitted, and then on 20 December towed downriver to [[Greenock]] to have her running rigging installed. In the event, completing the ship meant the company's creditors were owed even more money than when work had first been halted.<ref name=Ships>{{cite book|last1=Mitchell|first1=W. H.|last2=Sawyer|first2=L. A.|date=1995|title=The Empire Ships|page=49|publisher=Lloyd's of London Press|location=London|isbn=1-85044-275-4}}</ref>
+
+[[File:Cutty sark detail.jpg|right|upright|thumb|[[Clipper#Hull shape|Fine lines]] of the [[Bow (watercraft)|bow]]]]
+''Cutty Sark'' has a registered length of {{convert|212.5|ft|2}}, with a depth of hold of {{convert|21|ft|2}} and a net tonnage of 921. The hull is one of the sharpest of all the tea clippers: she has a coefficient of under deck tonnage{{efn|The coefficient of under deck tonnage is a method of estimating the "sharpness" of a hull design when all the necessary dimensions of the ships being compared are not available. Sharpness is the amount by which a hull differs from a rectangular block of the same length, breadth and depth: the more material that has to be cut away from that notional block, the sharper the hull. For the coefficient of under deck tonnage, the [[block coefficient]] and the [[prismatic coefficient]], the lower the number, the sharper the hull.}} of 0.55, compared to ''Thermopylae'' at 0.58.{{r|MacGregor 1983|pp=195–199, 247}} ''Cutty Sark''{{'}}s [[prismatic coefficient]], another measure of hull sharpness, is 0.628; this allows comparison with US-built clippers studied by [[Howard I. Chapelle]].{{efn|The prismatic coefficient for clippers studied by Chapelle can be seen in his book ''The Search for Speed Under Sail''. The prismatic coefficient for some of the more famous US-built ships are:
+*''Challenge'' (1851): 0.60, the most extreme clipper by builder [[William H. Webb]]
+*''[[Witch of the Wave]]'' (1851): 0.66, an ordinary clipper but with speed records from China to London
+*[[Lightning (clipper)|''Lightning'' (1854)]]: 0.61, an extreme clipper built by [[Donald McKay]]—an example of the larger-sized US-built clippers.<ref name="Chapelle 1967">{{cite book|last=Chapelle|first=Howard I.|author-link=Howard I. Chapelle|title=The Search for Speed Under Sail, 1700–1855|date=1967|publisher=Bonanza Books}}</ref>
+It is probable that few, if any, merchant sailing vessels had a prismatic coefficient of less than 0.57.{{r|Chapelle 1967|p=45}}}}{{efn|An alternative prismatic coefficient calculation for ''Cutty Sark'' is given as 0.627 based on a survey of the ship afloat in 1937.{{r|Scott 1941|p=185}}}} After water-line length, the prismatic coefficient is the next most important determinant of potential hull speed.<ref name="Cannon 2021">{{cite book|last1=Cannon|first1=Sophie|last2=Boyd|first2=Stephen|last3=Whitewright|first3=Julian|chapter=Development of a Quantitative Method for the Assessment of Historic Ship Performance|title=Practical Design of Ships and Other Floating Structures|series=Lecture Notes in Civil Engineering|date=2021|volume=63|pages=269–89|doi=10.1007/978-981-15-4624-2_16|isbn=978-981-15-4623-5|s2cid=225128699}}</ref> Unladen, or with a cargo of low density, ballast was required for stability. For example, when she was loaded with wool, 200 tons of ballast was carried. The largest wool cargo she ever carried was 900 tons' weight (the total of ballast and cargo of 1,100 tons is consistent with the estimated deadweight cargo capacity of 1,135 tons at 20-foot draught). The largest tea cargo carried was 615 tons' weight. Conversely, a dense cargo allowed full use of the deadweight capacity: if loaded with coal, she would usually carry 1,100 tons.{{r|Scott 1941|p=187}}
+
+Broadly, the parts of the ship visible above the waterline were constructed from East India [[teak]], while American [[Ulmus thomasii|rock elm]] was used for the ship's bottom. The [[stem (ship)|stem]], {{cvt|15|x|15|in|cm}}, and [[sternpost]], {{cvt|16.5|x|15|in|cm}}, were of teak while the rudder was of English oak. The keel was replaced in the 1920s with one constructed from {{convert|15|in|cm|adj=on}} [[pitch pine]].<ref name="Mirror">{{cite journal|last1=Platt|first1=Alan|last2=Waite|first2=Simon T.|last3=Sexton|first3=Robert T.|title=The ''Cutty Sark'' Second Keel and History as the ''Ferreira''|journal=The Mariner's Mirror|volume=95|issue=1|pages=8–10|publisher=The Society for Nautical Research|location=United Kingdom|date=February 2009|doi=10.1080/00253359.2009.10657081|s2cid=163769315}}</ref> The deck was made of {{convert|3.5|in|cm|-thick|adj=mid}} teak while the [[Tweendecker|'tween deck]] was {{convert|3|in|cm|adj=on}} yellow pine. The [[keel]], {{cvt|16.5|x|15|in|cm}}, had on either side a garboard strake, {{cvt|11|x|12|in|cm}}, and then {{Convert|6|in|adj=on}} planking decreasing to {{cvt|4.75|in|cm}} at one-fifth the depth of the hold. Teak planking began at approximately the level of the bilge stringer. The hull was covered by [[Muntz metal]] sheeting up to the {{convert|18|ft|adj=on}} depth mark, and all the external timbers were secured by Muntz metal bolts to the internal iron frame.<ref name="Mirror"/> The [[wrought-iron]]<ref name=guide>{{cite web|title=Cutty Sark|url=https://www.rmg.co.uk/sites/default/files/import/20121029_large_print_guide.pdf|publisher=Royal Museums Greenwich|access-date=21 January 2020|archive-date=16 January 2021|archive-url=https://web.archive.org/web/20210116090413/https://www.rmg.co.uk/sites/default/files/import/20121029_large_print_guide.pdf}}</ref> frame was an innovation first experimented with in shipbuilding in the 1840s, and was the standard building method for tea clippers by the middle of the 1860s.{{r|MacGregor 1983|p=132}} It consisted of frames (vertical), beams (horizontal) and [[cross bracing]] (diagonal members).<ref name=hull/>
+
+The diagonally-braced iron frame made for a strong, rigid ship;<ref name=hull/> diagonal members prevent racking ([[Shear stress|shearing]], where frame rectangles become [[parallelograms]]).<ref>{{cite report|last1=Tuomi|first1=Roger L.|last2=Gromala|first2=David S.|title=Racking Strength of Walls: Let-in Corner Bracing, Sheet Materials, and Effect of Loading Rate|series=USDA Forest Service Research Paper|date=1977|number=FPL 301|url=https://www.fpl.fs.fed.us/documnts/fplrp/fplrp301.pdf|archive-url=https://web.archive.org/web/20061012232325/http://www.fpl.fs.fed.us/documnts/fplrp/fplrp301.pdf|archive-date=12 October 2006}}</ref> Less [[:Wiktionary:work#Verb|working]] and leaking of the hull meant less crew time spent pumping, allowing more time to be spent on changes of sail.{{citation needed|date=January 2020}} The wrought-iron-framed hull also took up less cargo space than an all-wood hull would have done.<ref name=hull>{{cite web|title=Touch Cutty Sark's copper hull|url=https://www.rmg.co.uk/cutty-sark/must-see/touch-cutty-sarks-copper-hull|website=Royal Museums Greenwich: UNESCO World Heritage Site in London|date=21 September 2015}}</ref> The Muntz metal sheeting reduced [[fouling]] of ''Cutty Sark''{{'}}s hull;<ref name=guide/> with a cleaner hull, she could sail faster.<ref>[https://darchive.mblwhoilibrary.org/handle/1912/191 "Marine fouling and its prevention"]. Bureau of Ships, Navy Department, Woods Hole Oceanographic Institution, United States, 1952.</ref>
+
+==Performance==
+{{Quote box |title=Master's opinion |width=30% |quote=She was built for me. I superintended the building and fitting of her, and I never sailed a finer ship. At ten or twelve knots she did not disturb the water at all. Although she was a very sharp ship, just like a yacht, her spread of canvas was enormous, ... She was the fastest ship of her day, a grand ship, a ship that will last forever.|source=—Captain George Moodie{{sfn|Carr|1964|p=4}}}}
+{{Quote box |title=A speck on the horizon |width=30% |quote=One day we sighted a vessel, a mere speck on the horizon, astern of us, and the way she came into view it was evident she was travelling much faster than ourselves. 'Bringing the wind up with her' was remarked on board, and that seemed the only feasible conclusion to arrive at and account for the manner in which she overhauled us. In a few hours she was alongside us, and proved to be the famous British clipper ''Cutty Sark'', one of the fastest ships afloat. She passed us going two feet to our one, and in a short time was hull down ahead of us. |source=—Wool clipper crewman, 1879<ref>[[Basil Lubbock|Lubbock, Basil]], ''China Clippers'', pp. 295–296, account of a fast wool clipper crewman First published 1903 Charles Protheroe "Life in the Mercantile Marine" page 45.</ref>}}
+
+The maximum logged speed for ''Cutty Sark'' was {{convert|17.5|kn|lk=in}}. Her greatest recorded distance in noon to noon sights was {{convert|363|nmi|lk=in}} averaging {{convert|15|kn}}, although she recorded {{convert|2164|nmi}}<ref>{{citation |last=Carr|first=Frank G G |author-link=Frank George Griffith Carr|title=Cutty Sark, last of the clippers|date=December 1964|orig-date=December 1954|publisher=The "Cutty Sark" Society|via=Yachting World|page=4}}</ref> in six days, which given the weather over the whole period implied she had achieved over {{cvt|370|nmi}} some days.<ref>[[Basil Lubbock|Lubbock, Basil]], ''Cutty Sark'', p. 9</ref> By comparison, ''Thermopylae''{{'}}s best-recorded 24-hour distance was {{cvt|358|nmi}}. On another occasion she recorded {{cvt|3457|nmi}} in 11 days.{{sfn|Carr|1964|p=4}} ''Cutty Sark'' was considered to have the edge in a heavier wind, and ''Thermopylae'' in a lighter wind.{{r|Lubbock|pages=155–157}}
+
+==Name==
+[[File:Cutty Sark Figurehead.jpg|thumb|upright=1.2|left|The ship's figurehead shows [[Cutty-sark (witch)|Cutty-sark]], the nickname of the witch Nannie Dee who chases a drunk farmer, [[Tam o' Shanter (poem)|Tam o' Shanter]], snatching his horse's tail before he escapes by crossing water.]]
+[[File:Cutty sark stern.jpg|thumb|upright=1.2|left|Motto and [[Order of the Star of India|Star of India]] emblem on the stern of the ship]]
+The ship was named after [[Cutty-sark (witch)|Cutty-sark]], the nickname of the witch Nannie Dee in [[Robert Burns]]'s 1791 poem ''[[Tam o' Shanter (poem)|Tam o' Shanter]]''. The ship's [[figurehead (object)|figurehead]], the original of which has been attributed to carver Fredrick Hellyer of Blackwall, is a stark white carving of a bare-breasted Nannie Dee with long black hair holding a grey horse's tail in her hand.<ref>[http://www.seawitchartist.com/cuttysark-figurehead.htm The Cutty Sark's figurehead] {{Webarchive|url=https://web.archive.org/web/20160120115627/http://seawitchartist.com/cuttysark-figurehead.htm |date=20 January 2016 }} at Seawitchartist.com</ref> In the poem she wore a {{lang|sco|sark}} ([[Scots language|Scots]]: a [[chemise]] or [[undergarment]]), made of ''harn'' ([[Scots language|Scots]]: coarse [[linen]]), that she had been given as a child, which explains why it was ''cutty'', or in other words far too short.<ref>{{Cite web |title=SND: sark |url=https://www.dsl.ac.uk/entry/snd/sark }}{{Cite web |title=SND: harn |url=https://www.dsl.ac.uk/entry/snd/harn_n2 }}{{Cite web |title=SND: cutty |website=Dictionaries of the Scots Language |date=16 July 2021 |url=https://www.dsl.ac.uk/entry/snd/cutty |access-date=28 August 2026}}</ref><ref>{{cite web|url=http://www.dsl.ac.uk/dsl/getent4.php?query=cutty|title=Cutty, Cuttie|at=at 4|quote=(8) ''cutty(-ie) sark'', a short chemise or undergarment|website=[[Dictionary of the Scots Language]]|access-date=21 May 2007|archive-url=https://web.archive.org/web/20070926234446/http://www.dsl.ac.uk/dsl/getent4.php?query=cutty|archive-date=26 September 2007}}</ref> The [[erotic]] sight of her dancing, dressed only in short underwear, caused Tam to cry out "[[:wikt:weel#Scots|Weel]] done, Cutty-sark", which subsequently became a well-known [[catchphrase]]. Originally, carvings by Hellyer of the other scantily clad witches followed behind the figurehead along the bow, but these were removed by Willis in deference to 'good taste'. Tam o' Shanter riding ''Meg'' was to be seen along the ship's [[Quarter gallery|quarter]]. The motto "''Where theres a will is a way''" was inscribed along the [[taffrail]],<ref>Lubbock, pp. 32–34{{clarify |reason=Title?|date=August 2014}}</ref> with variable spaces enabling also the reading ''Where there(')s a Willis away''. ''The Tweed'', which acted as a model for much of the ship which followed her, had a figurehead depicting Tam o' Shanter.<ref>[[Basil Lubbock|Lubbock, Basil]], ''Blackwall Frigates'', p. 229</ref>
+
+==History==
+===First tea seasons===
+''Cutty Sark'' was destined for the [[tea]] trade, a seasonal trade of a high-value cargo from China to London. Though the "premium" or bonus paid to the ship that arrived with the first tea of the year was abandoned after the [[Great Tea Race of 1866]], faster ships could usually obtain a higher price for transporting their cargoes than others.<ref name="MacGregor 1983">{{cite book|last=MacGregor|first=David R.|date=1983|title=The Tea Clippers, Their History and Development 1833–1875|publisher=Conway Maritime Press|isbn=978-0-87021-884-2}}</ref> Her first roundtrip voyage under captain George Moodie began 16 February 1870 from London with a cargo of wine, spirits and beer bound for [[Shanghai]]. The return journey, carrying {{Convert|1305812|lb}} of tea from Shanghai, began 25 June, arriving 13 October in London via the [[Cape of Good Hope]].
+
+''Cutty Sark'' sailed in eight "tea seasons", from London to China and back.{{r|MacGregor 1983|p=237–242}}
+{| class="wikitable"
+|+ ''Cutty Sark''{{'}}s tea runs{{sfn|Carr|1964|p=5}}
+! Year !! From     !! To             !! Days
+|-
+| 1870 || Shanghai || Beachy Head || 109
+|-
+| 1871 || Shanghai || North Foreland || 107
+|-
+| 1872 || Shanghai || Portland || 120
+|-
+| 1873 || Shanghai || Deal || 116
+|-
+| 1874 || Woosung || Deal || 118
+|-
+| 1875 || Woosung || Deal || 122
+|-
+| 1876 || Woosung || Start || 108
+|-
+| 1877 || Woosung || Scilly || 122
+|}
+
+===Competition from steamers===
+''Cutty Sark''{{'}}s launch coincided with the opening of the [[Suez Canal]] to shipping in 1869. Her first trip encountered significant competition with steamships. The route from the Far East to London (and many other European ports) through the Suez Canal was shorter by about {{convert|3300|nmi}}, compared to sailing round the Cape of Good Hope.<ref name="suezcanal.gov.eg">{{cite web|url=https://www.suezcanal.gov.eg/English/About/Pages/WhySuezCanal.aspx|title=Why Suez Canal?|website=Suez Canal Authority}}</ref> The route round Africa is in excess of {{cvt|14000|nmi}}. Typically a clipper might log significantly more than that by planning her route for favourable winds. Whilst it was possible for a sailing vessel to take a tug through the canal, this was difficult and expensive. Furthermore, sailing conditions in the northern [[Red Sea]] were unsuited to the design of a tea clipper,<ref name=Jarvis/> so they still had to sail around Africa. The ability of a steamer to make, for example, {{convert|10|kn}} continuously, versus the fastest clipper voyage averaging under {{convert|6.5|kn}} over a longer distance, gave steamships not only a more predictable voyage time, but a substantially quicker one.{{efn|For this arithmetic, the speed of a steamer is that of [[SS Agamemnon (1865)|SS ''Agamemnon'']]. The "fastest clipper voyage" is that of [[Ariel (clipper)|''Ariel'']] in 1865. Ariel's log for that voyage shows about {{cvt|15800|nmi}} for the voyage, which took 99 days.{{r|Lubbock|pp=269–285}}}}
+
+Less obviously, steamship design had taken a large step forward in 1866 with [[SS Agamemnon (1865)|''Agamemnon'']], using higher boiler pressure and a compound engine, so obtaining a large improvement in fuel efficiency. Ships of this type could compete with clippers before the Suez Canal opened.<ref name="Jarvis">{{cite book|last=Jarvis|first=Adrian|editor1-first=Robert|editor1-last=Gardiner|editor2-first=Basil|editor2-last=Greenhill|title=The Advent of Steam – The Merchant Steamship before 1900|publisher=Conway Maritime Press|date=1993|pages=158–159|chapter=Chapter 9: Alfred Holt and the Compound Engine|isbn=0-85177-563-2}}</ref>
+
+When the tea clippers arrived in China in 1870, they found a big increase in the number of steamers, which were in high demand. The rate of freight to London that was given to steamers was nearly twice that paid to the sailing ships. Additionally, the insurance premium for a cargo of tea in a steamer was substantially less than for a sailing vessel. So successful were the steamers using the Suez Canal that, in 1871, 45 were built in Clyde shipyards alone for Far Eastern trade.{{r|MacGregor 1983|p=209}}
+
+The numbers of tea clippers sailing to China each year steadily reduced, with many ships being sold and moving to general cargo work. Costs were kept to a minimum and rigs were often reduced to [[barque]] so that a smaller crew was needed.
+
+===''Thermopylae''===
+''Cutty Sark''{{'}}s [[Great Tea Race of 1872|well-known race against]] ''[[Thermopylae (clipper)|Thermopylae]]'' took place in 1872, the two ships leaving [[Shanghai]] together on 18 June. Both ships were of similar size: length, beam and depths were within {{convert|1|ft|spell=in|1}} of each other. The ''Thermopylae'' had a slightly larger capacity: 991 compared to 963 (GRT) or 948 compared to 921 (net).{{sfn|Carr|1964|p=5}} Two weeks later ''Cutty Sark'' had built up a lead of some {{convert|400|nmi|mi km}}, but then lost her rudder<ref>{{cite web|url=https://collections.rmg.co.uk/collections/objects/15131.html|title=The tea clipper Thermopylae|publisher=[[National Maritime Museum]]}}</ref> in a heavy gale after passing through the [[Sunda Strait]]. John Willis's brother was on board the ship and ordered Moodie to put into [[Cape Town]] for repairs. Moodie refused, and instead the ship's carpenter Henry Henderson constructed a new rudder from spare timbers and iron. This took six days, working in gales and heavy seas which meant the men were tossed about as they worked and the brazier used to heat the metal for working was spilled out, burning the captain's son. The ship finally arrived in London on 18 October a week after ''Thermopylae'', a total passage of 122 days. The captain and crew were commended for their performance and Henderson received a £50 bonus for his work. This was the closest ''Cutty Sark'' came to being first ship home but it was Moodie's last trip as her captain before he transferred to steamships. He was replaced by Captain F. W. Moore.{{citation needed|date=May 2024}}
+
+{{Quote box |title=Life at Sea |width=30% |quote=A little east of the longitude of the Cape we were favoured by a great fair wind blow, that tested all the resources of ship and crew. At the first spurt, heavy squalls came up from S.W., that threatened to take toll of our masts, but later it steadied down to a hurricane straight from the west.
+
+Captain Wallace was sure in his element now. It was 'Stand by!' the whole time, not knowing whether the sticks would go, but the splendid rigging and equipment of sails in the ''Cutty Sark'' stood the strain. We lost two brand new topgallant sails and one lower fore topsail.
+
+A tremendous sea was running and needs must we carry on or be pooped. The partial becalming of the lower sails by the stern seas was a great danger, as they filled again with a bang that threatened to burst them into tatters. It was some trick rebending sails. I had a time on the fore topsail yard for two hours. The ship took a green sea over the stern, and it appeared as if there were just three sticks set in the ocean, as it swept the length of the deck. |source=—A crew member writing of life on board<ref>{{cite book|title=The Log of the ''Cutty Sark''|author=Basil Lubbock|url=https://archive.org/stream/logofcuttysark0000lubb/logofcuttysark0000lubb_djvu.txt|publisher=James Brown & Son|date=1924}}</ref>{{rp|9}}}}
+
+===Later tea seasons===
+Moore remained captain only for one round trip to China, taking 117 days for the return trip. This was 14 days longer than ''Thermopylae'' and 27 days longer than achieved by the iron ship ''[[Hallowe'en (clipper)|Hallowe'en]]'' a few months later. Captain W. E. Tiptaft assumed command in 1873 achieving 118 days on his first return trip, but after the ship had to travel {{convert|600|nmi|km}} up the [[Yangtze River]] in search of a cargo. Steamships were now taking most of the tea. The following year the return journey took 122 days.{{citation needed|date=September 2021}} In November 1877 the ship was anchored off [[Deal, Kent|Deal]] in the [[English Channel]] along with sixty other vessels, waiting out a great storm. The anchor failed to hold and ''Cutty Sark'' was blown through the ships, damaging two others before grounding on a mud bank. Fortunately she was pulled clear by the tug ''Macgregor'' before too much damage was caused and she was towed to the [[Thames]] for repairs.
+
+In December 1877 the ship sailed from London to Sydney, where she took on coal for Shanghai, arriving there in April. However, the ship was unable to find any cargo of tea for a return trip to London—the days of the tea race were over. The master, Captain Tiptaft, died in October while still in Shanghai and was replaced by the first mate, James Wallace. The ship now had to take different cargoes around the world, including coal, jute, castor oil and tea to Australia.
+
+In 1880 yards were shortened and the [[Studding sail|stun'sails]] removed.{{sfn|Carr|1964|p=5}} Also in 1880 an incident occurred on board during which the First Mate Sidney Smith killed seaman John Francis. Smith was allowed to leave the ship at [[Anjer]] by Captain Wallace, causing the crew to cease work in protest. Wallace continued the voyage with six apprentices and four tradesmen but became becalmed in the [[Java Sea]] for three days. In desperation as matters moved from bad to worse, he committed suicide by jumping overboard and disappeared. He was replaced as Master by William Bruce, who proved to be a drunken incompetent who claimed pay for non-existent crewmen and managed to set sail with inadequate provisions, resulting in the crew starving. An inquiry in New York in April 1882 resulted in the captain and mate being suspended and replaced by Captain Moore, previously of [[Blackadder (clipper)|''Blackadder'']].
+
+===Wool trade===
+[[File:Cutty Sark - waiting in Sydney Harbour for the new season's wool.jpg|thumb|right|upright|''Cutty Sark'' in Sydney Harbour awaiting a cargo of new season's wool, {{c.}} 1890]]
+
+In December 1883, ''Cutty Sark'' departed [[Newcastle, New South Wales]] with 4,289 bales of wool and 12 casks of tallow, arriving in London in just 83 days. This was 25 days faster than her nearest rival that year and heralded the start of a new career taking Australian wool to Britain in time for the January wool sales.
+
+From 1885 to 1893, ''Cutty Sark'' was run between England and New South Wales under the agency of the Sydney-based Dangar, Gedye & Co.<ref>{{cite book|last=Fraser|first=A.D.|title=THIS CENTURY OF OURS – Being an Account of the Origin and History during One Hundred Years of the House of Dangar, Gedye and Malloch Ltd, of Sydney|date=1938|pages=100–110|publisher=Hallstead Press Pty Limited|location=Sydney}}</ref> In 1885 [[Richard Woodget]] was appointed captain on a salary of £186 per year (£23,729.80 in 2019 when adjusted for inflation) and continued to improve on the fastest trip record, achieving 77 days on his first outward trip and 73 days returning to Britain from Australia. He achieved this by taking a more southerly route than previously, to catch the strongest winds in the [[Roaring Forties]] despite having to face icebergs, gales and storms whipped up by the winds he sought. ''Cutty Sark'' was the fastest ship on the wool trade for ten years. In July 1889 the log of the modern passenger steamship {{SS|Britannia|1887|6}} recorded that when steaming at 15 to 16 knots she was overtaken in the night by a sailing ship doing 17 knots, which proved to be ''Cutty Sark''.
+{| class="wikitable"
+|+ ''Cutty Sark''{{'}}s wool runs{{sfn|Carr|1964|p=5}}
+! Year    !! From           !! To      !! Days
+|-
+| 1883–84 || Newcastle, NSW || Deal || 82
+|-
+| 1884–85 || Newcastle, NSW || Dock || 80
+|-
+| 1885 || Sydney || Downs || 73 (67 to Ushant)
+|-
+| 1887 || Sydney || Lizard || 70
+|-
+| 1887–88 || Newcastle, NSW || Lizard || 69
+|-
+| 1888–89 || Sydney || London || 86
+|-
+| 1889–90 || Sydney || London || 75
+|-
+| 1890–91 || Sydney || London || 93
+|-
+| 1891–92 || Sydney || Lizard || 83
+|-
+| 1893 || Sydney || Antwerp || 98 (90 to Bishop's Rock)
+|-
+| 1893–94 || Sydney || Hull || 93 (87 to Scilly)
+|-
+| 1894–95 || Brisbane || London || 84
+|}
+
+===As ''Ferreira''===
+Eventually steamships began to dominate the wool trade too and it ceased to be profitable for a sailing ship. In 1895 Jock Willis sold ''Cutty Sark'' to the Portuguese firm Joaquim Antunes Ferreira for £1,250.<ref name="Platt13">{{cite journal|last1=Platt|first1=Alan|last2=Waite|first2=Simon T.|last3=Sexton|first3=Robert T.|title=The Cutty Sark's Second Keel and History as the Ferreira|journal=The Mariner's Mirror|volume=95|issue=1|page=13|publisher=The Society for Nautical Research|location=Portsmouth, UK|date=February 2009|doi=10.1080/00253359.2009.10657081|s2cid=163769315}}</ref> She was renamed ''Ferreira'' after the firm.<ref name="Platt13"/> Her crews referred to her as ''Pequena Camisola'' (''little shirt'', a straight translation of the Scots ''cutty sark'').<ref>{{cite web|url=http://www.bymnews.com/new/content/view/8591/80|website=BYM News & Magazine|title=Cutty Sark|date=24 January 2005|access-date=21 May 2007}}</ref>
+
+[[File:Cutty Sark (ship, 1869) - SLV H91.250-165.jpg|thumb|right|''Cutty Sark'' moored at Circular Quay, Sydney (circa 1880). Another clipper can be seen in the background.]]
+The ship traded various cargoes between Portugal, Rio de Janeiro, New Orleans, Mozambique, Angola, and Britain. In May 1916 she was dismasted off the [[Cape of Good Hope]] because of the rolling of the ship in bad weather and had to be towed into [[Table Bay]] off [[Cape Town]]. Because of World War I, it was impossible to obtain suitable materials to replace the masts so she was re-rigged over 18 months to a [[barquentine]] sail arrangement.
+
+In 1922 ''Ferreira'' was the last clipper operating anywhere in the world. Caught in a storm in the [[English Channel]] she put into [[Falmouth, Cornwall|Falmouth]] harbour where she was spotted by retired merchant navy captain Wilfred Dowman of [[Flushing, Cornwall|Flushing]], Cornwall, who was then operating the training ship ''Lady of Avenel''. The ship returned to Lisbon, where she was sold to new owners and renamed ''Maria do Amparo'' (Mary of the Refuge, a name associated with the devotion of Our Lady of the Refuge; in Portuguese, "''Nossa Senhora do Amparo''").
+
+===As cadet training ship===
+Dowman persevered in his determination to buy the ship, which he did for £3,750 and she was returned to Falmouth harbour. The purchase was made with the support of Dowman's wife, artist Catharine Dowman ({{nee|Courtauld}}),<ref>[https://www.rmg.co.uk/discover/behind-the-scenes/blog/catharine-dowman-and-preservation-cutty-sark Catharine Dowman and the preservation of Cutty Sark] {{Webarchive|url=https://web.archive.org/web/20191221052417/https://www.rmg.co.uk/discover/behind-the-scenes/blog/catharine-dowman-and-preservation-cutty-sark |date=21 December 2019 }} 6 March 2018, ''rmg.co.uk'', Retrieved 16 April 2019</ref> heiress daughter of [[Sydney Courtauld]], crepe and silk manufacturer.
+
+The rigging was restored to an approximation of the original arrangement and the ship was used as a cadet training ship. In 1924 she was used as committee boat for the regatta week in Fowey during that years regatta week as recalled to me by Mr. Arthur (Toby) West. As a historic survivor, the ship was opened to the public and visitors would be rowed out to inspect her. Dowman died in 1936 and the ship was given by Catharine Dowman, his widow, along with £5,000 for maintenance, to the Incorporated Thames Nautical Training College, [[HMS Worcester (1860)|HMS ''Worcester'']] at [[Greenhithe, Kent|Greenhithe]].{{sfn|Carr|1964|p=5}} She was towed to Greenhithe by tug.{{sfn|Carr|1964|p=6}} The ship was crewed by cadets, 15-year-old Robert Wyld steering the ship during the voyage.<ref>{{cite news|url=http://www.hands-on-illustrations.co.uk/big/mn/27/28.pdf|last=Wyld|first=Robert|title=Cutty Sark must Sail Again|newspaper=[[The Daily Mirror]]|date=28 May 2007|via=Hands on Illustrations}}</ref>
+
+[[File:CuttySarkAndHMSWorcester.jpg|thumb|300px|right|''Cutty Sark'' and {{HMS|Worcester|1860|6}} as training ships, 1938]]
+At Greenhithe, ''Cutty Sark'' acted as an auxiliary vessel to {{HMS|Worcester|1860|6}} for sail training drill, but by 1950 she had become surplus to requirements. From February to October 1951 she was temporarily moved first for a refit and then to take part in the [[Festival of Britain]] at [[Deptford]]. On 30 January 1952, the 800-ton tanker {{MV|Aqueity|1946|6}} collided with ''Cutty Sark''{{'}}s bow in the Thames. The two ships were locked together after the collision which forced ''Cutty Sark''{{'}}s [[jibboom]] into ''Worcester''{{'}}s [[forecastle]] rails, snapping the boom before scraping along ''Worcester''{{'}}s starboard side. ''Cutty Sark''{{'}}s figurehead lost an arm in the process. Worcester was a condemned hulk, sunk at her moorings at the time, photographs showing her lying on her starboard side with her starboard side near the shore. ''Cutty Sark'' was anchored and towed to the [[Shadwell Basin]] where repairs were carried out by Green & Silley Weir Ltd. The damaged arm was recovered at [[Grays Thurrock]] and the figurehead was repaired.<ref name=Collision>{{cite web|url=http://www.hms-worcester.me.uk/page19.html|title=The Cutty Sark|website=HMS Worcester & Merchant Navy|first=Colin|last=Thurlow|access-date=27 April 2011}}</ref>
+
+==Museum ship==
+[[File:Greenwich. - geograph.org.uk - 44193.jpg|thumb|Ship's stern before renovation in 1994. The original dock arrangement can also be seen.]]
+In 1953 ''Cutty Sark'' was given to the Cutty Sark Preservation Society{{sfn|Carr|1964|p=6}} and in 1954 she was moved to a custom-built dry dock at Greenwich.<ref name="Radio4-2007-05-22">BBC Radio 4 News, 6 p.m., 22 May 2007.</ref> She was stripped of upper masts, yards, deck-houses and ballast to lighten her before being towed from the East India Import Dock to the special dry dock at Greenwich. The skipper on this occasion was 83-year-old Captain C.E. Irving, who had sailed the world three times in her before he was 17. The river pilot was Ernest Coe. Thereafter the entrance tunnel to the dry dock was filled in, the river wall rebuilt and the work of re-rigging began. The foundation stone of the dry dock was laid by The Duke of Edinburgh, patron of the Cutty Sark Preservation Society, in June 1953. The restoration, re-rigging and preparation for public exhibition was estimated to cost £250,000.<ref name=Greenwich-Day-by-Day-December>{{cite web|url=http://www.greenwich-guide.org.uk/december.htm|title=Greenwich-Day-by-Day-December|first=David|last=Male|website=Greenwich Guide|access-date=13 December 2011|archive-url=https://web.archive.org/web/20120216031545/http://www.greenwich-guide.org.uk/december.htm|archive-date=16 February 2012|url-status=usurped}}</ref>
+[[File:Cutty Sark (1987).jpg|thumb|left|''Cutty Sark'', 8 October 1987]]
+
+[[File:Cutty sark October 2003.jpg|thumb|right|''Cutty Sark'' in Greenwich, October 2003]]
+''Cutty Sark'' was preserved as a [[museum ship]], and has since become a popular [[tourist]] attraction, and part of the [[National Historic Fleet]]. She is located near the centre of [[Greenwich]], in south-east London, close to the [[National Maritime Museum]], the former [[Greenwich Hospital (London)|Greenwich Hospital]], and [[Greenwich Park]]. She is also a prominent landmark on the route of the [[London Marathon]] and marks the finish of [[The Big Half]]. She usually flies [[signal flag]]s from her [[Ensign (flag)|ensign]] [[halyard]] reading "JKWS", which is the code representing ''Cutty Sark'' in the [[International Code of Signals]], introduced in 1857.
+
+[[File:Cutty Sark 1997frog1.jpg|thumb|''Cutty Sark'' in Greenwich, 1977]]
+The ship is in the care of the Cutty Sark Trust, whose president, the then [[Prince Philip, Duke of Edinburgh|Duke of Edinburgh]], was instrumental in ensuring her preservation, when he set up the Cutty Sark Society in 1951. The Trust replaced the Society in 2000.<ref name="Radio4-2007-05-22"/> She is a [[Listed building|Grade I listed monument]] and was on the [[Heritage at Risk Register|Buildings at Risk Register]] following the 2007 fire. The gallery beneath the ship holds the world's largest collection of ships' figureheads, donated to the Society by [[Sydney Cumbers]] in 1953.<ref name=figure>{{cite web|title=Figureheads|url=http://www.rmg.co.uk/cuttysark/history-and-collections/collections/figureheads|website=[[Royal Museums Greenwich]]|access-date=20 May 2012|archive-url=https://web.archive.org/web/20120704082353/http://www.rmg.co.uk/cuttysark/history-and-collections/collections/figureheads|archive-date=4 July 2012}}</ref>
+
+[[Cutty Sark DLR station|Cutty Sark station]] on the [[Docklands Light Railway]] is one minute's walk away, with connections to central London and the [[London Underground]]. [[Greenwich Pier]] is next to the ship, and is served by scheduled river boats from [[pier]]s in central London. A tourist information office stands to the east of the ship.
+
+===<span class="anchor" id="Fire"></span><!-- [[Cutty Sark fire]] redirects here-->Conservation and fire===
+[[File:Cutty Sark being restored.jpg|thumb|right|The ship one week before the fire. Most of the upper sections had already been dismantled for renovation.]]
+[[File:Cutty Sark fire.jpg|thumb|right|''Cutty Sark'' on fire, in May 2007]]
+By the early 2000s, there were serious concerns about corrosion of the iron internal structure, and the hull was also becoming distorted because more weight was being carried on the [[keel]] than if the ship was afloat, when it would be evenly supported over the whole area below the waterline. An extensive conservation project was planned to overcome this, including repair and anti-[[corrosion]] painting of the framework, the addition of steel ribs to add strength, and a new method of supporting the ship.
+
+On the morning of 21 May 2007, ''Cutty Sark'', which had been closed and partly dismantled for conservation work, caught fire, and burned for several hours before the [[London Fire Brigade]] could bring the fire under control. Initial reports indicated that the damage was extensive, with most of the wooden structure in the centre having been lost.<ref name=BBC_News_Story1>{{cite news|url=https://news.bbc.co.uk/2/hi/uk_news/england/london/6675381.stm|title=Blaze ravages historic Cutty Sark|publisher=[[BBC News]]|date=21 May 2007}}</ref>
+
+In an interview the next day, Richard Doughty, the chief executive of the Cutty Sark Trust, revealed that at least half of the "fabric" (timbers, etc.) of the ship had not been on site as it had been removed during the preservation work. Doughty stated that the trust was most worried about the state of iron framework to which the fabric was attached.<ref name=BBC_News_Story1/> He did not know how much more the ship would cost to restore, but estimated it at an additional £5–10 million, bringing the total cost of the ship's restoration to £30–35 million.<ref>{{cite news|url=https://www.telegraph.co.uk/news/main.jhtml?xml=/news/2007/05/22/nsark22.xml|title=Police launch Cutty Sark arson investigation|newspaper=[[The Daily Telegraph]]|location=London|date=22 May 2007|first1=Amy|last1=Iggulden|first2=Martin|last2=Beckford|archive-url=https://web.archive.org/web/20070526194452/http://www.telegraph.co.uk/news/main.jhtml?xml=%2Fnews%2F2007%2F05%2F22%2Fnsark22.xml|archive-date=26 May 2007}}</ref>
+
+In initial investigations, the possibility was covered that the fire might have been started deliberately.<ref>{{cite news|url=https://news.bbc.co.uk/2/hi/uk_news/england/london/6675381.stm|title=Blaze ravages historic Cutty Sark – A fire which swept through the famous 19th Century ship Cutty Sark may have been started deliberately, police say.|publisher=[[BBC News]]|date=21 May 2007|access-date=17 April 2019}}</ref> The fire was later found to have most likely been caused by an industrial vacuum cleaner which had been left running over the weekend,<ref>{{cite news|title=Cutty Sark deck damaged in blaze|url=https://www.bbc.com/news/uk-england-london-29680243|publisher=BBC News|date=19 October 2014}}</ref> compounded by the absence of the overnight fire watchers.<ref name="vacuum">{{cite news|last=Davenport|first=Justin|date=30 September 2008|title=Vacuum cleaner caused £10m Cutty Sark fire as guard slept|work=Evening Standard|location=London|url=https://www.standard.co.uk/news/vacuum-cleaner-caused-10m-cutty-sark-fire-as-guard-slept-6872360.html}}</ref>
+
+In a second incident on the morning of 19 October 2014, another fire broke out on the deck of the ''Cutty Sark''. A small part of deck three and the hull timbers were damaged in the blaze. The London Fire Brigade managed to contain the blaze within an hour and she was reopened to the public shortly after.<ref name=FireOnDeck/>
+
+====Damage====
+[[File:The Cutty Sark, burnt out - geograph.org.uk - 445455.jpg|thumb|right|The day after the fire, 22 May 2007]]
+Aerial video footage showed extensive damage, but seemed to indicate that the ship had not been destroyed in her entirety by the 2007 fire. A fire officer present at the scene said in a BBC interview that when they arrived, there had been "a well-developed fire throughout the ship". The bow section looked to be relatively unscathed and the [[stern]] also appeared to have survived without major damage; the fire seemed to have been concentrated in the centre of the ship. The chairman of Cutty Sark Enterprises said after inspecting the site: "The decks are unsalvageable but around 50% of the planking had already been removed; however, the damage is not as bad as originally expected."{{citation needed|date=April 2010}}
+
+As part of the restoration work planned before the fire, it was proposed that the ship be raised {{convert|3|m|sigfig=1|spell=in}}, to allow the construction of a state-of-the-art museum space beneath. This would allow visitors to view her from below.<ref>{{cite web|url=http://www.cuttysark.org.uk/index.cfm?fa=contentGeneric.cchjldrhspzrtmgp|title=The Future|website=Cutty Sark|archive-url=https://web.archive.org/web/20090724135706/http://www.cuttysark.org.uk/index.cfm?fa=contentGeneric.cchjldrhspzrtmgp|archive-date=24 July 2009}}</ref>
+
+There was criticism of the policies of the Cutty Sark Trust and its stance that the most important thing was to preserve as much as possible of the original fabric. Proponents of making her fit to go to sea advocated that the fire repairs be done in such a manner to enable her to do so.<ref>{{cite web|url=http://www.bymnews.com/may/cutty-sark.html|title=BYM News May Cutty Sark|website=BYM News & Magazine|access-date=29 October 2009}}</ref>
+
+However, the state of the timbers, especially the keel,<ref>{{cite web|url=http://www.hnsa.org/conf2004/papers/davies.htm|title=The ''Cutty Sark'', The Trials and Tribulations of a Restoration Project|website=Historic Naval Ships Association|first=Wyn|last=Davies|archive-url=https://web.archive.org/web/20090910060330/http://www.hnsa.org/conf2004/papers/davies.htm|archive-date=10 September 2009}}</ref> and the fact that a hole had been cut through the hull in the 1950s for an access door, made this difficult. The Cutty Sark Trust said that less than five percent of the original fabric was lost in the fire, as the decks which were destroyed were additions not present at the original building.
+
+The restoration work was criticised by The Victorian Society saying that the needs of the corporate hospitality market were put ahead of the preservation of the historic fabric of the ship.<ref name=BBC19598868>{{cite news|url=https://www.bbc.co.uk/news/uk-england-london-19598868|title=Cutty Sark refit 'damaging', says The Victorian Society|publisher=[[BBC News]]|date=14 September 2012}}</ref> ''[[Building Design]]'' magazine awarded the project its [[Carbuncle Cup]] for the worst new building completed in 2012 saying "The scheme's myriad failings stem from one calamitous choice: the decision to hoick the 144-year-old clipper close to three metres into the air on canted steel props."<ref>{{cite magazine|url=https://www.bdonline.co.uk/buildings/carbuncle-cup/carbuncle-cup-winner-2012-ship-in-a-throttle/5042493.article|title=Carbuncle Cup winner 2012: Ship in a throttle|magazine=[[Building Design]]|access-date=26 September 2012}}</ref>
+
+====Fundraising====
+[[File:Cutty Sark under restoration after being damaged by fire - geograph.org.uk - 906599.jpg|thumb|left|''Cutty Sark'' during repairs after the fire]]
+
+The design for the renovation project by Grimshaw architects with, during design development stage, newly established Youmeheshe architects and [[Buro Happold]] engineers involved raising the ship out of her dry berth using a [[Kevlar]] web, allowing visitors to pass under the hull to view it. Unfortunately it was discovered that the proposed web would not follow the reverse curves of the ship's hull which would effectively mask the hull's shape from view. An alternate design for the support of the ship had to be developed; this involved installing a deep steel belt around the hull tied by diagonal steel members passing through the hold to a new steel-reinforced keel. Horizontal tubular steel struts passing through the hold brace the diagonals apart while many of the corroded original hull frames have been doubled.
+
+A new steelwork lower deck of contemporary design incorporating an amphitheatre feature was installed in the main hold while a glass-encased lift installed within the ship terminates in a new steel-and-glass housing structure on the weather deck. A second new steel-and-glass box has been installed above the forehold to enclose a new staircase. Access to the ship is through a new opening cut through the hull below the waterline in the ship's starboard quarter. The new access hole has required the addition of new steel framing. Visitors arriving on board the ship now do so via this entrance, which leads to the lower hold. Maldwin Drummond, Chairman of the Cutty Sark Trust, has explained in ''Classic Boat'' magazine's September 2010 issue the need to retain the spirit of the ship and he quotes the ideal that "The visitor should see the ship as though for some unexplained reason the crew had gone ashore". Doubts over the wisdom of Grimshaw's proposals have been raised by many ship conservationists including the Cutty Sark Trust's own engineer Peter Mason.<ref>{{cite news|url=https://www.telegraph.co.uk/news/uknews/7173900/Cutty-Sark-restoration-turning-into-a-fiasco.html|archive-url=https://ghostarchive.org/archive/20220112/https://www.telegraph.co.uk/news/uknews/7173900/Cutty-Sark-restoration-turning-into-a-fiasco.html|archive-date=12 January 2022|url-access=subscription|url-status=live|title=Cutty Sark restoration turning into a fiasco|newspaper=[[The Daily Telegraph]]|location=London|date=6 February 2010|first=Andrew|last=Gilligan}}{{cbignore}}</ref>
+
+[[File:Cutty Sark 2012 landscaping.JPG|thumb|right|''Cutty Sark'' in February 2012, repairs nearing completion. The temporary cover which surrounded the ship during repair has been removed although workmen can still be seen on deck and in the rigging where not all yards have been replaced. Work was underway around the dock to lay new paving.]]
+The project was costed at £25 million when it commenced in 2006 with £11.75 million of this total being provided by a grant from the Heritage Lottery Fund.<ref>{{cite web|url=http://www.cuttysark.org.uk/index.cfm?fa=contentGeneric.rbxheocunmwyxdyg&pageId=2369|title=Press & Publicity> 23 Sept 06 Heritage Lottery Fund backs Cutty Sark scheme with an £11.75m grant|website=Cutty Sark|access-date=5 January 2011|archive-url=https://web.archive.org/web/20090724132335/http://www.cuttysark.org.uk/index.cfm?fa=contentGeneric.rbxheocunmwyxdyg&pageId=2369|archive-date=24 July 2009}}</ref>
+
+Oscar-winning film producer [[Jerry Bruckheimer]] aided in the repair and restoration of ''Cutty Sark''. A collection of photos taken by Bruckheimer went on display in London in November 2007 to help raise money for the Cutty Sark Conservation Project. The exhibition featured more than thirty pictures taken on set during the filming of ''[[Pirates of the Caribbean: At World's End]]''.<ref>{{cite web|url=http://www.cuttysark.org.uk/index.cfm?fa=contentGeneric.rbxheocunmwyxdyg&pageId=146682|title=Press & Publicity > 23 November 2007 Cutty Sark's Hollywood photo exhibition|website=Cutty Sark|access-date=29 October 2009|archive-url=https://web.archive.org/web/20090724132709/http://www.cuttysark.org.uk/index.cfm?fa=contentGeneric.rbxheocunmwyxdyg&pageId=146682|archive-date=24 July 2009}}</ref>
+
+In January 2008, the [[Heritage Lottery Fund]] awarded the Cutty Sark Trust another £10 million towards the restoration of the ship, meaning that the Trust had now achieved £30 million of the £35 million needed for the completion of the project. In June 2008, Israeli shipping magnate [[Sammy Ofer]] donated the outstanding £3.3 million needed to fully restore the ship{{citation needed|date=May 2020}} although by January 2009 the ''London Evening Standard'' reported that the cost had risen further to £40 million creating a new shortfall.<ref>{{cite news|url=https://www.standard.co.uk/hp/front/cost-of-saving-cutty-sark-soars-to-ps40m-as-rust-eats-into-hull-6932155.html|archive-url=https://archive.today/20130505151351/http://www.thisislondon.co.uk/standard/article-23615647-cost-of-saving-cutty-sark-soars-to-40m-as-rust-eats-into-hull.do|archive-date=5 May 2013|title=Cost of Saving Cutty Sark soars to £40m as rust eats into hull|first=Robert|last=Mendick|newspaper=[[Evening Standard]]|location=London|url-status=live|date=9 January 2009}}</ref>
+
+In February 2010, ''The Daily Telegraph'' reported the project cost had risen to £46 million with public money now being made available by London Borough of Greenwich to fill the funding gap.<ref>{{cite news|url=https://www.telegraph.co.uk/sport/othersports/olympics/news/7158084/Cutty-Sark-to-be-restored-in-time-for-London-2012-Olympics-after-devastating-blaze.html|archive-url=https://web.archive.org/web/20101010180621/http://www.telegraph.co.uk/sport/othersports/olympics/news/7158084/Cutty-Sark-to-be-restored-in-time-for-London-2012-Olympics-after-devastating-blaze.html|archive-date=10 October 2010|title=Cutty Sark to be restored in time for London 2012 Olympics after devastating blaze|newspaper=[[The Daily Telegraph]]|location=London|date=5 February 2010|first=Heidi|last=Blake}}</ref>
+
+====Investigation conclusion====
+
+On 30 September 2008, the [[London Fire Brigade]] announced the conclusion of the investigation into the fire at a press conference at [[New Scotland Yard]]. The painstaking investigation was conducted by the Fire Brigade, along with London's [[Metropolitan Police Service]], Forensic Science Services, and electrical examination experts Dr. Burgoyne's & Partners. They said that the most likely cause was the failure of an industrial vacuum cleaner that may have been left switched on over the weekend before the fire started. The report revealed no evidence that the ship was subjected to arson attack and concluded that the fire started accidentally.<ref name="vacuum"/><ref>{{cite web|url=http://www.london-fire.gov.uk//CuttySarkFireReport-29Sep08.pdf|title=Report on the investigation into the fire on board the clipper ship Cutty Sark, King William Walk, Greenwich, London SE10 on Monday 21st May 2007|author1=London Fire Brigade|author2-link=Metropolitan Police Service|author2=Metropolitan Police Service|date=29 September 2008|access-date=16 April 2010|archive-url=https://web.archive.org/web/20111128063551/http://www.london-fire.gov.uk/CuttySarkFireReport-29Sep08.pdf|archive-date=28 November 2011|author1-link=London Fire Brigade}}</ref>
+
+Physical evidence and CCTV footage of the fire showed that it probably started towards the stern of the ship on the lower deck. All electrical equipment on board was examined and it was determined that an industrial vacuum cleaner in this area was normally running continuously to suck up dust and particles from work going on to break up concrete within the ship. No one working on the ship had responsibility to ensure all equipment was turned off at the end of each day, and no one recalled switching off the equipment on the Friday in question. The vacuum cleaner has three motors inside and after the fire one was found to be burned out in a manner which suggested it had failed while operating. This was not conclusive evidence, however, because the motor might previously have failed in service without causing a fire, and gone unnoticed because the other two motors had continued to function. Tests on similar cleaners showed they had no thermal cutout devices and while they could run safely indefinitely if filters inside were clear, if the airflow through the cleaner was blocked then it would eventually overheat and could catch fire. This might occur if the cleaner were full of dust and debris. The cleaner had failed previously and two motors had been replaced.
+
+On the basis of witness evidence, the joint investigation team considered it unlikely that the fire was caused by the hot work (welding) that was being carried out as part of the renovation or by carelessly discarded smokers' materials. No one had visited this part of the ship since work stopped on Friday evening, and it was considered unlikely that a fire could have smouldered all weekend before finally breaking out Monday morning. However, it was discovered that although all hot work was supposed to be recorded and someone was supposed to check afterwards to ensure of no fires, there was no record that such checks had ever been made, and on at least one occasion hot work had been conducted with no records made.
+
+The ship was patrolled by two security guards, both of whom were supposed to patrol independently at least once an hour, or once every two hours later in the night, one being primarily responsible for the visitor pavilion and one for the dock. The guards were required to keep a log of their patrols, but after the fire the relevant page was found to be missing from the book. It was later found, already filled in reporting uneventful patrols of the site up to 7 a.m. when the guards would have gone off duty. The alarm was raised when one of the guards called the fire brigade; before this the two reported that they had smelled burning plastic and had been investigating to try to determine its source.
+
+A carpenter had visited the site on Sunday to collect some tools, but after 20 minutes attempting to contact a security guard to let him in, had climbed the fence, collected his tools and climbed out again. The carpenter reported that he had heard machinery operating towards the stern of the ship, but it was not clear whether this might have been the site diesel generator which ran at all times.
+
+The ship was fitted with a temporary fire alarm system but it was unclear whether this had operated. A separate alarm within the pavilion did sound when smoke and heat reached that area, but the guards reported no ringing alarm before the fire was seen. Investigation afterwards discovered a faulty relay in the alarm panel which failed to switch power to the siren circuits when an alarm was triggered. However, the panel also contained a failed fuse in one siren circuit which suggested that the siren had activated but the fire shorted it out, and this might have also caused the relay to fail. The failed relay would have shut off power to the second siren circuit. Statements from workers suggested that weekly tests of the alarm system had not been carried out.
+
+==Mast specifications==
+{{Main|Mast (sailing)}}
+The original mast specifications as laid down by the ship's designer still exist and are listed below as "tea rig". This arrangement was used during the ship's time on the tea trade route, where it was necessary to maximise the area of sail to get the greatest possible propulsion when the ship might be becalmed in the doldrums. For the route to Australia it was not necessary to carry such a large area of sail and the masts and yards were reduced. The tradewinds required great strength in masts, but the wind could best be captured by relatively small, high sails. A smaller rig also represented a saving in maintenance and operation costs. Each of the three masts (fore, main and mizzen) is in three overlapping sections.
+[[File:Cutty Sark stern.jpg|thumb|The restored stern, sheathed in [[Muntz metal]], elevated three metres above its dry dock under its glass-roofed visitors' centre in June 2012]]
+
+<div style="display:inline-block; vertical-align:top;">
+{| class="wikitable"
+|+ Mast heights above deck in metres
+! !! Tea&nbsp;rig<ref>{{cite book|last=Lubbock|first=Basil|author-link=Basil Lubbock|title=The Log of the Cutty Sark|chapter-url=https://archive.org/details/logofcuttysark0000lubb|chapter-url-access=registration|chapter=Appendix III|publisher=Boston, Charles E. Lauriat co.; Glasgow, J. Brown & son|year=1924}}</ref>!! Sydney<ref>{{cite web|last=Sankey|first=J.|url=https://www.johnsankey.ca/cuttysark.html|title=The Ship Cutty Sark|website=johnsankey.ca}}</ref>
+|-
+| Foretop || 18.8 || 16.5
+|-
+| Topgallant || 29.8 || 24.3
+|-
+| Royal || 39.6 || 35.4
+|-
+| Maintop || 19.8 || 16.9
+|-
+| Topgallant || 31.9 || 22.8
+|-
+| Royal || || 36.3
+|-
+| Skysail || 44.5 ||
+|-
+| Mizzentop || 17.0 || 14.8
+|-
+| Topgallant || 25.7 || 22.8
+|-
+| Royal || 33.2 || 31.7
+|}
+</div>
+<div style="display:inline-block; vertical-align:top;">
+{| class="wikitable"
+|+ Yard lengths in metres
+! !! Tea&nbsp;rig !! Sydney
+|-
+| Fore&nbsp;course || 23.8 || 21.0
+|-
+| Lowertopsail || 20.7 || 16.8
+|-
+| Uppertopsail || 19.5 || 14.6
+|-
+| Topgallant || 14.6 || 11.5
+|-
+| Royal || 11.6 || 9.4
+|-
+| Main&nbsp;course || 23.8 || 21.6
+|-
+| Lowertopsail || 20.7 || 18.5
+|-
+| Uppertopsail || 19.5 || 16.8
+|-
+| Topgallant || 14.6 || 14.2
+|-
+| Royal || 11.6 || 10.4
+|-
+| Skysail || 10.4 ||
+|-
+| Mizzen&nbsp;course || 18.3 || 17.4
+|-
+| Lowertopsail || 16.5 || 14.9
+|-
+| Uppertopsail || 14.6 || 13.4
+|-
+| Topgallant || 11.9 || 11.0
+|-
+| Royal || 10.1 || 8.2
+|-
+| Spanker || 15.8 || 14.1
+|}
+</div>
+
+==See also==
+{{Portal|Transport}}
+* [[Cutty Sark (short story)|"Cutty Sark"]]
+* [[Falls of Clyde (ship)|''Falls of Clyde'']]
+* ''[[Gipsy Moth IV]]''
+* [[List of clipper ships]]
+* [[List of large sailing vessels]]
+* [[List of ships built by William Denny and Brothers]]
+* ''[[Star of India (ship)|Star of India]]''
+* ''[[The Cowboy Captain of the Cutty Sark]]''
+* [[William Pile (shipbuilder)|William Pile]]
+
+==Notes==
+{{notelist}}
+
+==References==
+{{reflist}}
+
+==Bibliography==
+<!-- ISSNs/ISBNs needed for below entries -->
+* {{cite book |title=The Log of the Cutty Sark |author-link=Basil Lubbock |url=https://archive.org/details/logofcuttysark0000lubb |url-access=registration |first=Basil |last=Lubbock |year=1924 |publisher=James Brown and Son |location=Glasgow, Scotland}}
+* {{cite book |title=The Cutty Sark, Her Designer and Builder, Hercules Linton, 1836–1900 |first=Robert E. |last=Brettle |date=1969 |publisher=W. Heffer & Sons |location=Cambridge, England}}
+* {{cite book |last=Villiers |first=Alan |title=The Cutty Sark – Last of a Glorious Era. |author-link=Alan Villiers |url=https://archive.org/details/cuttysarklastofg00vill |url-access=registration |date=1953 |publisher=Hodder & Stoughton |page=[https://archive.org/details/cuttysarklastofg00vill/page/96 96]}}
+
+== External links ==
+{{Commons}}
+* [https://www.rmg.co.uk/cutty-sark Official site]
+* {{NHLE |num=1079013}}
+* [https://www.maritimequest.com/sailing_ships/cutty_sark_1869_page_1.htm MaritimeQuest ''Cutty Sark'' Pages]
+* [http://www.hnsa.org/hnsa-ships/cutty-sark/ HNSA Web Page: ''Cutty Sark''] {{Webarchive|url=https://web.archive.org/web/20151004053221/http://www.hnsa.org/hnsa-ships/cutty-sark/ |date=4 October 2015 }}
+* [https://web.archive.org/web/20120501114652/http://www.nbrb.by/Coinsbanknotes/CommCoin.asp?id=214 Belarusian memorial coins with ''Cutty Sark'' on reverse side]
+* [https://www.snf.org/texts/uploads/files/Cutty%20Sark%20Trust_1.pdf Views of the restoration, including frame] {{Webarchive|url=https://web.archive.org/web/20220412004642/https://www.snf.org/texts/uploads/files/Cutty%20Sark%20Trust_1.pdf |date=12 April 2022 }}
+
+{{Clipper ships}}
+{{National Historic Ships}}
+{{Oldest surviving ships (pre-1919)}}
+{{Museums and galleries in London}}
+{{London landmarks}}
+{{1877 shipwrecks}}
+{{1952 shipwrecks}}
+{{2007 shipwrecks}}
+{{coord|51|28|58|N|0|00|35|W|region:GB_type:landmark|display=title}}
+
+{{Authority control}}
+
+[[Category:1869 ships]]
+[[Category:2000s fires in the United Kingdom]]
+[[Category:2007 disasters in the United Kingdom]]
+[[Category:2007 fires in Europe]]
+[[Category:2007 in London]]
+[[Category:Tea clippers]]
+[[Category:Ships built on the River Clyde]]
+[[Category:Fires in London]]
+[[Category:Grade I listed buildings in the Royal Borough of Greenwich]]
+[[Category:Grade I listed ships]]
+[[Category:Structures formerly on the Heritage at Risk register]]
+[[Category:Ships and vessels of the National Historic Fleet]]
+[[Category:Museum ships in the United Kingdom]]
+[[Category:Robert Burns]]
+[[Category:Individual sailing vessels]]
+[[Category:Ships of Scotland]]
+[[Category:Tall ships of the United Kingdom]]
+[[Category:Royal Museums Greenwich|*]]
+[[Category:Full-rigged ships]]
+[[Category:Merchant ships of the United Kingdom]]
+[[Category:Maritime incidents in November 1877]]
+[[Category:World War I merchant ships of the United Kingdom]]
+[[Category:World War I merchant ships of Portugal]]
+[[Category:Maritime incidents in 1952]]
+[[Category:Tall ships of Portugal]]
+[[Category:Ship fires]]
+[[Category:Sailing ships of the United Kingdom]]
+[[Category:Maritime incidents in 2007]]
+[[Category:Burned buildings and structures in the United Kingdom]]
+[[Category:Building and structure fires during construction or renovation]]
+[[Category:Buildings and structures in Greenwich]]
+[[Category:Preserved cargo ships]]
+[[Category:Ships built by William Denny and Brothers]]

@@ -1,0 +1,62 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a mast drawn off its recorded heights",
+  "detail": "masts[0] (station 0.115): crosstrees 30.92 m over the foot, record 29.8 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a mast drawn off its recorded heights",
+  "detail": "masts[0] (station 0.115): truck 35.68 m over the foot, record 39.6 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[0] (station 0.115), yard 'tg' on section 2: its sail 3.51 m deep against the deepest hoisting topsail's 8.31 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[0] (station 0.115), yard 'royal' on section 2: its sail 2.01 m deep against the deepest hoisting topsail's 8.31 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a mast drawn off its recorded heights",
+  "detail": "masts[1] (station 0.556): crosstrees 32.56 m over the foot, record 31.9 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a mast drawn off its recorded heights",
+  "detail": "masts[1] (station 0.556): truck 37.58 m over the foot, record 44.5 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[1] (station 0.556), yard 'tg' on section 2: its sail 3.69 m deep against the deepest hoisting topsail's 8.76 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[1] (station 0.556), yard 'royal' on section 2: its sail 2.11 m deep against the deepest hoisting topsail's 8.76 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a mast drawn off its recorded heights",
+  "detail": "masts[2] (station 0.85): crosstrees 27.96 m over the foot, record 25.7 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a mast drawn off its recorded heights",
+  "detail": "masts[2] (station 0.85): truck 32.26 m over the foot, record 33.2 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[2] (station 0.85), yard 'tg' on section 2: its sail 3.17 m deep against the deepest hoisting topsail's 7.53 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[2] (station 0.85), yard 'royal' on section 2: its sail 1.81 m deep against the deepest hoisting topsail's 7.53 m"
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "id": "clipper",
+  "rule": "two yards on a pole too short for them",
+  "detail": "masts[2] (station 0.85), yard 'royal' on section 2: its sail 3.23 m deep against the deepest topsail's 7.10 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "rig height provenance wrong",
+  "detail": "rigTruckFrom 'record: mastHeightsM, top 19.8, crosstrees 31.9, truck 44.5 m over the deck, the stack solved for them' for masts[1] (square; truckM undefined, heightM undefined, 3 segment(s)) \u2014 the figure is derived through class fractions"
+ }
+]

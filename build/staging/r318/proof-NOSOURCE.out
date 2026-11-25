@@ -1,0 +1,17 @@
+[
+ {
+  "id": "clipper",
+  "rule": "mast heights with no source",
+  "detail": "masts[0] (station 0.115): mastHeightsM {\"top\":18.8,\"crosstrees\":29.8,\"truck\":39.6} and no mastHeightsProvenance"
+ },
+ {
+  "id": "clipper",
+  "rule": "mast heights with no source",
+  "detail": "masts[1] (station 0.556): mastHeightsM {\"top\":19.8,\"crosstrees\":31.9,\"truck\":44.5} and no mastHeightsProvenance"
+ },
+ {
+  "id": "clipper",
+  "rule": "mast heights with no source",
+  "detail": "masts[2] (station 0.85): mastHeightsM {\"top\":17,\"crosstrees\":25.7,\"truck\":33.2} and no mastHeightsProvenance"
+ }
+]

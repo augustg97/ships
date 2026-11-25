@@ -1355,7 +1355,16 @@ function gaffTopmastOf(mk, lower) {
 return (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
 ? mk.truckM - 0.88 * lower : lower * 0.52;
 }
+function squareStackOf(mk, lower) {
+const MH = mk.mastHeightsM;
+if (mk.rig === 'square' && MH && MH.top > 0 && MH.crosstrees > MH.top && MH.truck > MH.crosstrees) {
+const top = MH.crosstrees - 0.88 * lower;
+return { top, tg: MH.truck - 0.88 * (lower + top), from: 'mastHeightsM' };
+}
+return { top: lower * 0.60, tg: lower * 0.30, from: 'steel' };
+}
 function mastLowerOf(mk, steelMain, footY) {
+if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
 if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
 return mk.truckM * mk.capFrac;
 if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
@@ -1490,7 +1499,7 @@ const mScale = lower / mainLower;
 const dScale = [isMizzen ? Math.min(mScale, 0.60) : mScale,
 isMizzen ? Math.min(mScale, 0.70) : mScale,
 isMizzen ? Math.min(mScale, 0.70) : mScale];
-const top = lower * 0.60, tg = top * 0.50;
+const { top, tg } = squareStackOf(mk, lower);
 let y = base;
 let capY = base;
 const mastYards = [];
@@ -3129,7 +3138,7 @@ const flower = mastLowerOf(fm, steelMain, fbase);
 const fx = (fm.at - 0.5) * L + H.rake(fm.at);
 const hounds = fbase + flower * 0.78;
 const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
-: fm.rig === 'square' ? flower * 0.88 + flower * 0.60 * 0.72
+: fm.rig === 'square' ? flower * 0.88 + squareStackOf(fm, flower).top * 0.72
 : flower * 0.94);
 const n = S.headsails;
 for (let k = 0; k < n; k++) {
@@ -11239,6 +11248,7 @@ if (foot < Infinity && head > -Infinity) {
 rigDeckY = foot; rigTruckY = head;
 const mk = (S.masts || [])[topSeg.mi] || {};
 rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
+: (mk.mastHeightsM && mk.rig === 'square') ? 'record: mastHeightsM, top ' + mk.mastHeightsM.top + ', crosstrees ' + mk.mastHeightsM.crosstrees + ', truck ' + mk.mastHeightsM.truck + ' m over the deck, the stack solved for them'
 : (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
 : (mk.truckM !== undefined && mk.rig === 'gaff' && mk.capFrac !== undefined) ? 'record: truckM ' + mk.truckM + ' m deck to truck, the cap at the plate-read ' + mk.capFrac + ' of it'
 : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
@@ -11246,7 +11256,7 @@ rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk
 : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
 : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
 rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
-lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
+lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined || mk.mastHeightsM) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
 }
 } }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,
