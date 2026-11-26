@@ -30640,3 +30640,38 @@ Titanic's well bulwark and its closed wash-port doors are drawn as two sheets, o
 - **Inside the gate:** the other 24 captured frames, including every steel-hull ship frame captured (titanic, yamato, carrier, container, great-eastern, queen-mary-2, steamer, preussen), `ship-treasure`, `shipwright-corbis`, `shipwright-hounds`, the five globe frames, `action`, `descent*`, `aboard`, `aboard-off`, `aboard-coast`, `map-floor` and `sea-magnified`. Every prediction held: every MUST frame moved, and no CANNOT frame moved except by a capture fault.
 - **Not captured this round (21), for r339's opening:** ship-dreadnought, aboard-carrier, aboard-cable, aboard-titanic, aboard-yamato, aboard-preussen, aboard-wyoming, aboard-treasure, aboard-clipper, ship-azzam, action-salamis, board-salamis, action-gravelines, action-lepanto, action-myeongnyang, wake-plan, ship-ever-given, sea-ever-given, passage-sahul, sea-dugout-floor, sea-canoe-floor. Add ship-panokseon, recaptured alone. The `aboard-*` and `action-*` frames show timber ships at a distance and may move by a pixel line where a port wale is in view. aboard-treasure and aboard-wyoming also carry r337's voyage-position fault.
 - **Wale colour, for r339:** on the black-hulled Wyoming, clipper and Endurance, the wales draw as brown timber bands. That is the class wale material, which the starboard side already drew. Whether each ship's wales were painted with her hull is a record question, to be read off each plate before any colour changes. It belongs with the wale-as-a-timber item above.
+
+## Round 339 — 2026-11-26 — Every wale on the 20 timber hulls is now built as a timber of constant section. Until this round a wale was a strip of the hull surface scaled 1.8% outboard. It had no top or bottom face, so it cast no shadow line, and it closed to nothing toward the stem and stern, where the half-breadth closes. Each wale now stands proud of the planking by the same distance in metres at every station, with a top face, an outer face, an underside and an end cap at each end
+
+**Queue check: August's second list stands worked in full (r57).** The round opened at 03:29 with 647 MB free on the Data volume and a load of 3.3. It fell to 458 MB by 04:00 (this round's captures, about 100 MB). Captures ran one process per frame, one browser at a time.
+
+**r338's BACKLOG, FIRST.** 22 frames r338 did not capture were captured alone on r338's tree (HEAD 81c2f36) into `r339/run0` and scored offline (`r277/score-offline.py`). 17 were inside the gate. Five moved:
+- **Accepted, each looked at** (`r339/pair-*.png`): `ship-panokseon` (the port wales r338 drew), `sea-canoe-floor` (only the gaps between the deck slats, where r338's rewound faces now show below), `action-lepanto` and `action-salamis` (a pixel line on each distant galley and trireme).
+- **Not accepted:** `aboard-titanic` (7.55%). The panel reads 49° 01′ N, course 246° in the baseline and 49° 05′ N, course 247° in the capture. That is r337's voyage-position fault, and Titanic is a steel hull that no r338 or r339 change reaches.
+- Inside the gate: ship-dreadnought, ship-azzam, ship-ever-given, sea-ever-given, wake-plan, passage-sahul, sea-dugout-floor, board-salamis, action-gravelines, action-myeongnyang, and aboard-carrier, -cable, -yamato, -preussen, -wyoming, -treasure, -clipper. aboard-treasure and aboard-wyoming were inside the gate this time.
+
+**THE WALE (`r339/scripts/r339_edit_wale.py`, every replace asserted).** `buildWaleGeometry` builds four lines per station on each side. Two lie on the shell at the wale's top and bottom heights, unchanged from r338: v 0.655 ± 0.015 and v 0.760 ± 0.013, or the plate line where `hull.waleRead` is set. The other two are the same points carried outboard along the shell's own section normal by `proudM`. The normal tilts down where the side flares. Three strips join the four lines: the top, the outer face and the underside. Each strip has its own vertices, so the edges stay sharp. Each strip is wound against a stated direction (up, outboard, down), so neither side can come out inside out. The new code is in the strip helper; r338's per-side winding is gone.
+- `proudM` comes from `hull.wale.proudM` when the record sets it. No record sets it yet. The class default keeps r338's value at midships, 1.8% of the half-breadth at the wale's height at u 0.5, and holds it constant along the length. Each wale mesh carries `userData.waleProud` ('record' or 'class default') and `waleProudM`.
+- Probed in node on every hull (`r339/scripts/r339_node_probe.js`, three.js and hull.js in a vm context, no browser). The class default runs from 0.010 m (the voyaging canoe) to 0.161 m (the treasure ship): trireme 0.034, dhow 0.057, fluyt 0.057/0.047, carrack 0.097, East Indiaman 0.110, the 74 0.129/0.124, Wyoming 0.137, clipper 0.098, Endurance 0.068. Each wale is 1,448 triangles.
+- Falconer's WALES entry (`r172/falconer.txt`) gives the wale's breadth and thickness only by reference to his plate VII, with no figures in the text. So no `proudM` was recorded this round.
+
+**AUDIT RULE A-WALE-SECTION.** On each side of every wale mesh, count the triangles whose world normal is mostly up (ny > 0.6) and mostly down (ny < −0.6). Each count must be at least a fifth of that side's triangles.
+- **Proof B** (`r339/proofB.out`, HEAD's builder, new audit): **80 convictions**, every wale on both sides of all 20 hulls that carry wales (the canoe has two hulls, so four wales).
+- **Audit A** (`r339/auditA.out`, :8150, the files as pushed): 33 hulls, 0 hull problems. The one meta-rule hit (a side named from a sign) was fixed to go through `sideOf`; the final audit is in the receipt below.
+
+**WITNESSES** (`r339/wit/`, :8150, the same camera before and after, HEAD's hull.js swapped in for "before"):
+- `stack-fluyt-pq.png`: before, both wales fade out toward the bow. After, each runs to the stem as a timber with an edge.
+- `stack-clipper-pq.png`: after, the brown wales on her black side carry to the stem with a lit top edge.
+- `stack-sol-pq.png`: on the 74 the change is hard to see at this camera; the Bent-on panel covers most of her side.
+
+**Rule 0** (`wit/fluyt-pq-after.png`). It is a rendered ship, not a chart: the fluyt's bow on a rippled blue sea, with her bowsprit, an anchor at the cathead and the ship's boat on the skids. Three facts a viewer can read off it:
+1. She carries her anchor catted at the bow, with its stock across the rail.
+2. Two wales run along her side to the stem, under a sheer that rises forward.
+3. She has a single deck under an open waist, with a boat stowed amidships.
+
+**NOT DONE, FOR r340.**
+- **The wale's colour.** The wales are still the class 0x3d2f1f, about the planking's tone, so on the timber hulls the new edges read as lines and not as dark timbers. On black-hulled Wyoming, the clipper and Endurance they draw as brown bands. `hull.wale.finish` (tarred / painted with the hull / bright) is the record field to add; read each ship's plate before setting it.
+- **`hull.wale.proudM` from a record** for the ships that have a draught: the 74 (Steel's or Goodwin's scantlings), the East Indiaman, the clipper (Cutty Sark's), and the fluyt off Hollar at the plate's px/m.
+- Then (0y¹⁷⁹), the fluyt's fore station, and r334's list as written.
+
+**Live stamp: __STAMP__**

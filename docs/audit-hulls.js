@@ -7740,6 +7740,25 @@ const vv = A6.dot(E1.crossVectors(B6, C6)) / 6 * (flip ? -1 : 1); sv += vv; av +
 if (av > 1e-9 && sv < -0.6 * av) { const pt = tagOf(o), key = ((pt && pt.key) || 'unnamed') + (o.userData.kind ? '/' + o.userData.kind : '');
 (io[key] = io[key] || []).push((sv / av).toFixed(2)); }
 });
+g.traverse(o => {
+const pt = tagOf(o); if (!o.isMesh || !pt || pt.key !== 'wale') return;
+const pa = o.geometry.attributes.position, ix = o.geometry.index, nt = ix ? ix.count / 3 : pa.count / 3;
+const c = { '-1': [0, 0, 0], '1': [0, 0, 0] };
+for (let t = 0; t < nt; t++) {
+A6.fromBufferAttribute(pa, ix ? ix.getX(3 * t) : 3 * t).applyMatrix4(o.matrixWorld);
+B6.fromBufferAttribute(pa, ix ? ix.getX(3 * t + 1) : 3 * t + 1).applyMatrix4(o.matrixWorld);
+C6.fromBufferAttribute(pa, ix ? ix.getX(3 * t + 2) : 3 * t + 2).applyMatrix4(o.matrixWorld);
+const zc = (A6.z + B6.z + C6.z) / 3; if (Math.abs(zc) < 0.05) continue;
+E1.crossVectors(B6.clone().sub(A6), C6.clone().sub(A6)); const L = E1.length(); if (L < 1e-12) continue;
+const ny = E1.y / L, sd = zc > 0 ? '1' : '-1';
+c[sd][0]++; if (ny > 0.6) c[sd][1]++; else if (ny < -0.6) c[sd][2]++;
+}
+for (const sd of ['-1', '1']) {
+const [n, up, dn] = c[sd]; if (n < 24) continue;
+if (up < 0.2 * n || dn < 0.2 * n)
+say(v.id, 'a wale with no section', `${pt.name || 'wale'} (${sideOf(+sd)}): of ${n} triangles ${up} face up and ${dn} face down, so it is a ribbon of the shell with no top or underside`);
+}
+});
 for (const k in io) say(v.id, 'a part wound inside out', `${k}: ${io[k].length} mesh${io[k].length > 1 ? 'es' : ''} whose signed volume about its own centre is ${io[k].slice(0, 6).join(', ')}${io[k].length > 6 ? ', …' : ''} of its unsigned sum, so its faces point inward`);
 for (const k in hit) say(v.id, 'a part that faces the centreline', `${k}: ${hit[k].join(', ')} athwartships triangles face inboard on a FrontSide material, so it is culled from outside`);
 }

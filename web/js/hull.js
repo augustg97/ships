@@ -1033,33 +1033,92 @@ function buildStemGeometry(S, aft) {
   return g;
 }
 
-/* a wale is a band of the hull surface, pushed proud of it */
+/* ── A WALE IS A TIMBER, NOT A RIBBON (round 339) ────────────────────────────────────
+   Until r339 a wale was a strip of the hull surface scaled 1.8% outboard (z × 1.018). That
+   has two faults. First, the strip had no top or bottom face, so it cast no shadow line and
+   read as a stripe painted in the planking's colour; on a plate a wale is a heavy timber
+   with a lit top edge and a dark underside. Second, a proportion of the half-breadth puts
+   the wale 0.13 m proud amidships on a 74 and nothing at the ends, where the half-breadth
+   closes to the stem. A wale is a thick strake of constant section, and it stands as far
+   proud at the bow as amidships.
+   The wale is now a rectangular section run along the shell. Its inner face lies on the
+   planking between its top and bottom heights, and it stands proud along the shell's own
+   outward section normal by hull.wale.proudM, in metres, at every station. It has a top face,
+   an outer face, a bottom face and an end cap at each end. The top and bottom faces are
+   separate vertices, so the edges stay sharp under the light.
+   The class default for proudM keeps the r338 value at midships: 1.8% of the half-breadth at
+   the wale's own height at u 0.5. It is held constant along the length. userData.waleProud
+   says which applies: 'record' or 'class default'. */
+function waleProudM(S, H, vMid) {
+  if (S.wale && S.wale.proudM > 0) return { m: S.wale.proudM, from: 'record' };
+  const p = surfacePoint(S, H, 0.5, vMid);
+  return { m: Math.max(0.01, 0.018 * Math.abs(p[2])), from: 'class default' };
+}
 function buildWaleGeometry(S, v0, thick, vAt) {
   const H = hullSurface(S);
   const pos = [], idx = [];
   const NU = 120;
-  let base = 0;
+  const vLo = u => vAt ? vAt(u) - vAt.halfV(u) : v0 - 0.5 * thick;
+  const vHi = u => vAt ? vAt(u) + vAt.halfV(u) : v0 + 0.5 * thick;
+  const PR = waleProudM(S, H, 0.5 * (vLo(0.5) + vHi(0.5)));
+  /* the shell's outward normal in the section plane (y, |z|), at height v: the tangent up the
+     side is (ty, tz); (-tz, ty) is outboard on a vertical side and outboard-and-down on a
+     flaring one */
+  const nrm = (u, v) => {
+    const a = surfacePoint(S, H, u, Math.max(0, v - 0.01)), b = surfacePoint(S, H, u, Math.min(1, v + 0.01));
+    let ty = b[1] - a[1], tz = Math.abs(b[2]) - Math.abs(a[2]);
+    const L = Math.hypot(ty, tz) || 1; ty /= L; tz /= L;
+    return [-tz, ty];
+  };
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const tri = (a, b, c) => {
+    const e1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], e2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    return [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+  };
+  /* one face of the timber run along the length: A[i], B[i] its two edges at station i; wound so
+     the middle quad's normal agrees with `want` */
+  const strip = (A, B, want) => {
+    const b0 = pos.length / 3;
+    for (let i = 0; i <= NU; i++) pos.push(...A[i], ...B[i]);
+    const m = NU >> 1;
+    const flip = dot(tri(A[m], B[m], A[m + 1]), want) < 0;
+    for (let i = 0; i < NU; i++) {
+      const a = b0 + i * 2;
+      if (!flip) idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+      else idx.push(a, a + 2, a + 1, a + 2, a + 3, a + 1);
+    }
+  };
+  const cap = (q, want) => {
+    const b0 = pos.length / 3;
+    q.forEach(pt => pos.push(...pt));
+    if (dot(tri(q[0], q[1], q[2]), want) >= 0) idx.push(b0, b0 + 1, b0 + 2, b0, b0 + 2, b0 + 3);
+    else idx.push(b0, b0 + 2, b0 + 1, b0, b0 + 3, b0 + 2);
+  };
   for (let sgn = -1; sgn <= 1; sgn += 2) {
+    const Ti = [], To = [], Bo = [], Bi = [];
+    let nMid = null;
     for (let i = 0; i <= NU; i++) {
       const u = 0.012 + (i / NU) * 0.976;
-      for (let k = -1; k <= 1; k += 2) {
-        const p = surfacePoint(S, H, u, vAt ? vAt(u) + k * vAt.halfV(u) : v0 + k * 0.5 * thick);
-        const out = 1.018;                       // proud of the planking
-        pos.push(p[0], p[1], sgn * p[2] * out);
-      }
+      const vh = vHi(u), vl = vLo(u);
+      const pt = surfacePoint(S, H, u, vh), pb = surfacePoint(S, H, u, vl);
+      const nt = nrm(u, vh), nb = nrm(u, vl);
+      Ti.push([pt[0], pt[1], sgn * pt[2]]);
+      To.push([pt[0], pt[1] + PR.m * nt[0], sgn * (pt[2] + PR.m * nt[1])]);
+      Bo.push([pb[0], pb[1] + PR.m * nb[0], sgn * (pb[2] + PR.m * nb[1])]);
+      Bi.push([pb[0], pb[1], sgn * pb[2]]);
+      if (i === NU >> 1) nMid = [0, 0.5 * (nt[0] + nb[0]), sgn * 0.5 * (nt[1] + nb[1])];
     }
-    for (let i = 0; i < NU; i++) {
-      const a = base + i * 2;
-      /* r338: wound outward on each side. (a, a+1, a+2) faces -z, so the port (+z) strip takes the reverse
-         order; until r338 the port wales faced inboard and FrontSide culled them from outside */
-      if (sgn > 0) idx.push(a, a + 2, a + 1, a + 2, a + 3, a + 1);
-      else idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
-    }
-    base += (NU + 1) * 2;
+    strip(Ti, To, [0, 1, 0]);                    // top face, lit
+    strip(To, Bo, nMid);                         // outer face
+    strip(Bo, Bi, [0, -1, 0]);                   // underside, in shadow
+    const away = (k, k2) => [To[k][0] - To[k2][0], 0, 0];
+    cap([Ti[0], To[0], Bo[0], Bi[0]], away(0, 1));
+    cap([Ti[NU], To[NU], Bo[NU], Bi[NU]], away(NU, NU - 1));
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx); g.computeVertexNormals();
+  g.userData.waleProud = PR.from; g.userData.waleProudM = PR.m;
   return g;
 }
 
@@ -17586,10 +17645,13 @@ function buildShip(S, opts) {
        rope. And a one-piece hull has no strake to thicken: the trunk is its own girder. */
     if (S.build !== 'iron' && S.build !== 'steel' && S.build !== 'dugout') {
       const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
-      group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
+      const lw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale');
+      lw.userData.waleProud = lw.geometry.userData.waleProud; lw.userData.waleProudM = lw.geometry.userData.waleProudM;
+      group.add(lw);
       const rv = readWaleV(S, hullSurface(S));
       const mw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026, rv), waleMat), 'wale');
       if (rv) mw.userData.waleRead = true;
+      mw.userData.waleProud = mw.geometry.userData.waleProud; mw.userData.waleProudM = mw.geometry.userData.waleProudM;
       group.add(mw);
     }
     /* steering per the record (round 121): a paddled hull mounts nothing, a quarter-

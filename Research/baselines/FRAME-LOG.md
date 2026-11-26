@@ -1694,3 +1694,7 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-11-26 03:08** · `ship-clipper` — r338: her two port wales are drawn (winding fix), brown bands on a black side, the class colour the starboard side already had; left to r339 as a record question
 - **2026-11-26 03:08** · `ship-slave-ship` — r338: her two port wales are drawn (winding fix)
 - **2026-11-26 03:08** · `ship-carrack` — r338: her two port wales are drawn (winding fix)
+- **2026-11-26 03:48** · `ship-panokseon` — r339, captured alone on r338's tree (HEAD 81c2f36): the panokseon's port wales, now drawn after r338 rewound buildWaleGeometry's port strip; looked at in pair-ship-panokseon.png
+- **2026-11-26 03:48** · `sea-canoe-floor` — r339, captured alone on r338's tree: only the gaps between the canoe's deck slats change, where r338's rewound wales and frames now show their outer faces below; looked at in pair-sea-canoe-floor.png
+- **2026-11-26 03:48** · `action-lepanto` — r339, captured alone on r338's tree: a pixel line on each galley's hull and spars at distance, r338's port wales and rewound posts; looked at in pair-action-lepanto.png
+- **2026-11-26 03:48** · `action-salamis` — r339, captured alone on r338's tree: a pixel line on each trireme's hull at distance, r338's port wales and rewound posts; same class as action-lepanto
