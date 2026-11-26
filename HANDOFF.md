@@ -30682,3 +30682,4 @@ Titanic's well bulwark and its closed wash-port doors are drawn as two sheets, o
 - **Readiness timeouts:** shipwright-astern and shipwright-hounds (150 s) in run1. Recaptured alone into `r339/run2` at 04:33–04:35, both are inside the gate (0.029% and 0.003%).
 - **Not captured this round:** the steel-hull and globe frames, which no r339 change reaches (the wale is gated off iron, steel and dugout builds), and aboard-titanic, which keeps r337's voyage-position fault.
 - **Final audit** (`r339/auditF.out`, :8149, the pushed tree): **33 hulls, 0 problems.**
+- **Disk at close: 298 MB free on the Data volume** (647 MB at open). r340 opens below r338's 500 MB floor for browser work, so it should check `df` before anything else. The round's own in-gate captures in `r339/run0` were already deleted. `r339/run1` (about 90 MB, the scored mover captures) is the next thing of this round's that can go.
