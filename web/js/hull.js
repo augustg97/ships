@@ -2528,6 +2528,28 @@ function lowerHeadOf(S, mk, lower) {
   return { top: 1 - headM / lower, heel: 1 - 1.2 * headM / lower, shroud: 1 - 0.85 * headM / lower,
            headM, inPerYd, from: 'steel' };
 }
+/* ── r349: THE TOPMAST HEAD AND THE TOPGALLANT HOUNDS ARE STEEL'S SHARES TOO ─────────────────────────
+   Steel 1794, "Proportional Lengths of Masts": "The head of the mizen-mast, and main and fore topmasts, 4 inches
+   to every yard of the length. The head of the mizen topmast, and all topgallant-mast, 3 1/2 inches." Until r349
+   every topmast stood its crosstrees at a class 0.97 of its length and the topgallant's heel at 0.88, so on the
+   74's main the crosstrees stood 0.59 m under the topmast cap and the topgallant's heel 2.37 m under it: the heel
+   hung 1.8 m below the crosstrees that hold it. A topmast's head is the doubling: its crosstrees stand at the
+   head's foot, one head under the cap, and the topgallant's heel stands in it, 1.2 heads under the cap (the lower
+   masthead's proportion, r348). Eckersberg's Asow (1828) puts the main topmast head, crosstrees to cap, at 0.155
+   of the span from the main top to the crosstrees; Steel's rule gives 0.132, the class figure gave 0.032
+   (build/staging/r349/). A topgallant mast's head is the pole above its hounds, where its shrouds set up.
+   Like lowerHeadOf, this applies only where the hull records a step; every other mast keeps 0.97, 0.88, 0.95. */
+function upperHeadsOf(S, mk, top, tg) {
+  const stepM = mastStepOf(S, mk);
+  if (!(stepM > 0) || mk.rig !== 'square' || !(top > 0))
+    return { tm: { cross: 0.97, heel: 0.88, headM: top * 0.12, inPerYd: null, from: 'class' },
+             tg: { hounds: 0.95, headM: (tg || 0) * 0.05, inPerYd: null, from: 'class' } };
+  const ats = (S.masts || []).map(m2 => m2.at);
+  const mizzen = ats.length >= 3 && mk.at === Math.max(...ats);
+  const tmRate = mizzen ? 3.5 : 4, tmHead = top * tmRate / 36, tgHead = (tg || 0) * 3.5 / 36;
+  return { tm: { cross: 1 - tmHead / top, heel: 1 - 1.2 * tmHead / top, headM: tmHead, inPerYd: tmRate, from: 'steel' },
+           tg: { hounds: tg > 0 ? 1 - tgHead / tg : 0.95, headM: tgHead, inPerYd: 3.5, from: 'steel' } };
+}
 function mastLowerOf(mk, steelMain, footY, S) {
   if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
   /* r329 (0y¹⁷¹): a lateen mizzen that carries a top (lateenTopmast, r328) and a recorded top height is drawn to it:
@@ -2850,6 +2872,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
        ⚠ The first version used 0.62 and 0.42 — the topgallant was nearly half again too long,
        which is why the rig stood 72 m over a 57 m hull instead of about 62. */
     const { top, tg } = squareStackOf(mk, lower, lower + stepM);   // r318: Steel's 0.60 and 0.50, or the record's heights
+    const UH = upperHeadsOf(S, mk, top, tg);   // r349: the topmast's crosstrees and the topgallant's heel and hounds
+    const heelOf = si => si === 0 ? LF.heel : si === 1 ? UH.tm.heel : 0.88;   // where the NEXT section's heel stands, as a share of section si
     let y = base;
     /* capY tracks the HEAD of the highest drawn segment — the cap the lifts lead to. It is
        not `y`, because y advances by 0.88 of each segment (the doubling) and so ends BELOW
@@ -3306,7 +3330,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
           return segR[si].a + (segR[si].b - segR[si].a) * t;
         }
-        y0 += segs[si] * (si === 0 ? LF.heel : 0.88);
+        y0 += segs[si] * heelOf(si);
       }
       return segR[0].a;
     };
@@ -3369,6 +3393,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
                             inPerYd: LF.inPerYd, from: LF.from === 'steel'
                               ? 'Steel 1794: ' + LF.inPerYd + ' in to every yard of the whole mast, heel to head'
                               : 'class: the top at 0.90 and the topmast heel at 0.88 of the span over the deck' };
+      /* r349: the topmast head and the topgallant hounds as built (A-TOPMAST-HEAD-STEEL) */
+      if (si === 1 && mk.rig === 'square')
+        m.userData.head = { headM: +UH.tm.headM.toFixed(3), crossY: +(y + seg * UH.tm.cross).toFixed(3), heelY: +(y + seg * UH.tm.heel).toFixed(3),
+                            inPerYd: UH.tm.inPerYd, from: UH.tm.from === 'steel'
+                              ? 'Steel 1794: ' + UH.tm.inPerYd + ' in to every yard of the topmast; the crosstrees one head under the cap, the topgallant heel 1.2 heads'
+                              : 'class: the crosstrees at 0.97 and the topgallant heel at 0.88 of the topmast' };
+      if (si === 2 && mk.rig === 'square')
+        m.userData.head = { headM: +UH.tg.headM.toFixed(3), houndsY: +(y + seg * UH.tg.hounds).toFixed(3), inPerYd: UH.tg.inPerYd,
+                            from: UH.tg.from === 'steel' ? 'Steel 1794: 3 1/2 in to every yard of the topgallant mast, over its hounds'
+                                                         : 'class: the hounds at 0.95 of the topgallant mast' };
       /* r287 (0y96): `mi` names the mast, so the loft's deck-to-truck and the audit can read one mast's
          segments as one stack — the foot of segment 0 to the head of the last drawn — from the meshes */
       /* the iron mast's card carries its provenance: attested diameters are the record's,
@@ -3834,7 +3868,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
            side-view plate gives directly, and the same two points the record's mastHeightsM already reads (the
            crosstrees on the topmast's head, the truck on the topgallant's). The furled build still lowers the
            yard onto the cap below: the plate shows the sails set. Without the field, byte-identical. */
-        let hoistRec = null, hoistY = y + seg * 0.88;
+        let hoistRec = null, hoistY = y + seg * (si === 1 ? UH.tm.heel : 0.88);   // r349: atrip under the heel of the section above
         if (si >= 1 && tiers > 1 && !Array.isArray(mk.yards)) {
           const key = si === 1 ? 'topmast' : 'topgallantMast';
           const hr = mk.hoistRead && mk.hoistRead[key];
@@ -3876,7 +3910,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
       capY = y + seg;
       segHeads[si] = capY;
-      y += seg * (si === 0 ? LF.heel : 0.88);
+      y += seg * heelOf(si);
     });
 
     /* ── THE DOUBLED RIG, FROM THE RECORD: `yards` ON THE MAST ─────────────────────────
@@ -5886,7 +5920,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const platY = base + lower * LF.top;
         const platR = B * 0.20;
         const mxAt = mxA;
-        const topHead = base + lower * LF.heel + top * 0.97;
+        const topHead = base + lower * LF.heel + top * UH.tm.cross;   // r349: the topmast crosstrees, at the foot of its head
         /* ── r325 (0y¹⁶⁷): A TOPMAST TOP WHERE THE RECORD READS ONE ─────────────────────────────
            Before about 1700 a topmast carried a small round top of its own, under its cap, where the
            18th century put open crosstrees. Hocker's rig diagram of Vasa (1628) draws one on the fore
@@ -5942,7 +5976,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
             'A small round top on the topmast, under its cap, about half the width of the lower top. '
             + 'Ships carried one before about 1700; it spreads the topgallant shrouds, which set up at its rim. '
             + "Read off Hocker's rig diagram of Vasa (1628)."));
-          const tgHead = base + lower * LF.heel + top * 0.88 + tg * 0.95;
+          const tgHead = base + lower * LF.heel + top * UH.tm.heel + tg * UH.tg.hounds;   // r349: the topgallant's hounds
           const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
           for (let s = 0; s < nG; s++) {
             const f = (s + 1) / (nG + 1);
@@ -5963,11 +5997,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
             ct.add(bar);
           }
           ct.userData.mast = mi;
+          ct.userData.crossY = +topHead.toFixed(4);   // r349
           group.add(tag(ct, 'top', 'Crosstrees',
             'The light spreaders at the topmast head — trestletrees and crosstrees without '
             + 'a platform. They spread the topgallant shrouds the way the top spreads the '
             + "topmast's, one storey further up."));
-          const tgHead = base + lower * LF.heel + top * 0.88 + tg * 0.95;
+          const tgHead = base + lower * LF.heel + top * UH.tm.heel + tg * UH.tg.hounds;   // r349: the topgallant's hounds
           const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
           for (let s = 0; s < nG; s++) {
             const f = (s + 1) / (nG + 1);
@@ -5984,7 +6019,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const ur = ropeMesh(upRats, 0.014 + B * 0.0005, ropeMat);
         if (ur) group.add(tag(ur, 'ratline', 'Topmast ratlines'));
         const tgm = ropeMesh(tgSegs, 0.010 + B * 0.0004, ropeMat);
-        if (tgm) group.add(tag(tgm, 'shroud', 'Topgallant shrouds'));
+        if (tgm) { tgm.userData.topgallantShrouds = { mast: mi }; group.add(tag(tgm, 'shroud', 'Topgallant shrouds')); }
       }
 
       /* ── r305 (0y¹³³): A GAFF TOPMAST IS STAYED TOO ────────────────────────────────────
@@ -18505,7 +18540,7 @@ function buildShip(S, opts) {
                      : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
                      : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
                      : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments'
-                       + (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep), and its head, top to cap, is Steel\'s 5 in (4 on the mizzen) to every yard of the whole mast (r348)' : '');
+                       + (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep), and its head, top to cap, is Steel\'s 5 in (4 on the mizzen) to every yard of the whole mast (r348), and the topmast head, crosstrees to cap, Steel\'s 4 in (3 1/2 on the mizzen) to every yard of the topmast (r349)' : '');
         /* r288 (0y99): the same derivation as a RECORD, so the card can say it on screen in its own words —
            the sentence above is one string, and a card that has to parse a string to find the number will
            print the wrong thing the first time the sentence is reworded. `from` is 'record' or 'derived';

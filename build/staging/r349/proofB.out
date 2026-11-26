@@ -1,0 +1,67 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a topmast with no head record",
+  "detail": "mast 0 (station 0.115)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a topmast with no head record",
+  "detail": "mast 1 (station 0.556)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a topmast with no head record",
+  "detail": "mast 0 (station 0.115)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a topmast with no head record",
+  "detail": "mast 1 (station 0.504)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast with no head record",
+  "detail": "mast 0 (station 0.115)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast with no head record",
+  "detail": "mast 1 (station 0.556)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topmast with no head record",
+  "detail": "mast 2 (station 0.85)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast with no head record",
+  "detail": "mast 0 (station 0.115)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast with no head record",
+  "detail": "mast 1 (station 0.556)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast with no head record",
+  "detail": "mast 2 (station 0.85)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast with no head record",
+  "detail": "mast 0 (station 0.115)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast with no head record",
+  "detail": "mast 1 (station 0.556)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topmast with no head record",
+  "detail": "mast 2 (station 0.85)"
+ }
+]

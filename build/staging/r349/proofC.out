@@ -1,0 +1,57 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "topmast crosstrees not at their record",
+  "detail": "mast 0 (station 0.115): drawn at y 38.186, the head record puts them at 36.767"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topgallant heel off its record",
+  "detail": "mast 0 (station 0.115): heel at y 36.611, the topmast's head record puts it at 36.378"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topsail yard not atrip under the topgallant heel",
+  "detail": "mast 0 (station 0.115): set at y 36.378, the topgallant's heel at 36.611"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "topgallant shrouds off the hounds",
+  "detail": "mast 0 (station 0.115): the shrouds reach y 44.279, the hounds stand at 44.509"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "topmast crosstrees not at their record",
+  "detail": "mast 1 (station 0.556): drawn at y 42.475, the head record puts them at 40.879"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topgallant heel off its record",
+  "detail": "mast 1 (station 0.556): heel at y 40.704, the topmast's head record puts it at 40.441"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topsail yard not atrip under the topgallant heel",
+  "detail": "mast 1 (station 0.556): set at y 40.441, the topgallant's heel at 40.704"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "topgallant shrouds off the hounds",
+  "detail": "mast 1 (station 0.556): the shrouds reach y 49.328, the hounds stand at 49.587"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "topmast crosstrees not at their record",
+  "detail": "mast 2 (station 0.85): drawn at y 37.103, the head record puts them at 35.969"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topgallant heel off its record",
+  "detail": "mast 2 (station 0.85): heel at y 35.585, the topmast's head record puts it at 35.641"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topsail yard not atrip under the topgallant heel",
+  "detail": "mast 2 (station 0.85): set at y 35.641, the topgallant's heel at 35.585"
+ }
+]

@@ -1,0 +1,23 @@
+# r349 deleted build/staging/r348/run1 (these 22 PNGs) and build/staging/r348/run1-diff, untracked capture copies, 82 MB
+aboard.png
+aboard-coast.png
+action.png
+descent.png
+descent-coast.png
+descent-high.png
+globe-crossing.png
+globe-default.png
+globe-era-card.png
+globe-steam.png
+ship-clipper.png
+ship-dreadnought.png
+ship-endurance.png
+ship-great-eastern.png
+ship-preussen.png
+ship-slave-ship.png
+ship-steamer.png
+shipwright.png
+shipwright-ahead.png
+shipwright-astern.png
+shipwright-furled.png
+shipwright-hounds.png
