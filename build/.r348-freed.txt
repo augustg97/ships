@@ -24,3 +24,7 @@ build/staging/r344/run1-diff
 build/staging/r344/run2-diff
 build/staging/r345/run1-diff
 build/staging/r345/run2-diff
+build/staging/r346/run1
+build/staging/r347/run1
+build/staging/r346/run1-diff
+build/staging/r347/run1-diff
