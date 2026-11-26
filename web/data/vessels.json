@@ -4831,7 +4831,37 @@
           "drumDiaM": 1.5,
           "paint": "red"
         },
-        "capstanProvenance": "PLATE READS off RMG SLR0338, the contemporary Bellona model, quarter plate l5785_003 (~16 px/m at the waist — counts solid ±1, widths ±15%): bars SHIPPED, 12-14 rays so bars=14 is a read ±1; drumhead ≈1.5 m (read at that px/m, ±10%); bar tips ≈2.7 drumhead-dias out, agreeing with the period's 12-14 ft bars; the machine painted red-ochre like the inner works (paint field). whelps 6 is a CLASS DEFAULT (Falconer pl. II resolves six; period range 6-8). Form per Falconer 1769 CAPSTERN: whelps drumhead-to-deck, chocks between, two iron pawls on deck, men heaving breast-high. A 74 carried main (double) and jeer capstans; the weather-deck machine drawn is the upper barrel of the main."
+        "capstanProvenance": "PLATE READS off RMG SLR0338, the contemporary Bellona model, quarter plate l5785_003 (~16 px/m at the waist — counts solid ±1, widths ±15%): bars SHIPPED, 12-14 rays so bars=14 is a read ±1; drumhead ≈1.5 m (read at that px/m, ±10%); bar tips ≈2.7 drumhead-dias out, agreeing with the period's 12-14 ft bars; the machine painted red-ochre like the inner works (paint field). whelps 6 is a CLASS DEFAULT (Falconer pl. II resolves six; period range 6-8). Form per Falconer 1769 CAPSTERN: whelps drumhead-to-deck, chocks between, two iron pawls on deck, men heaving breast-high. A 74 carried main (double) and jeer capstans; the weather-deck machine drawn is the upper barrel of the main.",
+        "paintBands": {
+          "bands": [
+            [
+              "black",
+              0.0,
+              0.34
+            ],
+            [
+              "ochre",
+              0.34,
+              0.61
+            ],
+            [
+              "black",
+              0.61,
+              0.78
+            ],
+            [
+              "ochre",
+              0.78,
+              1.0
+            ]
+          ],
+          "of": "the freeboard over the load waterline",
+          "provenance": "PLATE READ, r340-r341: C. W. Eckersberg, 'The Russian Ship of the Line Asow and a Frigate at Anchor in the Roads of Elsinore' (1828, SMK), the Commons Google Art Project file at the 1920 px thumb (build/staging/r312/plates/asow.jpg, about 30 px/m at the mizzen). Read up two columns (x 800-830 and x 880-910), an ochre pixel being one where R - B > 28, the bands agree to 0.01 as fractions of the height from the waterline to the top of the upper ochre band: black 0-0.34, ochre 0.34-0.61, black 0.61-0.78, ochre 0.78-1.0. The upper ochre band runs up to the black rail cap at the top of the side, so that height is taken as the record's freeboard. BOUNDS: the ratios are scale-free and good to about 0.01; the plate's metres carry about 20% (the top of the band reads 4.8-5.1 m against the record's 5.4 m). Asow is a Russian 74 of 1826; the class's British dark is Crick-Smith's grey, and the shader keeps that colour."
+        },
+        "wale": {
+          "finish": "tarred",
+          "finishProvenance": "PLATE READ, r340: Eckersberg's Asow (see paintBands) paints the side black from the waterline to the lower ports and between the tiers, where the wales run; no wale shows a lighter tone than the band it runs in. Research/WALE-FINISH.md."
+        }
       }
     },
     {
@@ -9917,7 +9947,11 @@
           "bars": 8
         },
         "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars.",
-        "trucksContested": "CONTESTED, r285: the record's mast heights (fore heightM 18.8, main and mizzen truckM 33.5 / 26.8 deck to truck since r304, which gave them topmasts at the plate's cap shares; the fore figure is a lower mast the builder stacks a topmast and a topgallant mast on, to a built fore truck about 32 m over the deck; stationProvenance reads the trucks off the beset broadside at 12.6 px/m as fore 34.3, main 35.2, mizzen 29.3 m over the water) against r285's read of the same plate at 12.4 +/- 0.4 px/m from the mast spacing: the fore pole vanishes 248 px over the cap (21.4 +/- 1.5 m over the deck, 24.8 over the water), the main's 310 +/- 20 px (26.4 +/- 2 m over the deck), the mizzen's 270 +/- 20 px (23.1 +/- 2 m over the deck); the funnel's top 54 px over the cap (4.4 m; the record's 6.5 m over the deck is 5.15 m over the cap, 64 px). The old figures cannot be reproduced from the plate at any one scale: 34.3 m over the water at 12.6 px/m puts the fore truck at row 230, where nothing is drawn, and the funnel's '5.7 m over the rail' wants 9.5 px/m. A thin pole may fade before its truck, which bounds this read from above by a few metres, not by ten. NOT RESOLVED HERE: a plate with the hull to the waterline and the masts in it, or the RMG plan's mast table, settles it; until then the built masts stand at the record's heights and this field says they are contested."
+        "trucksContested": "CONTESTED, r285: the record's mast heights (fore heightM 18.8, main and mizzen truckM 33.5 / 26.8 deck to truck since r304, which gave them topmasts at the plate's cap shares; the fore figure is a lower mast the builder stacks a topmast and a topgallant mast on, to a built fore truck about 32 m over the deck; stationProvenance reads the trucks off the beset broadside at 12.6 px/m as fore 34.3, main 35.2, mizzen 29.3 m over the water) against r285's read of the same plate at 12.4 +/- 0.4 px/m from the mast spacing: the fore pole vanishes 248 px over the cap (21.4 +/- 1.5 m over the deck, 24.8 over the water), the main's 310 +/- 20 px (26.4 +/- 2 m over the deck), the mizzen's 270 +/- 20 px (23.1 +/- 2 m over the deck); the funnel's top 54 px over the cap (4.4 m; the record's 6.5 m over the deck is 5.15 m over the cap, 64 px). The old figures cannot be reproduced from the plate at any one scale: 34.3 m over the water at 12.6 px/m puts the fore truck at row 230, where nothing is drawn, and the funnel's '5.7 m over the rail' wants 9.5 px/m. A thin pole may fade before its truck, which bounds this read from above by a few metres, not by ten. NOT RESOLVED HERE: a plate with the hull to the waterline and the masts in it, or the RMG plan's mast table, settles it; until then the built masts stand at the record's heights and this field says they are contested.",
+        "wale": {
+          "finish": "withHull",
+          "finishProvenance": "PLATE READ, r340: Hurley's hand-coloured lantern slide a090007 (Commons, 1500 px, about 24 px/m at the stern) shows her side one dark tone from the rail to the ice, with no contrasting band. The slide's colour is hand-applied, so only tone is evidence: the wale is painted with the hull. Research/WALE-FINISH.md."
+        }
       },
       "rows": [
         [

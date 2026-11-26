@@ -9,6 +9,10 @@ uniform float uCopperAge;    // 0 = new and bright, 1 = fully verdigris
 uniform float uWaterline;    // v coordinate of the load waterline
 uniform float uChequer;      // 0 = plain, 1 = Nelson chequer with gunport bands
 uniform float uGunDecks;
+/* the chequer's tiers, from hull.js sideBands() (round 341): per gun deck, the ochre band's
+   lower and upper edge and the port centre, in the loft's v, and the edge's half-softness */
+uniform vec4  uTierLo, uTierHi, uTierPort;
+uniform float uTierSoft;
 uniform vec3  uTopside;      // the paint above the waterline
 uniform float uIron;         // 0 = wood, 1 = iron/steel plate
 uniform float uWeld;         // 0 = riveted lands, 1 = all-welded flush butts (≈1950 on)
@@ -328,12 +332,18 @@ void main(){
        the lids closed the hull reads as plain stripes, because the lids were painted to match. */
     if (uChequer > 0.5) {
       float band = 0.0, port = 0.0;
-      for (float d = 0.0; d < 4.0; d += 1.0) {
-        if (d >= uGunDecks) break;
-        float centre = uWaterline + 0.10 + d * 0.115;
-        band = max(band, smoothstep(0.052, 0.030, abs(v - centre)));
+      /* ⚠ THE PAINT FOLLOWS THE TIMBER (round 341). The band centres were fixed here at
+         uWaterline + 0.10 + d·0.115, so the paint and the wales were two models of one side.
+         Eckersberg's Asow paints the black where the wales run and the ochre on the planking
+         between them. The tiers now come from hull.js sideBands(), which also places the
+         wales, the gunports' guns and these ports. */
+      for (int d = 0; d < 4; d++) {
+        if (float(d) >= uGunDecks) break;
+        float lo = uTierLo[d], hi = uTierHi[d], pc = uTierPort[d];
+        band = max(band, smoothstep(lo - uTierSoft, lo + uTierSoft, v)
+                       * smoothstep(hi + uTierSoft, hi - uTierSoft, v));
         float px = fract(u * 26.0);
-        port = max(port, smoothstep(0.030, 0.016, abs(v - centre))
+        port = max(port, smoothstep(0.030, 0.016, abs(v - pc))
                        * smoothstep(0.30, 0.22, abs(px - 0.5)));
       }
       vec3 ochre = vec3(0.780, 0.585, 0.395);        // creamy-orange, not lemon

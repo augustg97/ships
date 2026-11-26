@@ -627,6 +627,33 @@ g.setIndex(idx); g.computeVertexNormals();
 g.userData.waleProud = PR.from; g.userData.waleProudM = PR.m;
 return g;
 }
+function sideBands(S) {
+const P = S.paintBands;
+const vf = f => 0.62 + 0.38 * f;
+if (P && Array.isArray(P.bands) && P.bands.length) {
+const ochre = P.bands.filter(b => b[0] === 'ochre');
+const black = P.bands.filter(b => b[0] === 'black');
+const tiers = ochre.map(b => ({ lo: vf(b[1]), hi: vf(b[2]), port: vf(0.5 * (b[1] + b[2])) }));
+const wales = [];
+if (black[0]) wales.push({ v0: vf(black[0][2]) - 0.015, thick: 0.030 });
+if (black[1]) wales.push({ v0: vf(0.5 * (black[1][1] + black[1][2])), thick: 0.026 });
+while (wales.length < 2) wales.push(wales.length ? { v0: 0.760, thick: 0.026 } : { v0: 0.655, thick: 0.030 });
+return { tiers, wales, soft: 0.004, from: 'record' };
+}
+const tiers = [];
+for (let d = 0; d < 4; d++) {
+const c = 0.62 + 0.10 + d * 0.115;
+tiers.push({ lo: c - 0.041, hi: c + 0.041, port: c });
+}
+return { tiers, wales: [{ v0: 0.655, thick: 0.030 }, { v0: 0.760, thick: 0.026 }], soft: 0.011, from: 'class' };
+}
+function waleFinish(S) {
+const f = S.wale && S.wale.finish;
+if (f === 'tarred') return { color: new THREE.Color().setRGB(0.180, 0.178, 0.172), finish: f, from: 'record' };
+if (f === 'withHull') return { color: new THREE.Color(S.topside || '#5b4a33'), finish: f, from: 'record' };
+if (f === 'bright') return { color: new THREE.Color(0x6b5334), finish: f, from: 'record' };
+return { color: new THREE.Color(0x3d2f1f), finish: 'unknown', from: 'class fallback' };
+}
 function readWaleV(S, H) {
 const W = S.waleRead;
 if (!(W && Array.isArray(W.stations) && W.stations.length >= 2)) return null;
@@ -6339,7 +6366,9 @@ if (!decks) return;
 const g = new THREE.Group();
 const len = S.beam * 0.19, r = S.beam * 0.017;
 for (let d = 0; d < decks; d++) {
-const v = 0.62 + 0.10 + d * 0.115;
+const tier = sideBands(S).tiers[d];
+if (!tier) continue;
+const v = tier.port;
 if (v > 0.985) continue;
 for (let k = 0; k < 26; k++) {
 const u = (k + 0.5) / 26;
@@ -11387,6 +11416,12 @@ uCopperAge: { value: S.copperAge !== undefined ? S.copperAge : 0.55 },
 uWaterline: { value: 0.62 },
 uChequer: { value: S.chequer ? 1 : 0 },
 uGunDecks: { value: S.gunDecks || 0 },
+...(() => {
+const t = sideBands(S).tiers, at = (k, i) => (t[i] ? t[i][k] : 0);
+const v4 = k => new THREE.Vector4(at(k, 0), at(k, 1), at(k, 2), at(k, 3));
+return { uTierLo: { value: v4('lo') }, uTierHi: { value: v4('hi') },
+uTierPort: { value: v4('port') }, uTierSoft: { value: sideBands(S).soft } };
+})(),
 uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
 uIron: { value: S.iron ? 1 : 0 },
 uWeld: { value: WELDED ? 1 : 0 },
@@ -11421,12 +11456,19 @@ group.add(tag(new THREE.Mesh(buildStemGeometry(S, false), timber), 'stempost', '
 group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'Sternpost'));
 }
 if (S.build !== 'iron' && S.build !== 'steel' && S.build !== 'dugout') {
-const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
-const lw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale');
+const WF = waleFinish(S), SB = sideBands(S);
+const waleMat = WF.from === 'record'
+? new THREE.ShaderMaterial({
+vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam, uCol: { value: WF.color } } })
+: new THREE.MeshStandardMaterial({ color: WF.color, roughness: 0.9 });
+const lw = tag(new THREE.Mesh(buildWaleGeometry(S, SB.wales[0].v0, SB.wales[0].thick), waleMat), 'wale');
 lw.userData.waleProud = lw.geometry.userData.waleProud; lw.userData.waleProudM = lw.geometry.userData.waleProudM;
+lw.userData.waleFinish = WF.finish + ' (' + WF.from + ')'; lw.userData.waleBands = SB.from;
 group.add(lw);
 const rv = readWaleV(S, hullSurface(S));
-const mw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026, rv), waleMat), 'wale');
+const mw = tag(new THREE.Mesh(buildWaleGeometry(S, SB.wales[1].v0, SB.wales[1].thick, rv), waleMat), 'wale');
+mw.userData.waleFinish = lw.userData.waleFinish; mw.userData.waleBands = SB.from;
 if (rv) mw.userData.waleRead = true;
 mw.userData.waleProud = mw.geometry.userData.waleProud; mw.userData.waleProudM = mw.geometry.userData.waleProudM;
 group.add(mw);
@@ -11642,5 +11684,5 @@ extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;
 }
-window.SHIPS_HULL = { PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { sideBands, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
 superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

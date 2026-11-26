@@ -1122,6 +1122,54 @@ function buildWaleGeometry(S, v0, thick, vAt) {
   return g;
 }
 
+/* ── THE PAINT FOLLOWS THE TIMBER (round 341) ─────────────────────────────────────────
+   The chequer's band centres were fixed in the shader at uWaterline + 0.10 + d·0.115, and the
+   wales at v 0.655 and 0.760, so paint and timber were two models of one side. On the 74 the
+   upper wale crossed the top of the lower ochre band. Eckersberg's Asow (1828) paints the black
+   where the wales run and the ochre on the planking between them, with each tier of ports in
+   its ochre band. hull.paintBands { bands: [[ 'black' | 'ochre', from, to ]], as fractions of
+   the freeboard over the load waterline } is that read. This function turns it into the
+   shader's tiers, the ports' centres (so the guns follow) and the wales' heights:
+     the main wale's top on the top of the lowest black band, where the lower ports' ochre
+     begins; each later wale centred in the next black band.
+   The wales keep the class depths: at 30 px/m the plate does not separate a wale's moulding
+   from the black-painted planking around it. Without the field, the class tiers and wales,
+   byte-identical: the old band was |v − c| < 0.041 with edges 0.011 soft. */
+function sideBands(S) {
+  const P = S.paintBands;
+  const vf = f => 0.62 + 0.38 * f;
+  if (P && Array.isArray(P.bands) && P.bands.length) {
+    const ochre = P.bands.filter(b => b[0] === 'ochre');
+    const black = P.bands.filter(b => b[0] === 'black');
+    const tiers = ochre.map(b => ({ lo: vf(b[1]), hi: vf(b[2]), port: vf(0.5 * (b[1] + b[2])) }));
+    const wales = [];
+    if (black[0]) wales.push({ v0: vf(black[0][2]) - 0.015, thick: 0.030 });
+    if (black[1]) wales.push({ v0: vf(0.5 * (black[1][1] + black[1][2])), thick: 0.026 });
+    while (wales.length < 2) wales.push(wales.length ? { v0: 0.760, thick: 0.026 } : { v0: 0.655, thick: 0.030 });
+    return { tiers, wales, soft: 0.004, from: 'record' };
+  }
+  const tiers = [];
+  for (let d = 0; d < 4; d++) {
+    const c = 0.62 + 0.10 + d * 0.115;
+    tiers.push({ lo: c - 0.041, hi: c + 0.041, port: c });
+  }
+  return { tiers, wales: [{ v0: 0.655, thick: 0.030 }, { v0: 0.760, thick: 0.026 }], soft: 0.011, from: 'class' };
+}
+
+/* ── A WALE'S PAINT IS A FACT OF THE RECORD (round 341) ──────────────────────────────
+   Every wale was one brown, 0x3d2f1f. hull.wale.finish says what the plate shows:
+   'tarred' is the side's black (the chequer's dark grey, vec3(0.180, 0.178, 0.172) linear,
+   so the timber and the band it runs in are one paint); 'withHull' is the topside colour;
+   'bright' is the timber's own tone. Without it the brown stays, as the class fallback,
+   and the mesh says so in userData.waleFinish. Research/WALE-FINISH.md holds the reads. */
+function waleFinish(S) {
+  const f = S.wale && S.wale.finish;
+  if (f === 'tarred') return { color: new THREE.Color().setRGB(0.180, 0.178, 0.172), finish: f, from: 'record' };
+  if (f === 'withHull') return { color: new THREE.Color(S.topside || '#5b4a33'), finish: f, from: 'record' };
+  if (f === 'bright') return { color: new THREE.Color(0x6b5334), finish: f, from: 'record' };
+  return { color: new THREE.Color(0x3d2f1f), finish: 'unknown', from: 'class fallback' };
+}
+
 /* ── A READ WALE IS LAID ON ITS PLATE'S LINE (round 337) ─────────────────────────────
    The class wales stand at a fixed fraction of the freeboard (v 0.655 and 0.760), so they
    rise aft in proportion to the rail. On the fluyt that drew her main wale climbing with the
@@ -10086,7 +10134,7 @@ function buildDeadeyes(xs, r, mat) {
  * two-decker that is the most obvious absence on the ship. The barrels are placed from the
  * SAME two expressions the shader uses to draw the ports —
  *
- *     port centre in v : uWaterline + 0.10 + deck * 0.115
+ *     port centre in v : sideBands(S).tiers[deck].port (r341; the class tier is uWaterline + 0.10 + deck * 0.115)
  *     ports along u    : fract(u * 26.0) == 0.5
  *
  * — so a barrel cannot come out of a blank plank, and if the port pattern is ever retuned the
@@ -10104,7 +10152,9 @@ function buildGuns(S, group, mat) {
   const g = new THREE.Group();
   const len = S.beam * 0.19, r = S.beam * 0.017;
   for (let d = 0; d < decks; d++) {
-    const v = 0.62 + 0.10 + d * 0.115;                  // the shader's port centre, exactly
+    const tier = sideBands(S).tiers[d];                 // the shader's port centre, exactly (r341)
+    if (!tier) continue;
+    const v = tier.port;
     if (v > 0.985) continue;
     for (let k = 0; k < 26; k++) {
       const u = (k + 0.5) / 26;
@@ -17579,6 +17629,12 @@ function buildShip(S, opts) {
       uWaterline: { value: 0.62 },
       uChequer: { value: S.chequer ? 1 : 0 },
       uGunDecks: { value: S.gunDecks || 0 },
+      ...(() => {
+        const t = sideBands(S).tiers, at = (k, i) => (t[i] ? t[i][k] : 0);
+        const v4 = k => new THREE.Vector4(at(k, 0), at(k, 1), at(k, 2), at(k, 3));
+        return { uTierLo: { value: v4('lo') }, uTierHi: { value: v4('hi') },
+                 uTierPort: { value: v4('port') }, uTierSoft: { value: sideBands(S).soft } };
+      })(),
       uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
       uIron: { value: S.iron ? 1 : 0 },
       uWeld: { value: WELDED ? 1 : 0 },
@@ -17644,12 +17700,23 @@ function buildShip(S, opts) {
        hull's own plating is the girder, and putting wales on one is like bracing a bridge with
        rope. And a one-piece hull has no strake to thicken: the trunk is its own girder. */
     if (S.build !== 'iron' && S.build !== 'steel' && S.build !== 'dugout') {
-      const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
-      const lw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale');
+      const WF = waleFinish(S), SB = sideBands(S);
+      /* a RECORDED finish is the side's own paint, so it takes the shell's own light: STEEL_FRAG
+         on the hull material's uSun/uCam (the r102 lesson). In the scene's lights through ACES
+         the first r341 witness drew the 74's tarred wales as pale grey stripes on a dark band.
+         The class fallback keeps its MeshStandardMaterial brown, byte-identical. */
+      const waleMat = WF.from === 'record'
+        ? new THREE.ShaderMaterial({
+            vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
+            uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam, uCol: { value: WF.color } } })
+        : new THREE.MeshStandardMaterial({ color: WF.color, roughness: 0.9 });
+      const lw = tag(new THREE.Mesh(buildWaleGeometry(S, SB.wales[0].v0, SB.wales[0].thick), waleMat), 'wale');
       lw.userData.waleProud = lw.geometry.userData.waleProud; lw.userData.waleProudM = lw.geometry.userData.waleProudM;
+      lw.userData.waleFinish = WF.finish + ' (' + WF.from + ')'; lw.userData.waleBands = SB.from;
       group.add(lw);
       const rv = readWaleV(S, hullSurface(S));
-      const mw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026, rv), waleMat), 'wale');
+      const mw = tag(new THREE.Mesh(buildWaleGeometry(S, SB.wales[1].v0, SB.wales[1].thick, rv), waleMat), 'wale');
+      mw.userData.waleFinish = lw.userData.waleFinish; mw.userData.waleBands = SB.from;
       if (rv) mw.userData.waleRead = true;
       mw.userData.waleProud = mw.geometry.userData.waleProud; mw.userData.waleProudM = mw.geometry.userData.waleProudM;
       group.add(mw);
@@ -18021,5 +18088,5 @@ function buildShip(S, opts) {
   return group;
 }
 
-window.SHIPS_HULL = { PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { sideBands, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
                       superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

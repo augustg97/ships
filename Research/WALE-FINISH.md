@@ -105,3 +105,36 @@ ship (the Vasa rig diagram, which shows no hull paint). All 17 stay `'unknown'` 
 read. The candidates to read first are those whose black topside makes today's brown band the
 most visible, the clipper and Wyoming, plus the East Indiaman, the other ship that carries ports in tiers. Her bands
 would need the same structural change as the 74's.
+
+## r341: what the model now does with these reads
+
+- **`hull.wale.finish`** is a record field. The 74 is `'tarred'`, Endurance `'withHull'`, every
+  other timber hull has no value and keeps the class brown. `userData.waleFinish` on each wale
+  mesh says `'tarred (record)'`, `'withHull (record)'` or `'unknown (class fallback)'`.
+- **A recorded finish is lit by the hull's own light.** The first witness drew the 74's tarred
+  wales in a `MeshStandardMaterial`, which is lit by the scene's lights through ACES. They came
+  out as pale grey stripes on the dark band they run in (r102 measured the same fault on Azzam's
+  terraces: 216 against 89 sRGB for one paint). A recorded wale is now drawn with `STEEL_FRAG`
+  on the hull material's own `uSun`/`uCam`, so the wale and its band are one paint. The class
+  fallback keeps its old material.
+- **The 74's paint and wales come from one record, `hull.paintBands`.** It holds Asow's four
+  bands as fractions of the freeboard: black 0–0.34, ochre 0.34–0.61, black 0.61–0.78, ochre
+  0.78–1.0. `sideBands()` in hull.js turns it into the shader's tiers, the gunports' centres (so
+  the guns follow), and the wale heights. The main wale's top is on the top of the lowest black
+  band, and the middle wale is centred in the black band between the tiers. Amidships on the
+  model:
+
+  | | before (class) | after (Asow) |
+  |---|---|---|
+  | lower tier of ports, centre | 1.42 m | 2.57 m |
+  | upper tier of ports, centre | 3.06 m | 4.81 m |
+  | tier spacing | 1.64 m | 2.24 m |
+  | main wale, centre | 0.52 m | 1.64 m |
+  | middle wale, centre | 2.00 m (across the top of the lower ochre) | 3.77 m (in the black between tiers) |
+
+  The tier spacing is now the height of a gun deck plus its beams. Before, it was 1.64 m, too
+  low for a man to stand between decks.
+- **Bound.** The model's weather deck stands at the sheer, 5.4 m. The upper tier's port tops
+  are at 5.14 m, 0.26 m under that deck. On a real two-decker, the upper gun deck is the deck
+  in the waist, and the side above it is a bulwark. That puts the deck about 1.5 m below the
+  top of the side, which this hull does not model yet. See HANDOFF r341, item 1 for r342.

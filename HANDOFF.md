@@ -30709,3 +30709,39 @@ After the deletions there were 455–460 MB free. Sampled every 2 s for 30 s, it
 4. Read a colour plate for the clipper, Wyoming and the East Indiaman before setting theirs.
 
 **Disk at close: 441 MB free.**
+
+## Round 341 — 2026-11-26 — The 74's side is now painted, and her wales and gunports placed, from one read of Eckersberg's *Asow* (1828). Until this round the shader fixed the chequer's bands, and the wales and guns stood at fixed fractions of the freeboard. These were three separate models of one side. Her upper wale ran across the top of the lower ochre band, and both tiers of ports stood about 1.1–1.7 m lower than the plate puts them. Wales now carry a recorded paint, `hull.wale.finish`: the 74's are tarred, and Endurance's are painted with her hull
+
+**Queue check: August's second list stands worked in full (r57).** The round took r340's first item for r341: `hull.wale.finish`, then driving the chequer bands from the wale heights.
+
+**THE DISK.** At 05:03 the Data volume had 420 MB free, under the 500 MB floor for browser work. `build/staging` held 21 GB, and 12 GB of it was untracked copies of ratchet captures. These were 334 directories whose files are all PNGs named after baseline frames (`run1-current`, `allcur`, `mid`, `have` …), from rounds r197–r335, and none of them is tracked by git. Each round's decisions on those captures are already committed in the baselines and FRAME-LOG.md. The 330 directories from r330 and earlier were deleted, 11.99 GB. The list is in `build/.r341-freed.txt`. That left 11.9 GB free. r331–r335's capture copies were kept.
+
+**WHAT CHANGED** (`build/staging/r341/scripts/r341_edit.py <web dir> second` reproduces both passes on a clean tree, then `glsl.py check` and `bundle`; `r341_edit_audit.py` adds the audit rule):
+1. **`hull.paintBands`** on the 74: Asow's bands as fractions of the freeboard over the load waterline. Black 0–0.34, ochre 0.34–0.61, black 0.61–0.78, ochre 0.78–1.0. The bands were read up two columns in r340 and agree to 0.01. The upper ochre band runs up to the rail cap at the top of the side, so the top of the band is taken as the record's freeboard.
+2. **`sideBands(S)`** in hull.js is now the one source for the side's tiers. It gives the shader its ochre bands (`uTierLo/uTierHi/uTierPort/uTierSoft`, which replace the fixed `uWaterline + 0.10 + d·0.115`), it gives `buildGuns` its port centres, and it gives the wales their heights. The main wale's top is on the top of the lowest black band, and the middle wale is centred in the black band between the tiers. The wales keep the class depths, because at 30 px/m the plate cannot separate a wale from the black-painted planking around it. A hull without the field gets the class tiers and wales. The node probe confirms this: every other hull builds identically, part by part.
+3. **`hull.wale.finish`**: `'tarred'` (the chequer's dark grey), `'withHull'` (the topside colour) or `'bright'` (timber). The 74 is tarred and Endurance withHull. The other 18 timber hulls have no value. They keep the brown, and their meshes carry `userData.waleFinish = 'unknown (class fallback)'`.
+4. **A recorded wale takes the hull's own light.** The first after-witness drew the tarred wales in a `MeshStandardMaterial` as pale grey stripes across the dark band. This is the r102 fault: the scene's lights through ACES render one paint about 2.4× brighter than HULL_FRAG's sun does. A recorded wale is now drawn with `STEEL_FRAG` on the hull material's own `uSun`/`uCam`, the material the terraces and islands already use. The class fallback keeps its old material, so the unrecorded hulls do not move.
+
+**MEASURED** (node probe, amidships, 74):
+
+| | before | after |
+|---|---|---|
+| lower tier of ports / guns | 1.42 m | 2.57 m |
+| upper tier of ports / guns | 3.06 m | 4.81 m |
+| main wale centre | 0.52 m | 1.64 m |
+| middle wale centre | 2.00 m (in the lower ochre) | 3.77 m (in the black between the tiers) |
+
+**NEW AUDIT RULE `A-WALE-PAINT`.** On a hull whose record carries `paintBands`, the bands must run in order from 0 to 1. Every wale amidships must lie inside a black band, and every gun barrel must stand inside an ochre band. Proof B ran HEAD's builder and shaders against the new record and audit, and convicted the 74 twice. One conviction was the upper wale at 1.80–2.20 m (0.334–0.407 of the sheer), across the ochre. The other was 60 of 120 barrels standing in the black, e.g. 1.62 m. On the new builder: **33 hulls, 0 problems** (`auditA2.out`, after the material change).
+
+**WITNESS** (`build/staging/r341/wit/`, 2880 px; crops `crop2-sol-beam.png`, `crop2-sol-pq.png`, `crop2-end-beam.png`): before / after2 at the 74's port beam and bow quarter, Endurance's port beam, and the East Indiaman's port beam. The East Indiaman is pixel-identical, as predicted: she has a chequer but no `paintBands`. Endurance's two brown bands are gone, and her wales show as edges in her own dark paint.
+
+**RULE 0** (`crop2-sol-beam.png`, the after half). Does this read as a rendered world rather than a chart? Yes: it is a planked hull side with gunports, guns run out, timbers standing proud, and water at the foot. Three facts a viewer can read off it: (1) she carries two tiers of guns, and the lower tier stands about half the height of the side above the water; (2) her side is painted ochre along each tier of ports, and dark grey below the lower tier and between the tiers; (3) two wales run the length of the hull as raised timbers, each inside a dark band, each with a lit top edge.
+
+**BOUND — the next structural item for the 74.** The model's weather deck stands at the sheer (5.4 m amidships). The upper tier's port tops are now at 5.14 m, 0.26 m under that deck. On a two-decker, the upper gun deck is the deck in the waist, its ports' sills about 0.6 m above it. The side above it is a bulwark up to the rail. Asow's bands put that deck about 3.9 m over the water, 1.5 m below the top of the side. This was already wrong before r341, when the upper tier stood 2.3 m under a deck it could not have stood on. It is more legible now that the ports are where the plate puts them.
+
+**FOR r342:**
+1. **The 74's waist deck.** Read `deck.belowSheerM` for the 74: the upper ochre band's ports against her rail on Asow, and the RMG Bellona model plates already on disk (capstanProvenance: l5785_003). Set it so the upper tier's sills stand about 0.6 m over the deck. Note that `deck.belowSheerM > 0.3` turns on the bulwark gear rules (memory: deck record unlocks the pin-gated gear rules), so probe every rule's output on the 74 in node before the ratchet.
+2. The East Indiaman carries the class chequer (one tier, fixed centre). Read a plate before giving her `paintBands`.
+3. r340's item 4: read colour plates for the clipper and Wyoming before setting their wale finish.
+
+**Disk at close: __DISK__ free.** Live stamp 1795699734.
