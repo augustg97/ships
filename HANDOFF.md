@@ -30667,11 +30667,18 @@ Titanic's well bulwark and its closed wash-port doors are drawn as two sheets, o
 **Rule 0** (`wit/fluyt-pq-after.png`). It is a rendered ship, not a chart: the fluyt's bow on a rippled blue sea, with her bowsprit, an anchor at the cathead and the ship's boat on the skids. Three facts a viewer can read off it:
 1. She carries her anchor catted at the bow, with its stock across the rail.
 2. Two wales run along her side to the stem, under a sheer that rises forward.
-3. She has a single deck under an open waist, with a boat stowed amidships.
+3. She sets a square course on the foremast, whose shrouds carry ratlines.
 
 **NOT DONE, FOR r340.**
 - **The wale's colour.** The wales are still the class 0x3d2f1f, about the planking's tone, so on the timber hulls the new edges read as lines and not as dark timbers. On black-hulled Wyoming, the clipper and Endurance they draw as brown bands. `hull.wale.finish` (tarred / painted with the hull / bright) is the record field to add; read each ship's plate before setting it.
 - **`hull.wale.proudM` from a record** for the ships that have a draught: the 74 (Steel's or Goodwin's scantlings), the East Indiaman, the clipper (Cutty Sark's), and the fluyt off Hollar at the plate's px/m.
 - Then (0y¹⁷⁹), the fluyt's fore station, and r334's list as written.
 
-**Live stamp: __STAMP__**
+**Live stamp VERIFIED: 1795694450 on https://augustg97.github.io/ships/index.html at 04:03 PST** (commit da60469).
+
+**THE FRAMES (receipt).** 32 predicted movers were captured one process per frame on the pushed tree (`r339/run1`, 04:01–04:32), predicted movers first, and scored offline.
+- **Accepted, 10, each looked at** (`r339/p1/pair-*.png`, `sheet0-2.png`; reasons in FRAME-LOG.md). ship-canoe, ship-clipper, ship-junk, ship-panokseon, ship-sekibune, ship-treasure, ship-trireme and ship-wyoming change only along their wales. `shipwright` changes along the 74's wales and those of the East Indiaman in the next berth. `sea-canoe-floor` changes where the canoe's wale shows through the gaps between the deck slats.
+- **Inside the gate (19):** ship-dhow, ship-galley, ship-galleass, ship-endurance, ship-slave-ship and ship-carrack all moved, by 0.02–0.05% (under the gate). Also inside: shipwright-ahead, shipwright-furled, shipwright-corbis, ship-dugout, ship-usv, ship-great-eastern, aboard, aboard-clipper, aboard-wyoming, aboard-treasure, and action-lepanto, action-salamis, action-gravelines and action-myeongnyang (0.000–0.001%: the Action fleet does not draw the wales at that scale).
+- **Readiness timeouts:** shipwright-astern and shipwright-hounds (150 s) in run1. Recaptured alone into `r339/run2` at 04:33–04:35, both are inside the gate (0.029% and 0.003%).
+- **Not captured this round:** the steel-hull and globe frames, which no r339 change reaches (the wale is gated off iron, steel and dugout builds), and aboard-titanic, which keeps r337's voyage-position fault.
+- **Final audit** (`r339/auditF.out`, :8149, the pushed tree): **33 hulls, 0 problems.**
