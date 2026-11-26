@@ -1,0 +1,37 @@
+[
+ {
+  "id": "trireme",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[0] foot at x -2.80 (radius 0.11) stands inside the ship's boat at x -4.46 to 1.49"
+ },
+ {
+  "id": "corbita",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[0] foot at x -2.10 (radius 0.27) stands inside the ship's boat at x -4.46 to 1.49"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[2] foot at x 0.00 (radius 0.54) stands inside the ship's boat at x -7.65 to 2.55"
+ },
+ {
+  "id": "panokseon",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[0] foot at x -1.80 (radius 0.23) stands inside the ship's boat at x -3.83 to 1.27"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[1] foot at x 0.11 (radius 0.20) stands inside the ship's boat at x -3.51 to 1.17"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[2] foot at x -6.02 (radius 0.46) stands inside the ship's boat at x -12.81 to 4.26"
+ },
+ {
+  "id": "endurance",
+  "rule": "a mast through the ship's boat",
+  "detail": "masts[1] foot at x 1.47 (radius 0.23) stands inside the ship's boat at x -5.05 to 1.68"
+ }
+]

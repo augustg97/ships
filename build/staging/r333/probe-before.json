@@ -1,0 +1,117 @@
+{
+ "at": [
+  0.115,
+  0.556,
+  0.85
+ ],
+ "stX": [
+  -11.499,
+  1.54,
+  10.029
+ ],
+ "mainShare": 0.6057,
+ "foreMizzen": 21.528,
+ "segs": [
+  {
+   "mi": 0,
+   "si": 0,
+   "foot": 3.577,
+   "head": 14.011
+  },
+  {
+   "mi": 0,
+   "si": 1,
+   "foot": 12.759,
+   "head": 20.677
+  },
+  {
+   "mi": 0,
+   "si": 2,
+   "foot": 19.727,
+   "head": 24.107
+  },
+  {
+   "mi": 1,
+   "si": 0,
+   "foot": 3.002,
+   "head": 15.469
+  },
+  {
+   "mi": 1,
+   "si": 1,
+   "foot": 13.973,
+   "head": 23.532
+  },
+  {
+   "mi": 1,
+   "si": 2,
+   "foot": 22.385,
+   "head": 27.552
+  }
+ ],
+ "lateen": {
+  "len": 13.379,
+  "heel": [
+   5.521,
+   3.629
+  ],
+  "peak": [
+   15.448,
+   12.598
+  ],
+  "angle": 42.1,
+  "ud": {
+   "mastX": 10.029,
+   "slingY": 7.996,
+   "slingX": 10.355,
+   "mastHeadY": 11.98,
+   "rakeDeg": 4,
+   "mastHeadX": 10.634,
+   "onSquareMast": false,
+   "mast": 2,
+   "yardLen": 13.379,
+   "angleDeg": 42.1,
+   "baseY": 3.332,
+   "heel": [
+    5.521,
+    3.629
+   ],
+   "peak": [
+    15.448,
+    12.598
+   ],
+   "d2t": 7.76,
+   "spacing": 8.489,
+   "slingOfD2T": 0.601,
+   "yardFrom": "record lateenRead",
+   "headroom": 0.57,
+   "headroomFrom": "class: ten yard-radii at the sling, not under 0.45 m; no plate reads it",
+   "off": 0.158,
+   "mastR": 0.101,
+   "yardR": 0.057,
+   "rollR": 0,
+   "furled": false,
+   "side": "port",
+   "sideFrom": "class: to leeward of the fleet's wind, the side every fore-and-aft cloth is sheeted to; no record names the side",
+   "sheetDeg": 29.2,
+   "stow": null,
+   "clew": [
+    13.401,
+    5.02,
+    2.536
+   ],
+   "sheet": {
+    "lead": "rail",
+    "xAft": 15.625,
+    "end": [
+     13.401,
+     3.837,
+     2.031
+    ],
+    "room": 2.224,
+    "drawn": true,
+    "from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+   }
+  }
+ }
+}

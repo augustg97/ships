@@ -1,0 +1,7 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a mast station off its own plate",
+  "detail": "masts[1] (station 0.53): built 0.5727 of the fore-to-mizzen span; the plate its heights were read off puts the foot at column 655.6, 0.5981 of the span (-0.86 m off, 0.01 allowed)"
+ }
+]

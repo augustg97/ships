@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a mast station off its own plate",
+  "detail": "masts[1] (station 0.556): built 0.6057 of the fore-to-mizzen span; the plate its heights were read off puts the foot at column 1143, 0.5393 of the span (1.43 m off, 0.01 allowed)"
+ }
+]

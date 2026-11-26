@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a lateen read that disagrees with its own rows",
+  "detail": "masts[2] (station 0.85, lateen mizzen): rows give yard 1.288, heel 0.239 of the spacing, 58.72\u00b0; the read says 1.303, 0.267, 57.67\u00b0"
+ }
+]

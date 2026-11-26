@@ -7141,6 +7141,31 @@
         });
       }
     }
+    /* ── A-BOAT-CLEAR (round 333, the fluyt): NO MAST STANDS UP THROUGH THE SHIP'S BOAT.
+       The boat on skids was set at u 0.46 on every hull and no rule asked where the masts stood. When r333
+       moved the fluyt's main to the station her plate draws, the mast stood up through the boat's after
+       thwarts, and every audit rule passed. MESH: each mast's lowest segment, as a cylinder of its own radius
+       at the deck, against the boat hull's own vertices in hull space. A mast whose axis falls inside the
+       boat's length and breadth, with its surface inside the boat's x-span and the boat's sheer above the
+       deck the mast stands on, convicts: 'a mast through the ship's boat'. */
+    {
+      g.updateMatrixWorld(true);
+      const invB = new THREE.Matrix4().copy(g.matrixWorld).invert(), P = new THREE.Vector3();
+      const boats = [], segs0 = [];
+      g.traverse(o => { if (!o.isMesh) return;
+        if (o.userData.part && o.userData.part.key === 'boat' && o.userData.part.name === "Ship's boat") boats.push(o);
+        const s = o.userData.seg; if (s && s.si === 0) segs0.push({ s, r: (o.geometry.parameters || {}).radiusBottom || 0 }); });
+      boats.forEach(bo => {
+        const M = new THREE.Matrix4().multiplyMatrices(invB, bo.matrixWorld), A = bo.geometry.attributes.position;
+        let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M);
+          x0 = Math.min(x0, P.x); x1 = Math.max(x1, P.x); z0 = Math.min(z0, P.z); z1 = Math.max(z1, P.z); y0 = Math.min(y0, P.y); y1 = Math.max(y1, P.y); }
+        segs0.forEach(({ s, r }) => {
+          if (s.footX + r > x0 && s.footX - r < x1 && z0 < r && z1 > -r && s.footY < y1 && s.headY > y0)
+            say(v.id, "a mast through the ship's boat", `masts[${s.mi}] foot at x ${s.footX.toFixed(2)} (radius ${r.toFixed(2)}) stands inside the ship's boat at x ${x0.toFixed(2)} to ${x1.toFixed(2)}`);
+        });
+      });
+    }
     /* ── A-FUNNEL-STATIONS (round 296, Titanic): A FUNNEL STANDS WHERE ITS OWN READ PUTS IT.
        Her four funnels were spaced evenly at 28.5 m while the 1911 side plan draws them 35 to
        36 m apart, which left the forward funnel 16.6 m abaft the plan's. The record now carries
@@ -7695,12 +7720,14 @@
         const isRead = /^PLATE READ/.test(pv);
         if (isRead !== !!rd) { say(v.id, 'a lateen read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and lateenRead is ${rd ? 'present' : 'absent'}`); return; }
         if (!rd) return;
-        const R = rd.rows, sp = R.mainFoot[0] - R.mizzenFoot[0];
+        /* r333: Hollar's plate has the bow at the left and Vasa's at the right, so the spacing is taken as a magnitude, the
+           heel's share is signed toward the main, and the angle is read off the magnitudes of the two legs */
+        const R = rd.rows, sp = Math.abs(R.mainFoot[0] - R.mizzenFoot[0]), spS = R.mainFoot[0] - R.mizzenFoot[0];
         const yl = Math.hypot(R.heel[0] - R.peak[0], R.heel[1] - R.peak[1]);
-        const ang = Math.atan2(R.heel[1] - R.peak[1], R.heel[0] - R.peak[0]) * 180 / Math.PI;
-        const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / sp - rd.heelAheadOfMastSpacing)];
+        const ang = Math.atan2(Math.abs(R.heel[1] - R.peak[1]), Math.abs(R.heel[0] - R.peak[0])) * 180 / Math.PI;
+        const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / spS - rd.heelAheadOfMastSpacing)];
         if (Math.max(...dRows) > 0.005 || Math.abs(ang - rd.angleDeg) > 0.1)
-          say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / sp).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
+          say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / spS).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
         const o = ly[mi];
         if (!o) { say(v.id, 'a lateen read with no yard', `${at}: no set lateen yard records this mast`); return; }
         const fwd = (H.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
@@ -7749,6 +7776,21 @@
           }
           for (const k of Object.keys(MH)) if (sh[k] === undefined)
             say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded with no share read for it`);
+          /* ── A-STATION-SHARE (round 333, 0y¹⁷⁵): A MAST WHOSE HEIGHTS ARE READ AS SHARES OF THE FORE-TO-MIZZEN SPAN STANDS
+             WHERE THE SAME PLATE PUTS IT IN THAT SPAN. Every mastHeightsRead names the plate column of the mast's own foot
+             (foot[0]) and of the fore's and the mizzen's (feetPx), so the read already says where the mast stands between the
+             two. The fluyt's main stood at the class station 0.556, 0.606 of the span abaft the fore, while Hollar's plate,
+             the same one its heights were read from, draws it at 0.539: 1.32 m aft. BUILT: the mast's station on the loft's
+             deck line, as a share of the built fore-to-mizzen span, agrees with (foot[0] - feetPx[0]) / (feetPx[1] - feetPx[0])
+             within rd.boundStation (default 0.01; a 3 px read on a 777 px span is 0.004): 'a mast station off its own plate'.
+             A mast that answers otherwise must say so: an atProvenance opening CONTESTED excuses it, and the excuse is the
+             record's, not the rule's. */
+          {
+            const shP = (rd.foot[0] - rd.feetPx[0]) / (rd.feetPx[1] - rd.feetPx[0]);
+            const shB = (stX(mk.at) - stX(Math.min(...ats))) / spB, bS = rd.boundStation || 0.01;
+            if (Math.abs(shB - shP) > bS && !/^CONTESTED/.test(mk.atProvenance || ''))
+              say(v.id, 'a mast station off its own plate', `${at}: built ${shB.toFixed(4)} of the fore-to-mizzen span; the plate its heights were read off puts the foot at column ${rd.foot[0]}, ${shP.toFixed(4)} of the span (${((shB - shP) * spB).toFixed(2)} m off, ${bS} allowed)`);
+          }
         });
       }
     }

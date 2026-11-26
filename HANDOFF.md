@@ -30266,3 +30266,81 @@ Proofs, all on :8150 (`webb/`):
 - **Predicted not to move, and inside the gate:** `shipwright-furled` 0.044% / 0.016, the same figure as in r330 and r331.
 - **The largest of the rest:** `passage-sahul` 0.047%, `aboard-preussen` 0.036%, all inside the gate.
 - **No frames are left unscored for r333.**
+
+## Round 333 — 2026-11-25 — The fluyt's mainmast now stands where Hollar's 1647 etching of a fluyt under sail draws it, and her lateen mizzen yard is read off the same plate. Until this round the main stood at the class station, 1.43 m further aft than the plate puts it, and the lateen yard was Vasa's, a 1628 warship's read applied to a merchant ship. On the plate the main stands 0.539 of the way from the fore to the mizzen; the model put it at 0.606. The lateen yard on the plate rises at 57.7° from the horizontal, where Vasa's rises at 42.1°. Its peak now stands 3.5 m above the mizzen top over the poop; before, it stood 1.5 m above the top and 1.2 m further aft. Moving the main put it up through the ship's boat on the skids, and a new audit rule found that six other hulls already had a mast standing through their boat. The boat is now stowed between two masts on every hull
+
+**Queue check: August's second list stands worked in full (r57). This round took (0y¹⁷⁵) and (0y¹⁷³), which r332 named. `build/staging/r333` did not exist. At the start the load was 2.9, and no process held more than one core. r332's receipt left no unscored frames, so no clean-HEAD run was made.**
+
+**THE PLATE.** Hollar, *Navis Mercatoria Hollandica, vulgo VLIET*, 1647 (`r328/dl/hollar-flute.jpg`, 1920 px, about 36 px/m at the masts, bow at the left).
+
+- **The main's station.** r329 read the three masts' feet at columns 724, 1143 and 1501 for the mast heights (`mastHeightsRead.foot`, `feetPx`). (1143 − 724) / (1501 − 724) = 0.5393. A 3 px read of a foot is 0.004 of the span. Hollar draws the ship a little from forward of the beam. That draws the bow larger, which would make the plate's share too large, so the main may stand slightly further forward still.
+- **The lateen yard** (`r333_read.py`, `yardfit.json`; crops `aft.png`, `heel.png`, `peak.png`). The yard's line was traced on every third row from 500 to 869 and fitted on 123 rows (rms 1.84 px). The peak is at row 486, where the spar ends in a forked tip over the poop. The heel is at row 880, where the sail's tack curls round it just above the poop rail. Against the 358 px between the main's and the mizzen's feet:
+
+| | Vasa (r321), before | Hollar's fluyt, now |
+|---|---|---|
+| angle from the horizontal | 42.1° | 57.67° |
+| yard length, of the main-to-mizzen spacing | 1.576 | 1.303 |
+| heel before the mizzen, of the spacing | 0.531 | 0.267 |
+
+**WHAT CHANGED** (`r333_edit.py`, one script for the record, the audit and a builder comment, every replace asserted).
+
+- **Record.** The fluyt's main stands at `at` 0.504, where it stood at 0.556, with an `atProvenance` that opens PLATE READ and gives the columns. The fore and the mizzen keep their stations, so the 21.53 m span that every mast height is a share of is unchanged and no height moved. The mizzen's `lateenRead` and `lateenYardProvenance` are Hollar's read in place of Vasa's. The three masts' `mastHeightsProvenance` no longer says the stations disagree with the plate; each records that they did until r333.
+- **Builder.** No code changed. The lateen yard is keyed to the main-to-mizzen spacing, and with the main at the plate's station that spacing is the plate's too: 9.92 m built against 358 px / 36.1 px/m = 9.92 m on the plate.
+- **Audit.** A new rule, **A-STATION-SHARE**, inside A-MAST-READ. Every `mastHeightsRead` names the plate column of the mast's own foot and of the fore's and the mizzen's. The rule holds the built station, as a share of the built fore-to-mizzen span, to that share within 0.01. A mast whose `atProvenance` opens CONTESTED is excused. The East Indiaman's and the slave ship's mains stand 0.008 off Vasa's share and pass. **A-LATEEN-READ** now reads its rows on a plate with the bow at either side: the spacing is a magnitude, the heel's share is signed toward the main, and the angle is read off the magnitudes of the two legs.
+- `Research/MASTHEADS.md` §7 records the read.
+
+**THE BOAT** (`r333_boat.py`, builder and audit, every replace asserted). The first witness (`crop-boat-after.png`) showed the fluyt's main standing up through the after end of the ship's boat on the skids. The boat was set at u 0.46 and 0.17 of the waterline long on every hull with a laid deck over 25 m, and no rule asked where the masts stood. Before this round the fluyt's main stood 0.3 m abaft the boat's transom.
+
+- **Audit: A-BOAT-CLEAR.** Each mast's lowest segment, as a cylinder of its own radius, against the boat hull's own vertices in hull space. On r332's builder it convicts **7 hulls** (proof G): the trireme, the corbita, the treasure ship, the panokseon, the fluyt (with this round's station), Wyoming and Endurance. The other six had a mast through the boat before this round, and nothing had caught it.
+- **Builder.** A boat whose length, 0.35 m each way, holds no mast's axis keeps u 0.46 and is drawn exactly as before (the junk, the carrack, the East Indiaman, the 74 and the clipper). Otherwise the boat goes to the gap between two masts' feet, or between a mast and the waist's end at u 0.20 or 0.80, nearest u 0.46 that holds it with 0.9 m clear of each axis; the treasure ship's main is 0.54 m in radius. Where no gap holds it, it is shortened to fit the widest gap, down to half its length. `userData.skidBoat` records the station and the length.
+- **Where each boat now stands** (`boatprobe.out`, u and length): trireme 0.531, corbita 0.551, galley 0.528, galleass 0.546, panokseon 0.555, slave ship 0.436, fluyt 0.386, Endurance 0.429, treasure ship 0.590, all at their old lengths; Wyoming 0.365, shortened from 17.0 m to 13.26 m, between her second and third masts. The galley, the galleass and the slave ship moved because a mast's axis stood within 0.35 m of the boat's end, which the audit does not convict.
+
+**MEASURED** (`r333_probe.py`; `probe-before.json`, `probe-after.json`).
+
+| | before | after |
+|---|---|---|
+| main foot, x in hull space | 1.54 | 0.11 |
+| main, share of the fore-to-mizzen span | 0.6057 | 0.5392 |
+| main-to-mizzen spacing | 8.49 m | 9.92 m |
+| lateen yard length | 13.38 m | 12.93 m |
+| heel (x, y) | 5.52, 3.63 | 7.38, 3.63 |
+| peak (x, y) | 15.45, 12.60 | 14.29, 14.55 |
+| yard crosses the mast, of the deck-to-top height | 0.601 | 0.649 |
+
+The mizzen top stands at y 11.09, so the peak stands 3.5 m above it, where the plate draws 2.8 m. The built heel stands about 0.6 m higher than the plate's, because the model's deck has none of Hollar's rise of sheer aft.
+
+**PROOFS** (:8150, `webb/`, `r333_proofs.sh`):
+
+| Proof | What was broken | Problems found |
+|---|---|---|
+| A | r332's record with this round's audit | 1: 'a mast station off its own plate' (0.6057 built, 0.5393 read, 1.43 m) |
+| B | this round's record with the main back at 0.556 | 1: the same |
+| C | the heel's column moved 10 px | 1: 'a lateen read that disagrees with its own rows' |
+| D | r332's audit with this round's tree | 1: 'a lateen read that disagrees with its own rows' (yard −1.303, 122.33°: the signed spacing) |
+| E | the East Indiaman's main moved to 0.53 | 1: 'a mast station off its own plate' (0.86 m) |
+| E2 | E, with an `atProvenance` opening CONTESTED | 0 |
+| F | the builder drawing every read lateen at 42.1° | 1: 'a lateen yard off its read' |
+| G | r332's builder with this round's record and audit | 7: 'a mast through the ship's boat' on the 7 hulls named above |
+
+`audit-webb.out` (:8150, files identical to the tree by `cmp`): **0 problems on 33 hulls.**
+
+**WITNESSED.** `#v=ship&s=fluyt&b=90&l=8&z=1.0` and `&b=60&l=10&z=0.7`, panels hidden, before and after on :8150 (`w-fluyt-{before,after}-{beam,aft}.png`, `pair-fluyt-beam.png`, `pair-fluyt-aft.png`). In the after frames the mainmast stands further forward. The boat in the waist now stands forward of it (`w-fluyt-after2-aft.png`); in the first after frame the mast stood up through the boat's after end. `sheet-boats.png` shows the fluyt, the treasure ship and Wyoming after the boat change: Wyoming's boat lies on the deck between her second and third masts, clear of both. The lateen yard rises more steeply from a heel further aft and peaks higher over the poop.
+
+**Rule 0, on `w-fluyt-after-beam.png` read whole: three rendered ships on a rippled sea under a low grey coast, the fluyt broadside in the middle, an oared galley at her left and the bow of a larger ship at the right edge. It is not a chart. Three facts a viewer can read off it without a legend:**
+
+1. **The fluyt's mainmast stands a little forward of the middle of her length, with a boat on deck just forward of it.**
+2. **Her aftermost mast carries a triangular sail on a steep slanting yard whose upper end rises above the small platform on that mast.**
+3. **The fore and the main each set two square sails, and above each upper sail a bare pole stands with no sail on it.**
+
+**WHAT IS STILL OPEN.**
+
+- **(0y¹⁷³) is closed:** the lateen yard is the fluyt's own plate's.
+- **(0y¹⁷⁵) is half closed.** The main's station is read. The sheer is not: Hollar's fluyt rises strongly aft to a high, narrow poop, and the model's deck is nearly flush. Read the rail's rows from the stem to the taffrail and give the hull `sheerStern` from them.
+- **(0y¹⁷⁹), NEW: the fore's and the mizzen's stations along the hull.** On the plate the foremast stands close behind the stem head, about 0.8 m by a first look. The model's fore stands 4.9 m abaft its loft's stem head. Moving the fore or the mizzen changes the span that every mast height is a share of, so every `mastHeightsM` must be re-derived in the same round. A-MAST-READ will convict any height left stale.
+- **(0y¹⁷⁸)**, the pennants; **(0y¹⁷⁰)**, the sekibune's halyard lead; **(0y¹⁶¹)**, **(0y¹⁶²)**, **(0y¹⁵⁹)**, **(0y¹⁶⁰)**, **(0y¹⁵³)**, **(0y¹⁵⁵)**, **(0y¹⁵¹)**, and **(0y¹⁴⁵)** to **(0y⁹⁴)** and the named residuals stand as r294 to r332 list them.
+
+**THE FRAMES.** No baseline frame shows the fluyt in her own berth. Predicted movers from the fluyt: `shipwright`, `shipwright-ahead` and `shipwright-furled` (she is the 74's left berth neighbour; her main, her boat and her lateen moved in both builds), possibly `shipwright-astern` and `shipwright-hounds`, and `action-gravelines`, whose English fleet is drawn with the fluyt model. Predicted movers from the boats: any frame that shows the deck of the trireme, the corbita, the galley, the galleass, the panokseon, the slave ship, the treasure ship, Wyoming or Endurance: `ship-trireme`, `ship-galley`, `ship-galleass`, `ship-panokseon`, `ship-slave-ship`, `ship-treasure`, `aboard-treasure`, `ship-wyoming`, `aboard-wyoming`, `ship-endurance`, and the action frames whose fleets are drawn with these models (`action-salamis`, `board-salamis`, `action-lepanto`, `action-myeongnyang`). The first full ratchet was launched at 17:01:12 and stopped at frame 3 when the boat fault was found. It was relaunched on the final tree at 17:14:40, at load 8.3, before the build and this entry. **Every frame is scored and classified in the receipt that follows.**
+
+**r334 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r334` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take the fluyt's sheer (the rest of 0y¹⁷⁵) or her fore and mizzen stations (0y¹⁷⁹).**
+
+**Live stamp: docs/index.html carries data-version 1795655705 at the build.**

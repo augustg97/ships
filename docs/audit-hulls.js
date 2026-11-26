@@ -5105,6 +5105,24 @@ say(v.id, 'a mast built off its read',
 }
 }
 {
+g.updateMatrixWorld(true);
+const invB = new THREE.Matrix4().copy(g.matrixWorld).invert(), P = new THREE.Vector3();
+const boats = [], segs0 = [];
+g.traverse(o => { if (!o.isMesh) return;
+if (o.userData.part && o.userData.part.key === 'boat' && o.userData.part.name === "Ship's boat") boats.push(o);
+const s = o.userData.seg; if (s && s.si === 0) segs0.push({ s, r: (o.geometry.parameters || {}).radiusBottom || 0 }); });
+boats.forEach(bo => {
+const M = new THREE.Matrix4().multiplyMatrices(invB, bo.matrixWorld), A = bo.geometry.attributes.position;
+let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M);
+x0 = Math.min(x0, P.x); x1 = Math.max(x1, P.x); z0 = Math.min(z0, P.z); z1 = Math.max(z1, P.z); y0 = Math.min(y0, P.y); y1 = Math.max(y1, P.y); }
+segs0.forEach(({ s, r }) => {
+if (s.footX + r > x0 && s.footX - r < x1 && z0 < r && z1 > -r && s.footY < y1 && s.headY > y0)
+say(v.id, "a mast through the ship's boat", `masts[${s.mi}] foot at x ${s.footX.toFixed(2)} (radius ${r.toFixed(2)}) stands inside the ship's boat at x ${x0.toFixed(2)} to ${x1.toFixed(2)}`);
+});
+});
+}
+{
 const FR = H.funnelRead;
 if (!FR && H.funnels && H.islands && H.islands.plate)
 say(v.id, 'funnels on a side-plan hull with no read of their own', 'hull.islands.plate is present and hull.funnelRead is absent');
@@ -5482,12 +5500,12 @@ if (!pv) { say(v.id, 'a lateen mizzen yard with no answer', `${at}: lateenYardPr
 const isRead = /^PLATE READ/.test(pv);
 if (isRead !== !!rd) { say(v.id, 'a lateen read without its figures', `${at}: provenance opens '${pv.slice(0, 12)}' and lateenRead is ${rd ? 'present' : 'absent'}`); return; }
 if (!rd) return;
-const R = rd.rows, sp = R.mainFoot[0] - R.mizzenFoot[0];
+const R = rd.rows, sp = Math.abs(R.mainFoot[0] - R.mizzenFoot[0]), spS = R.mainFoot[0] - R.mizzenFoot[0];
 const yl = Math.hypot(R.heel[0] - R.peak[0], R.heel[1] - R.peak[1]);
-const ang = Math.atan2(R.heel[1] - R.peak[1], R.heel[0] - R.peak[0]) * 180 / Math.PI;
-const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / sp - rd.heelAheadOfMastSpacing)];
+const ang = Math.atan2(Math.abs(R.heel[1] - R.peak[1]), Math.abs(R.heel[0] - R.peak[0])) * 180 / Math.PI;
+const dRows = [Math.abs(yl / sp - rd.yardOfMastSpacing), Math.abs((R.heel[0] - R.mizzenFoot[0]) / spS - rd.heelAheadOfMastSpacing)];
 if (Math.max(...dRows) > 0.005 || Math.abs(ang - rd.angleDeg) > 0.1)
-say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / sp).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
+say(v.id, 'a lateen read that disagrees with its own rows', `${at}: rows give yard ${(yl / sp).toFixed(3)}, heel ${((R.heel[0] - R.mizzenFoot[0]) / spS).toFixed(3)} of the spacing, ${ang.toFixed(2)}°; the read says ${rd.yardOfMastSpacing}, ${rd.heelAheadOfMastSpacing}, ${rd.angleDeg}°`);
 const o = ly[mi];
 if (!o) { say(v.id, 'a lateen read with no yard', `${at}: no set lateen yard records this mast`); return; }
 const fwd = (H.masts || []).filter(m2 => m2.at < mk.at).sort((a2, b2) => b2.at - a2.at)[0];
@@ -5523,6 +5541,12 @@ say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded; ${sh[
 }
 for (const k of Object.keys(MH)) if (sh[k] === undefined)
 say(v.id, 'mast heights off their read', `${at}: ${k} ${MH[k]} m recorded with no share read for it`);
+{
+const shP = (rd.foot[0] - rd.feetPx[0]) / (rd.feetPx[1] - rd.feetPx[0]);
+const shB = (stX(mk.at) - stX(Math.min(...ats))) / spB, bS = rd.boundStation || 0.01;
+if (Math.abs(shB - shP) > bS && !/^CONTESTED/.test(mk.atProvenance || ''))
+say(v.id, 'a mast station off its own plate', `${at}: built ${shB.toFixed(4)} of the fore-to-mizzen span; the plate its heights were read off puts the foot at column ${rd.foot[0]}, ${shP.toFixed(4)} of the span (${((shB - shP) * spB).toFixed(2)} m off, ${bS} allowed)`);
+}
 });
 }
 }

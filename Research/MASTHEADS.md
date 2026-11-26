@@ -347,6 +347,33 @@ halyard-leg census and A-HOIST-READ count only the yards a set build crosses.
 Not read: whether a fluyt crossed her topgallant yards at sea in light weather. One plate under sail is one
 ship on one day, and the record says that it is one plate.
 
+**Round 333 (0y¹⁷⁵, 0y¹⁷³): the main's station and the lateen yard.** r329 read the three masts' feet at
+columns 724, 1143 and 1501, which puts the main 0.5393 of the way from the fore to the mizzen. The hull's class
+stations put it at 0.606, 1.43 m further aft. The main now stands at the plate's share (`at` 0.504, through the
+loft's deck line, which is flat at the main). The fore and the mizzen keep their stations, so the 21.53 m span
+that every mast height is a share of is unchanged, and no height moved.
+
+The mizzen's lateen yard was Vasa's (r321: 42.1°, 1.576 of the main-to-mizzen spacing, the heel 0.531 of it
+before the mizzen). On Hollar's plate it is traced on every third row from 500 to 869 and fitted as a line on
+123 rows (rms 1.84 px). Its peak is at row 486, column 1654.7, over the poop; its heel at row 880, column
+1405.3, just above the poop rail. Against the 358 px between the main's and the mizzen's feet:
+
+| | Vasa (r321) | Hollar's fluyt (r333) |
+|---|---|---|
+| angle from the horizontal | 42.1° | 57.67° |
+| yard length, of the spacing | 1.576 | 1.303 |
+| heel before the mizzen, of the spacing | 0.531 | 0.267 |
+| built yard | 13.38 m | 12.93 m |
+| built peak over the mizzen top | 1.5 m | 3.5 m (2.8 m on the plate) |
+
+The built heel stands about 0.6 m higher than the plate's, because the model's deck lacks Hollar's rise of
+sheer aft (still open in 0y¹⁷⁵). A-STATION-SHARE now holds every mast whose heights are read as shares of the
+fore-to-mizzen span to the station the same plate draws, within 0.01 of the span. The East Indiaman's and the
+slave ship's mains stand within 0.008 of Vasa's share. A-LATEEN-READ now reads its rows on a plate with the bow
+at either side.
+
+Not read: the fore's and the mizzen's stations along the hull (0y¹⁷⁹), and the sheer.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent

@@ -5989,7 +5989,30 @@ pg.add(box);
 group.add(tag(pg, 'compassPlatform'));
 }
 if (timberShip && laidDeck && S.lwl > 25) {
-const bl = L * 0.17, u = 0.46;
+let bl = L * 0.17;
+let u = 0.46;
+{
+const xOf = q => (q - 0.5) * L + H.rake(q), c = 0.9;
+const feet = (S.masts || []).map(m => xOf(m.at)).sort((a, b) => a - b);
+const x0 = (u - 0.5) * L;
+if (feet.some(xm => Math.abs(xm - x0) < bl / 2 + 0.35)) {
+const lo = (0.20 - 0.5) * L, hi = (0.80 - 0.5) * L;
+const edges = [lo, ...feet.filter(xm => xm > lo && xm < hi), hi];
+const gaps = [];
+for (let k = 0; k + 1 < edges.length; k++) {
+const a = edges[k] + (k === 0 ? 0 : c), b = edges[k + 1] - (k + 1 === edges.length - 1 ? 0 : c);
+if (b > a) gaps.push([a, b]);
+}
+const fit = gaps.filter(([a, b]) => b - a >= bl)
+.map(([a, b]) => Math.min(b - bl / 2, Math.max(a + bl / 2, x0)))
+.sort((p1, p2) => Math.abs(p1 - x0) - Math.abs(p2 - x0));
+if (fit.length) u = 0.5 + fit[0] / L;
+else {
+const w = gaps.sort((g1, g2) => (g2[1] - g2[0]) - (g1[1] - g1[0]))[0];
+if (w && w[1] - w[0] >= bl / 2) { bl = w[1] - w[0]; u = 0.5 + (w[0] + w[1]) / 2 / L; }
+}
+}
+}
 const boatSpec = {
 loa: bl, lwl: bl * 0.94, beam: bl / 3.4, draught: bl * 0.075, freeboard: bl * 0.105,
 cm: 0.62, wlPower: 2.6, stemFineness: 0.06, sternFineness: 0.42, transom: 0.20,
@@ -5998,6 +6021,7 @@ tumblehome: 0.0, stemRake: 0.06, sternRake: 0.02, strakes: 9, masts: [],
 };
 const bm = new THREE.Mesh(buildHullGeometry(boatSpec, 40, 14), pale);
 bm.position.set((u - 0.5) * L, deckAtU(u) + bl * 0.060, 0);
+bm.userData.skidBoat = { u: +u.toFixed(4), lengthM: +bl.toFixed(3), moved: u !== 0.46 || bl !== L * 0.17 };
 group.add(tag(bm, 'boat'));
 for (const d of [-0.30, 0.30]) {
 const sk = new THREE.Mesh(
