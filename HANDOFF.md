@@ -31118,4 +31118,4 @@ The bound is ±6 px on the head and ±8 px on the span. The plate's head in metr
 4. **A second plate for the mizzen topmast head.** A British 74's broadside or a contemporary model (Bellona, RMG SLR0338) would settle whether the mizzen topmast's head is Steel's 3 1/2 inches or the painter's 4.6. If one reads, put it in `topmastHeadRead` beside *Asow*'s; the record takes one read per mast now, so a second needs the field to become a list.
 5. **The disk.** Check `ls -la .git/objects/pack/ | grep tmp_pack` and `df -m /System/Volumes/Data` at the start of every round. `gc.auto` stays 0.
 
-**Disk at close: 7,841 MB free, no `tmp_pack_*` file.** Live stamp 1795737459, verified live at __LIVE__.
+**Disk at close: 7,841 MB free, no `tmp_pack_*` file.** Live stamp 1795737459, verified live at 15:59.
