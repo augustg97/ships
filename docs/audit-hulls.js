@@ -7659,6 +7659,43 @@ say(v.id, 'a deck line station off its own trace', `u ${u}: the station's row ${
 }
 }
 }
+if (H.waleRead) {
+const WR = H.waleRead, ST = WR.stations, TR = WR.trace;
+if (!(Array.isArray(ST) && ST.length >= 2 && Array.isArray(WR.rows) && WR.rows.length === ST.length && Array.isArray(WR.datumRows) && WR.datumRows.length === ST.length
+&& Array.isArray(WR.cols) && WR.cols.length === ST.length && WR.pxPerM > 0 && typeof WR.datumM === 'number'
+&& TR && Array.isArray(TR.rows) && TR.rows.length >= 2 && TR.stepCol && TR.maxStepRows > 0 && TR.stationWindowCols > 0))
+say(v.id, 'a wale read with no rows', 'hull.waleRead needs stations, rows, datumRows and cols of one length, datumM, pxPerM and trace {fromCol, stepCol, rows, maxStepRows, stationWindowCols}');
+else {
+ST.forEach(([u, m], j) => {
+const want = WR.datumM + (WR.datumRows[j] - WR.rows[j]) / WR.pxPerM;
+if (Math.abs(m - want) > 0.05) say(v.id, 'a wale station off its plate read', `u ${u}: ${m} m, the plate's row ${WR.rows[j]} over datum row ${WR.datumRows[j]} reads ${want.toFixed(2)} m`);
+});
+let worst = 0, at = null;
+for (let i = 1; i < TR.rows.length; i++) { const dd = Math.abs(TR.rows[i] - TR.rows[i - 1]); if (dd > worst) { worst = dd; at = TR.fromCol + i * TR.stepCol; } }
+if (worst > TR.maxStepRows) say(v.id, 'a wale trace that steps onto another line', `the trace steps ${worst} rows at column ${at}, over its limit of ${TR.maxStepRows}`);
+const lastCol = TR.fromCol + (TR.rows.length - 1) * TR.stepCol;
+ST.forEach(([u], j) => {
+const c = WR.cols[j]; if (!(c >= TR.fromCol && c <= lastCol)) return;
+const nb = TR.rows.filter((_, k) => Math.abs(TR.fromCol + k * TR.stepCol - c) <= TR.stationWindowCols).sort((x, y) => x - y);
+if (!nb.length) return;
+const md = nb.length % 2 ? nb[(nb.length - 1) / 2] : (nb[nb.length / 2 - 1] + nb[nb.length / 2]) / 2;
+if (Math.abs(WR.rows[j] - md) > 2.0) say(v.id, 'a wale station off its own trace', `u ${u}: the station's row ${WR.rows[j]} is ${(WR.rows[j] - md).toFixed(2)} px off the trace's ${md} at column ${c}`);
+});
+const read = []; g.updateMatrixWorld(true);
+g.traverse(o => { const pt = tagOf(o); if (o.isMesh && pt && pt.key === 'wale' && o.userData.waleRead) read.push(o); });
+if (read.length !== 1) say(v.id, 'a read wale not drawn', `${read.length} wale meshes carry the read, where the record asks for one`);
+else {
+const HS = SHIPS_HULL.hullSurface(H), o = read[0], pa = o.geometry.attributes.position, P6 = new THREE.Vector3();
+ST.forEach(([u, m]) => {
+if (u < 0.05 || u > 0.95) return;
+const x = SHIPS_HULL.surfacePoint(H, HS, u, 0.62 + 0.38 * m / Math.max(0.5, HS.sheer(u)))[0];
+let sum = 0, n = 0;
+for (let i = 0; i < pa.count; i++) { P6.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); if (P6.z > 0 && Math.abs(P6.x - x) <= 0.25) { sum += P6.y; n++; } }
+if (!n || Math.abs(sum / n - m) > 0.10) say(v.id, 'a wale built off its read line', `u ${u}: the wale's port vertices within 0.25 m of x ${x.toFixed(2)} stand at ${n ? (sum / n).toFixed(2) : 'nothing'} m, the read ${m} m`);
+});
+}
+}
+}
 if (part.container || part.forecast) {
 const H2 = SHIPS_HULL.hullSurface(H);
 let over = 0, worst = 0;

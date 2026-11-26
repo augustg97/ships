@@ -1,0 +1,12 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a wale trace that steps onto another line",
+  "detail": "the trace steps 6 rows at column 1300, over its limit of 1"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale station off its own trace",
+  "detail": "u 0.7: the station's row 955 is -6.00 px off the trace's 961 at column 1337.5"
+ }
+]

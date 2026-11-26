@@ -557,7 +557,7 @@ g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return g;
 }
-function buildWaleGeometry(S, v0, thick) {
+function buildWaleGeometry(S, v0, thick, vAt) {
 const H = hullSurface(S);
 const pos = [], idx = [];
 const NU = 120;
@@ -566,7 +566,7 @@ for (let sgn = -1; sgn <= 1; sgn += 2) {
 for (let i = 0; i <= NU; i++) {
 const u = 0.012 + (i / NU) * 0.976;
 for (let k = -1; k <= 1; k += 2) {
-const p = surfacePoint(S, H, u, v0 + k * 0.5 * thick);
+const p = surfacePoint(S, H, u, vAt ? vAt(u) + k * vAt.halfV(u) : v0 + k * 0.5 * thick);
 const out = 1.018;
 pos.push(p[0], p[1], sgn * p[2] * out);
 }
@@ -581,6 +581,17 @@ const g = new THREE.BufferGeometry();
 g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return g;
+}
+function readWaleV(S, H) {
+const W = S.waleRead;
+if (!(W && Array.isArray(W.stations) && W.stations.length >= 2)) return null;
+const hAt = pchip(W.stations.map(([u, r]) => ({ u, r })));
+const d = W.depthM > 0 ? W.depthM : 0.026 / 0.38 * S.freeboard;
+const fb = u => Math.max(0.5, H.sheer(u));
+const vAt = u => 0.62 + 0.38 * hAt(u) / fb(u);
+vAt.halfV = u => 0.38 * (d / 2) / fb(u);
+vAt.hAt = hAt;
+return vAt;
 }
 function steeringOf(S) {
 if (S.steering) return S.steering;
@@ -11364,7 +11375,10 @@ group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'S
 if (S.build !== 'iron' && S.build !== 'steel' && S.build !== 'dugout') {
 const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
 group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
-group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026), waleMat), 'wale'));
+const rv = readWaleV(S, hullSurface(S));
+const mw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026, rv), waleMat), 'wale');
+if (rv) mw.userData.waleRead = true;
+group.add(mw);
 }
 const steer = steeringOf(S);
 if (steer === 'quarter') {
@@ -11577,5 +11591,5 @@ extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;
 }
-window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
 superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

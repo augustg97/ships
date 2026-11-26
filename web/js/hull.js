@@ -1023,7 +1023,7 @@ function buildStemGeometry(S, aft) {
 }
 
 /* a wale is a band of the hull surface, pushed proud of it */
-function buildWaleGeometry(S, v0, thick) {
+function buildWaleGeometry(S, v0, thick, vAt) {
   const H = hullSurface(S);
   const pos = [], idx = [];
   const NU = 120;
@@ -1032,7 +1032,7 @@ function buildWaleGeometry(S, v0, thick) {
     for (let i = 0; i <= NU; i++) {
       const u = 0.012 + (i / NU) * 0.976;
       for (let k = -1; k <= 1; k += 2) {
-        const p = surfacePoint(S, H, u, v0 + k * 0.5 * thick);
+        const p = surfacePoint(S, H, u, vAt ? vAt(u) + k * vAt.halfV(u) : v0 + k * 0.5 * thick);
         const out = 1.018;                       // proud of the planking
         pos.push(p[0], p[1], sgn * p[2] * out);
       }
@@ -1047,6 +1047,27 @@ function buildWaleGeometry(S, v0, thick) {
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx); g.computeVertexNormals();
   return g;
+}
+
+/* ── A READ WALE IS LAID ON ITS PLATE'S LINE (round 337) ─────────────────────────────
+   The class wales stand at a fixed fraction of the freeboard (v 0.655 and 0.760), so they
+   rise aft in proportion to the rail. On the fluyt that drew her main wale climbing with the
+   rail to her taffrail. Hollar's 1647 plate draws her planking rising aft about half as much
+   as the rail: the band between the rail and the seam under the channels widens from 0.94 m
+   at the main to 2.1 m at the tuck. hull.waleRead { stations: [[u, metres over the load
+   waterline]], depthM } lays the main wale centred on that line. v is found at each station
+   from the height (above v 0.62 surfacePoint's height is linear in v, 0 at the waterline
+   and the sheer at v 1). Without the field, the class wale, byte-identical. */
+function readWaleV(S, H) {
+  const W = S.waleRead;
+  if (!(W && Array.isArray(W.stations) && W.stations.length >= 2)) return null;
+  const hAt = pchip(W.stations.map(([u, r]) => ({ u, r })));
+  const d = W.depthM > 0 ? W.depthM : 0.026 / 0.38 * S.freeboard;
+  const fb = u => Math.max(0.5, H.sheer(u));
+  const vAt = u => 0.62 + 0.38 * hAt(u) / fb(u);
+  vAt.halfV = u => 0.38 * (d / 2) / fb(u);
+  vAt.hAt = hAt;
+  return vAt;
 }
 
 /* ── STEERING IS A FACT OF THE RECORD (round 121) ─────────────────────────────────────
@@ -17544,7 +17565,10 @@ function buildShip(S, opts) {
     if (S.build !== 'iron' && S.build !== 'steel' && S.build !== 'dugout') {
       const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
       group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
-      group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026), waleMat), 'wale'));
+      const rv = readWaleV(S, hullSurface(S));
+      const mw = tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026, rv), waleMat), 'wale');
+      if (rv) mw.userData.waleRead = true;
+      group.add(mw);
     }
     /* steering per the record (round 121): a paddled hull mounts nothing, a quarter-
        steered hull ships a pair, everything else keeps the axial rudder its kind draws */
@@ -17913,5 +17937,5 @@ function buildShip(S, opts) {
   return group;
 }
 
-window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
                       superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

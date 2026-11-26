@@ -1,0 +1,97 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.05: the wale's port vertices within 0.25 m of x -13.42 stand at 2.50 m, the read 2.17 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.1: the wale's port vertices within 0.25 m of x -11.64 stand at 2.51 m, the read 2.17 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.15: the wale's port vertices within 0.25 m of x -9.97 stand at 2.59 m, the read 2.29 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.2: the wale's port vertices within 0.25 m of x -8.38 stand at 2.47 m, the read 2.18 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.25: the wale's port vertices within 0.25 m of x -6.89 stand at 2.39 m, the read 2.09 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.3: the wale's port vertices within 0.25 m of x -5.50 stand at 2.39 m, the read 2.09 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.35: the wale's port vertices within 0.25 m of x -4.13 stand at 2.36 m, the read 2.06 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.4: the wale's port vertices within 0.25 m of x -2.75 stand at 2.36 m, the read 2.06 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.45: the wale's port vertices within 0.25 m of x -1.37 stand at 2.39 m, the read 2.09 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.5: the wale's port vertices within 0.25 m of x 0.00 stand at 2.40 m, the read 2.1 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.55: the wale's port vertices within 0.25 m of x 1.38 stand at 2.47 m, the read 2.17 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.6: the wale's port vertices within 0.25 m of x 2.75 stand at 2.52 m, the read 2.22 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.65: the wale's port vertices within 0.25 m of x 4.13 stand at 2.58 m, the read 2.28 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.7: the wale's port vertices within 0.25 m of x 5.50 stand at 2.69 m, the read 2.39 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.75: the wale's port vertices within 0.25 m of x 6.89 stand at 2.79 m, the read 2.49 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.8: the wale's port vertices within 0.25 m of x 8.34 stand at 2.99 m, the read 2.7 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.85: the wale's port vertices within 0.25 m of x 9.87 stand at 3.20 m, the read 2.92 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.9: the wale's port vertices within 0.25 m of x 11.47 stand at 3.51 m, the read 3.22 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a wale built off its read line",
+  "detail": "u 0.95: the wale's port vertices within 0.25 m of x 13.18 stand at 4.05 m, the read 3.78 m"
+ }
+]

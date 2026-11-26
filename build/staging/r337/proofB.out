@@ -1,0 +1,182 @@
+[
+ {
+  "id": "voyaging-canoe",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "trireme",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "corbita",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "dhow",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "junk",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "cog",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "caravel",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "carrack",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "galley",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "galleass",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "panokseon",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a read wale not drawn",
+  "detail": "0 wale meshes carry the read, where the record asks for one"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "preussen",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "titanic",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "usv",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "clipper",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "steamer",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "dreadnought",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "yamato",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "carrier",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "container",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "ever-given",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "azzam",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "endurance",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a stage card the audit cannot ask",
+  "detail": "window.SW_STAGE_CARD is not defined"
+ },
+ {
+  "id": "battle",
+  "rule": "shared polar model unreachable",
+  "detail": "compilePolar is not a page global \u2014 the battle compiles and evaluates through it at open"
+ },
+ {
+  "id": "battle",
+  "rule": "shared polar model unreachable",
+  "detail": "polarSpeed is not a page global \u2014 the battle compiles and evaluates through it at open"
+ },
+ {
+  "id": "battle",
+  "rule": "shared polar model unreachable",
+  "detail": "polarBeat is not a page global \u2014 the battle compiles and evaluates through it at open"
+ }
+]
