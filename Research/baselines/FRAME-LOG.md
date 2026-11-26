@@ -1690,3 +1690,7 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-11-26 02:57** · `shipwright-ahead` — r338: the berth neighbour's port wale is drawn and the 74's bow changed by a sliver (winding fix). The fluyt's rig at the left edge is the same stale-baseline difference as in shipwright
 - **2026-11-26 03:01** · `ship-sekibune` — r338: the sekibune's two port wales are drawn (winding fix), the lines along her side under the oars
 - **2026-11-26 03:01** · `shipwright-astern` — r338: the 74's sternpost was inside out (the class post is built upward); its faces now point out and the light falls on its near face. The change is confined to the post at her stern and a speck at the left edge
+- **2026-11-26 03:08** · `ship-wyoming` — r338: her two port wales are drawn (winding fix). They show as brown timber bands on her black side, the class colour the starboard side already had; whether her wales were painted with the hull is left to r339
+- **2026-11-26 03:08** · `ship-clipper` — r338: her two port wales are drawn (winding fix), brown bands on a black side, the class colour the starboard side already had; left to r339 as a record question
+- **2026-11-26 03:08** · `ship-slave-ship` — r338: her two port wales are drawn (winding fix)
+- **2026-11-26 03:08** · `ship-carrack` — r338: her two port wales are drawn (winding fix)
