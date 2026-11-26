@@ -135,15 +135,23 @@ return st.topM[0] + (st.topM[1] - st.topM[0]) * t;
 }
 return null;
 };
-const islandTop = u => {
+const islandOf = u => {
 if (!(S.islands && S.islands.list)) return null;
-for (const isl of S.islands.list)
-if (u >= isl.u[0] && u <= isl.u[1]) {
-const t = (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0]);
-return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
-}
+for (const isl of S.islands.list) if (u >= isl.u[0] && u <= isl.u[1]) return isl;
 return null;
 };
+const islandTop = u => {
+const isl = islandOf(u);
+if (!isl) return null;
+const t = (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0]);
+if (isl.overSheerM) return sheer(u) + isl.overSheerM[0] + (isl.overSheerM[1] - isl.overSheerM[0]) * t;
+return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
+};
+const islandRailM = u => {
+const isl = islandOf(u);
+return isl ? (isl.railM || S.islands.railM || 1.0) : null;
+};
+const islandDeck = u => { const t = islandTop(u); return t === null ? null : t - islandRailM(u); };
 const wellTop = u => {
 const W = S.islands && S.islands.wells;
 if (!W) return null;
@@ -182,7 +190,7 @@ if (!deckDrop) return sheer(u);
 if (S.deck.level) return S.freeboard - deckDrop;
 return sheer(u) - deckDrop;
 };
-return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, islandTop, wellTop, section: sectionRows(S),
+return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, islandTop, islandDeck, islandRailM, islandOf, wellTop, section: sectionRows(S),
 straightPost: SP, postTan, stemLine };
 }
 function deckEdge(S, H, u) {
@@ -1495,7 +1503,8 @@ const rec = { part, mast: mi, side: sideName(sgn), rail: best.rail || 'pin', pin
 const capHalf = Math.abs(surfacePoint(S, H, best.u, 1)[2]);
 if (Math.abs(from.z) > capHalf + 0.05) {
 const rc = S.capM ? S.capM / 1.6 : B * 0.016;
-const fair = new THREE.Vector3(best.x, H.sheer(best.u) + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
+const capBase = (() => { const it = (S.build === 'steel' || S.build === 'iron') ? null : H.islandTop(best.u); return it !== null ? it : H.sheer(best.u); })();
+const fair = new THREE.Vector3(best.x, capBase + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
 list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
 } else list.push([from, head]);
 belayed.push(rec);
@@ -1535,7 +1544,8 @@ S.__belay = belayPins.length ? { spec: BELAY, belayed, leadTo, addFifeRail } : n
 const railAt = (uu, sgn) => {
 const uc = Math.max(0.03, Math.min(0.965, uu));
 const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
-return new THREE.Vector3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
+const dI = FINE && S.islands ? H.islandDeck(uc) : null;
+return new THREE.Vector3((uc - 0.5) * L, (dI !== null ? dI : deckAt(uc)) + B * 0.012, sgn * hz);
 };
 const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
 const h = y1 - y0;
@@ -1808,7 +1818,8 @@ y0 += segs[si] * 0.88;
 }
 return segR[0].a;
 };
-if (mk.rig === 'square' && S.__belay) S.__belay.addFifeRail(mi, u, mxA(base), base, mastRAt(base));
+const fifeBase = (() => { const d = hullSurface(S).islandDeck(u); return d === null ? base : d; })();
+if (mk.rig === 'square' && S.__belay) S.__belay.addFifeRail(mi, u, mxA(fifeBase), fifeBase, mastRAt(fifeBase));
 segs.forEach((seg, si) => {
 if (mk.only && si >= mk.only) return;
 const mastMat = S.mastLivery === 'buff'
@@ -2546,7 +2557,10 @@ const xAft = se[0], ROOM = 0.30, ABAFT = 0.60;
 const needOut = clewHull.x > xAft - ROOM;
 const ctS = castleTopAt(S, H, 0.985);
 const crown = (S.sternLights || S.gunDecks) ? B * 0.055 + B * 0.011 : 0;
-const poopTop = ctS ? ctS.y + ctS.railH : H.sheer(1) + crown;
+const islT1 = H.islandTop(1);
+const poopTop = ctS ? ctS.y + ctS.railH
+: islT1 !== null ? islT1 + ((S.sternLights || S.gunDecks) ? B * 0.055 * 0.35 + B * 0.011 : 0)
+: H.sheer(1) + crown;
 const rO = Math.max(0.05, rYheel * 0.55);
 const quarterZ = ctS ? ctS.half * 0.85 : se[2] * 0.85;
 let lead, outl = null;
@@ -3375,8 +3389,8 @@ if (S.bowsprit) {
 const u0 = 0.02;
 const x0 = -L / 2 + H.rake(u0);
 const len = L * S.bowsprit;
-const spritDeck = H.islandTop(u0) !== null
-? H.islandTop(u0) - ((S.islands && S.islands.railM) || 1.0) : deckAt(u0);
+const islS = H.islandOf(u0);
+const spritDeck = islS && islS.spritHeel !== 'main' ? H.islandDeck(u0) : deckAt(u0);
 const steeve = (S.steeve || 22) * Math.PI / 180;
 const bg = new THREE.CylinderGeometry(B * 0.010, B * 0.020, len, 16);
 const bm = new THREE.Mesh(bg, woodDark);
@@ -4563,7 +4577,8 @@ const frameTimbers = !!(S.frames && S.frames.roomAndSpaceM);
 const steelShip = S.build === 'steel' || S.build === 'iron';
 if (openHull || !S.deck || !(S.deck.belowSheerM > 0.3) || frameTimbers || steelShip) return null;
 const L = S.lwl;
-const deckAtU = u => H.deck(u), railAtU = u => H.sheer(u);
+const deckAtU = u => { const d = H.islandDeck(u); return d === null ? H.deck(u) : d; };
+const railAtU = u => { const t = H.islandTop(u); return t === null ? H.sheer(u) : t; };
 const BW = S.bulwark || {};
 const pitch = BW.stanchionPitchM || 1.2;
 const sided = BW.stanchionSidedM || 0.12, moulded = BW.stanchionMouldedM || 0.15, gap = 0.05;
@@ -4586,6 +4601,13 @@ if (u > 0.95) break;
 if (!wallAt(u)) continue;
 stations.push({ u, fb: railAtU(u), yD: deckAtU(u) });
 }
+for (const isl of ((S.islands && S.islands.list) || [])) for (const ue of isl.u) {
+if (ue <= 0 || ue >= 1) continue;
+for (const uu of [ue - 0.08 / L, ue + 0.08 / L])
+if (uu > 0.035 && uu < 0.965 && wallAt(uu) && !stations.some(st => Math.abs(st.u - uu) < 0.3 / L && H.islandOf(st.u) === H.islandOf(uu)))
+stations.push({ u: uu, fb: railAtU(uu), yD: deckAtU(uu) });
+}
+stations.sort((a, b) => a.u - b.u);
 const runs = [], pins = [];
 if (pinRail && stations.length) {
 const NU = 90;
@@ -4605,9 +4627,13 @@ pins.push({ x, y: y + 0.05, z: sgn * (zi + railW / 2), sgn, u });
 }
 run = [];
 };
+let lastIsl;
 for (let i = 0; i <= NU; i++) {
 const u = 0.035 + (i / NU) * 0.93;
 const yD = deckAtU(u);
+const isl = H.islandOf(u);
+if (i && isl !== lastIsl) flush();
+lastIsl = isl;
 if (!wallAt(u) || railAtU(u) - yD < yPin + 0.15) { flush(); continue; }
 const p = skinAt(u, yD + yPin);
 run.push({ u, x: p[0], y: yD + yPin, zi: Math.abs(p[2]) - gap - moulded - railW });
@@ -4627,7 +4653,9 @@ const L = S.lwl, B = S.beam;
 const deckAtU = u => H.deck(u);
 const halfAtU = u => Math.abs(deckEdge(S, H, u)[2]);
 const capH = S.capM ? S.capM : B * 0.016 * 1.6;
-const railAtU = u => { const w = H.wellTop(u); return w !== null ? w - capH : H.sheer(u); };
+const timberIsland = !(S.build === 'steel' || S.build === 'iron');
+const railAtU = u => { const w = H.wellTop(u); if (w !== null) return w - capH;
+const it = timberIsland ? H.islandTop(u) : null; return it !== null ? it : H.sheer(u); };
 const railHalfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
 const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 if (!openHull) {
@@ -4637,7 +4665,7 @@ const T = S.decks ? linerHouse(S) : null;
 const t0 = T && T.tiers.length ? T.tiers[0] : null;
 const open = (u) => {
 if (H.stepTop(u) !== null) return false;
-if (H.islandTop(u) !== null) return false;
+if (H.islandTop(u) !== null) return timberIsland;
 if (!t0 || u < t0.uA || u > t0.uB) return true;
 return halfAtU(u) - t0.half(u) > B * 0.045;
 };
@@ -4661,8 +4689,17 @@ idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
 base += run.length * 4;
 run = [];
 };
-for (let i = 0; i <= NU; i++) {
-const u = 0.035 + (i / NU) * 0.93;
+let lastIslC;
+const Ucap = [];
+for (let i = 0; i <= NU; i++) Ucap.push(0.035 + (i / NU) * 0.93);
+if (timberIsland) for (const isl of ((S.islands && S.islands.list) || [])) for (const ue of isl.u)
+if (ue > 0 && ue < 1) Ucap.push(ue - 0.08 / L, ue + 0.08 / L);
+Ucap.sort((a, b) => a - b);
+for (let i = 0; i < Ucap.length; i++) {
+const u = Ucap[i];
+const islC = H.islandOf(u);
+if (i && islC !== lastIslC) flush();
+lastIslC = islC;
 if (!open(u)) { flush(); continue; }
 run.push({ x: (u - 0.5) * L + H.rake(u), y: railAtU(u), hb: railHalfAtU(u) });
 }
@@ -6078,8 +6115,14 @@ let u = 0.46;
 const xOf = q => (q - 0.5) * L + H.rake(q), c = 0.9;
 const feet = (S.masts || []).map(m => xOf(m.at)).sort((a, b) => a - b);
 const x0 = (u - 0.5) * L;
-if (feet.some(xm => Math.abs(xm - x0) < bl / 2 + 0.35)) {
-const lo = (0.20 - 0.5) * L, hi = (0.80 - 0.5) * L;
+let wLo = 0.20, wHi = 0.80;
+for (const isl of ((S.islands && S.islands.list) || [])) {
+if ((isl.u[0] + isl.u[1]) / 2 < 0.5) wLo = Math.max(wLo, isl.u[1]);
+else wHi = Math.min(wHi, isl.u[0]);
+}
+const islC = wLo > 0.20 || wHi < 0.80 ? 0.3 : 0;
+const lo = islC ? xOf(wLo) + islC : (0.20 - 0.5) * L, hi = islC ? xOf(wHi) - islC : (0.80 - 0.5) * L;
+if (feet.some(xm => Math.abs(xm - x0) < bl / 2 + 0.35) || x0 - bl / 2 < lo || x0 + bl / 2 > hi) {
 const edges = [lo, ...feet.filter(xm => xm > lo && xm < hi), hi];
 const gaps = [];
 for (let k = 0; k + 1 < edges.length; k++) {
@@ -7089,7 +7132,9 @@ vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.fr
 side: THREE.DoubleSide,
 uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
 uCol: { value: new THREE.Color(hex) } } });
-const wallMat = steel(S.topside || '#3a3a3c');
+const wallMat = S.islands.finish
+? (() => { const m = steel('#000000'); m.uniforms.uCol.value = waleFinish({ wale: { finish: S.islands.finish }, topside: S.topside }).color; return m; })()
+: steel(S.topside || '#3a3a3c');
 const cover = deckCovering(S);
 const deckMat = new THREE.ShaderMaterial({
 vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
@@ -7122,6 +7167,7 @@ return new THREE.Mesh(g, mat);
 for (const isl of S.islands.list) {
 const u0 = isl.u[0], u1 = isl.u[1], closedFwd = u0 <= 0, closedAft = u1 >= 1;
 const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+const iRail = isl.railM || railM;
 const g = new THREE.Group();
 const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
 const stU = k => {
@@ -7134,7 +7180,18 @@ path.push({ u: u1, x: xAt(u1), z: -halfAt(u1) });
 for (let k = N; k >= 0; k--) { const u = stU(k); path.push({ u, x: xAt(u), z: -halfAt(u) }); }
 path.push({ u: u0, x: xAt(u0), z: halfAt(u0) });
 const wall = [];
-for (const p of path) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, top(p.u), p.z);
+const breast = isl.breastM ? (u => top(u) - iRail + isl.breastM) : null;
+const pathW = [];
+for (let k = 0; k < path.length; k++) {
+const p = path[k], q = path[k + 1];
+pathW.push({ ...p, hi: top(p.u) });
+const same = (x, y) => Math.abs(x - y) < 1e-9;
+if (breast && q && same(q.u, p.u) && Math.sign(q.z) !== Math.sign(p.z)
+&& ((same(p.u, u1) && !closedAft) || (same(p.u, u0) && !closedFwd))) {
+pathW.push({ ...p, hi: breast(p.u) }, { ...q, hi: breast(q.u) });
+}
+}
+for (const p of pathW) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, p.hi, p.z);
 g.add(strip(wall, wallMat));
 for (const ue of [...(closedFwd ? [] : [u0]), ...(closedAft ? [] : [u1])]) {
 const x = xAt(ue), h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
@@ -7142,7 +7199,7 @@ g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat));
 }
 const dp = [];
 for (let k = 0; k <= N; k++) {
-const u = stU(k), y = top(u) - railM, [dx, h] = shellAt(u, y);
+const u = stU(k), y = top(u) - iRail, [dx, h] = shellAt(u, y);
 dp.push(dx, y, -h, dx, y, h);
 }
 g.add(strip(dp, deckMat, true));
@@ -7157,7 +7214,7 @@ acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
 if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
 }
 const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
-const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - railM, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
+const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - iRail, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
 for (const q of Q) {
 const p = at(q), st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, postH, 5), railMat);
 st.position.set(p.x, p.y + postH / 2, p.z);
@@ -9529,7 +9586,16 @@ rail.position.set(xF + B * 0.004, zm, 0);
 g.add(tag(rail, 'transom'));
 }
 }
-if (rows || S.gunDecks) {
+const islT = H.islandTop(1);
+if ((rows || S.gunDecks) && islT !== null) {
+const halfT = halfAt(fb) * 0.97, hR = B * 0.055;
+const arc = new THREE.CatmullRomCurve3([
+new THREE.Vector3(xF, islT, -halfT),
+new THREE.Vector3(xF, islT + hR * 0.35, 0),
+new THREE.Vector3(xF, islT, halfT)]);
+g.add(tag(new THREE.Mesh(
+new THREE.TubeGeometry(arc, 16, B * 0.011, 6, false), mats.woodDark), 'taffrail'));
+} else if (rows || S.gunDecks) {
 const halfT = halfAt(fb) * 0.97;
 const hR = B * 0.055;
 const arc = new THREE.CatmullRomCurve3([

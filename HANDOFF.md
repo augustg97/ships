@@ -30792,3 +30792,61 @@ The rig drops 1.5 m with the deck, because every mast steps on the deck the mode
 3. r341's items 2 and 3 stand: a plate for the East Indiaman's `paintBands`, and colour plates for the clipper's and Wyoming's wale finish.
 
 **Disk at close: 10567 MB free.** Live stamp 1795705107.
+
+## Round 343 — 2026-11-26 — The 74 now has a forecastle and a quarterdeck, with the open waist between them. Until this round her deck ran 1.5 m under the rail from stem to stern, so the whole ship read as one long open well. Bellona's contemporary model puts the forecastle over the first quarter of her length and the quarterdeck over the after 57%. Each is a deck 2.0 m over the upper deck, behind a tarred barricade. The boat now sits in the waist, and every fall now ends on the deck its mast is worked from
+
+**Queue check: August's second list stands worked in full (r57).** The round took r342's first item for r343: the 74's forecastle and quarterdeck. It opened at 07:16 with 10 GB free and a load of 3.7.
+
+**THE READ** (`hull.islands` on the 74; the provenance gives every number):
+- **Spans** from SLR0338, the RMG model of *Bellona* (1760), quarter plate l5785_003 (`build/staging/r171/bellona-qtr-l5785_003.jpg`; `build/staging/r343/bellona-top-2x.png` is the 2x crop with a column ruler). On the plate the stem head stands at x 185, the taffrail at x 1090, the forecastle's breastwork at x 405 and the quarterdeck's breast rail at x 555. The upper tier's port pitch grows from about 45 px at the bow to 55 px at the stern, so the plate is foreshortened about 20% along her length. Corrected for that, the forecastle runs from u 0 to 0.26 and the quarterdeck from u 0.43 to the stern, each end contested by about 0.02 u (1 m).
+- **Heights.** Bellona lays both decks about level with the top of the side. On Eckersberg's *Asow* (1828) the quarterdeck's black barricade stands about 2.2 m over the waist rail, and the forecastle's about 1.3 m (at a scale the plate does not give that far forward). The model lays each deck 0.5 m over the waist rail, which is 2.0 m over the upper deck, the class's height between decks. The quarterdeck's barricade stands 1.5 m over its deck, so its top is 2.0 m over the rail; Asow reads 2.2 m. The forecastle's barricade is 1.2 m, a class figure. A breast rail 1.0 m high closes each end that faces the waist, also a class figure. Both barricades are tarred black, as Asow paints them.
+- **Not drawn, and named in the provenance:** the gangways along each side of the waist, the poop over the after quarterdeck (Bellona has one from about u 0.63; Asow hides hers), and the guns on the quarterdeck and forecastle.
+
+**WHAT CHANGED** (`build/staging/r343/scripts/r343_edit.py <web dir>`, `r343_edit_record.py <vessels.json>`, `r343_edit_audit.py <audit-hulls.js>` reproduce everything on a clean tree):
+1. **An island on a timber hull rides the sheer.** `isl.overSheerM: [fwd, aft]` gives the top as a height over the sheer, where a steel island's `topM` is a straight line between two read heights. A wooden ship's raised deck is laid parallel to her sheer. Each island may carry its own `railM`. `hullSurface` now returns `islandOf`, `islandDeck` and `islandRailM`, so there is one derivation of an island's deck.
+2. **The island builder**: the barricade wears `islands.finish` (the wale's vocabulary; the 74's is `tarred`). An end facing a well gets a breastwork `isl.breastM` over the island's deck; without the field the perimeter is walked as before. `isl.spritHeel: 'main'` keeps the 74's bowsprit heeled on the upper deck under the forecastle, because a ship with a beakhead runs her bowsprit out below the forecastle deck.
+3. **The bulwark furniture stands on the deck the crew stands on.** Inside an island's span the stanchions stand on the island's deck up to its top, and the pin rail is on them. A post stands 8 cm each side of every break, and a pin-rail run ends at the break. Before this, the 74's 78 stanchions and both pin rails stood on the upper deck under the raised decks. When only the waist kept them, the mizzen's halyards led 25 m forward to the waist's pins.
+4. **The capping rides a timber island's barricade.** Its run gets a station at each break post. A steel island still has no capping, and Titanic's and Preussen's caps are unchanged.
+5. **The fife rails stand on the island's deck.** The fore fife rail is on the forecastle, and the main and mizzen fife rails are on the quarterdeck. The masts still step on the upper deck and pass up through the raised decks.
+6. **A fall led over the cap gets its fairlead on the cap's top at the pin's station.** That is the barricade's top on a timber island. The fore tack's fairlead had stood 2 m down inside the forecastle barricade.
+7. **A fall with no pin ends on the island's deck** inside an island's span, in the fine build (`railAt` in buildRig). On Preussen the jigger's peak and throat halyards, and the sheets and tacks under her poop, ran down through the poop deck to the main deck 1.1 m below it. This fault predates r343. The island-aware audit found it.
+8. **The skid boat is stowed in the waist**, between the islands' ends with 0.3 m clear. The class bounds u 0.20 and 0.80 put the 74's boat through the quarterdeck's breast. It is now 8.1 m long, down from 8.67 m, and stands at x −12.1 to −4.0.
+9. **The taffrail crowns the quarterdeck's barricade** at the stern; it had stood at the sheer, in front of the island's stern wall. The spanker sheet's lead height reads the same top.
+
+**MEASURED** (node probe; `parts-before.txt` and `parts-after.txt` give every part's extent):
+
+| the 74 | before | after |
+|---|---|---|
+| deck under the forecastle / quarterdeck, at u 0.1 / 0.7 | 4.86 / 3.97 m (upper deck) | 6.86 / 5.97 m |
+| barricade top over the rail | none | 1.7 m forecastle, 2.0 m quarterdeck |
+| stanchions | 78, all on the upper deck | 82: the waist's on the upper deck, the rest on the island decks |
+| fife rails (y) | 3.90–6.09 m | 5.90–8.09 m |
+| mizzen peak and throat halyards, lowest point | 5.53 m | 7.53 m (the quarterdeck's pin rail) |
+| skid boat (x) | −6.5 to 2.2 m (through the quarterdeck's breast) | −12.1 to −4.0 m (in the waist) |
+| taffrail (y) | 6.30–7.52 m | 8.16–8.72 m |
+
+**FLEET HASH** (`scripts/r343_fleet_hash.js`, every hull, fine and furled, every mesh's world vertices): only the 74's fine build and Preussen's fine build change. Every furled build and all 31 other hulls are identical. An earlier version also moved Titanic's and Preussen's capping, through the break stations. Those stations are now gated on a timber island.
+
+**AUDIT.** The first run on the new builder found 132 problems on the 74. None was a fault in the model. Every rule that measures a fitting or a fall against "the deck at x" read the upper deck's mesh, 2 m under the deck those parts now stand on. Five `deckAtX` readers now take the island's deck inside a built island's span (`islandDeckAtX`, which checks the island is built, so the furled build reads the main deck). Three rules measured in the wrong place:
+- **A-FIFE-RAIL** found the mast at the deck's height, where the mast passes through and has no ring. It now takes the mast's lowest ring.
+- **'a pin rail in the wall'** compared each point with the nearest stanchion. At the 74's bow the half-breadth changes 0.3 m a metre, so a stanchion 0.7 m off read a rail inside the planking as 0.21 m out. The rule now interpolates between the stanchions either side.
+- **'a stanchion under no cap'** used a 0.35 m window. At the raked bow the cap's stations stand 0.78 m apart, so a stanchion between two of them now counts as under the cap.
+
+**NEW RULE A-FALL-THROUGH-ISLAND.** No vertex of a running fall that stands inboard of an island's side may lie more than 0.10 m under that island's deck. Final audit: **33 hulls, 0 problems** (`auditG.out`). Proof B on the r342 builder cannot run: the new audit calls `islandDeck`, which that builder does not have, and it stops with a TypeError (`proofB.err`). Proof C instead (memory: old geometry on the new builder): the new builder with two lines flipped back, so a fall with no pin ends on the main deck and the fife rail stands on the upper deck (`proofC.out`, 55 problems). The new rule convicted Preussen 5 times (tack, sheet, halyard, throat and peak halyards, 1.03–1.63 m under her island decks) and the 74 3 times (jeers, clewline, buntline, 0.71–0.78 m under). A-FIFE-RAIL and the coil rule convicted the 74's flipped fife rails as well.
+
+**WITNESS** (`wit/`, 2880 px, before on :8150 carrying r342's builder and record, after on :8149): `crop-fbeam.png` (the 74 furled from high on the port beam, before over after), `crop-sol-fquarter.png`, `crop-pr.png` (Preussen's poop: one fall passes through the deck before, and ends on it after).
+
+**RULE 0** (`crop-fbeam.png`, the after half). Does this read as a rendered world rather than a chart? Yes. It shows a two-decked wooden ship from above her port beam, with planked decks, masts, rigging and guns run out, on the sea. Three facts a viewer can read off it: (1) the deck is raised at both ends and open in the middle, and the ship's boat sits in that open middle; (2) the raised ends have black walls about a man's height round them, and the after one runs about half the ship's length; (3) the masts pass up through the raised decks, and each has a rail round its foot on the raised deck.
+
+**BOUND.** The barricades are drawn in STEEL_FRAG, the flat paint the steel islands use. They have no planking, no seams and no rail mouldings, so up close each reads as a painted slab. HULL_FRAG draws the side's planking, and carrying it up onto the island walls is the next structural step for any timber island.
+
+**RATCHET RECEIPT (r343).** hull.js changed, but the fleet hash shows only the 74's and Preussen's fine builds move. The 25 frames that can show either were captured one process per frame (`run1`; the list is r342's 22 plus `aboard-preussen`, `ship-wyoming` and `ship-titanic`) and scored offline with r277's scorer. **8 movers, all predicted, each looked at and accepted:** `shipwright` 1.629%, `shipwright-ahead` 0.212%, `shipwright-astern` 4.823%, `shipwright-furled` 6.818%, `shipwright-hounds` 3.713%, `ship-steamer` 0.095% (the 74 in the next berth), `ship-preussen` 0.202% and `aboard-preussen` 0.095% (her falls on her island decks). Crops are `pair-shipwright.png` and `sheet-movers.png`. One capture fault was not accepted: `aboard-coast` read 17.996%, the documented second-browser value. It recaptured alone at 0.032% (`run2`). The other 16 frames were inside the gate. The 40 frames that cannot show the 74 or Preussen were not recaptured; their hulls build identically.
+
+**FOR r344:**
+1. **Plank the timber barricades.** The island walls on a timber hull should take the hull's own planking (HULL_FRAG's strakes, the chequer's paint) where steel islands take STEEL_FRAG. Read Asow at the quarter for the barricade's rail mouldings.
+2. **The jeer capstan.** Bellona's model shows a capstan in the waist, ahead of the quarterdeck's breast. The model's one capstan stands at u 0.6, which is the main capstan's place under the quarterdeck, so it is now hidden. capstanProvenance reads its bars and drumhead off the waist capstan. Either give the record a second capstan, the jeer capstan with its own station, or move the read to the capstan it describes.
+3. **The gangways and the poop.** Both plates show gangways along each side of the waist, joining the forecastle and quarterdeck at their deck level. Bellona has a poop from about u 0.63. Two islands cannot overlap, so the poop needs the island list to allow a stacked island, or a third island at its own top with the quarterdeck ending at its front.
+4. r342's item 2 stands: Steel's main-mast length is heel to head, and `mastLowerOf` stands that whole length above the deck.
+5. r341's items stand: a plate for the East Indiaman's `paintBands`, and colour plates for the clipper's and Wyoming's wale finish.
+
+**Disk at close: 9013 MB free.** Live stamp 1795709449.

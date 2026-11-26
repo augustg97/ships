@@ -20,6 +20,15 @@ if (u < H.forefoot) { const k = (H.forefoot - u) / H.forefoot; r = -(H.stemRake 
 else if (u > 1 - H.run) { const k = (u - (1 - H.run)) / H.run; r = (H.sternRake || 0) * rs * k * k * H.loa; }
 return (u - 0.5) * H.lwl + r;
 };
+const islandsBuilt = new WeakMap();
+const islandDeckAtX = (H, xq, grp) => {
+if (!(H && H.islands && Array.isArray(H.islands.list))) return null;
+if (!islandsBuilt.has(grp)) { let f = false; grp.traverse(o => { const p = o.userData && o.userData.part; if (p && p.key === 'forecast') f = true; }); islandsBuilt.set(grp, f); }
+if (!islandsBuilt.get(grp)) return null;
+let a = 0, b = 1;
+for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (loftDeckX(H, m) < xq) a = m; else b = m; }
+return SHIPS_HULL.hullSurface(H).islandDeck((a + b) / 2);
+};
 {
 const spend = s => String(s == null ? '' : s)
 .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
@@ -4391,7 +4400,7 @@ const liftPts = lifts.map(pts);
 let platTop = null;
 if (platM.length) { platTop = -1e9; for (const m of platM) for (const q of pts(m)) platTop = Math.max(platTop, q.y); }
 let deckPts = null;
-const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+const deckAtX = xq => { const iD = islandDeckAtX(H, xq, G); if (iD !== null) return iD; if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 for (const { o, rec } of booms) {
@@ -4635,7 +4644,7 @@ d = Math.min(d, Math.hypot(q.x - (a.foot.x + dx * t), q.y - (a.foot.y + dy * t))
 return d; };
 const topAtMast = Q => { let top = null; for (const q of Q) if (mastDist(q) < 0.8 && (!top || q.y > top.y)) top = q; return top; };
 let deckPts = null;
-const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+const deckAtX = xq => { const iD = islandDeckAtX(H, xq, G); if (iD !== null) return iD; if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 const gaffAxes = gaffs.map(o => { const ax = axisOf(pts(o)); let lo = ax.foot, hi = ax.head; if (lo.x > hi.x) [lo, hi] = [hi, lo]; return { lo, hi, o }; });
@@ -4711,7 +4720,7 @@ if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.le
 if (railM.length) say(v.id, 'a pin rail in a bulwark that is not there', `${railM.length} Pin rail mesh(es) on a hull ${deep ? 'whose frames are drawn to the head' : 'with no deck below the sheer'}`);
 } else {
 let deckPts = null, capPts = null;
-const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+const deckAtX = xq => { const iD = islandDeckAtX(H, xq, g); if (iD !== null) return iD; if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 const capAtX = (xq, sgn) => { if (!capPts) capPts = [].concat(...capM.map(pts));
@@ -4719,6 +4728,9 @@ const st = new Map(); let outer = 0, n = 0;
 for (const q of capPts) { if (Math.sign(q.z) !== sgn || Math.abs(q.x - xq) > 0.8) continue;
 const k = Math.round(q.x * 50); st.set(k, Math.min(st.has(k) ? st.get(k) : 1e9, q.y));
 if (Math.abs(q.x - xq) <= 0.35) { outer = Math.max(outer, Math.abs(q.z)); n++; } }
+if (!n) { const ks = [...st.keys()].map(k => k / 50);
+if (ks.some(x => x <= xq) && ks.some(x => x > xq)) { n = 1;
+for (const q of capPts) if (Math.sign(q.z) === sgn && Math.abs(q.x - xq) <= 0.8) outer = Math.max(outer, Math.abs(q.z)); } }
 if (!n) return null;
 const S2 = [...st.entries()].map(([k, y]) => [k / 50, y]).sort((a, b) => a[0] - b[0]);
 let lo = null, hi = null; for (const e of S2) { if (e[0] <= xq) lo = e; else if (!hi) hi = e; }
@@ -4767,9 +4779,11 @@ if (rr && rr.pinRailM != null && hMed != null && Math.abs(hMed - rr.pinRailM) > 
 say(v.id, 'a pin rail off its height', `the ${sideOf(sgn)} pin rail stands a median ${hMed.toFixed(2)} m over the deck's edge at its own stations (${hs.length} reads, ${hs[0].toFixed(2)}–${hs[hs.length - 1].toFixed(2)}) where the builder says ${rr.pinRailM} (${rr.pinRailFrom})`);
 let worst = -1e9, wq = null;
 for (let k = 0; k < Q.length; k += 4) { const q = Q[k];
-let st = null, bd = 1e9; for (const c of bySide[sgn]) { const d = Math.abs(c.x - q.x); if (d < bd) { bd = d; st = c; } }
-if (!st || bd > 1.5) continue;
-let inner = 1e9; for (const r of st.P) if (Math.abs(r.y - q.y) < 0.35) inner = Math.min(inner, Math.abs(r.z));
+const innerOf = c => { let m2 = 1e9; for (const r of c.P) if (Math.abs(r.y - q.y) < 0.35) m2 = Math.min(m2, Math.abs(r.z)); return m2; };
+let sa = null, sb = null;
+for (const c of bySide[sgn]) { if (c.x <= q.x && (!sa || c.x > sa.x)) sa = c; if (c.x > q.x && (!sb || c.x < sb.x)) sb = c; }
+const ia = sa && q.x - sa.x <= 1.5 ? innerOf(sa) : 1e9, ib = sb && sb.x - q.x <= 1.5 ? innerOf(sb) : 1e9;
+const inner = ia < 1e8 && ib < 1e8 ? ia + (ib - ia) * (q.x - sa.x) / Math.max(1e-6, sb.x - sa.x) : Math.min(ia, ib);
 if (inner > 1e8) continue;
 const over = Math.abs(q.z) - inner; if (over > worst) { worst = over; wq = q; } }
 if (wq && worst > 0.03) say(v.id, 'a pin rail in the wall', `the ${sideOf(sgn)} pin rail at x ${wq.x.toFixed(2)} stands ${worst.toFixed(3)} m outside the nearest stanchion's inner face`);
@@ -4795,7 +4809,7 @@ if (fifeM.length || fifePinsM.length) say(v.id, 'a fife rail on a hull with no p
 } else if (sq.length) {
 if (!H.fifeRail) say(v.id, 'a fife rail with no answer', `a hull with pins and ${sq.length} square mast(s) whose record says nothing of the fife rail (hull.fifeRail: figures, or a provenance naming the plates read)`);
 let deckPts = null;
-const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+const deckAtX = xq => { const iD = islandDeckAtX(H, xq, g); if (iD !== null) return iD; if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 const fifePins = [];
@@ -4805,7 +4819,9 @@ const mastXAt = (xn, e) => { if (!mastPts) mastPts = [].concat(...mastMs.map(pts
 let a = 1e9, b = -1e9; for (const q of mastPts) if (Math.abs(q.x - xn) < 3 && Math.abs(q.y - e) < 0.6 && Math.abs(q.z) < 1.5) { a = Math.min(a, q.x); b = Math.max(b, q.x); }
 return a < 1e8 ? (a + b) / 2 : xn; };
 for (const { m, i } of sq) {
-const xn = (m.at - 0.5) * L, xm = mastXAt(xn, deckAtX(xn)), at = `mast ${i} (station ${m.at})`;
+const footY = xq => { if (!mastPts) mastPts = [].concat(...mastMs.map(pts)); let y = 1e9;
+for (const q of mastPts) if (Math.abs(q.x - xq) < 3 && Math.abs(q.z) < 1.5) y = Math.min(y, q.y); return y; };
+const xn = (m.at - 0.5) * L, xm = mastXAt(xn, footY(xn)), at = `mast ${i} (station ${m.at})`;
 const rails = fifeM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
 if (!rails.length) { say(v.id, 'a square mast with no fife rail', `${at}: ${pinsM.length ? 'a pin rail' : 'pins'} and no Fife rail mesh records this mast — nothing that comes down the mast can be made fast at its foot`); continue; }
 if (rails.length > 1) say(v.id, 'two fife rails on one mast', `${at}: ${rails.length} Fife rail meshes record it`);
@@ -4814,7 +4830,8 @@ let xMin = 1e9, xMax = -1e9, zMax = 0, yMax = -1e9; for (const q of P) { xMin = 
 const rM = fr.mastR || 0;
 if (!(xMin < xm - rM - 0.2 && xMax > xm + rM + 0.2 && zMax > rM + 0.3))
 say(v.id, 'a fife rail that does not stand round its mast', `${at}: the timber spans x ${xMin.toFixed(2)}..${xMax.toFixed(2)}, |z| to ${zMax.toFixed(2)} against the mast at x ${xm.toFixed(2)}, radius ${rM.toFixed(2)}`);
-const e = deckAtX(xm), over = yMax - e;
+const isD = H.islands ? SHIPS_HULL.hullSurface(H).islandDeck(m.at) : null;
+const e = isD !== null ? isD : deckAtX(xm), over = yMax - e;
 if (e < 1e8 && (over < 0.9 || over > 1.3)) say(v.id, 'a fife rail off its height', `${at}: the rail's top stands ${over.toFixed(2)} m over the deck at the mast (0.9–1.3 wanted)`);
 const pm = fifePinsM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
 if (!pm.length) { say(v.id, 'a fife rail with no pins', `${at}: a Fife rail mesh and no Fife rail pins mesh for it`); continue; }
@@ -5046,7 +5063,7 @@ if (belays.length && !coilM.length) say(v.id, 'belayed pins with no coils', `${b
 if (coilM.length) {
 const C = [].concat(...coilM.map(pts));
 let deckPts = null;
-const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+const deckAtX = xq => { const iD = islandDeckAtX(H, xq, g); if (iD !== null) return iD; if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 const nC = coilM.reduce((a, o) => a + (o.userData.coils || []).length, 0);
@@ -7287,14 +7304,20 @@ const groups = [];
 g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.key === 'forecast') groups.push({ o, name: p.name }); });
 for (const isl of (IL || [])) {
 const shapeOK = isl && typeof isl.name === 'string' && Array.isArray(isl.u) && isl.u.length === 2 && isl.u[0] >= 0 && isl.u[1] <= 1 && isl.u[1] > isl.u[0]
-&& Array.isArray(isl.topM) && isl.topM.length === 2 && isl.topM.every(t => typeof t === 'number');
-if (!shapeOK) { say(v.id, 'an island declared out of shape', `${JSON.stringify(isl).slice(0, 120)}; want {name, u: [a, b], topM: [fwd, aft]}`); continue; }
+&& ((Array.isArray(isl.topM) && isl.topM.length === 2 && isl.topM.every(t => typeof t === 'number'))
+|| (Array.isArray(isl.overSheerM) && isl.overSheerM.length === 2 && isl.overSheerM.every(t => typeof t === 'number')));
+if (!shapeOK) { say(v.id, 'an island declared out of shape', `${JSON.stringify(isl).slice(0, 120)}; want {name, u: [a, b], topM: [fwd, aft]} or overSheerM: [fwd, aft]`); continue; }
 const um = (isl.u[0] + isl.u[1]) / 2;
-if (Math.min(isl.topM[0], isl.topM[1]) < H2.sheer(um)) say(v.id, 'an island whose top lies under the sheer', `${isl.name}: topM ${isl.topM.join('/')} m, the sheer at its middle ${H2.sheer(um).toFixed(2)} m`);
+const topAt = q => H2.islandTop(q);
+if (isl.overSheerM ? Math.min(...isl.overSheerM) <= 0 : Math.min(isl.topM[0], isl.topM[1]) < H2.sheer(um))
+say(v.id, 'an island whose top lies under the sheer', `${isl.name}: ${isl.overSheerM ? 'overSheerM ' + isl.overSheerM.join('/') : 'topM ' + isl.topM.join('/') + ' m, the sheer at its middle ' + H2.sheer(um).toFixed(2)} m`);
+if (isl.railM !== undefined && !(isl.railM > 0.3 && isl.railM < (isl.overSheerM ? Math.min(...isl.overSheerM) + 2.5 : 4)))
+say(v.id, 'an island railM out of range', `${isl.name}: railM ${isl.railM}`);
 const grp = groups.find(q => q.name === isl.name);
 if (!grp) { say(v.id, 'an island recorded and not built', `${isl.name}, u ${isl.u[0]}-${isl.u[1]}: no forecast group of that name`); continue; }
 const bb = new THREE.Box3().setFromObject(grp.o);
-const wantTop = Math.max(isl.topM[0], isl.topM[1]);
+let wantTop = -Infinity;
+for (let k = 0; k <= 40; k++) { const t = topAt(isl.u[0] + (isl.u[1] - isl.u[0]) * k / 40); if (t !== null) wantTop = Math.max(wantTop, t); }
 if (Math.abs(bb.max.y - wantTop) > 0.15) say(v.id, 'an island built off its recorded top', `${isl.name}: built top ${bb.max.y.toFixed(2)} m over the water, record ${wantTop.toFixed(2)}`);
 const x0 = loftDeckX(H, isl.u[0]), x1 = loftDeckX(H, isl.u[1]);
 if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record u ${isl.u[0]}-${isl.u[1]} on the loft's deck-level line ${x0.toFixed(1)}..${x1.toFixed(1)}`);
@@ -7302,7 +7325,7 @@ for (const ue of [0, 1]) {
 if (ue === 0 ? isl.u[0] > 0 : isl.u[1] < 1) continue;
 const xe = loftDeckX(H, ue), built = ue === 0 ? bb.min.x : bb.max.x;
 if (Math.abs(built - xe) > 0.1) say(v.id, "an island short of the hull's end it runs to", `${isl.name}: built to x ${built.toFixed(2)}, the loft's ${ue === 0 ? 'stem head' : 'stern end'} at ${xe.toFixed(2)}`);
-const tE = isl.topM[ue] - (H.islands.railM || 1.0), floorY = Math.min(H2.sheer(ue), tE) - 0.3;
+const tE = H2.islandDeck(ue), floorY = Math.min(H2.sheer(ue), tE) - 0.3;
 let low = 0, lowest = Infinity; const P3 = new THREE.Vector3();
 grp.o.updateMatrixWorld(true);
 grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
@@ -7329,6 +7352,23 @@ say(v.id, 'an island built off its plate', `${isl.name}: built x ${bb.min.x.toFi
 }
 }
 if (H.stationRead && !H.islands.plate) say(v.id, 'islands on a plate-read hull with no plate datum of their own', `hull.stationRead is present and hull.islands.plate is absent, so no island's end can be read against the plate`);
+if (groups.length) {
+const FALL = new Set(['sheet', 'tack', 'halyard', 'throatHalyard', 'peakHalyard', 'jeers', 'clewline', 'buntline']);
+const uAtX2 = x => { let a = 0, b = 1; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (loftDeckX(H, m) < x) a = m; else b = m; } return (a + b) / 2; };
+const P5 = new THREE.Vector3(), worst = {};
+g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p || !FALL.has(p.key)) return;
+const pa = o.geometry.attributes.position;
+for (let i = 0; i < pa.count; i++) { P5.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+const u = uAtX2(P5.x); if (u <= 0.002 || u >= 0.998) continue;
+const dI = H2.islandDeck(u); if (dI === null) continue;
+const half = Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1)[2]);
+if (Math.abs(P5.z) > half - 0.10) continue;
+const under = dI - P5.y;
+if (under > 0.10 && (!worst[p.key] || under > worst[p.key].under)) worst[p.key] = { under, x: P5.x, y: P5.y, z: P5.z, dI }; } });
+for (const [k, w] of Object.entries(worst))
+say(v.id, 'a fall through an island deck', `${k}: a vertex at x ${w.x.toFixed(2)}, y ${w.y.toFixed(2)}, |z| ${Math.abs(w.z).toFixed(2)} lies ${w.under.toFixed(2)} m under the island's deck (${w.dI.toFixed(2)})`);
+}
 {
 const uAtX = x => { let a = 0, b = 1; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (loftDeckX(H, m) < x) a = m; else b = m; } return (a + b) / 2; };
 const P4 = new THREE.Vector3();
