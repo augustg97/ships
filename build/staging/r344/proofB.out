@@ -1,0 +1,22 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a timber island drawn in a steel paint",
+  "detail": "Forecastle: a wall mesh of the island is not drawn in HULL_FRAG, so it shows no planking"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a timber island drawn in a steel paint",
+  "detail": "Forecastle: a wall mesh of the island is not drawn in HULL_FRAG, so it shows no planking"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a timber island drawn in a steel paint",
+  "detail": "Quarterdeck: a wall mesh of the island is not drawn in HULL_FRAG, so it shows no planking"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a timber island drawn in a steel paint",
+  "detail": "Quarterdeck: a wall mesh of the island is not drawn in HULL_FRAG, so it shows no planking"
+ }
+]

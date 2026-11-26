@@ -11451,9 +11451,28 @@ function buildIslands(S, group, hullMat) {
                 uCol: { value: new THREE.Color(hex) } } });
   /* r343: a timber island's barricade wears a recorded paint (islands.finish, the wale's
      vocabulary: the 74's is tarred black on Asow); without it the topside colour, as before */
-  const wallMat = S.islands.finish
-    ? (() => { const m = steel('#000000'); m.uniforms.uCol.value = waleFinish({ wale: { finish: S.islands.finish }, topside: S.topside }).color; return m; })()
-    : steel(S.topside || '#3a3a3c');
+  /* ⚠ A TIMBER BARRICADE IS PLANKED (round 344). r343 drew the 74's barricades in STEEL_FRAG,
+     the flat paint a steel island's plating takes, so up close each read as a painted slab
+     standing on a planked side. A wooden ship's barricade is the side's own planking carried
+     up on the top timbers: the same strakes, butts and treenails. On a timber hull the wall is
+     drawn in HULL_FRAG, sharing the hull material's own uniforms (sun, camera, strake count,
+     plank length, frame spacing), so the seams continue across the sheer at the shell's own
+     pitch. Its v carries on above the sheer at the freeboard's own scale (v = wl + (1 − wl)·y /
+     sheer: linear in height, 1 at the sheer), so the first barricade strake is the next strake
+     up. The paint is the recorded finish on plain planking: the chequer's bands and the
+     record's glazing rows belong to the side under the sheer. A steel island is unchanged. */
+  const timberWall = !(S.build === 'steel' || S.build === 'iron') && !S.iron && hullMat.fragmentShader === HULL_FRAG;
+  const wallCol = S.islands.finish
+    ? waleFinish({ wale: { finish: S.islands.finish }, topside: S.topside }).color
+    : new THREE.Color(S.topside || '#3a3a3c');
+  const wallMat = timberWall
+    ? new THREE.ShaderMaterial({ vertexShader: HULL_VERT, fragmentShader: HULL_FRAG, side: THREE.DoubleSide,
+        uniforms: { ...hullMat.uniforms, uTopside: { value: wallCol.clone() }, uChequer: { value: 0 },
+                    uHGrpN: { value: 0 }, uCopper: { value: 0 } } })
+    : (() => { const m = steel('#000000'); m.uniforms.uCol.value = wallCol; return m; })();
+  const wlV = hullMat.uniforms.uWaterline ? hullMat.uniforms.uWaterline.value : 0.62;
+  /* the loft's (u, v) of a point on the wall at station u and height y (the freeboard's scale) */
+  const wallUV = (u, y) => [u, wlV + (1 - wlV) * y / Math.max(0.5, H.sheer(Math.max(0, Math.min(1, u))))];
   /* the island's deck is a weather deck: the same DECK_FRAG recipe the hull's own deck is
      drawn in, the recorded covering's planking, lit by the declared normal — so it reads as
      the planked deck it is and not as a dark plate (the first r292 witness) */
@@ -11478,7 +11497,7 @@ function buildIslands(S, group, hullMat) {
     const p = surfacePoint(S, H, uc, (a + b) / 2);
     return [p[0], Math.abs(p[2])];
   };
-  const strip = (pts, mat, up) => {
+  const strip = (pts, mat, up, uvs) => {
     /* pts: [x, yLo, z, x, yHi, z] per station, a quad between neighbours. The winding is the
        normal: walked round the perimeter it faces OUT of the wall; on the deck strip, whose
        pairs run −z to +z, the same order faces DOWN, and a deck shader lit by its declared
@@ -11490,6 +11509,7 @@ function buildIslands(S, group, hullMat) {
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    if (uvs) g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     g.setIndex(idx); g.computeVertexNormals();
     return new THREE.Mesh(g, mat);
   };
@@ -11529,13 +11549,23 @@ function buildIslands(S, group, hullMat) {
         pathW.push({ ...p, hi: breast(p.u) }, { ...q, hi: breast(q.u) });
       }
     }
-    for (const p of pathW) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, p.hi, p.z);
-    g.add(strip(wall, wallMat));
+    const wallUv = [];
+    for (const p of pathW) {
+      wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, p.hi, p.z);
+      wallUv.push(...wallUV(p.u, H.sheer(p.u) - 0.02), ...wallUV(p.u, p.hi));
+    }
+    g.add(strip(wall, wallMat, false, wallUv));
     /* the end bulkheads, from the main deck up to the sheer where the wall above begins: only
        at an end that faces a well */
     for (const ue of [...(closedFwd ? [] : [u0]), ...(closedAft ? [] : [u1])]) {
       const x = xAt(ue), h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
-      g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat));
+      /* the bulkhead's planks run athwartships, so its u runs across the beam (a plank's worth of
+         u per half-breadth would repeat the butts; one u step of the station's own length keeps
+         the grain from smearing) */
+      const du = h / L;
+      g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat, false,
+        [...wallUV(ue, yd).map((c, i) => i ? c : ue - du), ...wallUV(ue, ys).map((c, i) => i ? c : ue - du),
+         ...wallUV(ue, yd).map((c, i) => i ? c : ue + du), ...wallUV(ue, ys).map((c, i) => i ? c : ue + du)]));
     }
     /* the island's deck, railM under the top, lofted station by station */
     const dp = [];

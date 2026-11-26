@@ -7315,6 +7315,24 @@ if (isl.railM !== undefined && !(isl.railM > 0.3 && isl.railM < (isl.overSheerM 
 say(v.id, 'an island railM out of range', `${isl.name}: railM ${isl.railM}`);
 const grp = groups.find(q => q.name === isl.name);
 if (!grp) { say(v.id, 'an island recorded and not built', `${isl.name}, u ${isl.u[0]}-${isl.u[1]}: no forecast group of that name`); continue; }
+if (!(H.build === 'steel' || H.build === 'iron' || H.iron)) {
+const P6 = new THREE.Vector3(); grp.o.updateMatrixWorld(true);
+grp.o.traverse(o => {
+if (!o.isMesh || o.material.fragmentShader === SHADERS['DECK_FRAG.frag']) return;
+if (o.material.fragmentShader !== SHADERS['HULL_FRAG.frag']) { say(v.id, 'a timber island drawn in a steel paint', `${isl.name}: a wall mesh of the island is not drawn in HULL_FRAG, so it shows no planking`); return; }
+const uv = o.geometry.attributes.uv;
+if (!uv) { say(v.id, 'a timber island drawn in a steel paint', `${isl.name}: a wall mesh in HULL_FRAG carries no uv, so it reads the loft's (0, 0)`); return; }
+const pa = o.geometry.attributes.position; let worst = 0, at = null;
+for (let i = 0; i < pa.count; i++) {
+P6.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+let a7 = 0, b7 = 1; for (let k = 0; k < 40; k++) { const m = (a7 + b7) / 2; if (loftDeckX(H, m) < P6.x) a7 = m; else b7 = m; }
+const uq = (a7 + b7) / 2;
+if (Math.abs(P6.y - H2.sheer(uq)) > 0.05) continue;
+const d = Math.abs(uv.getY(i) - 1); if (d > worst) { worst = d; at = uq; }
+}
+if (worst > 0.01) say(v.id, "a timber island's planking off the shell's at the sheer", `${isl.name}: v at the sheer is ${(1 - worst).toFixed(3)} or ${(1 + worst).toFixed(3)} at u ${at.toFixed(3)}, the shell's is 1.000`);
+});
+}
 const bb = new THREE.Box3().setFromObject(grp.o);
 let wantTop = -Infinity;
 for (let k = 0; k <= 40; k++) { const t = topAt(isl.u[0] + (isl.u[1] - isl.u[0]) * k / 40); if (t !== null) wantTop = Math.max(wantTop, t); }

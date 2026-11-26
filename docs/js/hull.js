@@ -7132,9 +7132,17 @@ vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.fr
 side: THREE.DoubleSide,
 uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
 uCol: { value: new THREE.Color(hex) } } });
-const wallMat = S.islands.finish
-? (() => { const m = steel('#000000'); m.uniforms.uCol.value = waleFinish({ wale: { finish: S.islands.finish }, topside: S.topside }).color; return m; })()
-: steel(S.topside || '#3a3a3c');
+const timberWall = !(S.build === 'steel' || S.build === 'iron') && !S.iron && hullMat.fragmentShader === HULL_FRAG;
+const wallCol = S.islands.finish
+? waleFinish({ wale: { finish: S.islands.finish }, topside: S.topside }).color
+: new THREE.Color(S.topside || '#3a3a3c');
+const wallMat = timberWall
+? new THREE.ShaderMaterial({ vertexShader: HULL_VERT, fragmentShader: HULL_FRAG, side: THREE.DoubleSide,
+uniforms: { ...hullMat.uniforms, uTopside: { value: wallCol.clone() }, uChequer: { value: 0 },
+uHGrpN: { value: 0 }, uCopper: { value: 0 } } })
+: (() => { const m = steel('#000000'); m.uniforms.uCol.value = wallCol; return m; })();
+const wlV = hullMat.uniforms.uWaterline ? hullMat.uniforms.uWaterline.value : 0.62;
+const wallUV = (u, y) => [u, wlV + (1 - wlV) * y / Math.max(0.5, H.sheer(Math.max(0, Math.min(1, u))))];
 const cover = deckCovering(S);
 const deckMat = new THREE.ShaderMaterial({
 vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
@@ -7153,7 +7161,7 @@ for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, uc,
 const p = surfacePoint(S, H, uc, (a + b) / 2);
 return [p[0], Math.abs(p[2])];
 };
-const strip = (pts, mat, up) => {
+const strip = (pts, mat, up, uvs) => {
 const idx = [];
 for (let k = 0; k + 1 < pts.length / 6; k++) {
 const a = k * 2, b = a + 2;
@@ -7161,6 +7169,7 @@ if (up) idx.push(a, a + 1, b, a + 1, b + 1, b); else idx.push(a, b, a + 1, a + 1
 }
 const g = new THREE.BufferGeometry();
 g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+if (uvs) g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx); g.computeVertexNormals();
 return new THREE.Mesh(g, mat);
 };
@@ -7191,11 +7200,18 @@ if (breast && q && same(q.u, p.u) && Math.sign(q.z) !== Math.sign(p.z)
 pathW.push({ ...p, hi: breast(p.u) }, { ...q, hi: breast(q.u) });
 }
 }
-for (const p of pathW) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, p.hi, p.z);
-g.add(strip(wall, wallMat));
+const wallUv = [];
+for (const p of pathW) {
+wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, p.hi, p.z);
+wallUv.push(...wallUV(p.u, H.sheer(p.u) - 0.02), ...wallUV(p.u, p.hi));
+}
+g.add(strip(wall, wallMat, false, wallUv));
 for (const ue of [...(closedFwd ? [] : [u0]), ...(closedAft ? [] : [u1])]) {
 const x = xAt(ue), h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
-g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat));
+const du = h / L;
+g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat, false,
+[...wallUV(ue, yd).map((c, i) => i ? c : ue - du), ...wallUV(ue, ys).map((c, i) => i ? c : ue - du),
+...wallUV(ue, yd).map((c, i) => i ? c : ue + du), ...wallUV(ue, ys).map((c, i) => i ? c : ue + du)]));
 }
 const dp = [];
 for (let k = 0; k <= N; k++) {
