@@ -1,0 +1,12 @@
+ship-yamato
+ship-clipper
+ship-preussen
+ship-dreadnought
+aboard
+descent-coast
+map-floor
+action-gravelines
+descent
+descent-high
+aboard-coast
+aboard-cable
