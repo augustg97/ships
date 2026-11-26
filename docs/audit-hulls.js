@@ -4715,15 +4715,26 @@ const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 const capAtX = (xq, sgn) => { if (!capPts) capPts = [].concat(...capM.map(pts));
-let under = 1e9, outer = 0, n = 0; for (const q of capPts) { if (Math.sign(q.z) !== sgn || Math.abs(q.x - xq) > 0.35) continue;
-under = Math.min(under, q.y); outer = Math.max(outer, Math.abs(q.z)); n++; } return n ? { under, outer } : null; };
+const st = new Map(); let outer = 0, n = 0;
+for (const q of capPts) { if (Math.sign(q.z) !== sgn || Math.abs(q.x - xq) > 0.8) continue;
+const k = Math.round(q.x * 50); st.set(k, Math.min(st.has(k) ? st.get(k) : 1e9, q.y));
+if (Math.abs(q.x - xq) <= 0.35) { outer = Math.max(outer, Math.abs(q.z)); n++; } }
+if (!n) return null;
+const S2 = [...st.entries()].map(([k, y]) => [k / 50, y]).sort((a, b) => a[0] - b[0]);
+let lo = null, hi = null; for (const e of S2) { if (e[0] <= xq) lo = e; else if (!hi) hi = e; }
+const under = lo && hi ? lo[1] + (hi[1] - lo[1]) * (xq - lo[0]) / Math.max(1e-6, hi[0] - lo[0]) : (lo || hi)[1];
+return { under, outer }; };
+let skinPts = null;
+const skinHalfAt = (xq, yq) => { if (!skinPts) { skinPts = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'planking') skinPts.push(...pts(o)); }); }
+let w = 0; for (const q of skinPts) if (Math.abs(q.x - xq) < 0.3 && Math.abs(q.y - yq) < 0.15) w = Math.max(w, Math.abs(q.z)); return w; };
 const year = H.year || 0, pinsDue = year >= 1600;
 if (!stM.length) say(v.id, 'a bulwark with no stanchions', `deck.belowSheerM ${H.deck.belowSheerM}, frames not drawn as timbers, and no Bulwark stanchion mesh: the wall is the planking's bare inner face`);
 const rec = stM.length ? stM[0].userData.bulwarkFurniture : null;
 const bySide = { 1: [], '-1': [] };
 for (const o of stM) {
-const P = pts(o); let yF = 1e9, yH = -1e9, x = 0, zOut = 0, sgn = 0;
-for (const q of P) { yF = Math.min(yF, q.y); yH = Math.max(yH, q.y); x += q.x; zOut = Math.max(zOut, Math.abs(q.z)); sgn += q.z; }
+const P = pts(o); let yF = 1e9, yH = -1e9, x = 0, zOut = 0, sgn = 0, proud = -1e9, proudAt = null;
+for (const q of P) { yF = Math.min(yF, q.y); yH = Math.max(yH, q.y); x += q.x; zOut = Math.max(zOut, Math.abs(q.z)); sgn += q.z;
+const sk = skinHalfAt(q.x, q.y); if (sk > 0 && Math.abs(q.z) - sk > proud) { proud = Math.abs(q.z) - sk; proudAt = [q.y, Math.abs(q.z), sk]; } }
 x /= P.length; sgn = sgn > 0 ? 1 : -1;
 const at = `the ${sideOf(sgn)} stanchion at x ${x.toFixed(2)}`;
 const e = deckAtX(x);
@@ -4733,7 +4744,7 @@ if (!c) say(v.id, 'a stanchion under no cap', `${at}: no capping rail mesh withi
 else {
 if (yH > c.under + 0.02) say(v.id, 'a stanchion through the cap', `${at}: its head at y ${yH.toFixed(2)} stands ${(yH - c.under).toFixed(2)} m above the cap's underside (${c.under.toFixed(2)})`);
 if (yH < c.under - 0.25) say(v.id, 'a stanchion short of the cap', `${at}: its head at y ${yH.toFixed(2)} stops ${(c.under - yH).toFixed(2)} m under the cap's underside (${c.under.toFixed(2)}); a hand is the most`);
-if (zOut > c.outer + 0.01) say(v.id, 'a stanchion outside the planking', `${at}: its outer face at |z| ${zOut.toFixed(3)} stands ${(zOut - c.outer).toFixed(3)} m outside the cap's outer edge (${c.outer.toFixed(3)})`);
+if (proudAt && proud > 0.01) say(v.id, 'a stanchion outside the planking', `${at}: at y ${proudAt[0].toFixed(2)} its outer face at |z| ${proudAt[1].toFixed(3)} stands ${proud.toFixed(3)} m outside the planking at that height (${proudAt[2].toFixed(3)})`);
 }
 bySide[sgn].push({ x, yF, yH, P });
 }
@@ -4788,8 +4799,13 @@ const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
 let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
 if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
 const fifePins = [];
+const mastMs = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'mast' && !/nest|leg/i.test(p.name || '')) mastMs.push(o); });
+let mastPts = null;
+const mastXAt = (xn, e) => { if (!mastPts) mastPts = [].concat(...mastMs.map(pts));
+let a = 1e9, b = -1e9; for (const q of mastPts) if (Math.abs(q.x - xn) < 3 && Math.abs(q.y - e) < 0.6 && Math.abs(q.z) < 1.5) { a = Math.min(a, q.x); b = Math.max(b, q.x); }
+return a < 1e8 ? (a + b) / 2 : xn; };
 for (const { m, i } of sq) {
-const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+const xn = (m.at - 0.5) * L, xm = mastXAt(xn, deckAtX(xn)), at = `mast ${i} (station ${m.at})`;
 const rails = fifeM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
 if (!rails.length) { say(v.id, 'a square mast with no fife rail', `${at}: ${pinsM.length ? 'a pin rail' : 'pins'} and no Fife rail mesh records this mast — nothing that comes down the mast can be made fast at its foot`); continue; }
 if (rails.length > 1) say(v.id, 'two fife rails on one mast', `${at}: ${rails.length} Fife rail meshes record it`);

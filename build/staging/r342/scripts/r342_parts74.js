@@ -1,0 +1,18 @@
+const vm = require('vm'), fs = require('fs');
+const ctx = { console, Math, JSON, Float32Array, Uint16Array, Uint32Array, Int32Array, Uint8Array, Float64Array, Array, Object, Map, Set, WeakMap, Symbol, Promise, setTimeout, performance: { now: () => 0 } };
+ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
+ctx.document = { createElement: () => ({ getContext: () => null, style: {} }), createElementNS: () => ({ getContext: () => null, style: {} }) };
+vm.createContext(ctx);
+const W = process.argv[2], ID = process.argv[3] || 'ship-of-the-line';
+for (const f of ['js/three.min.js', 'js/shaders.js', 'js/hull.js']) vm.runInContext(fs.readFileSync(W + '/' + f, 'utf8'), ctx);
+const V = JSON.parse(fs.readFileSync(W + '/data/vessels.json', 'utf8')).vessels;
+const SH = ctx.SHIPS_HULL, THREE = ctx.THREE;
+const v = V.find(x => x.id === ID);
+const g = SH.buildShip(v.hull, { fine: true }); g.updateMatrixWorld(true);
+const parts = {}; const P = new THREE.Vector3();
+g.traverse(o => { if (!o.isMesh) return; const k = (o.userData.part && o.userData.part.key) || ('?' + (o.name||'')); const pa = o.geometry.attributes.position;
+  const b = parts[k] || (parts[k] = { n: 0, x0: 1e9, x1: -1e9, y0: 1e9, y1: -1e9, z1: -1e9 }); b.n++;
+  for (let i = 0; i < pa.count; i++) { P.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); b.x0 = Math.min(b.x0, P.x); b.x1 = Math.max(b.x1, P.x); b.y0 = Math.min(b.y0, P.y); b.y1 = Math.max(b.y1, P.y); b.z1 = Math.max(b.z1, P.z); } });
+const H = SH.hullSurface(v.hull);
+console.log('sheer/deck at u:', [0, 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9, 1].map(u => u + ':' + H.sheer(u).toFixed(2) + '/' + H.deck(u).toFixed(2)).join(' '));
+for (const [k, b] of Object.entries(parts)) console.log(k.padEnd(28), b.n, 'x', b.x0.toFixed(1), b.x1.toFixed(1), 'y', b.y0.toFixed(2), b.y1.toFixed(2), 'z1', b.z1.toFixed(2));
