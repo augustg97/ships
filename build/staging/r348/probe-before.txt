@@ -1,0 +1,12 @@
+Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation
+mast 0 seg 0  foot 4.77  head 26.08  len 21.32  step {"belowDeckM":7.85,"wholeM":29.159,"from":"record (hull.mastStep)"}
+mast 0 seg 1  foot 23.52  head 41.01  len 17.51
+mast 0 seg 2  foot 38.91  head 47.66  len 8.75
+mast 1 seg 0  foot 3.90  head 28.85  len 24.95  step {"belowDeckM":7.85,"wholeM":32.8,"from":"record (hull.mastStep)"}
+mast 1 seg 1  foot 25.86  head 45.54  len 19.68
+mast 1 seg 2  foot 43.18  head 53.02  len 9.84
+mast 2 seg 0  foot 4.23  head 24.49  len 20.34  step {"belowDeckM":7.85,"wholeM":28.11,"from":"record (hull.mastStep)"}
+mast 2 seg 1  foot 22.06  head 38.93  len 16.93
+mast 2 seg 2  foot 36.90  head 45.33  len 8.47
+tops []
+rig top y 53.03 z span 28.057 x span 72.336

@@ -1480,6 +1480,17 @@ if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none')) retur
 if (mk.truckM !== undefined && mk.rig === 'square') return false;
 return mk.heightM === undefined;
 }
+function lowerHeadOf(S, mk, lower) {
+const stepM = mastStepOf(S, mk);
+if (!(stepM > 0) || mk.rig !== 'square' || !(lower > 0))
+return { top: 0.90, heel: 0.88, shroud: 0.97, headM: lower * 0.10, inPerYd: null, from: 'class' };
+const ats = (S.masts || []).map(m2 => m2.at);
+const mizzen = ats.length >= 3 && mk.at === Math.max(...ats);
+const inPerYd = mizzen ? 4 : 5;
+const headM = (lower + stepM) * inPerYd / 36;
+return { top: 1 - headM / lower, heel: 1 - 1.2 * headM / lower, shroud: 1 - 0.85 * headM / lower,
+headM, inPerYd, from: 'steel' };
+}
 function mastLowerOf(mk, steelMain, footY, S) {
 if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
 if (mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0)
@@ -1611,6 +1622,7 @@ const mxA = h => x + tanRake * (h - base);
 const steelMain = (S.lwl + S.beam) / 2;
 const lower = mastLowerOf(mk, steelMain, base, S);
 const stepM = mastStepOf(S, mk);
+const LF = lowerHeadOf(S, mk, lower);
 const mainLower = S.masts.reduce((mx, m2) =>
 Math.max(mx, mastLowerOf(m2, steelMain, deckAt(m2.at), S)), 0)
 || lower || 1;
@@ -1628,7 +1640,7 @@ const mastYards = [];
 const mastDiscs = [];
 if (FINE && mk.rig === 'square' && (mk.only ? Math.min(mk.only, 3) : 3) >= 3 && mk.topmastTop
 && typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0) {
-const tmH = base + lower * 0.88 + top, yT = base + mk.topmastTop.ofFootToHead * (tmH - base);
+const tmH = base + lower * LF.heel + top, yT = base + mk.topmastTop.ofFootToHead * (tmH - base);
 mastDiscs.push({ x: mxA(yT), y: yT, r: B * 0.20 * mk.topmastTop.ofLowerTop, year: S.year || 0, mastR: null, name: 'Topmast top' });
 }
 const segHeads = [];
@@ -1840,7 +1852,7 @@ if (h <= y0 + segs[si] || si === segs.length - 1) {
 const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
 return segR[si].a + (segR[si].b - segR[si].a) * t;
 }
-y0 += segs[si] * 0.88;
+y0 += segs[si] * (si === 0 ? LF.heel : 0.88);
 }
 return segR[0].a;
 };
@@ -1872,6 +1884,11 @@ if (si === 0 && isSteelLength(mk))
 m.userData.step = stepM > 0
 ? { belowDeckM: stepM, wholeM: +(lower + stepM).toFixed(3), from: 'record (hull.mastStep)' }
 : { belowDeckM: 0, wholeM: +lower.toFixed(3), from: 'unknown (class fallback): the whole Steel length stands on the deck' };
+if (si === 0 && mk.rig === 'square')
+m.userData.head = { headM: +LF.headM.toFixed(3), topY: +(y + seg * LF.top).toFixed(3), heelY: +(y + seg * LF.heel).toFixed(3),
+inPerYd: LF.inPerYd, from: LF.from === 'steel'
+? 'Steel 1794: ' + LF.inPerYd + ' in to every yard of the whole mast, heel to head'
+: 'class: the top at 0.90 and the topmast heel at 0.88 of the span over the deck' };
 if (S.iron) m.userData.part = { ...m.userData.part,
 name: mk.wood ? 'Wooden mast' : S.build === 'steel' ? 'Steel mast' : 'Iron mast',
 what: mk.diaM !== undefined
@@ -2003,14 +2020,14 @@ group.add(tag(cg, 'cross'));
 }
 } else {
 const tp = buildTop(topR, mats.woodPale, headR, S.year);
-tp.position.set(mxA(y + seg * 0.90), y + seg * 0.90, 0);
-tp.userData.mast = mi;
+tp.position.set(mxA(y + seg * LF.top), y + seg * LF.top, 0);
+tp.userData.mast = mi; tp.userData.lowerTop = true;
 group.add(tp);
-mastDiscs.push({ x: mxA(y + seg * 0.90), y: y + seg * 0.90, r: topR, year: S.year || 0, mastR: headR, name: 'Top' });
+mastDiscs.push({ x: mxA(y + seg * LF.top), y: y + seg * LF.top, r: topR, year: S.year || 0, mastR: headR, name: 'Top' });
 }
 if (mk.only !== 1) {
 const chH = seg * 0.085, chD = radii[0] * 2.1, chW = radii[0] * 0.5;
-const topY = seg * 0.90 - topR * 0.22;
+const topY = seg * LF.top - topR * 0.22;
 for (const sz of [-1, 1]) {
 const cg = new THREE.BoxGeometry(chD, chH, chW);
 const cp = cg.attributes.position;
@@ -2140,8 +2157,8 @@ courseAt = Math.min(0.90, (prevYard + depth - y) / seg);
 let courseRec = null;
 if (si === 0 && tiers > 1) {
 const rd = (mk.courseRead && typeof mk.courseRead.ofDeckToTop === 'number') ? mk.courseRead : null;
-if (rd) courseAt = rd.ofDeckToTop * 0.90;
-courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: 0.90, from: rd ? 'record' : 'class' };
+if (rd) courseAt = rd.ofDeckToTop * LF.top;
+courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: LF.top, from: rd ? 'record' : 'class' };
 }
 let hoistRec = null, hoistY = y + seg * 0.88;
 if (si >= 1 && tiers > 1 && !Array.isArray(mk.yards)) {
@@ -2164,7 +2181,7 @@ si > 0 || tiers === 1 ? { tie: si }
 }
 capY = y + seg;
 segHeads[si] = capY;
-y += seg * 0.88;
+y += seg * (si === 0 ? LF.heel : 0.88);
 });
 if (mk.rig === 'square' && mk.yards) {
 const T = capY - base;
@@ -2268,8 +2285,8 @@ const zb = Math.max(0, chord) * depth + proud
 return V3(yd.cx - xw * sT - zb * cT, yd.yy + y, -xw * cT + zb * sT);
 };
 const L0 = (segHeads[0] !== undefined ? segHeads[0] : capY) - base;
-const jb = base + L0 * 0.86;
-const topY = base + L0 * 0.90;
+const jb = base + L0 * (LF.top - 0.04);
+const topY = base + L0 * LF.top;
 const topR = B * 0.20, topAft = (S.year || 0) >= 1710 ? topR * 0.70 : topR;
 const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
 const PROUD = 0.14;
@@ -3082,7 +3099,7 @@ if (hal) lug.add(tag(hal, 'halyard'));
 }
 if (mk.shrouds) {
 const half = Math.abs(surfacePoint(S, H, u, 1)[2]);
-const topY = lateenHead ? lateenHead.hounds : base + lower * 0.97;
+const topY = lateenHead ? lateenHead.hounds : base + lower * LF.shroud;
 const shroudPts = [[], []];
 const shroudSegs = [], ratSegs = [];
 const SF = mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length
@@ -3251,13 +3268,13 @@ if (rats) group.add(tag(rats, 'ratline'));
 const tiersDrawn = mk.rig === 'square'
 ? (mk.only ? Math.min(mk.only, segs.length) : segs.length) : 1;
 if (FINE && mk.rig === 'square' && tiersDrawn >= 2) {
-const platX = mxA(base + lower * 0.90);
-const platY = base + lower * 0.90;
+const platX = mxA(base + lower * LF.top);
+const platY = base + lower * LF.top;
 const platR = B * 0.20;
 const mxAt = mxA;
-const topHead = base + lower * 0.88 + top * 0.97;
+const topHead = base + lower * LF.heel + top * 0.97;
 const TT = mk.topmastTop && typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0 ? mk.topmastTop : null;
-const tmHeadY = base + lower * 0.88 + top;
+const tmHeadY = base + lower * LF.heel + top;
 const ttY = TT ? base + TT.ofFootToHead * (tmHeadY - base) : 0;
 const ttR = TT ? platR * TT.ofLowerTop : 0;
 const shHead = TT ? ttY - ttR * 0.25 : topHead;
@@ -3300,7 +3317,7 @@ group.add(tag(tp, 'top', 'Topmast top',
 'A small round top on the topmast, under its cap, about half the width of the lower top. '
 + 'Ships carried one before about 1700; it spreads the topgallant shrouds, which set up at its rim. '
 + "Read off Hocker's rig diagram of Vasa (1628)."));
-const tgHead = base + (lower + top) * 0.88 + tg * 0.95;
+const tgHead = base + lower * LF.heel + top * 0.88 + tg * 0.95;
 const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
 for (let s = 0; s < nG; s++) {
 const f = (s + 1) / (nG + 1);
@@ -3323,7 +3340,7 @@ group.add(tag(ct, 'top', 'Crosstrees',
 'The light spreaders at the topmast head — trestletrees and crosstrees without '
 + 'a platform. They spread the topgallant shrouds the way the top spreads the '
 + "topmast's, one storey further up."));
-const tgHead = base + (lower + top) * 0.88 + tg * 0.95;
+const tgHead = base + lower * LF.heel + top * 0.88 + tg * 0.95;
 const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
 for (let s = 0; s < nG; s++) {
 const f = (s + 1) / (nG + 1);
@@ -3450,7 +3467,7 @@ const flower = mastLowerOf(fm, steelMain, fbase, S);
 const fx = (fm.at - 0.5) * L + H.rake(fm.at);
 const hounds = fbase + flower * 0.78;
 const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
-: fm.rig === 'square' ? flower * 0.88 + squareStackOf(fm, flower, flower + mastStepOf(S, fm)).top * 0.72
+: fm.rig === 'square' ? flower * lowerHeadOf(S, fm, flower).heel + squareStackOf(fm, flower, flower + mastStepOf(S, fm)).top * 0.72
 : flower * 0.94);
 const n = S.headsails;
 for (let k = 0; k < n; k++) {
@@ -11936,7 +11953,7 @@ rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk
 : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
 : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
 : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments'
-+ (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep)' : '');
++ (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep), and its head, top to cap, is Steel\'s 5 in (4 on the mizzen) to every yard of the whole mast (r348)' : '');
 rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
 lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined || mk.mastHeightsM) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM,
 stepM: mastStepOf(S, mk) };

@@ -6867,6 +6867,43 @@ say(v.id, 'a Steel-length mast cut short with no step record', `mast ${mi}: the 
 }
 });
 }
+{
+const steelLen = mk => !(mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+&& !(mk.truckM !== undefined && mk.rig === 'square') && mk.heightM === undefined;
+const rec = H.mastStep && H.mastStep.belowDeckM > 0 ? H.mastStep.belowDeckM : 0;
+const segs = {}, tops = {};
+g.traverse(o => {
+if (o.isMesh && o.userData.seg) (segs[o.userData.seg.mi] = segs[o.userData.seg.mi] || {})[o.userData.seg.si] = o.userData;
+if (o.userData && o.userData.lowerTop) tops[o.userData.mast] = o;
+});
+const ats = (H.masts || []).map(m2 => m2.at);
+(H.masts || []).forEach((mk, mi) => {
+const S0 = segs[mi] && segs[mi][0];
+if (!S0 || mk.rig !== 'square') return;
+const hd = S0.head;
+if (!hd) { say(v.id, 'a square lower with no masthead record', `mast ${mi}: no userData.head`); return; }
+const stepped = rec > 0 && steelLen(mk);
+if (!stepped) {
+if (!/^class/.test(hd.from || '')) say(v.id, 'a masthead not labelled as the class figure', `mast ${mi}: head.from '${hd.from}'`);
+return;
+}
+const want = ats.length >= 3 && mk.at === Math.max(...ats) ? 4 : 5;
+const span = S0.seg.headY - S0.seg.footY, headM = (span + rec) * want / 36;
+if (hd.inPerYd !== want) say(v.id, 'a masthead at the wrong Steel rate', `mast ${mi}: ${hd.inPerYd} in per yard against Steel's ${want}`);
+if (Math.abs(hd.headM - headM) > 0.02)
+say(v.id, 'a lower masthead off Steel\'s share of the whole mast', `mast ${mi}: head ${hd.headM} m against ${want} in/yd of ${(span + rec).toFixed(2)} m = ${headM.toFixed(3)} m`);
+const tp = tops[mi];
+if (tp) {
+tp.updateMatrixWorld(true);
+const q = new THREE.Vector3().setFromMatrixPosition(tp.matrixWorld).applyMatrix4(new THREE.Matrix4().copy(g.matrixWorld).invert());
+if (Math.abs(q.y - (S0.seg.headY - headM)) > 0.03)
+say(v.id, 'a lower top off its masthead', `mast ${mi}: the top at y ${q.y.toFixed(3)}, the cap at ${S0.seg.headY.toFixed(3)}, Steel's head ${headM.toFixed(3)} m puts it at ${(S0.seg.headY - headM).toFixed(3)}`);
+} else say(v.id, 'a stepped square lower with no top', `mast ${mi}`);
+const S1 = segs[mi][1];
+if (S1 && Math.abs(S1.seg.footY - (S0.seg.headY - 1.2 * headM)) > 0.03)
+say(v.id, 'a topmast heel off the doubling', `mast ${mi}: heel at y ${S1.seg.footY.toFixed(3)}, 1.2 heads under the cap is ${(S0.seg.headY - 1.2 * headM).toFixed(3)}`);
+});
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

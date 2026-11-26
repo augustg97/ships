@@ -1,0 +1,32 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lower top off its masthead",
+  "detail": "mast 0: the top at y 23.944, the cap at 26.075, Steel's head 4.050 m puts it at 22.025"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast heel off the doubling",
+  "detail": "mast 0: heel at y 23.518, 1.2 heads under the cap is 21.215"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lower top off its masthead",
+  "detail": "mast 1: the top at y 26.357, the cap at 28.852, Steel's head 4.556 m puts it at 24.296"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast heel off the doubling",
+  "detail": "mast 1: heel at y 25.858, 1.2 heads under the cap is 23.385"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a lower top off its masthead",
+  "detail": "mast 2: the top at y 22.465, the cap at 24.491, Steel's head 3.123 m puts it at 21.368"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast heel off the doubling",
+  "detail": "mast 2: heel at y 22.060, 1.2 heads under the cap is 20.743"
+ }
+]

@@ -1,0 +1,157 @@
+[
+ {
+  "id": "trireme",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "trireme",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "corbita",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "corbita",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "cog",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "carrack",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "carrack",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 2: no userData.head"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 2: no userData.head"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 2: no userData.head"
+ },
+ {
+  "id": "preussen",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "preussen",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "preussen",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 2: no userData.head"
+ },
+ {
+  "id": "preussen",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 3: no userData.head"
+ },
+ {
+  "id": "preussen",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 4: no userData.head"
+ },
+ {
+  "id": "clipper",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "clipper",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "clipper",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 2: no userData.head"
+ },
+ {
+  "id": "steamer",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ },
+ {
+  "id": "steamer",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 1: no userData.head"
+ },
+ {
+  "id": "steamer",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 2: no userData.head"
+ },
+ {
+  "id": "endurance",
+  "rule": "a square lower with no masthead record",
+  "detail": "mast 0: no userData.head"
+ }
+]

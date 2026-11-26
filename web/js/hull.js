@@ -2506,6 +2506,28 @@ function isSteelLength(mk) {
   if (mk.truckM !== undefined && mk.rig === 'square') return false;
   return mk.heightM === undefined;
 }
+/* ── r348: THE LOWER MASTHEAD IS STEEL'S SHARE OF THE WHOLE MAST ─────────────────────────────
+   Steel 1794, "Proportional Lengths of Masts" (maritime.org, part 1): "The head of the main and fore masts,
+   5 inches to every yard of the mast's length. The head of the mizen-mast, and main and fore topmasts, 4 inches
+   to every yard of the length." The mast's length there is the whole mast, heel to head (r347). Until r348 the
+   builder stood every top at 0.90 of the lower's span over the deck and every topmast heel at 0.88, so on the
+   74 the main masthead, top to cap, was 2.5 m. Steel's rule gives 4.56 m, and Eckersberg's Asow (1828) reads
+   4.2 m (build/staging/r348/). This rule applies only where the hull records a step (hull.mastStep), because
+   that is where the record says the mast is Steel's whole length; every other mast keeps the class fractions.
+   The topmast's heel keeps the class doubling's proportion to the head, 1.2 of it (0.12 against 0.10).
+   The lower shrouds' eyes rest on the trestletrees, just over the top: on a Steel head they stand 0.15 of
+   the head over the top; the class figure is 0.97 of the span (0.7 of the class head over the top). */
+function lowerHeadOf(S, mk, lower) {
+  const stepM = mastStepOf(S, mk);
+  if (!(stepM > 0) || mk.rig !== 'square' || !(lower > 0))
+    return { top: 0.90, heel: 0.88, shroud: 0.97, headM: lower * 0.10, inPerYd: null, from: 'class' };
+  const ats = (S.masts || []).map(m2 => m2.at);
+  const mizzen = ats.length >= 3 && mk.at === Math.max(...ats);
+  const inPerYd = mizzen ? 4 : 5;
+  const headM = (lower + stepM) * inPerYd / 36;
+  return { top: 1 - headM / lower, heel: 1 - 1.2 * headM / lower, shroud: 1 - 0.85 * headM / lower,
+           headM, inPerYd, from: 'steel' };
+}
 function mastLowerOf(mk, steelMain, footY, S) {
   if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
   /* r329 (0y¹⁷¹): a lateen mizzen that carries a top (lateenTopmast, r328) and a recorded top height is drawn to it:
@@ -2794,6 +2816,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        `heightM` is metres, `height` is a share of Steel's main. */
     const lower = mastLowerOf(mk, steelMain, base, S);
     const stepM = mastStepOf(S, mk);
+    const LF = lowerHeadOf(S, mk, lower);   // r348: where the lower's top, topmast heel and shroud eyes stand
     /* ── A MAST IS AS THICK AS ITS OWN LENGTH ASKS, NOT AS ITS SHIP'S BEAM ─────────────
        Every mast on a ship drew the same diameter — beam x 0.06 — so the treasure ship's
        0.6-share mizzen stood as fat as her main, and the corbita's little artemon as fat
@@ -2842,7 +2865,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
     const mastDiscs = [];
     if (FINE && mk.rig === 'square' && (mk.only ? Math.min(mk.only, 3) : 3) >= 3 && mk.topmastTop
         && typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0) {
-      const tmH = base + lower * 0.88 + top, yT = base + mk.topmastTop.ofFootToHead * (tmH - base);
+      const tmH = base + lower * LF.heel + top, yT = base + mk.topmastTop.ofFootToHead * (tmH - base);
       mastDiscs.push({ x: mxA(yT), y: yT, r: B * 0.20 * mk.topmastTop.ofLowerTop, year: S.year || 0, mastR: null, name: 'Topmast top' });
     }
     /* the HEAD of each drawn segment, by section — the sheave a hoisting yard's tie runs
@@ -3283,7 +3306,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
           return segR[si].a + (segR[si].b - segR[si].a) * t;
         }
-        y0 += segs[si] * 0.88;
+        y0 += segs[si] * (si === 0 ? LF.heel : 0.88);
       }
       return segR[0].a;
     };
@@ -3340,6 +3363,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
         m.userData.step = stepM > 0
           ? { belowDeckM: stepM, wholeM: +(lower + stepM).toFixed(3), from: 'record (hull.mastStep)' }
           : { belowDeckM: 0, wholeM: +lower.toFixed(3), from: 'unknown (class fallback): the whole Steel length stands on the deck' };
+      /* r348: the lower masthead as built, top to cap, and its rule (A-MASTHEAD-STEEL) */
+      if (si === 0 && mk.rig === 'square')
+        m.userData.head = { headM: +LF.headM.toFixed(3), topY: +(y + seg * LF.top).toFixed(3), heelY: +(y + seg * LF.heel).toFixed(3),
+                            inPerYd: LF.inPerYd, from: LF.from === 'steel'
+                              ? 'Steel 1794: ' + LF.inPerYd + ' in to every yard of the whole mast, heel to head'
+                              : 'class: the top at 0.90 and the topmast heel at 0.88 of the span over the deck' };
       /* r287 (0y96): `mi` names the mast, so the loft's deck-to-truck and the audit can read one mast's
          segments as one stack — the foot of segment 0 to the head of the last drawn — from the meshes */
       /* the iron mast's card carries its provenance: attested diameters are the record's,
@@ -3549,10 +3578,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
           const tp = buildTop(topR, mats.woodPale, headR, S.year);
           /* r256: on the axis at its OWN height — it stood at the head's x, 0.1·seg·sin(rake)
              off the pole at the hounds on every raked mast */
-          tp.position.set(mxA(y + seg * 0.90), y + seg * 0.90, 0);
-          tp.userData.mast = mi;
+          tp.position.set(mxA(y + seg * LF.top), y + seg * LF.top, 0);
+          tp.userData.mast = mi; tp.userData.lowerTop = true;
           group.add(tp);
-          mastDiscs.push({ x: mxA(y + seg * 0.90), y: y + seg * 0.90, r: topR, year: S.year || 0, mastR: headR, name: 'Top' });
+          mastDiscs.push({ x: mxA(y + seg * LF.top), y: y + seg * LF.top, r: topR, year: S.year || 0, mastR: headR, name: 'Top' });
         }
         /* ── THE CHEEKS AT THE HOUNDS ──────────────────────────────────────────────
            The top does not float. Bolted to either side of the masthead are two knees
@@ -3564,7 +3593,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
            sits on the hounds of the pole itself. */
         if (mk.only !== 1) {
           const chH = seg * 0.085, chD = radii[0] * 2.1, chW = radii[0] * 0.5;
-          const topY = seg * 0.90 - topR * 0.22;       // the trestletrees' underside
+          const topY = seg * LF.top - topR * 0.22;     // the trestletrees' underside (r348: LF.top)
           for (const sz of [-1, 1]) {
             const cg = new THREE.BoxGeometry(chD, chH, chW);
             const cp = cg.attributes.position;
@@ -3792,8 +3821,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
         let courseRec = null;
         if (si === 0 && tiers > 1) {
           const rd = (mk.courseRead && typeof mk.courseRead.ofDeckToTop === 'number') ? mk.courseRead : null;
-          if (rd) courseAt = rd.ofDeckToTop * 0.90;
-          courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: 0.90, from: rd ? 'record' : 'class' };
+          if (rd) courseAt = rd.ofDeckToTop * LF.top;
+          courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: LF.top, from: rd ? 'record' : 'class' };
         }
         /* ── r324 (0y¹⁶⁶): THE RECORD MAY READ WHERE A HOISTING YARD IS SET ─────────────────────────
            Above the course every yard of a segment rig rides a tie and is set ATRIP, at 0.88 of the section it
@@ -3847,7 +3876,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
       capY = y + seg;
       segHeads[si] = capY;
-      y += seg * 0.88;
+      y += seg * (si === 0 ? LF.heel : 0.88);
     });
 
     /* ── THE DOUBLED RIG, FROM THE RECORD: `yards` ON THE MAST ─────────────────────────
@@ -4090,8 +4119,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
             return V3(yd.cx - xw * sT - zb * cT, yd.yy + y, -xw * cT + zb * sT);
           };
           const L0 = (segHeads[0] !== undefined ? segHeads[0] : capY) - base;
-          const jb = base + L0 * 0.86;            // just under the top, the jeers' station
-          const topY = base + L0 * 0.90;          // where the top stands (the rig's own placement)
+          const jb = base + L0 * (LF.top - 0.04); // just under the top, the jeers' station
+          const topY = base + L0 * LF.top;        // where the top stands (the rig's own placement)
           const topR = B * 0.20, topAft = (S.year || 0) >= 1710 ? topR * 0.70 : topR;   // buildTop's D: the straight edge aft
           const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
           const PROUD = 0.14;
@@ -5570,7 +5599,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          shroudTops), and on the galley's raked foremast 0.73 m off a plumb pole. They set up
          at the hounds, between the sling and the head, on the mast that is there — and since
          round 255 the pole rakes as its record says, so the head is lateenHead.x, on the axis. */
-      const topY = lateenHead ? lateenHead.hounds : base + lower * 0.97;
+      const topY = lateenHead ? lateenHead.hounds : base + lower * LF.shroud;
       const shroudPts = [[], []];
       const shroudSegs = [], ratSegs = [];
       /* ── THE SHROUDS SET UP WHERE THE RECORD SAYS (round 236). The class lands them at
@@ -5853,11 +5882,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const tiersDrawn = mk.rig === 'square'
         ? (mk.only ? Math.min(mk.only, segs.length) : segs.length) : 1;
       if (FINE && mk.rig === 'square' && tiersDrawn >= 2) {
-        const platX = mxA(base + lower * 0.90);               // where buildTop stands (r256: on the axis at the hounds)
-        const platY = base + lower * 0.90;
+        const platX = mxA(base + lower * LF.top);               // where buildTop stands (r256: on the axis at the hounds)
+        const platY = base + lower * LF.top;
         const platR = B * 0.20;
         const mxAt = mxA;
-        const topHead = base + lower * 0.88 + top * 0.97;
+        const topHead = base + lower * LF.heel + top * 0.97;
         /* ── r325 (0y¹⁶⁷): A TOPMAST TOP WHERE THE RECORD READS ONE ─────────────────────────────
            Before about 1700 a topmast carried a small round top of its own, under its cap, where the
            18th century put open crosstrees. Hocker's rig diagram of Vasa (1628) draws one on the fore
@@ -5870,7 +5899,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
            other three-tier mast keeps the crosstrees and says why in `topmastTopProvenance`.
            Without the field, byte-identical. */
         const TT = mk.topmastTop && typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0 ? mk.topmastTop : null;
-        const tmHeadY = base + lower * 0.88 + top;
+        const tmHeadY = base + lower * LF.heel + top;
         const ttY = TT ? base + TT.ofFootToHead * (tmHeadY - base) : 0;
         const ttR = TT ? platR * TT.ofLowerTop : 0;
         const shHead = TT ? ttY - ttR * 0.25 : topHead;          // under the trestletrees (buildTop: underside at -0.22 r)
@@ -5913,7 +5942,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
             'A small round top on the topmast, under its cap, about half the width of the lower top. '
             + 'Ships carried one before about 1700; it spreads the topgallant shrouds, which set up at its rim. '
             + "Read off Hocker's rig diagram of Vasa (1628)."));
-          const tgHead = base + (lower + top) * 0.88 + tg * 0.95;
+          const tgHead = base + lower * LF.heel + top * 0.88 + tg * 0.95;
           const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
           for (let s = 0; s < nG; s++) {
             const f = (s + 1) / (nG + 1);
@@ -5938,7 +5967,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
             'The light spreaders at the topmast head — trestletrees and crosstrees without '
             + 'a platform. They spread the topgallant shrouds the way the top spreads the '
             + "topmast's, one storey further up."));
-          const tgHead = base + (lower + top) * 0.88 + tg * 0.95;
+          const tgHead = base + lower * LF.heel + top * 0.88 + tg * 0.95;
           const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
           for (let s = 0; s < nG; s++) {
             const f = (s + 1) / (nG + 1);
@@ -6125,7 +6154,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          fan; the real suit climbs to the fore topmast head, which is most of what makes a
          P-liner's head profile. */
       const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
-                           : fm.rig === 'square' ? flower * 0.88 + squareStackOf(fm, flower, flower + mastStepOf(S, fm)).top * 0.72
+                           : fm.rig === 'square' ? flower * lowerHeadOf(S, fm, flower).heel + squareStackOf(fm, flower, flower + mastStepOf(S, fm)).top * 0.72
                            : flower * 0.94);
       const n = S.headsails;
       for (let k = 0; k < n; k++) {
@@ -18476,7 +18505,7 @@ function buildShip(S, opts) {
                      : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
                      : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
                      : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments'
-                       + (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep)' : '');
+                       + (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep), and its head, top to cap, is Steel\'s 5 in (4 on the mizzen) to every yard of the whole mast (r348)' : '');
         /* r288 (0y99): the same derivation as a RECORD, so the card can say it on screen in its own words —
            the sentence above is one string, and a card that has to parse a string to find the number will
            print the wrong thing the first time the sentence is reworded. `from` is 'record' or 'derived';

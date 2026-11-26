@@ -1,0 +1,23 @@
+  aboard-coast                   0.032%  0.012 ok
+  aboard                         0.015%  0.004 ok
+  action                         0.000%  0.000 ok
+  descent-coast                  0.016%  0.003 ok
+  descent-high                   0.013%  0.003 ok
+  descent                        0.014%  0.004 ok
+  globe-crossing                 0.020%  0.009 ok
+  globe-default                  0.008%  0.004 ok
+  globe-era-card                 0.041%  0.013 ok
+  globe-steam                    0.046%  0.014 ok
+  ship-clipper                   0.021%  0.010 ok
+  ship-dreadnought               0.006%  0.003 ok
+  ship-endurance                 0.005%  0.004 ok
+  ship-great-eastern             0.007%  0.002 ok
+  ship-preussen                  0.000%  0.000 ok
+  ship-slave-ship                0.000%  0.000 ok
+  ship-steamer                   0.254%  0.126 CHANGED
+  shipwright-ahead              18.476%  4.844 CHANGED
+  shipwright-astern             25.688% 11.109 CHANGED
+  shipwright-furled             11.939%  6.100 CHANGED
+  shipwright-hounds             19.461%  9.822 CHANGED
+  shipwright                    21.200%  6.471 CHANGED
+22 frames scored offline, 6 beyond the gate

@@ -1,0 +1,3 @@
+Round 348: the 74's lower mastheads follow Steel's rule, 5 in to every yard of the whole mast (4 on the mizzen); lowerHeadOf stands each top one head under the cap and the topmast heel 1.2 heads under it on a hull that records mastStep, so the main head is 4.56 m (2.5 before; Eckersberg's Asow reads 4.1) and the mizzen's 3.12 (Asow 3.0); main truck 53.0 -> 50.5 m over the water; every site that placed the lower top or topmast heel reads it; card row and crossjack provenance say so; A-MASTHEAD-STEEL (proof B 31, proof C 6); 6 predicted movers accepted; disk at 134 MB at open, r341-r345 capture scratch freed
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
