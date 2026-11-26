@@ -1,2 +1,5 @@
-START 01:35:29 load 4.15 7.11 9.84 HEAD 8932fc0
-33 frames to capture
+START 01:40:01 load 4.53 5.23 8.20 HEAD 9ed4dd2
+34 frames to capture
+    · ship-container               http://localhost:8149/?frozen=1#v=ship&s=container
+    · aboard-coast                 http://localhost:8149/?frozen=1#e=2&f=syracuse
+RESUME EXIT 1  END 01:43:34
