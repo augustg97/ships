@@ -1493,13 +1493,16 @@ headM, inPerYd, from: 'steel' };
 }
 function upperHeadsOf(S, mk, top, tg) {
 const stepM = mastStepOf(S, mk);
+const R = mk.topmastHeadRead;
+const read = R ? { mast: R.mast, plateName: R.plateName, share: R.share, bound: R.bound, inPerYd: R.inPerYd,
+inPerYdBound: R.inPerYdBound, verdict: R.verdict } : null;
 if (!(stepM > 0) || mk.rig !== 'square' || !(top > 0))
-return { tm: { cross: 0.97, heel: 0.88, headM: top * 0.12, inPerYd: null, from: 'class' },
+return { tm: { cross: 0.97, heel: 0.88, headM: top * 0.12, inPerYd: null, from: 'class', read },
 tg: { hounds: 0.95, headM: (tg || 0) * 0.05, inPerYd: null, from: 'class' } };
 const ats = (S.masts || []).map(m2 => m2.at);
 const mizzen = ats.length >= 3 && mk.at === Math.max(...ats);
 const tmRate = mizzen ? 3.5 : 4, tmHead = top * tmRate / 36, tgHead = (tg || 0) * 3.5 / 36;
-return { tm: { cross: 1 - tmHead / top, heel: 1 - 1.2 * tmHead / top, headM: tmHead, inPerYd: tmRate, from: 'steel' },
+return { tm: { cross: 1 - tmHead / top, heel: 1 - 1.2 * tmHead / top, headM: tmHead, inPerYd: tmRate, from: 'steel', read },
 tg: { hounds: tg > 0 ? 1 - tgHead / tg : 0.95, headM: tgHead, inPerYd: 3.5, from: 'steel' } };
 }
 function mastLowerOf(mk, steelMain, footY, S) {
@@ -1906,7 +1909,8 @@ if (si === 1 && mk.rig === 'square')
 m.userData.head = { headM: +UH.tm.headM.toFixed(3), crossY: +(y + seg * UH.tm.cross).toFixed(3), heelY: +(y + seg * UH.tm.heel).toFixed(3),
 inPerYd: UH.tm.inPerYd, from: UH.tm.from === 'steel'
 ? 'Steel 1794: ' + UH.tm.inPerYd + ' in to every yard of the topmast; the crosstrees one head under the cap, the topgallant heel 1.2 heads'
-: 'class: the crosstrees at 0.97 and the topgallant heel at 0.88 of the topmast' };
+: 'class: the crosstrees at 0.97 and the topgallant heel at 0.88 of the topmast',
+read: UH.tm.read };
 if (si === 2 && mk.rig === 'square')
 m.userData.head = { headM: +UH.tg.headM.toFixed(3), houndsY: +(y + seg * UH.tg.hounds).toFixed(3), inPerYd: UH.tg.inPerYd,
 from: UH.tg.from === 'steel' ? 'Steel 1794: 3 1/2 in to every yard of the topgallant mast, over its hounds'
@@ -11979,7 +11983,12 @@ rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk
 + (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep), and its head, top to cap, is Steel\'s 5 in (4 on the mizzen) to every yard of the whole mast (r348), and the topmast head, crosstrees to cap, Steel\'s 4 in (3 1/2 on the mizzen) to every yard of the topmast (r349)' : '');
 rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
 lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined || mk.mastHeightsM) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM,
-stepM: mastStepOf(S, mk) };
+stepM: mastStepOf(S, mk),
+headReads: (() => { const byMi = {};
+group.traverse(o => { const ud = o.isMesh && o.userData;
+if (ud && ud.seg && ud.seg.si === 1 && ud.head && ud.head.read)
+byMi[ud.seg.mi] = Object.assign({ mi: ud.seg.mi, ruleInPerYd: ud.head.inPerYd }, ud.head.read); });
+return Object.keys(byMi).map(Number).sort((a, b) => a - b).map(k => byMi[k]); })() };
 }
 } }
 const capstanUnseated = group.userData.capstanUnseated;

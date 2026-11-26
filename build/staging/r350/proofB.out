@@ -1,0 +1,17 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a plate read of a topmast head not carried to the build",
+  "detail": "mast 0 (station 0.115, fore): head.read null"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a plate read of a topmast head not carried to the build",
+  "detail": "mast 1 (station 0.556, main): head.read null"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a plate read of a topmast head not carried to the build",
+  "detail": "mast 2 (station 0.85, mizzen): head.read null"
+ }
+]

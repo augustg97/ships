@@ -1297,12 +1297,23 @@ function swFillCard(v) {
      their sources. Nothing is printed on a hull whose figure is the record's. The row is written from the
      loft's record, not from the mast list, so the card and the loft cannot name different masts. */
   const H = SW.ship && SW.ship.userData && SW.ship.userData.rigTruckHow;
+  /* r350: what a plate read of the topmast heads says against the rule, from the build's own head records */
+  const inch = x => x === 3.5 ? '3 1/2' : String(x);
+  const andList = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  const swHeadReads = R => {
+    if (!R || !R.length) return '';
+    const ok = R.filter(r => r.verdict === 'agrees').map(r => r.mast), bad = R.filter(r => r.verdict === 'contested');
+    return (ok.length ? ' On ' + R[0].plateName + ', the ' + andList(ok) + ' topmast head' + (ok.length > 1 ? 's agree' : ' agrees')
+                        + ' with Steel\'s rule to within the plate\'s precision.' : '')
+      + bad.map(r => ' The ' + r.mast + ' topmast\'s head there reads ' + r.inPerYd + ' ± ' + r.inPerYdBound
+                     + ' inches to every yard, against Steel\'s ' + inch(r.ruleInPerYd) + ', so the model\'s ' + r.mast + ' topmast head is contested.').join('');
+  };
   const rigRow = (H && H.from !== 'record' && (v.hull.masts || []).length)
     ? [['Rig, deck to truck',
         'derived, not recorded: ' + (
           H.from === 'measured' ? 'no mast height is recorded; the figure is the span of the tallest mast as drawn, to a class proportion of the hull'
           : H.lower === 'record' ? 'the lower mast is the record\'s (' + H.heightM + ' m); the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
-          : H.n > 1 && H.stepM > 0 ? 'no mast height is recorded. The lower mast is Steel\'s length for this hull, heel to head, less the ' + H.stepM + ' m from the deck down to its step on the keelson. Its head, from the top to the cap, is Steel\'s 5 inches for every yard of that whole length, and 4 inches on the mizzen. The topmast and topgallant are Steel\'s 3/5 and 3/10 of the whole mast. The topmast\'s head, from its crosstrees to its cap, is Steel\'s 4 inches for every yard of the topmast, and 3 1/2 inches on the mizzen. Each mast\'s heel stands 1.2 of those heads under the cap of the mast below it, ' + H.n + ' segments in all'
+          : H.n > 1 && H.stepM > 0 ? 'no mast height is recorded. The lower mast is Steel\'s length for this hull, heel to head, less the ' + H.stepM + ' m from the deck down to its step on the keelson. Its head, from the top to the cap, is Steel\'s 5 inches for every yard of that whole length, and 4 inches on the mizzen. The topmast and topgallant are Steel\'s 3/5 and 3/10 of the whole mast. The topmast\'s head, from its crosstrees to its cap, is Steel\'s 4 inches for every yard of the topmast, and 3 1/2 inches on the mizzen. Each mast\'s heel stands 1.2 of those heads under the cap of the mast below it, ' + H.n + ' segments in all.' + swHeadReads(H.headReads)
           : H.n > 1 ? 'no mast height is recorded; the lower mast is drawn to a class proportion of the hull and the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
           : 'no mast height is recorded; the mast is one pole, drawn to a class proportion of the hull')]]
     : [];

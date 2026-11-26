@@ -1,0 +1,17 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast head read with the wrong verdict",
+  "detail": "mast 0 (station 0.115, fore): drawn 0.182 against the plate's 0.207 +/- 0.026, so 'agrees'; the record says 'contested'"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a contested topmast head whose provenance does not say so",
+  "detail": "mast 0 (station 0.115, fore)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a topmast head read with the wrong verdict",
+  "detail": "mast 2 (station 0.85, mizzen): drawn 0.143 against the plate's 0.199 +/- 0.024, so 'contested'; the record says 'agrees'"
+ }
+]

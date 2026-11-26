@@ -6960,6 +6960,26 @@ if (Math.abs(yMax - h2.houndsY) > 0.08) say(v.id, 'topgallant shrouds off the ho
 }
 });
 }
+{
+const segs = {};
+g.traverse(o => { if (o.isMesh && o.userData.seg) (segs[o.userData.seg.mi] = segs[o.userData.seg.mi] || {})[o.userData.seg.si] = o.userData; });
+(H.masts || []).forEach((mk, mi) => {
+const R = mk.topmastHeadRead; if (!R) return;
+const at = `mast ${mi} (station ${mk.at}, ${R.mast})`;
+const S0 = segs[mi] && segs[mi][0], S1 = segs[mi] && segs[mi][1];
+const h0 = S0 && S0.head, h1 = S1 && S1.head;
+if (!h0 || !h1) { say(v.id, 'a topmast head read on a mast with no head records', at); return; }
+const r = h1.read;
+if (!r || r.share !== R.share || r.bound !== R.bound || r.verdict !== R.verdict)
+{ say(v.id, 'a plate read of a topmast head not carried to the build', `${at}: head.read ${JSON.stringify(r || null)}`); return; }
+const rw = R.rows || {}, rs = (rw.crosstrees - rw.cap) / (rw.lowerCap - rw.crosstrees);
+if (!(Math.abs(rs - R.share) <= 0.002)) say(v.id, "a topmast head read whose share is not its rows'", `${at}: rows give ${rs.toFixed(4)}, the record ${R.share}`);
+const drawn = h1.headM / (h1.crossY - (h0.topY + h0.headM));
+const want = Math.abs(drawn - R.share) <= R.bound ? 'agrees' : 'contested';
+if (R.verdict !== want) say(v.id, 'a topmast head read with the wrong verdict', `${at}: drawn ${drawn.toFixed(3)} against the plate's ${R.share} +/- ${R.bound}, so '${want}'; the record says '${R.verdict}'`);
+if (R.verdict === 'contested' && !/CONTESTED/.test(R.provenance || '')) say(v.id, 'a contested topmast head whose provenance does not say so', at);
+});
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

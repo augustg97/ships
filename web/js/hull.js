@@ -2541,13 +2541,18 @@ function lowerHeadOf(S, mk, lower) {
    Like lowerHeadOf, this applies only where the hull records a step; every other mast keeps 0.97, 0.88, 0.95. */
 function upperHeadsOf(S, mk, top, tg) {
   const stepM = mastStepOf(S, mk);
+  /* r350: a plate read of this topmast's head, carried to the build so the audit and the card read the same thing.
+     It does not move anything: where it disagrees with the rule beyond its bound, the record says 'contested'. */
+  const R = mk.topmastHeadRead;
+  const read = R ? { mast: R.mast, plateName: R.plateName, share: R.share, bound: R.bound, inPerYd: R.inPerYd,
+                     inPerYdBound: R.inPerYdBound, verdict: R.verdict } : null;
   if (!(stepM > 0) || mk.rig !== 'square' || !(top > 0))
-    return { tm: { cross: 0.97, heel: 0.88, headM: top * 0.12, inPerYd: null, from: 'class' },
+    return { tm: { cross: 0.97, heel: 0.88, headM: top * 0.12, inPerYd: null, from: 'class', read },
              tg: { hounds: 0.95, headM: (tg || 0) * 0.05, inPerYd: null, from: 'class' } };
   const ats = (S.masts || []).map(m2 => m2.at);
   const mizzen = ats.length >= 3 && mk.at === Math.max(...ats);
   const tmRate = mizzen ? 3.5 : 4, tmHead = top * tmRate / 36, tgHead = (tg || 0) * 3.5 / 36;
-  return { tm: { cross: 1 - tmHead / top, heel: 1 - 1.2 * tmHead / top, headM: tmHead, inPerYd: tmRate, from: 'steel' },
+  return { tm: { cross: 1 - tmHead / top, heel: 1 - 1.2 * tmHead / top, headM: tmHead, inPerYd: tmRate, from: 'steel', read },
            tg: { hounds: tg > 0 ? 1 - tgHead / tg : 0.95, headM: tgHead, inPerYd: 3.5, from: 'steel' } };
 }
 function mastLowerOf(mk, steelMain, footY, S) {
@@ -3398,7 +3403,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
         m.userData.head = { headM: +UH.tm.headM.toFixed(3), crossY: +(y + seg * UH.tm.cross).toFixed(3), heelY: +(y + seg * UH.tm.heel).toFixed(3),
                             inPerYd: UH.tm.inPerYd, from: UH.tm.from === 'steel'
                               ? 'Steel 1794: ' + UH.tm.inPerYd + ' in to every yard of the topmast; the crosstrees one head under the cap, the topgallant heel 1.2 heads'
-                              : 'class: the crosstrees at 0.97 and the topgallant heel at 0.88 of the topmast' };
+                              : 'class: the crosstrees at 0.97 and the topgallant heel at 0.88 of the topmast',
+                            read: UH.tm.read };   // r350: a plate read of this head, where the record carries one (A-TOPMAST-HEAD-READ)
       if (si === 2 && mk.rig === 'square')
         m.userData.head = { headM: +UH.tg.headM.toFixed(3), houndsY: +(y + seg * UH.tg.hounds).toFixed(3), inPerYd: UH.tg.inPerYd,
                             from: UH.tg.from === 'steel' ? 'Steel 1794: 3 1/2 in to every yard of the topgallant mast, over its hounds'
@@ -18548,7 +18554,14 @@ function buildShip(S, opts) {
            count of segments the class fractions carry it through; truckM / heightM are the record's figures. */
         rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
                         lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined || mk.mastHeightsM) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM,
-                        stepM: mastStepOf(S, mk) };   // r347
+                        stepM: mastStepOf(S, mk),   // r347
+                        /* r350: every plate read of a topmast head, mast by mast, as the build carries it, so the card
+                           says what the plate agrees with and what it contests */
+                        headReads: (() => { const byMi = {};
+                          group.traverse(o => { const ud = o.isMesh && o.userData;
+                            if (ud && ud.seg && ud.seg.si === 1 && ud.head && ud.head.read)
+                              byMi[ud.seg.mi] = Object.assign({ mi: ud.seg.mi, ruleInPerYd: ud.head.inPerYd }, ud.head.read); });
+                          return Object.keys(byMi).map(Number).sort((a, b) => a - b).map(k => byMi[k]); })() };
       }
     } }
   const capstanUnseated = group.userData.capstanUnseated;   // r346, set by seatClassCapstans
