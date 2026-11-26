@@ -1,0 +1,12 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its plate read",
+  "detail": "u 0.85: 4.8 m, the plate's row 871 over datum row 933 reads 4.72 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.85: the station's row 871 is 3.00 px off the trace's 868.00 at column 1500.9"
+ }
+]

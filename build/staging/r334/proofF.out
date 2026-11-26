@@ -1,0 +1,307 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0: hullSurface sheer 4.20 m, the read 3.67 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.05: hullSurface sheer 3.89 m, the read 3.67 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.05: the deck's outermost vertex within 0.5 m of x -14.15 stands at 3.85 m, the read 3.67 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.15: hullSurface sheer 3.44 m, the read 3.72 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.15: the deck's outermost vertex within 0.5 m of x -10.19 stands at 3.41 m, the read 3.72 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.2: hullSurface sheer 3.29 m, the read 3.64 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.2: the deck's outermost vertex within 0.5 m of x -8.46 stands at 3.27 m, the read 3.64 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.25: hullSurface sheer 3.17 m, the read 3.42 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.25: the deck's outermost vertex within 0.5 m of x -6.91 stands at 3.14 m, the read 3.42 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.55: hullSurface sheer 3.00 m, the read 2.92 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.5716: hullSurface sheer 3.00 m, the read 3.08 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.5816: hullSurface sheer 3.01 m, the read 3.53 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.6: hullSurface sheer 3.01 m, the read 3.58 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.6: the deck's outermost vertex within 0.5 m of x 2.75 stands at 3.01 m, the read 3.58 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.65: hullSurface sheer 3.03 m, the read 3.69 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.65: the deck's outermost vertex within 0.5 m of x 4.13 stands at 3.02 m, the read 3.69 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.7: hullSurface sheer 3.07 m, the read 3.9 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.7: the deck's outermost vertex within 0.5 m of x 5.50 stands at 3.05 m, the read 3.9 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.75: hullSurface sheer 3.13 m, the read 4.29 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.75: the deck's outermost vertex within 0.5 m of x 6.90 stands at 3.11 m, the read 4.29 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.8: hullSurface sheer 3.22 m, the read 4.5 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.8: the deck's outermost vertex within 0.5 m of x 8.40 stands at 3.20 m, the read 4.5 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.85: hullSurface sheer 3.33 m, the read 4.8 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.85: the deck's outermost vertex within 0.5 m of x 10.03 stands at 3.31 m, the read 4.8 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.9: hullSurface sheer 3.48 m, the read 5.27 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.9: the deck's outermost vertex within 0.5 m of x 11.77 stands at 3.45 m, the read 5.27 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.95: hullSurface sheer 3.67 m, the read 5.94 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.95: the deck's outermost vertex within 0.5 m of x 13.64 stands at 3.64 m, the read 5.94 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 1: hullSurface sheer 3.90 m, the read 6.62 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "house off the record",
+  "detail": "boat deck derives to 19.5 m over water, record says 19"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0: hullSurface sheer 10.80 m, the read 12.27 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.05: hullSurface sheer 10.62 m, the read 11.61 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.1: hullSurface sheer 10.47 m, the read 11.08 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.15: hullSurface sheer 10.36 m, the read 10.72 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.15: the deck's outermost vertex within 0.5 m of x -90.65 stands at 10.36 m, the read 10.72 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.2: hullSurface sheer 10.27 m, the read 10.44 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.2: the deck's outermost vertex within 0.5 m of x -77.70 stands at 10.27 m, the read 10.44 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.3: hullSurface sheer 10.15 m, the read 10.02 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.35: hullSurface sheer 10.12 m, the read 9.87 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.35: the deck's outermost vertex within 0.5 m of x -38.85 stands at 10.12 m, the read 9.87 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.4: hullSurface sheer 10.11 m, the read 9.74 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.4: the deck's outermost vertex within 0.5 m of x -25.90 stands at 10.11 m, the read 9.74 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.45: hullSurface sheer 10.10 m, the read 9.64 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.45: the deck's outermost vertex within 0.5 m of x -12.95 stands at 10.10 m, the read 9.64 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.5: hullSurface sheer 10.10 m, the read 9.57 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.5: the deck's outermost vertex within 0.5 m of x 0.00 stands at 10.10 m, the read 9.57 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.55: hullSurface sheer 10.10 m, the read 9.52 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.55: the deck's outermost vertex within 0.5 m of x 12.95 stands at 10.10 m, the read 9.52 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.6: hullSurface sheer 10.10 m, the read 9.51 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.6: the deck's outermost vertex within 0.5 m of x 25.90 stands at 10.10 m, the read 9.51 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.65: hullSurface sheer 10.11 m, the read 9.54 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.65: the deck's outermost vertex within 0.5 m of x 38.85 stands at 10.11 m, the read 9.54 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.7: hullSurface sheer 10.13 m, the read 9.61 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.7: the deck's outermost vertex within 0.5 m of x 51.80 stands at 10.13 m, the read 9.61 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.75: hullSurface sheer 10.16 m, the read 9.71 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.75: the deck's outermost vertex within 0.5 m of x 64.75 stands at 10.16 m, the read 9.71 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.8: hullSurface sheer 10.20 m, the read 9.85 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.8: the deck's outermost vertex within 0.5 m of x 77.84 stands at 10.20 m, the read 9.85 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.85: hullSurface sheer 10.25 m, the read 10.02 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.85: the deck's outermost vertex within 0.5 m of x 91.36 stands at 10.25 m, the read 10.02 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a sheer drawn off its read deck line",
+  "detail": "u 0.9: hullSurface sheer 10.31 m, the read 10.22 m"
+ }
+]

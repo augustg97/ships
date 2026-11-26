@@ -1,0 +1,22 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.15: the station's row 907 is 3.00 px off the trace's 904.00 at column 771.2"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.25: the station's row 918 is -4.76 px off the trace's 922.76 at column 889.8"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.4: the station's row 932 is 2.76 px off the trace's 929.24 at column 1039.7"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.85: the station's row 868 is 3.00 px off the trace's 865.00 at column 1500.9"
+ }
+]

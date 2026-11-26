@@ -1,0 +1,32 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a deck built off its read deck line",
+  "detail": "u 0.5716: the deck's outermost vertex within 0.5 m of x 1.97 stands at 3.54 m, the read 3.08 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line trace that steps onto another line",
+  "detail": "the trace steps 10.00 rows at column 1215, over its limit of 8"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.15: the station's row 907 is 3.00 px off the trace's 904.00 at column 771.2"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.25: the station's row 918 is -4.76 px off the trace's 922.76 at column 889.8"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.4: the station's row 932 is 2.76 px off the trace's 929.24 at column 1039.7"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.85: the station's row 868 is 3.00 px off the trace's 865.00 at column 1500.9"
+ }
+]

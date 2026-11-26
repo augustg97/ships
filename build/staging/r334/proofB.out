@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a deck line trace that steps onto another line",
+  "detail": "the trace steps 10.00 rows at column 1215, over its limit of 8"
+ }
+]
