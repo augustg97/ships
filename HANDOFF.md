@@ -31079,3 +31079,5 @@ After that the volume held 790–830 MB for the rest of the round. The OS update
 3. r345's items 2–6 stand: the skid boat hollow from above; the 74's gangways and poop; the barricade's mouldings; the East Indiaman's `paintBands`; and the wale finish on the clipper and Wyoming.
 4. **The 74's waterline in the furled broadside** (`crop-waterline.png`, from `wit/broad-after.png`). Where the hull meets the water, its edge curves up toward the bow; on a level hull the waterline would run straight. This is not settled. Read the hull's draught at the stem against the water mesh before calling it a fault.
 5. **The disk.** Check `ls -la .git/objects/pack/ | grep tmp_pack` and `df -m /System/Volumes/Data` at the start of every round. `gc.auto` is 0 in this repository's config; leave it so until there are about 8 GB free for a repack.
+
+**Disk at close: 8,254 MB free, and no `tmp_pack_*` file after the push.** Live stamp 1795733102, verified live at 14:47 (Deploy Pages run 45906804635).
