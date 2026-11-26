@@ -2471,16 +2471,42 @@ function gaffTopmastOf(mk, lower) {
    r322 (0y¹⁶⁴): a mast built in two pieces (`only` 2: Vasa's mizzen, and the 1590-1620 hulls' mizzens that take
    its heights) records a top and crosstrees and no truck, because no topgallant mast is built on it; its topmast
    is solved the same way and the third piece, which is never drawn, keeps Steel's half. */
-function squareStackOf(mk, lower) {
+function squareStackOf(mk, lower, whole) {
   const MH = mk.mastHeightsM;
   const twoPiece = mk.only === 2 && MH && MH.truck === undefined;
   if (mk.rig === 'square' && MH && MH.top > 0 && MH.crosstrees > MH.top && (MH.truck > MH.crosstrees || twoPiece)) {
     const top = MH.crosstrees - 0.88 * lower;
     return { top, tg: twoPiece ? top * 0.50 : MH.truck - 0.88 * (lower + top), from: 'mastHeightsM' };
   }
-  return { top: lower * 0.60, tg: lower * 0.30, from: 'steel' };
+  /* r347: Steel's 3/5 and 3/10 are shares of the WHOLE mast, heel to head (`whole`), not of the part standing
+     above the deck; the two differ by the step depth on a hull that records one (mastStepOf) */
+  const W = whole !== undefined ? whole : lower;
+  return { top: W * 0.60, tg: W * 0.30, from: 'steel' };
 }
-function mastLowerOf(mk, steelMain, footY) {
+/* ── r347: STEEL'S LENGTH IS HEEL TO HEAD, AND THE HEEL STEPS ON THE KEELSON ──────────────
+   "The length of the lower deck and extreme breadth being added together, the half is the length of the
+   main-mast" gives the mast's whole length, as every mast table does: on a 74, 107 ft 6 in, which is
+   the 108 ft the tables give her main mast. The heel stands in a step on the keelson, so the depth in
+   hold and the height of the gun deck are inside that length, below the upper deck. Until r347 the
+   builder stood the whole length on the deck, and the 74's main top stood 29.5 m over her upper deck.
+   On Eckersberg's Asow (1828) it stands 22.0 m over it (r347, build/staging/r347/), and the corrected
+   rule gives 22.5. `S.mastStep.belowDeckM` is the depth from the deck the mast stands on to the top of
+   its step. It applies only where the mast's length comes from Steel's rule; a recorded height in metres
+   is a height over the deck already. A hull with no step record stands its Steel length on the deck,
+   and the mast carries userData.stepFrom 'unknown (class fallback)'. */
+function mastStepOf(S, mk) {
+  if (!S || !S.mastStep || !(S.mastStep.belowDeckM > 0) || !mk || !isSteelLength(mk)) return 0;
+  return S.mastStep.belowDeckM;
+}
+function isSteelLength(mk) {
+  if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return false;
+  if (mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0) return false;
+  if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined) return false;
+  if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none')) return false;
+  if (mk.truckM !== undefined && mk.rig === 'square') return false;
+  return mk.heightM === undefined;
+}
+function mastLowerOf(mk, steelMain, footY, S) {
   if (mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0) return mk.mastHeightsM.top / 0.90;
   /* r329 (0y¹⁷¹): a lateen mizzen that carries a top (lateenTopmast, r328) and a recorded top height is drawn to it:
      the top stands at its own topOfLower share of the lower pole, so the pole is the top's height over that share. */
@@ -2496,7 +2522,7 @@ function mastLowerOf(mk, steelMain, footY) {
             : 0.88 * (1 + 0.60) + 0.30;
     return mk.truckM / K;
   }
-  return mk.heightM !== undefined ? mk.heightM : (mk.height || 0) * steelMain;
+  return mk.heightM !== undefined ? mk.heightM : (mk.height || 0) * steelMain - mastStepOf(S, mk);
 }
 function buildRig(S, group, mats, FINE, FURLED) {
   const L = S.lwl, B = S.beam;
@@ -2766,7 +2792,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
        a trireme at L/B 9.7 comes out with a 20 m mast against Olympias's measured 11 m. Where a
        vessel has an attested mast, that measurement wins and the rule is not used at all —
        `heightM` is metres, `height` is a share of Steel's main. */
-    const lower = mastLowerOf(mk, steelMain, base);
+    const lower = mastLowerOf(mk, steelMain, base, S);
+    const stepM = mastStepOf(S, mk);
     /* ── A MAST IS AS THICK AS ITS OWN LENGTH ASKS, NOT AS ITS SHIP'S BEAM ─────────────
        Every mast on a ship drew the same diameter — beam x 0.06 — so the treasure ship's
        0.6-share mizzen stood as fat as her main, and the corbita's little artemon as fat
@@ -2783,7 +2810,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        mizzen) is inference, like the height shares themselves. Junk and crabclaw masts
        take the length scaling only — China is not rigged by Steel's tables. */
     const mainLower = S.masts.reduce((mx, m2) =>
-      Math.max(mx, mastLowerOf(m2, steelMain, deckAt(m2.at))), 0)
+      Math.max(mx, mastLowerOf(m2, steelMain, deckAt(m2.at), S)), 0)
       || lower || 1;
     /* the mizzen is the AFTERMOST STATION, not the last list entry — the corbita and the
        trireme list their mains first and their bow masts second */
@@ -2799,7 +2826,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        ships give topmast 1.05–1.22 x extreme breadth and topgallant 0.57–0.70 x breadth.
        ⚠ The first version used 0.62 and 0.42 — the topgallant was nearly half again too long,
        which is why the rig stood 72 m over a 57 m hull instead of about 62. */
-    const { top, tg } = squareStackOf(mk, lower);   // r318: Steel's 0.60 and 0.50, or the record's heights
+    const { top, tg } = squareStackOf(mk, lower, lower + stepM);   // r318: Steel's 0.60 and 0.50, or the record's heights
     let y = base;
     /* capY tracks the HEAD of the highest drawn segment — the cap the lifts lead to. It is
        not `y`, because y advances by 0.88 of each segment (the doubling) and so ends BELOW
@@ -3308,6 +3335,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
          pole built to some other line, which is what the artemon was for 250 rounds */
       m.userData.seg = { mi, si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
                          rakeDeg: mk.rake || 0, lengthM: segLen };
+      /* r347: a Steel-length lower says where its heel steps (A-MAST-STEP) */
+      if (si === 0 && isSteelLength(mk))
+        m.userData.step = stepM > 0
+          ? { belowDeckM: stepM, wholeM: +(lower + stepM).toFixed(3), from: 'record (hull.mastStep)' }
+          : { belowDeckM: 0, wholeM: +lower.toFixed(3), from: 'unknown (class fallback): the whole Steel length stands on the deck' };
       /* r287 (0y96): `mi` names the mast, so the loft's deck-to-truck and the audit can read one mast's
          segments as one stack — the foot of segment 0 to the head of the last drawn — from the meshes */
       /* the iron mast's card carries its provenance: attested diameters are the record's,
@@ -3708,7 +3740,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
            tables run .89-.91, so a frigate wants the tabulated ratio, not the rule. */
         /* the record may attest the course yard itself (Preussen: "Länge Großrah:
            32 m") — an attested spar beats Steel's share of a derived mast */
-        const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
+        /* r347: Steel's 7/8 is of the whole mast, heel to head (his table: 7/8 x 112 ft = 98 ft) */
+        const courseL = mk.courseYardM !== undefined ? mk.courseYardM : (lower + stepM) * 0.875;
         const yardLen = si === 0 ? courseL
                       : si === 1 ? courseL * 0.714
                       : courseL * 0.714 * 0.667;
@@ -3863,8 +3896,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* the record may attest the course yard itself (Preussen: "Länge Großrah: 32 m;
          Royalrah: 16 m" — and 16/32 is EXACTLY the royal's 0.50 share below, the record
          confirming the plan's own fractions). An attested spar beats Steel's 7/8 of a
-         derived mast. */
-      const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
+         derived mast. r347: of the whole mast, heel to head. */
+      const courseL = mk.courseYardM !== undefined ? mk.courseYardM : (lower + stepM) * 0.875;
       /* r285 (0y88): the record may hang a named yard at its OWN fraction of the truck — `yardFracs: { course: 0.35 }`,
          a plate read — and the plan's class fraction stands for every yard it does not name. Endurance's course yard
          reads 0.35 +/- 0.03 of her fore truck on the beset broadside (the plan's 0.36 inside the bound); the mechanism
@@ -6081,7 +6114,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const fm = S.masts[0];
       const steelMain = (S.lwl + S.beam) / 2;
       const fbase = deckAt(fm.at);
-      const flower = mastLowerOf(fm, steelMain, fbase);
+      const flower = mastLowerOf(fm, steelMain, fbase, S);
       const fx = (fm.at - 0.5) * L + H.rake(fm.at);
       const hounds = fbase + flower * 0.78;
       /* the outermost stay stops at the topmast HEAD, short of the truck — hoisted to the
@@ -6092,7 +6125,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          fan; the real suit climbs to the fore topmast head, which is most of what makes a
          P-liner's head profile. */
       const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
-                           : fm.rig === 'square' ? flower * 0.88 + squareStackOf(fm, flower).top * 0.72
+                           : fm.rig === 'square' ? flower * 0.88 + squareStackOf(fm, flower, flower + mastStepOf(S, fm)).top * 0.72
                            : flower * 0.94);
       const n = S.headsails;
       for (let k = 0; k < n; k++) {
@@ -18442,14 +18475,16 @@ function buildShip(S, opts) {
                      : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
                      : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
                      : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
-                     : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
+                     : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments'
+                       + (mastStepOf(S, mk) > 0 ? '; the lower stands its Steel length less the ' + mastStepOf(S, mk) + ' m from the deck down to its step (hull.mastStep)' : '');
         /* r288 (0y99): the same derivation as a RECORD, so the card can say it on screen in its own words —
            the sentence above is one string, and a card that has to parse a string to find the number will
            print the wrong thing the first time the sentence is reworded. `from` is 'record' or 'derived';
            `lower` says what the lower mast is (this ship's recorded heightM, or a beam share); `n` is the
            count of segments the class fractions carry it through; truckM / heightM are the record's figures. */
         rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
-                        lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined || mk.mastHeightsM) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
+                        lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined || mk.mastHeightsM) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM,
+                        stepM: mastStepOf(S, mk) };   // r347
       }
     } }
   const capstanUnseated = group.userData.capstanUnseated;   // r346, set by seatClassCapstans

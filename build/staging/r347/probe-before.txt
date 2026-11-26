@@ -1,0 +1,10 @@
+mast 0 seg 0  foot 4.77  head 33.93  len 29.18
+mast 0 seg 1  foot 30.43  head 47.92  len 17.51
+mast 0 seg 2  foot 45.82  head 54.57  len 8.75
+mast 1 seg 0  foot 3.90  head 36.70  len 32.80
+mast 1 seg 1  foot 32.77  head 52.45  len 19.68
+mast 1 seg 2  foot 50.08  head 59.92  len 9.84
+mast 2 seg 0  foot 4.23  head 32.34  len 28.22
+mast 2 seg 1  foot 28.97  head 45.83  len 16.93
+mast 2 seg 2  foot 43.81  head 52.24  len 8.47
+rig top y 59.94

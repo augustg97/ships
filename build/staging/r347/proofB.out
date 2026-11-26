@@ -1,0 +1,97 @@
+[
+ {
+  "id": "corbita",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 0: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "corbita",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 1: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "junk",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 0: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "junk",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 1: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 0: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 1: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 2: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 3: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 4: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "carrack",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 0: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "carrack",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 1: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "open boom off its sail plan",
+  "detail": "aftermost boom 15.6 m against an entitlement of 12.6 m with nothing drawn abaft the mast"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 0: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 1: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 2: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "steamer",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 0: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "steamer",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 1: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "steamer",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 2: its length comes from Steel's rule and its lower carries no userData.step"
+ },
+ {
+  "id": "steamer",
+  "rule": "a Steel-length mast with no heel record",
+  "detail": "mast 3: its length comes from Steel's rule and its lower carries no userData.step"
+ }
+]

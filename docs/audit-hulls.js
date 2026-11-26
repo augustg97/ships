@@ -205,7 +205,8 @@ const K = mk.only === 1 ? 1.0 : mk.only === 2 ? 0.88 + 0.60
 return mk.truckM / K;
 }
 return mk.heightM !== undefined ? mk.heightM
-: (mk.height || 0) * (H.lwl + H.beam) / 2;
+: (mk.height || 0) * (H.lwl + H.beam) / 2
+- (H.mastStep && H.mastStep.belowDeckM > 0 ? H.mastStep.belowDeckM : 0);
 };
 {
 const bad = {};
@@ -6838,6 +6839,34 @@ say(v.id, 'a mast segment built short of its record', `segment ${r.si} at foot x
 return { masts, yards, hullPts, axisOf };
 };
 yardRead(g, 'set');
+{
+const steelLen = mk => !(mk.rig === 'square' && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+&& !(mk.rig === 'lateen' && mk.lateenTopmast && mk.lateenTopmast.topOfLower > 0 && mk.mastHeightsM && mk.mastHeightsM.top > 0)
+&& !(mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+&& !(mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
+&& !(mk.truckM !== undefined && mk.rig === 'square')
+&& mk.heightM === undefined;
+const rec = H.mastStep && H.mastStep.belowDeckM > 0 ? H.mastStep.belowDeckM : 0;
+const seg0 = {};
+g.traverse(o => { if (o.isMesh && o.userData.seg && o.userData.seg.si === 0) seg0[o.userData.seg.mi] = o.userData; });
+(H.masts || []).forEach((mk, mi) => {
+const u = seg0[mi];
+if (!u || !steelLen(mk)) return;
+const whole = (mk.height || 0) * (H.lwl + H.beam) / 2, span = u.seg.headY - u.seg.footY;
+if (!u.step) { say(v.id, 'a Steel-length mast with no heel record', `mast ${mi}: its length comes from Steel's rule and its lower carries no userData.step`); return; }
+if (rec > 0) {
+if (Math.abs(u.step.belowDeckM - rec) > 0.005)
+say(v.id, 'a mast heel off the record', `mast ${mi}: step ${u.step.belowDeckM} m against the record's ${rec} m`);
+if (Math.abs(span - (whole - rec)) > 0.02)
+say(v.id, 'a Steel-length mast standing its whole length on the deck', `mast ${mi}: the lower stands ${span.toFixed(2)} m over the deck; Steel's ${whole.toFixed(2)} m less the ${rec} m step is ${(whole - rec).toFixed(2)} m`);
+} else {
+if (!/unknown \(class fallback\)/.test(u.step.from || ''))
+say(v.id, 'a mast heel with no record not labelled as the fallback', `mast ${mi}: step.from is '${u.step.from}'`);
+if (Math.abs(span - whole) > 0.02)
+say(v.id, 'a Steel-length mast cut short with no step record', `mast ${mi}: the lower stands ${span.toFixed(2)} m against Steel's ${whole.toFixed(2)} m`);
+}
+});
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

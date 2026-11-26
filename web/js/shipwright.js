@@ -1302,6 +1302,7 @@ function swFillCard(v) {
         'derived, not recorded: ' + (
           H.from === 'measured' ? 'no mast height is recorded; the figure is the span of the tallest mast as drawn, to a class proportion of the hull'
           : H.lower === 'record' ? 'the lower mast is the record\'s (' + H.heightM + ' m); the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
+          : H.n > 1 && H.stepM > 0 ? 'no mast height is recorded. The lower mast is Steel\'s length for this hull, heel to head, less the ' + H.stepM + ' m from the deck down to its step on the keelson; the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
           : H.n > 1 ? 'no mast height is recorded; the lower mast is drawn to a class proportion of the hull and the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
           : 'no mast height is recorded; the mast is one pole, drawn to a class proportion of the hull')]]
     : [];
