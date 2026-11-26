@@ -30252,3 +30252,17 @@ Proofs, all on :8150 (`webb/`):
 **r333 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r333` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁷³) or (0y¹⁷⁵), the fluyt's lateen peak or her mast stations, which are the remaining reads of her own plate.**
 
 **Live stamp: docs/index.html carries data-version 1795650657 at the build.**
+
+**Live stamp VERIFIED: 1795650657 on https://augustg97.github.io/ships/index.html at 16:00 PST. The published `data/vessels.json` carries `uncrossedAtSea`.**
+
+**THE FRAMES (receipt): ALL 65 SCORED; `shipwright`, `shipwright-ahead` and `action-gravelines` ACCEPTED, ALL THREE PREDICTED.**
+
+- **The full check** was launched at 15:38:31 and captured 26 frames. It died at frame 27, `aboard`, on the 150 s ready wait (16:00:47), as r329's to r331's did. The 26 were kept (`run1/`, `score-run1.out`). Five of them were beyond the gate:
+  - `shipwright` 0.055% / 0.020, predicted: the change is confined to x 0–48, rows 668–955, the fluyt's rig at the frame's left edge, where the topgallant sail is gone (`pair-shipwright.png`). Accepted.
+  - `ship-usv` 91.1%, a capture fault: the frame captured the 1590 globe in place of the Shipwright (`chk-ship-usv.png`). Recaptured alone: 0.000%.
+  - `globe-modern` 10.2%, `globe-crossing` 9.8% and `globe-era-card` 5.0%, captured while this round's proofs ran a second browser on :8150. The voyage panel lists different vessel positions (`chk-globe-modern.png`), the fault r295 and r330 recorded. Recaptured alone: 0.036%, 0.020% and 0.041%.
+- **The other 39** were captured one process per frame from 16:01:13 to 16:27, the predicted movers first, with no failure (`r332_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). The four faults were recaptured alone after them (`r332_recap.sh`, `run3/`, `score-run3.out`). Every frame was scored with r277's offline scorer.
+- **Predicted and accepted:** `shipwright-ahead` 0.055% / 0.020, the same strip at the left edge; `action-gravelines` 0.054% / 0.016, x 1975–2679, rows 783–959, where every English ship, drawn with the fluyt model, now stands without topgallant sails (`pair-action-gravelines.png`).
+- **Predicted not to move, and inside the gate:** `shipwright-furled` 0.044% / 0.016, the same figure as in r330 and r331.
+- **The largest of the rest:** `passage-sahul` 0.047%, `aboard-preussen` 0.036%, all inside the gate.
+- **No frames are left unscored for r333.**
