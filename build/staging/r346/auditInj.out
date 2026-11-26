@@ -1,0 +1,82 @@
+[
+ {
+  "id": "caravel",
+  "rule": "a part in a capstan's sweep",
+  "detail": "mast/Mast in the bars' sweep: a face crosses y 3.09 within 2.28 m of the axis, near x 0.97; the capstan at x 2.06: drumhead radius 0.48 m, bars to 2.28 m at y 3.06\u20133.11"
+ },
+ {
+  "id": "caravel",
+  "rule": "a part in a capstan's sweep",
+  "detail": "sail/Sail in the bars' sweep at x 0.15 y 3.08 z 0.95; the capstan at x 2.06: drumhead radius 0.48 m, bars to 2.28 m at y 3.06\u20133.11"
+ },
+ {
+  "id": "carrack",
+  "rule": "a part in a capstan's sweep",
+  "detail": "mast/Mast in the bars' sweep: a face crosses y 5.41 within 2.90 m of the axis, near x 1.98; the capstan at x 4.20: drumhead radius 0.61 m, bars to 2.90 m at y 5.38\u20135.44"
+ },
+ {
+  "id": "carrack",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Ship's boat in the bars' sweep: a face crosses y 5.41 within 2.90 m of the axis, near x 1.33; the capstan at x 4.20: drumhead radius 0.61 m, bars to 2.90 m at y 5.38\u20135.44"
+ },
+ {
+  "id": "carrack",
+  "rule": "a part in a capstan's sweep",
+  "detail": "castles/Aftcastle in the bars' sweep: a face crosses y 5.41 within 2.90 m of the axis, near x 2.80; the capstan at x 4.20: drumhead radius 0.61 m, bars to 2.90 m at y 5.38\u20135.44"
+ },
+ {
+  "id": "galley",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Ship's boat in the bars' sweep at x 2.68 y 2.15 z 0.90; the capstan at x 4.74: drumhead radius 0.48 m, bars to 2.28 m at y 2.07\u20132.12"
+ },
+ {
+  "id": "galley",
+  "rule": "a part in a capstan's sweep",
+  "detail": "oar/Oars in the bars' sweep: a face crosses y 2.09 within 2.28 m of the axis, near x 3.79; the capstan at x 4.74: drumhead radius 0.48 m, bars to 2.28 m at y 2.07\u20132.12"
+ },
+ {
+  "id": "galley",
+  "rule": "a part in a capstan's sweep",
+  "detail": "apostis/Corsia in the drum: a face crosses y 1.27 within 0.48 m of the axis, near x 5.97; the capstan at x 4.74: drumhead radius 0.48 m, bars to 2.28 m at y 2.07\u20132.12"
+ },
+ {
+  "id": "galleass",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Ship's boat in the bars' sweep at x 3.41 y 3.77 z 1.04; the capstan at x 5.28: drumhead radius 0.48 m, bars to 2.28 m at y 3.77\u20133.82"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a part in a capstan's sweep",
+  "detail": "mast/Mast in the bars' sweep: a face crosses y 5.61 within 3.27 m of the axis, near x 2.43; the capstan at x 5.16: drumhead radius 0.68 m, bars to 3.27 m at y 5.58\u20135.65"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a part in a capstan's sweep",
+  "detail": "mast/Mast in the bars' sweep: a face crosses y 3.99 within 2.28 m of the axis, near x 1.48; the capstan at x 3.12: drumhead radius 0.48 m, bars to 2.28 m at y 3.96\u20134.01"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a part in a capstan's sweep",
+  "detail": "mast/Mast in the bars' sweep: a face crosses y 5.35 within 3.72 m of the axis, near x 8.40; the capstan at x 12.05: drumhead radius 0.77 m, bars to 3.72 m at y 5.31\u20135.39"
+ },
+ {
+  "id": "clipper",
+  "rule": "a part in a capstan's sweep",
+  "detail": "deckhouse/Deckhouse in the bars' sweep: a face crosses y 4.39 within 2.90 m of the axis, near x 5.90; the capstan at x 7.08: drumhead radius 0.60 m, bars to 2.90 m at y 4.35\u20134.42"
+ },
+ {
+  "id": "endurance",
+  "rule": "a part in a capstan's sweep",
+  "detail": "deckhouse/Deckhouse in the bars' sweep: a face crosses y 2.99 within 2.28 m of the axis, near x 4.75; the capstan at x 4.75: drumhead radius 0.48 m, bars to 2.28 m at y 2.96\u20133.01"
+ },
+ {
+  "id": "endurance",
+  "rule": "a part in a capstan's sweep",
+  "detail": "funnel/Funnel in the bars' sweep at x 6.85 y 3.02 z -0.60; the capstan at x 4.75: drumhead radius 0.48 m, bars to 2.28 m at y 2.96\u20133.01"
+ },
+ {
+  "id": "endurance",
+  "rule": "a part in a capstan's sweep",
+  "detail": "funnel/Steam pipe in the bars' sweep: a face crosses y 2.99 within 2.28 m of the axis, near x 6.23; the capstan at x 4.75: drumhead radius 0.48 m, bars to 2.28 m at y 2.96\u20133.01"
+ }
+]

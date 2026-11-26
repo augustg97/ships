@@ -4612,8 +4612,22 @@
         say(v.id, 'a machine the record does not carry',
             `${capm.length} capstan meshes drawn with no capstan field — this hull's `
             + 'tradition attests other gear, and silence draws nothing');
-      if (H.capstan && !capm.length)
-        say(v.id, 'declared but not drawn', 'capstan');
+      /* ── A-CAPSTAN-UNSEATED (round 346): A CLASS CAPSTAN WITH NOWHERE CLEAR IS NOT DRAWN, AND SAYS SO.
+         A record with no station draws its capstan at the nearest station from u 0.62 where its
+         drum and bars' sweep are clear (seatClassCapstans). On the galley, the carrack and Endurance
+         no station between u 0.20 and 0.85 is clear, and the builder draws none. MESH and RECORD:
+         a recorded bar capstan with no capstan mesh passes only where the builder recorded the
+         failed search on the group (userData.capstanUnseated) AND the record's provenance says "No
+         capstan is drawn"; a provenance that says so over a drawn capstan convicts too. */
+      const capProv = H.capstanProvenance || '';
+      const capUnseated = (g.userData && g.userData.capstanUnseated) || null;
+      if (H.capstan && !capm.length && !(capUnseated && /No capstan is drawn/.test(capProv)))
+        say(v.id, 'declared but not drawn', capUnseated
+            ? 'capstan: the builder found no clear station, and the record\'s provenance does not say "No capstan is drawn"'
+            : 'capstan');
+      if (H.capstan && capm.length && /No capstan is drawn/.test(capProv))
+        say(v.id, 'declared but not drawn',
+            'the record\'s provenance says "No capstan is drawn" and a capstan is drawn');
       /* ── THE MEDIEVAL SPILL IS THE RECOVERED TIMBER'S FORM (round 212).
          The Bremen cog's Gangspill came up with the wreck (DSM Inv. I/11066/14, oak,
          D 56 cm, H 176 cm) and the museum's description fixes it: the rope round the
@@ -4757,6 +4771,23 @@
               `${capOwn.size} capstan(s) built, the record names ${capRec.length}`);
         else for (const G of capOwn.keys()) {
           const c = capCentre(G);
+          /* (r346) a record with no station: the builder moved the machine to the nearest clear
+             station from u 0.62 and recorded the seat. The centre must stand where the seat says,
+             and the record's provenance must name that station, so the card and the deck agree. */
+          const seatSt = G.userData && G.userData.capstanStation;
+          if (!(H.capstan.stations && H.capstan.stations.length) && H.capstan.atU == null) {
+            if (!seatSt || !seatSt.seat)
+              say(v.id, 'capstans off the record\'s stations', 'a class-station capstan with no seat record');
+            else {
+              if (Math.abs((seatSt.u - 0.5) * H.lwl - c.x) > 0.3)
+                say(v.id, 'capstans off the record\'s stations',
+                    `the capstan stands at x ${c.x.toFixed(2)}; its seat says u ${seatSt.u}, x ${((seatSt.u - 0.5) * H.lwl).toFixed(2)}`);
+              if (!(H.capstanProvenance || '').includes(`u ${seatSt.u}`))
+                say(v.id, 'capstans off the record\'s stations',
+                    `the capstan is drawn at u ${seatSt.u} and the record's provenance does not name that station`);
+            }
+            continue;
+          }
           const st = capRec.slice().sort((a, b) => Math.abs((a.atU - 0.5) * H.lwl - c.x) - Math.abs((b.atU - 0.5) * H.lwl - c.x))[0];
           if (Math.abs((st.atU - 0.5) * H.lwl - c.x) > 0.3)
             say(v.id, 'capstans off the record\'s stations',
@@ -4776,14 +4807,17 @@
         const SKIP = new Set(['capstan', 'deck', 'planking', 'frames', 'keel', 'waterway', 'wale', 'rail']);
         const ROPE = /stay|shroud|sheet|brace|halyard|lift|tack|bowline|clew|bunt|fall|rope|coil|ratline|lanyard|jeer|tye|rigging|line|vang|pendant|tackle|guy/i;
         const P = new THREE.Vector3();
-        /* ⚠ THE CLASS STATION IS NOT JUDGED YET. A record with no `stations` and no `atU` draws
+        /* (r345) THE CLASS STATION WAS NOT JUDGED AT FIRST. A record with no `stations` and no `atU` draws
            its capstan at u 0.62, a station nobody read, and the first run of this rule found six
            conflicts there on five hulls: the caravel's sail, the galley's boat and oars, the
            galleass's boat, the clipper's deckhouse and Endurance's funnel. Moving those machines
            is r346's first item (HANDOFF). Until then this arm judges only a station the record
            names, and a recorded station that is not clear convicts. */
-        const capClassOnly = !(H.capstan.stations && H.capstan.stations.length) && H.capstan.atU == null;
-        if (!capClassOnly) for (const [G, ms] of capOwn) {
+        /* (r346) and since r346 it is: the builder seats a class capstan where this arm passes, so
+           every drawn capstan is judged, the class station's with the rest. Run with the gate off,
+           the arm found 16 problems on 9 hulls at u 0.62, where r345's vertex-only first run had
+           listed 6 on 5 (build/staging/r346/auditInj.out). */
+        for (const [G, ms] of capOwn) {
           const c = capCentre(G);
           let rD = 0, yTop = -1e9, yFoot = 1e9, rB = 0, b0 = 1e9, b1 = -1e9;
           for (const o of ms) {
@@ -4802,11 +4836,15 @@
             const pt = tagOf(o); if (!pt || SKIP.has(pt.key) || ROPE.test(pt.key)) return;
             const M = new THREE.Matrix4().multiplyMatrices(invCap, o.matrixWorld), A = o.geometry.attributes.position;
             const k = `${pt.key}/${pt.name}`;
+            const grat = pt.key === 'grating', rDo = grat ? rD + 0.3 : rD, yD0 = grat ? yFoot - 0.1 : yFoot + 0.05;
+            let gy0 = 1e9, gy1 = -1e9;
             const W = new Float32Array(A.count * 3);
             for (let i = 0; i < A.count; i++) { P.fromBufferAttribute(A, i).applyMatrix4(M);
-              W[3 * i] = P.x; W[3 * i + 1] = P.y; W[3 * i + 2] = P.z;
+              W[3 * i] = P.x; W[3 * i + 1] = P.y; W[3 * i + 2] = P.z; gy0 = Math.min(gy0, P.y); gy1 = Math.max(gy1, P.y);
               const r = Math.hypot(P.x - c.x, P.z - c.z);
-              const inDrum = r < rD && P.y > yFoot + 0.05 && P.y < yTop;
+              /* (r346) a hatch is cut 0.3 m clear of the drumhead's rim (r345's grating rule), and a
+                 grating's coaming stands a few centimetres over the planking, under the drum's bands */
+              const inDrum = r < rDo && P.y > yD0 && P.y < yTop;
               const inSweep = r < rB && P.y > b0 - 0.05 && P.y < b1 + 0.05;
               if (inDrum || inSweep) {
                 if (!hits.has(k)) hits.set(k, `${inDrum ? 'in the drum' : 'in the bars\' sweep'} at x ${P.x.toFixed(2)} y ${P.y.toFixed(2)} z ${P.z.toFixed(2)}`); return; } }
@@ -4817,7 +4855,8 @@
                to the capstan's axis. */
             const I = o.geometry.index, nT = I ? I.count / 3 : A.count / 3;
             const cuts = [[(b0 + b1) / 2, rB, "in the bars' sweep"],
-                          [yFoot + 0.15, rD, 'in the drum'], [(yFoot + yTop) / 2, rD, 'in the drum'], [yTop - 0.05, rD, 'in the drum']];
+                          [yFoot + 0.15, rDo, 'in the drum'], [(yFoot + yTop) / 2, rDo, 'in the drum'], [yTop - 0.05, rDo, 'in the drum']];
+            if (grat) cuts.push([(gy0 + gy1) / 2, rDo, 'within 0.3 m of the drumhead\'s rim']);
             const seg = (ax, az, bx, bz) => { const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz;
               const t = L2 > 0 ? Math.max(0, Math.min(1, ((c.x - ax) * dx + (c.z - az) * dz) / L2)) : 0;
               return Math.hypot(ax + t * dx - c.x, az + t * dz - c.z); };
