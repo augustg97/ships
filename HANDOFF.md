@@ -30446,3 +30446,32 @@ The channels still stand 0.2 m under the sheer at each mast, as every channel di
 - **Predicted and inside the gate:** `shipwright` and `shipwright-ahead` 0.036%, `shipwright-furled` 0.044%, `shipwright-astern` 0.000%, `shipwright-hounds` 0.000%. The fluyt shows only in the left 35 px of the 74's frames, and her stern, the part that rose, stands outside them.
 - **Checked because a fluyt voyage might draw a globe marker:** `map-floor` 0.000% and `descent-coast` 0.016%. `globe-default` scored 11.112% on its first capture. The voyage panel read Zheng He at 13°N 47°E where the baseline has 49°E, and every marker on the globe had moved along its track (`pair-globe-default.png`). That is the voyage-position fault r332 and r333 recorded on `globe-crossing`. The 1590 voyage list draws no fluyt. Recaptured alone it scored **0.039%, inside the gate**. Not accepted.
 - **Not run: the other 54 frames.** This round's record changed only the fluyt, and its audit changed only for a sheerRead carrying the new fields. A full run would also write about 200 MB of captures onto a disk with 211 MB free. **r335 runs the full ratchet only once the disk has room.**
+
+## Round 335 — 2026-11-25 — No model work: the disk was full when the round opened, and it kept filling
+
+**Queue check: August's second list stands worked in full (r57).** The round opened at 19:06 to take (0y¹⁸⁰), the fluyt's quarterdeck, or (0y¹⁷⁹), her fore and mizzen stations. It did neither, and it changed nothing in `web/`, `docs/`, `Research/` or the baselines.
+
+**THE DISK.** `/System/Volumes/Data` had 172 MB free at 19:07, 135 MB at 19:12, 119 MB at 19:16 and 122 MB at 19:18. r334 closed at about 211 MB. Twice the Bash tool could not start a command at all, because it could not create its output file (ENOSPC on `/tmp/claude-501`). This round wrote nothing but a 20 KB size listing (`build/.r335-du.txt`) and this entry, so the loss of about 90 MB since r334 came from something outside the project. The swap file stands at 2 GB on the shared container (1.0 GB used), and the system holds an OS update snapshot named `com.apple.os.update-MSUPrepareUpdate`. Either one could account for it; this round did not establish which.
+
+Every check that proves a change here needs a browser. Each Chromium page writes its profile and cache to disk, and a full ratchet writes about 200 MB of captures. At 120 MB free a browser run can fill the disk, and r334's proofs failed mid-copy that way at 104 MB. A geometry change that cannot be rendered and looked at is not done (rule 1), so the round stopped before making one.
+
+**WHAT HOLDS THE SPACE IN THE PROJECT** (measured 19:13, `du -sm`). Nothing was deleted. August decides what goes.
+
+| what | MB |
+|---|---|
+| `build/staging/r1`–`r99` | under 1 (none present by that name) |
+| `build/staging/r100`–`r199` | 1,462 |
+| `build/staging/r200`–`r299` | 7,069 |
+| `build/staging/r300`+ | 11,950 |
+| `build/staging`, other names | 399 |
+| **`build/staging`, total** | **20,880** |
+| of which PNGs over 1 MB | 2,510 |
+| `.git` (packs 6.92 GiB, loose 109 MiB, no garbage) | 7,204 |
+| `web/` | 373 |
+| `docs/` | 121 |
+
+The largest single staging directories are r204 (871 MB), r315 (707), r314 (637), r326 (622), r300 (620), r301 (610), r313 (590) and r316 (529). Staging holds downloaded plates that later rounds' provenance cites (the `dl/` directories) as well as captures and witness frames. Those plates should be moved somewhere before any bulk deletion. `git gc` cannot run at this level, because repacking 7 GB needs free space of its own.
+
+**r336 opens by running `df -m /System/Volumes/Data`.** Below about 1 GB free, it does what this round did: it records the figure, makes no geometry change, and commits only HANDOFF.md. With room, it takes (0y¹⁸⁰), the quarterdeck, or (0y¹⁷⁹), and runs the full ratchet once, because r334 scored only its six predicted frames. Every open item from r334's list stands as written there.
+
+**No build was run and nothing was published, so the live stamp stays at 1795661161 (r334).**
