@@ -30683,3 +30683,29 @@ Titanic's well bulwark and its closed wash-port doors are drawn as two sheets, o
 - **Not captured this round:** the steel-hull and globe frames, which no r339 change reaches (the wale is gated off iron, steel and dugout builds), and aboard-titanic, which keeps r337's voyage-position fault.
 - **Final audit** (`r339/auditF.out`, :8149, the pushed tree): **33 hulls, 0 problems.**
 - **Disk at close: 298 MB free on the Data volume** (647 MB at open). r340 opens below r338's 500 MB floor for browser work, so it should check `df` before anything else. The round's own in-gate captures in `r339/run0` were already deleted. `r339/run1` (about 90 MB, the scored mover captures) is the next thing of this round's that can go.
+
+## Round 340 — 2026-11-26 — No model change: the disk was under the floor for browser work. This round read the wale's paint off the plates on disk. The 74's wales are black, Endurance's are painted with her hull, and Hollar's etching cannot say what the fluyt's were. The reads are in `Research/WALE-FINISH.md`
+
+**Queue check: August's second list stands worked in full (r57).** The round opened at 04:46 with r339's first item for r340 next: the wale's colour, `hull.wale.finish`.
+
+**THE DISK.** At 04:46 the Data volume had 230–272 MB free. One Bash call failed with ENOSPC, and commands ran through Monitor until space was freed. Two things were deleted, both untracked and both looked at first:
+- `Research/baselines/_current/*.png`, 30 files, 100 MB. This is gitignored scratch that every ratchet check clears.
+- `build/staging/r339/run1`, 91 MB. These are r339's scored mover captures, which r339's close named as the next thing to go. Its accepted frames are in the baselines.
+
+After the deletions there were 455–460 MB free. Sampled every 2 s for 30 s, it drained at about 2 MB/min, with one dip to 167 MB that recovered within 15 s. That is under r338's 500 MB floor for browser work, and a 300 MB dip from outside the project would kill a capture half-written. So the round made no captures and changed nothing in `web/`, `docs/` or the baselines. There was no build and no ratchet, and the live stamp stays 1795694450 (r339).
+
+**THE WALE'S PAINT, READ OFF THE PLATES** (`Research/WALE-FINISH.md`; crops in `build/staging/r340/`):
+- **The 74: black.** Eckersberg's *Asow* (1828, 1920 thumb, ~30 px/m) paints her side in bands. Each tier of ports has an ochre band, with a black band between the tiers and a broad black band from the lower tier to the water, where the main wales run. Read up two clean columns (x 800, x 880), the bands are consistent to 0.01 as fractions of the height from the waterline to the top of the upper ochre band: black 0–0.34, ochre 0.34–0.61, black 0.61–0.78, ochre 0.78–1.0. The model's chequer (shader, fixed band centres) gives 0–0.23, 0.23–0.55, 0.55–0.68, 0.68–1.0. The model's lower wale sits in its black band. Its upper wale (1.81–2.18 m over the water) straddles the boundary between the lower ochre band and the black band between the tiers.
+- **Endurance: painted with the hull.** On Hurley a090007 her side is one dark tone from the rail to the ice, with no contrasting band. The slide is hand-coloured, so only tone counts as evidence.
+- **The fluyt: unknown.** Hollar draws each wale as a moulding with a shadow line under it, in the same hatching as the planking. An etching's tone is shading, not paint.
+- **The other 17 timber hulls: no plate read.** Only four have a Commons file in their record (carrack, sekibune, East Indiaman, slave ship), and none of those shows hull paint.
+
+**Rule 0 was not run.** Nothing was rendered this round.
+
+**FOR r341, if `df -m /System/Volumes/Data` shows more than 500 MB:**
+1. Add `hull.wale.finish` ('tarred' | 'withHull' | 'bright' | 'unknown'). 'unknown' keeps today's brown and must be labelled as the class fallback. Set the 74 to 'tarred' (the chequer's dark, vec3(0.180, 0.178, 0.172)) and Endurance to 'withHull'. Leave the fluyt and the rest at 'unknown'.
+2. **The structural half: drive the chequer bands from the wale heights.** On the plate, the black bands are where the wales are. Today the shader fixes the band centres at `uWaterline + 0.10 + d·0.115`. Pass the wale heights in, and use Asow's proportions as the read for the 74. Otherwise a black upper wale paints over the top of the lower ochre band.
+3. Then the frames this moves: the 74's (`shipwright`, the furled/astern/ahead/hounds/corbis set, and its berth neighbours) and `ship-endurance`. Probe in node first (`r339/scripts/r339_node_probe.js`).
+4. Read a colour plate for the clipper, Wyoming and the East Indiaman before setting theirs.
+
+**Disk at close: 441 MB free.**
