@@ -433,7 +433,8 @@ nSt++;
 }
 for (let j = 0; j + 1 < nSt; j++) {
 const a = base + j * 2;
-idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+if (sgn > 0) idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+else idx.push(a, a + 2, a + 1, a + 2, a + 3, a + 1);
 }
 base += nSt * 2;
 continue;
@@ -547,9 +548,11 @@ x1, p[1], sA,  x1, p[1], -sA);
 }
 for (let i = 0; i < N; i++) {
 const a = i * 4, b = a + 4;
+const up = pos[b * 3 + 1] > pos[a * 3 + 1];
 for (let f = 0; f < 4; f++) {
 const c = (f + 1) % 4;
-idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+if (up) idx.push(a + f, a + c, b + f, a + c, b + c, b + f);
+else idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
 }
 }
 const g = new THREE.BufferGeometry();
@@ -573,7 +576,8 @@ pos.push(p[0], p[1], sgn * p[2] * out);
 }
 for (let i = 0; i < NU; i++) {
 const a = base + i * 2;
-idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+if (sgn > 0) idx.push(a, a + 2, a + 1, a + 2, a + 3, a + 1);
+else idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
 }
 base += (NU + 1) * 2;
 }
@@ -3668,7 +3672,7 @@ const row = NR + 1;
 for (let i = 0; i < NA; i++)
 for (let j = 0; j < NR; j++) {
 const a = i * row + j;
-idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+idx.push(a, a + 1, a + row, a + 1, a + row + 1, a + row);
 }
 const g = new THREE.BufferGeometry();
 g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -4765,7 +4769,7 @@ const g = new THREE.BufferGeometry(); const pos = [], idx = [];
 pts.forEach((p, k) => {
 const x = Math.max(xA, Math.min(xB, p[0]));
 pos.push(x, p[1] + cs / 2, zc - cs / 2, x, p[1] + cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc - cs / 2);
-if (k) { const a = (k - 1) * 4, b = k * 4; for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, b + f, a + c, a + c, b + f, b + c); } }
+if (k) { const a = (k - 1) * 4, b = k * 4; for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, a + c, b + f, a + c, b + c, b + f); } }
 });
 g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
 const cm = new THREE.Mesh(g, wood); cm.name = 'deck-carling';
@@ -7145,7 +7149,9 @@ quad(ua, ub, ha.hi, ta, hb.hi, tb);
 const geo = new THREE.BufferGeometry();
 geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-g.add(new THREE.Mesh(geo, inward ? inMat : outMat));
+const sheet = new THREE.Mesh(geo, inward ? inMat : outMat);
+if (inward) sheet.userData.facesInboard = true;
+g.add(sheet);
 }
 }
 group.add(tag(g, 'wellBulwark', w.name + ' bulwark'));
@@ -7171,6 +7177,7 @@ geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
 const door = new THREE.Mesh(geo, inward ? inMat : (inCol ? outMat : wallMat));
 door.userData.washPort = { well: w.name, u: p.u, doors: 'closed', side: sgn };
+if (inward) door.userData.facesInboard = true;
 pg.add(door);
 }
 }
@@ -8949,8 +8956,8 @@ for (let j = 0; j < NSp; j++)
 for (let side = 0; side < 2; side++)
 for (let i = 0; i < NC; i++) {
 const a = j * rowW + side * (NC + 1) + i, b = a + rowW;
-if (side === 0) wi.push(a, b, a + 1, a + 1, b, b + 1);
-else            wi.push(a, a + 1, b, a + 1, b + 1, b);
+if (side === 0) wi.push(a, a + 1, b, a + 1, b + 1, b);
+else            wi.push(a, b, a + 1, a + 1, b, b + 1);
 }
 const wg = new THREE.BufferGeometry();
 wg.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3));

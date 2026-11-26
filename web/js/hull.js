@@ -803,7 +803,11 @@ function buildFramesGeometry(S, NF = 26, onlyU) {
         }
         for (let j = 0; j + 1 < nSt; j++) {
           const a = base + j * 2;
-          idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+          /* r338: wound outward on each side. (a, a+1, a+2) faces +z, so the starboard (-z) ribbon
+             takes the reverse order; until r338 the starboard frames faced inboard and FrontSide
+             culled them from outside in every skeleton stage */
+          if (sgn > 0) idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+          else idx.push(a, a + 2, a + 1, a + 2, a + 3, a + 1);
         }
         base += nSt * 2;
         continue;
@@ -1009,11 +1013,18 @@ function buildStemGeometry(S, aft) {
     pos.push(x0, p[1], -sF, x0, p[1], sF,
              x1, p[1], sA,  x1, p[1], -sA);
   }
+  /* r338: the ring order (x0,-s) (x0,+s) (x1,+s) (x1,-s) faces out only when the post is drawn
+     downward. The class stem runs sheer to keel and the class sternpost keel to sheer, and a
+     straight post's line runs foot to head, so one post on every hull was inside out: its faces
+     turned in, FrontSide drew the far side's inner face and the light fell on it backwards. Each
+     segment is wound by the direction its own rings run. */
   for (let i = 0; i < N; i++) {
     const a = i * 4, b = a + 4;
+    const up = pos[b * 3 + 1] > pos[a * 3 + 1];
     for (let f = 0; f < 4; f++) {
       const c = (f + 1) % 4;
-      idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+      if (up) idx.push(a + f, a + c, b + f, a + c, b + c, b + f);
+      else idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
     }
   }
   const g = new THREE.BufferGeometry();
@@ -1039,7 +1050,10 @@ function buildWaleGeometry(S, v0, thick, vAt) {
     }
     for (let i = 0; i < NU; i++) {
       const a = base + i * 2;
-      idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+      /* r338: wound outward on each side. (a, a+1, a+2) faces -z, so the port (+z) strip takes the reverse
+         order; until r338 the port wales faced inboard and FrontSide culled them from outside */
+      if (sgn > 0) idx.push(a, a + 2, a + 1, a + 2, a + 3, a + 1);
+      else idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
     }
     base += (NU + 1) * 2;
   }
@@ -6525,7 +6539,10 @@ function makeFurl(A, B, area, mat, group, o) {
   for (let i = 0; i < NA; i++)
     for (let j = 0; j < NR; j++) {
       const a = i * row + j;
-      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+      /* r338: (a, a+row, a+1) has the normal axis x tangent, which points AT the axis, so every roll
+         in the fleet was inside out: FrontSide drew the far wall's inner face, lit from behind. This
+         order faces out from the axis (A-INSIDE-OUT) */
+      idx.push(a, a + 1, a + row, a + 1, a + row + 1, a + row);
     }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -7823,7 +7840,8 @@ function buildFittings(S, group, mats) {
           pts.forEach((p, k) => {
             const x = Math.max(xA, Math.min(xB, p[0]));
             pos.push(x, p[1] + cs / 2, zc - cs / 2, x, p[1] + cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc - cs / 2);
-            if (k) { const a = (k - 1) * 4, b = k * 4; for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, b + f, a + c, a + c, b + f, b + c); } }
+            /* r338: the ring (top -z, top +z, bottom +z, bottom -z) walked aft faces in under (a, b, a+1); this order faces out */
+            if (k) { const a = (k - 1) * 4, b = k * 4; for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, a + c, b + f, a + c, b + c, b + f); } }
           });
           g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
           const cm = new THREE.Mesh(g, wood); cm.name = 'deck-carling';
@@ -11409,7 +11427,9 @@ function buildIslands(S, group, hullMat) {
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
         geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-        g.add(new THREE.Mesh(geo, inward ? inMat : outMat));
+        const sheet = new THREE.Mesh(geo, inward ? inMat : outMat);
+        if (inward) sheet.userData.facesInboard = true;   // seen from the well deck (A-STRIP-FACES, r338)
+        g.add(sheet);
       }
     }
     group.add(tag(g, 'wellBulwark', w.name + ' bulwark'));
@@ -11437,6 +11457,7 @@ function buildIslands(S, group, hullMat) {
             geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
             const door = new THREE.Mesh(geo, inward ? inMat : (inCol ? outMat : wallMat));
             door.userData.washPort = { well: w.name, u: p.u, doors: 'closed', side: sgn };
+            if (inward) door.userData.facesInboard = true;
             pg.add(door);
           }
         }
@@ -14043,8 +14064,9 @@ function buildWingSail(S, group, mats) {
     for (let side = 0; side < 2; side++)
       for (let i = 0; i < NC; i++) {
         const a = j * rowW + side * (NC + 1) + i, b = a + rowW;
-        if (side === 0) wi.push(a, b, a + 1, a + 1, b, b + 1);
-        else            wi.push(a, a + 1, b, a + 1, b + 1, b);
+        /* r338: the +z face (side 0) takes (a, a+1, b) to face +z as the span rises; the two were swapped and the wing was inside out */
+        if (side === 0) wi.push(a, a + 1, b, a + 1, b + 1, b);
+        else            wi.push(a, b, a + 1, a + 1, b, b + 1);
       }
   const wg = new THREE.BufferGeometry();
   wg.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3));

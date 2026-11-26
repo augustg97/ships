@@ -7696,6 +7696,53 @@ if (!n || Math.abs(sum / n - m) > 0.10) say(v.id, 'a wale built off its read lin
 }
 }
 }
+{
+g.updateMatrixWorld(true);
+const A6 = new THREE.Vector3(), B6 = new THREE.Vector3(), C6 = new THREE.Vector3(), E1 = new THREE.Vector3(), E2 = new THREE.Vector3();
+const hit = {};
+g.traverse(o => {
+if (!o.isMesh || !o.material || Array.isArray(o.material) || o.material.side !== THREE.FrontSide || o.userData.facesInboard) return;
+const pa = o.geometry && o.geometry.attributes && o.geometry.attributes.position; if (!pa) return;
+const ix = o.geometry.index, nt = ix ? ix.count / 3 : pa.count / 3; if (nt > 200000) return;
+const flip = o.matrixWorld.determinant() < 0;
+const cnt = { p: [0, 0], s: [0, 0] };
+for (let t = 0; t < nt; t++) {
+A6.fromBufferAttribute(pa, ix ? ix.getX(3 * t) : 3 * t).applyMatrix4(o.matrixWorld);
+B6.fromBufferAttribute(pa, ix ? ix.getX(3 * t + 1) : 3 * t + 1).applyMatrix4(o.matrixWorld);
+C6.fromBufferAttribute(pa, ix ? ix.getX(3 * t + 2) : 3 * t + 2).applyMatrix4(o.matrixWorld);
+E1.subVectors(B6, A6); E2.subVectors(C6, A6); E1.cross(E2); if (flip) E1.negate();
+const L = E1.length(); if (!(L > 1e-12) || Math.abs(E1.z) < 0.5 * L) continue;
+const cz = (A6.z + B6.z + C6.z) / 3; if (Math.abs(cz) < 0.05) continue;
+const sd = cz > 0 ? cnt.p : cnt.s; sd[(E1.z > 0) === (cz > 0) ? 0 : 1]++;
+}
+for (const [k, nm] of [['p', 'port'], ['s', 'starboard']]) {
+const [out, inn] = cnt[k];
+if (out + inn >= 8 && inn > 0.9 * (out + inn)) {
+const pt = tagOf(o), key = (pt && pt.key) || o.name || 'unnamed';
+(hit[key + ' (' + nm + ')'] = hit[key + ' (' + nm + ')'] || []).push(`${inn} of ${out + inn}`);
+}
+}
+});
+const io = {};
+g.traverse(o => {
+if (!o.isMesh || !o.material || Array.isArray(o.material) || o.material.side !== THREE.FrontSide || o.userData.facesInboard) return;
+const pa = o.geometry && o.geometry.attributes && o.geometry.attributes.position; if (!pa) return;
+const ix = o.geometry.index, nt = ix ? ix.count / 3 : pa.count / 3; if (nt < 24 || nt > 200000) return;
+const bb = new THREE.Box3().setFromObject(o), cc = bb.getCenter(new THREE.Vector3());
+const flip = o.matrixWorld.determinant() < 0;
+let sv = 0, av = 0;
+for (let t = 0; t < nt; t++) {
+A6.fromBufferAttribute(pa, ix ? ix.getX(3 * t) : 3 * t).applyMatrix4(o.matrixWorld).sub(cc);
+B6.fromBufferAttribute(pa, ix ? ix.getX(3 * t + 1) : 3 * t + 1).applyMatrix4(o.matrixWorld).sub(cc);
+C6.fromBufferAttribute(pa, ix ? ix.getX(3 * t + 2) : 3 * t + 2).applyMatrix4(o.matrixWorld).sub(cc);
+const vv = A6.dot(E1.crossVectors(B6, C6)) / 6 * (flip ? -1 : 1); sv += vv; av += Math.abs(vv);
+}
+if (av > 1e-9 && sv < -0.6 * av) { const pt = tagOf(o), key = ((pt && pt.key) || 'unnamed') + (o.userData.kind ? '/' + o.userData.kind : '');
+(io[key] = io[key] || []).push((sv / av).toFixed(2)); }
+});
+for (const k in io) say(v.id, 'a part wound inside out', `${k}: ${io[k].length} mesh${io[k].length > 1 ? 'es' : ''} whose signed volume about its own centre is ${io[k].slice(0, 6).join(', ')}${io[k].length > 6 ? ', …' : ''} of its unsigned sum, so its faces point inward`);
+for (const k in hit) say(v.id, 'a part that faces the centreline', `${k}: ${hit[k].join(', ')} athwartships triangles face inboard on a FrontSide material, so it is culled from outside`);
+}
 if (part.container || part.forecast) {
 const H2 = SHIPS_HULL.hullSurface(H);
 let over = 0, worst = 0;
