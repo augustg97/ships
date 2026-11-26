@@ -1,0 +1,27 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a part in a capstan's sweep",
+  "detail": "grating/Grating in the drum at x -10.44 y 4.29 z -0.70; the capstan at x -10.20: drumhead radius 0.75 m, bars to 3.60 m at y 5.10\u20135.17"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Ship's boat in the bars' sweep at x -11.86 y 5.21 z 0.07; the capstan at x -10.20: drumhead radius 0.75 m, bars to 3.60 m at y 5.10\u20135.17"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Boat skids in the drum: a face crosses y 4.19 within 0.75 m of the axis, near x -10.11; the capstan at x -10.20: drumhead radius 0.75 m, bars to 3.60 m at y 5.10\u20135.17"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a part in a capstan's sweep",
+  "detail": "forecast/Forecastle in the bars' sweep: a face crosses y 5.13 within 3.60 m of the axis, near x -12.24; the capstan at x -10.20: drumhead radius 0.75 m, bars to 3.60 m at y 5.10\u20135.17"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a part in a capstan's sweep",
+  "detail": "mast/Mast in the bars' sweep: a face crosses y 5.01 within 3.60 m of the axis, near x 2.88; the capstan at x 6.12: drumhead radius 0.75 m, bars to 3.60 m at y 4.97\u20135.05"
+ }
+]

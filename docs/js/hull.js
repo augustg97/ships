@@ -1163,6 +1163,17 @@ name: 'Weather deck — painted steel' },
 bare:   { mode: 0, col: 0xa08a66, plankW: 0, buttL: 1,
 name: 'Deck — bare timber' },
 };
+function capstanStations(S) {
+const C = S.capstan;
+if (!C || C.form === 'spill') return [];
+const B = S.beam, clampN = (v, a, b) => Math.max(a, Math.min(b, v));
+const list = C.stations && C.stations.length ? C.stations : [{ atU: C.atU != null ? C.atU : 0.62 }];
+return list.map(st => ({
+name: st.name || null, what: st.what || null, u: st.atU,
+D: st.drumDiaM || C.drumDiaM || clampN(B * 0.11, 0.95, 1.55),
+bars: st.bars || C.bars || 6,
+}));
+}
 function deckCovering(S) {
 const rec = S.deck && S.deck.covering;
 if (rec && DECK_COVERINGS[rec])
@@ -5005,9 +5016,15 @@ quadInto(V, [X0, yB + 0.004, Z0], [X0, yB + 0.004, Z0 + w],
 gg.add(accMesh(V, hatchVoid));
 return tag(gg, 'grating');
 };
-if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {
+const capClear = capstanStations(S).map(c => ({ x: (c.u - 0.5) * L, r: c.D / 2 + 0.3 }));
+if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u0 => {
+const l = L * 0.055;
+let x = (u0 - 0.5) * L;
+for (const c of capClear)
+if (Math.abs(x - c.x) < l / 2 + c.r) x = c.x + (x >= c.x ? 1 : -1) * (l / 2 + c.r + 0.02);
+const u = 0.5 + x / L;
 const w = halfAtU(u) * 0.85;
-group.add(gratingAt(u, w, L * 0.055));
+group.add(gratingAt(u, w, l));
 });
 if (S.capstan && S.capstan.form === 'spill') {
 const R = S.capstan;
@@ -5040,13 +5057,13 @@ cg.add(sp);
 cg.position.x = (u - 0.5) * L + (onCastle ? H.rake(u) : 0);
 group.add(tag(cg, 'capstan'));
 }
-if (S.capstan && S.capstan.form !== 'spill') {
-const u = 0.62, y = deckAtU(u);
+for (const ST of capstanStations(S)) {
+const u = ST.u, y = deckAtU(u);
 const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
-const D = S.capstan.drumDiaM || clampN(B * 0.11, 0.95, 1.55);
+const D = ST.D;
 const H = clampN(0.86 * D, 1.15, 1.35);
 const headT = 0.30 * H, whelpH = H - headT;
-const nW = S.capstan.whelps || 6, nB = S.capstan.bars || 6;
+const nW = S.capstan.whelps || 6, nB = ST.bars;
 const body = S.capstan.paint === 'red'
 ? (mats.capRed || (mats.capRed = new THREE.MeshStandardMaterial(
 { color: 0x7a3226, roughness: 0.72 })))
@@ -5102,7 +5119,8 @@ p.rotation.y = -a;
 cg.add(p);
 }
 cg.position.x = (u - 0.5) * L;
-group.add(tag(cg, 'capstan'));
+cg.userData.capstanStation = { name: ST.name, u, drumDiaM: D, bars: nB, barTipM: D * 1.35 + D * 1.05, barY: barY - y };
+group.add(tag(cg, 'capstan', ST.name || undefined, ST.what || undefined));
 }
 if (S.windlass) {
 const u = S.windlass.atU || 0.5, y = deckAtU(u);
@@ -6110,7 +6128,7 @@ group.add(tag(pg, 'compassPlatform'));
 }
 if (timberShip && laidDeck && S.lwl > 25) {
 let bl = L * 0.17;
-let u = 0.46;
+let u = 0.46, boomed = false;
 {
 const xOf = q => (q - 0.5) * L + H.rake(q), c = 0.9;
 const feet = (S.masts || []).map(m => xOf(m.at)).sort((a, b) => a - b);
@@ -6121,6 +6139,7 @@ if ((isl.u[0] + isl.u[1]) / 2 < 0.5) wLo = Math.max(wLo, isl.u[1]);
 else wHi = Math.min(wHi, isl.u[0]);
 }
 const islC = wLo > 0.20 || wHi < 0.80 ? 0.3 : 0;
+boomed = wLo > 0.20 && wHi < 0.80;
 const lo = islC ? xOf(wLo) + islC : (0.20 - 0.5) * L, hi = islC ? xOf(wHi) - islC : (0.80 - 0.5) * L;
 if (feet.some(xm => Math.abs(xm - x0) < bl / 2 + 0.35) || x0 - bl / 2 < lo || x0 + bl / 2 > hi) {
 const edges = [lo, ...feet.filter(xm => xm > lo && xm < hi), hi];
@@ -6146,10 +6165,24 @@ forefoot: 0.26, run: 0.30, riseF: 0.55, riseA: 0.30, sheerBow: 0.9, sheerStern: 
 tumblehome: 0.0, stemRake: 0.06, sternRake: 0.02, strakes: 9, masts: [],
 };
 const bm = new THREE.Mesh(buildHullGeometry(boatSpec, 40, 14), pale);
-bm.position.set((u - 0.5) * L, deckAtU(u) + bl * 0.060, 0);
-bm.userData.skidBoat = { u: +u.toFixed(4), lengthM: +bl.toFixed(3), moved: u !== 0.46 || bl !== L * 0.17 };
+let seatY = deckAtU(u) + bl * 0.060, beamY = 0, beamH = 0;
+if (boomed) {
+bm.geometry.computeBoundingBox();
+beamH = Math.max(0.22, B * 0.018);
+beamY = Math.max(railAtU(u - 0.30 * bl / L), railAtU(u + 0.30 * bl / L)) + capH;
+seatY = beamY + beamH - bm.geometry.boundingBox.min.y;
+}
+bm.position.set((u - 0.5) * L, seatY, 0);
+bm.userData.skidBoat = { u: +u.toFixed(4), lengthM: +bl.toFixed(3), moved: u !== 0.46 || bl !== L * 0.17, overWaist: boomed };
 group.add(tag(bm, 'boat'));
-for (const d of [-0.30, 0.30]) {
+if (boomed) for (const d of [-0.30, 0.30]) {
+const uq = u + d * bl / L, half = railHalfAtU(uq);
+const sk = new THREE.Mesh(new THREE.BoxGeometry(B * 0.030 * 1.4, beamH, 2 * half), wood);
+sk.position.set((u - 0.5) * L + d * bl, beamY + beamH / 2, 0);
+group.add(tag(sk, 'boat', 'Skid beam',
+'A beam laid across the waist from one rail to the other. The ship\'s boat rides on two of them, over the deck where the jeer capstan is worked.'));
+}
+else for (const d of [-0.30, 0.30]) {
 const sk = new THREE.Mesh(
 new THREE.BoxGeometry(B * 0.030, B * 0.022, bl / 3.4 * 1.5), wood);
 sk.position.set((u - 0.5) * L + d * bl, deckAtU(u) + bl * 0.012, 0);
@@ -7206,7 +7239,7 @@ wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, p.hi, p.z);
 wallUv.push(...wallUV(p.u, H.sheer(p.u) - 0.02), ...wallUV(p.u, p.hi));
 }
 g.add(strip(wall, wallMat, false, wallUv));
-for (const ue of [...(closedFwd ? [] : [u0]), ...(closedAft ? [] : [u1])]) {
+for (const ue of (timberWall ? [] : [...(closedFwd ? [] : [u0]), ...(closedAft ? [] : [u1])])) {
 const x = xAt(ue), h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
 const du = h / L;
 g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat, false,

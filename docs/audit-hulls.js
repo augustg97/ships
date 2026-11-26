@@ -3292,7 +3292,88 @@ say(v.id, 'a spill nobody built',
 }
 }
 }
-if (H.capstan && capm.length && H.capstan.form !== 'spill') {
+const capOwn = new Map();
+for (const o of capm) { let e = o; while (e && !(e.userData && e.userData.part)) e = e.parent;
+const k = e || o; if (!capOwn.has(k)) capOwn.set(k, []); capOwn.get(k).push(o); }
+const capRec = !H.capstan || H.capstan.form === 'spill' ? []
+: (H.capstan.stations && H.capstan.stations.length ? H.capstan.stations
+: [{ atU: H.capstan.atU != null ? H.capstan.atU : 0.62 }]);
+g.updateMatrixWorld(true);
+const invCap = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const capCentre = G => new THREE.Vector3().setFromMatrixPosition(G.matrixWorld).applyMatrix4(invCap);
+if (capRec.length && capm.length) {
+if (capOwn.size !== capRec.length)
+say(v.id, 'capstans off the record\'s stations',
+`${capOwn.size} capstan(s) built, the record names ${capRec.length}`);
+else for (const G of capOwn.keys()) {
+const c = capCentre(G);
+const st = capRec.slice().sort((a, b) => Math.abs((a.atU - 0.5) * H.lwl - c.x) - Math.abs((b.atU - 0.5) * H.lwl - c.x))[0];
+if (Math.abs((st.atU - 0.5) * H.lwl - c.x) > 0.3)
+say(v.id, 'capstans off the record\'s stations',
+`a capstan stands at x ${c.x.toFixed(2)}; the nearest recorded station, u ${st.atU}, is x ${((st.atU - 0.5) * H.lwl).toFixed(2)}`);
+}
+}
+if (capRec.length && capm.length) {
+const SKIP = new Set(['capstan', 'deck', 'planking', 'frames', 'keel', 'waterway', 'wale', 'rail']);
+const ROPE = /stay|shroud|sheet|brace|halyard|lift|tack|bowline|clew|bunt|fall|rope|coil|ratline|lanyard|jeer|tye|rigging|line|vang|pendant|tackle|guy/i;
+const P = new THREE.Vector3();
+const capClassOnly = !(H.capstan.stations && H.capstan.stations.length) && H.capstan.atU == null;
+if (!capClassOnly) for (const [G, ms] of capOwn) {
+const c = capCentre(G);
+let rD = 0, yTop = -1e9, yFoot = 1e9, rB = 0, b0 = 1e9, b1 = -1e9;
+for (const o of ms) {
+const M = new THREE.Matrix4().multiplyMatrices(invCap, o.matrixWorld), A = o.geometry.attributes.position;
+const bar = Math.abs(o.rotation.z) > 0.1;
+for (let i = 0; i < A.count; i++) { P.fromBufferAttribute(A, i).applyMatrix4(M);
+const r = Math.hypot(P.x - c.x, P.z - c.z);
+if (bar) { rB = Math.max(rB, r); b0 = Math.min(b0, P.y); b1 = Math.max(b1, P.y); }
+else { yTop = Math.max(yTop, P.y); yFoot = Math.min(yFoot, P.y);
+if (o.name === 'cap-head') rD = Math.max(rD, r); } }
+}
+if (!rB || !rD) continue;
+const hits = new Map();
+g.traverse(o => {
+if (!o.isMesh || ms.includes(o)) return;
+const pt = tagOf(o); if (!pt || SKIP.has(pt.key) || ROPE.test(pt.key)) return;
+const M = new THREE.Matrix4().multiplyMatrices(invCap, o.matrixWorld), A = o.geometry.attributes.position;
+const k = `${pt.key}/${pt.name}`;
+const W = new Float32Array(A.count * 3);
+for (let i = 0; i < A.count; i++) { P.fromBufferAttribute(A, i).applyMatrix4(M);
+W[3 * i] = P.x; W[3 * i + 1] = P.y; W[3 * i + 2] = P.z;
+const r = Math.hypot(P.x - c.x, P.z - c.z);
+const inDrum = r < rD && P.y > yFoot + 0.05 && P.y < yTop;
+const inSweep = r < rB && P.y > b0 - 0.05 && P.y < b1 + 0.05;
+if (inDrum || inSweep) {
+if (!hits.has(k)) hits.set(k, `${inDrum ? 'in the drum' : 'in the bars\' sweep'} at x ${P.x.toFixed(2)} y ${P.y.toFixed(2)} z ${P.z.toFixed(2)}`); return; } }
+const I = o.geometry.index, nT = I ? I.count / 3 : A.count / 3;
+const cuts = [[(b0 + b1) / 2, rB, "in the bars' sweep"],
+[yFoot + 0.15, rD, 'in the drum'], [(yFoot + yTop) / 2, rD, 'in the drum'], [yTop - 0.05, rD, 'in the drum']];
+const seg = (ax, az, bx, bz) => { const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz;
+const t = L2 > 0 ? Math.max(0, Math.min(1, ((c.x - ax) * dx + (c.z - az) * dz) / L2)) : 0;
+return Math.hypot(ax + t * dx - c.x, az + t * dz - c.z); };
+for (let t = 0; t < nT; t++) {
+const ia = I ? I.getX(3 * t) : 3 * t, ib = I ? I.getX(3 * t + 1) : 3 * t + 1, ic = I ? I.getX(3 * t + 2) : 3 * t + 2;
+const V = [ia, ib, ic].map(j => [W[3 * j], W[3 * j + 1], W[3 * j + 2]]);
+for (const [yc, rc, what] of cuts) {
+const pts = [];
+for (let e = 0; e < 3; e++) { const a = V[e], b = V[(e + 1) % 3];
+if ((a[1] - yc) * (b[1] - yc) < 0) { const f = (yc - a[1]) / (b[1] - a[1]);
+pts.push([a[0] + f * (b[0] - a[0]), a[2] + f * (b[2] - a[2])]); } }
+if (pts.length === 2 && seg(pts[0][0], pts[0][1], pts[1][0], pts[1][1]) < rc) {
+if (!hits.has(k)) hits.set(k, `${what}: a face crosses y ${yc.toFixed(2)} within ${rc.toFixed(2)} m of the axis, near x ${((pts[0][0] + pts[1][0]) / 2).toFixed(2)}`);
+return; }
+}
+}
+});
+for (const [k, w] of hits)
+say(v.id, "a part in a capstan's sweep",
+`${k} ${w}; the capstan at x ${c.x.toFixed(2)}: drumhead radius ${rD.toFixed(2)} m, bars to ${rB.toFixed(2)} m at y ${b0.toFixed(2)}–${b1.toFixed(2)}`);
+}
+}
+if (H.capstan && capm.length && H.capstan.form !== 'spill') for (const [capG, capmG] of capOwn) {
+const capm = capmG;
+const recSt = capRec.slice().sort((a, b) => Math.abs((a.atU - 0.5) * H.lwl - capCentre(capG).x) - Math.abs((b.atU - 0.5) * H.lwl - capCentre(capG).x))[0] || {};
+const recBars = recSt.bars || H.capstan.bars;
 const vrange = o => {
 const a = o.geometry.attributes.position;
 let y0 = 1e9, y1 = -1e9;
@@ -3344,9 +3425,9 @@ o.geometry.type === 'ExtrudeGeometry') &&
 if (H.capstan.whelps && whelps.length !== H.capstan.whelps)
 say(v.id, "the capstan off the record's count",
 `${whelps.length} whelps drawn, record says ${H.capstan.whelps}`);
-if (H.capstan.bars && bars !== H.capstan.bars)
+if (recBars && bars !== recBars)
 say(v.id, "the capstan off the record's count",
-`${bars} bars shipped, record says ${H.capstan.bars}`);
+`${bars} bars shipped, record says ${recBars}`);
 if (whelps.length) {
 const tol = 0.05 * headDia;
 let baseGap = 1e9, headGap = 1e9, flare = 0;

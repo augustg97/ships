@@ -1,0 +1,32 @@
+[
+ {
+  "id": "caravel",
+  "rule": "a part in a capstan's sweep",
+  "detail": "sail/Sail in the bars' sweep at x 0.15 y 3.08 z 0.95; the capstan at x 2.06: drumhead radius 0.48 m, bars to 2.28 m at y 3.06\u20133.11"
+ },
+ {
+  "id": "galley",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Ship's boat in the bars' sweep at x 2.68 y 2.15 z 0.90; the capstan at x 4.74: drumhead radius 0.48 m, bars to 2.28 m at y 2.07\u20132.12"
+ },
+ {
+  "id": "galley",
+  "rule": "a part in a capstan's sweep",
+  "detail": "oar/Oars in the drum at x 4.99 y 2.25 z -0.35; the capstan at x 4.74: drumhead radius 0.48 m, bars to 2.28 m at y 2.07\u20132.12"
+ },
+ {
+  "id": "galleass",
+  "rule": "a part in a capstan's sweep",
+  "detail": "boat/Ship's boat in the bars' sweep at x 3.41 y 3.77 z 1.04; the capstan at x 5.28: drumhead radius 0.48 m, bars to 2.28 m at y 3.77\u20133.82"
+ },
+ {
+  "id": "clipper",
+  "rule": "a part in a capstan's sweep",
+  "detail": "deckhouse/Deckhouse in the bars' sweep at x 7.36 y 4.36 z -2.50; the capstan at x 7.08: drumhead radius 0.60 m, bars to 2.90 m at y 4.35\u20134.42"
+ },
+ {
+  "id": "endurance",
+  "rule": "a part in a capstan's sweep",
+  "detail": "funnel/Funnel in the bars' sweep at x 6.85 y 3.02 z -0.60; the capstan at x 4.75: drumhead radius 0.48 m, bars to 2.28 m at y 2.96\u20133.01"
+ }
+]
