@@ -30437,3 +30437,12 @@ The channels still stand 0.2 m under the sheer at each mast, as every channel di
 **r335 opens by checking `df -m /System/Volumes/Data`, `uptime` and `ps -r`, and checks whether `build/staging/r335` already exists before writing into it. Below about 1 GB free, it runs only single-frame checks. Then it takes (0y¹⁸⁰), the quarterdeck, or (0y¹⁷⁹).**
 
 **Live stamp: docs/index.html carries data-version 1795661161 at the build.**
+
+**Live stamp VERIFIED: 1795661161 on https://augustg97.github.io/ships/index.html at 18:52 PST.**
+
+**THE FRAMES (receipt): ALL SIX PREDICTED FRAMES SCORED ON THE PUSHED TREE fb268ce, ONE `check --frame` AT A TIME; `action-gravelines` ACCEPTED.**
+
+- **`action-gravelines` 0.121% / 0.032, accepted, predicted.** The English fleet is drawn with the fluyt model, and each of those ships now carries her read sheer. The diff is confined to the fleet's hulls, x 1970–2692, rows 791–981 (`pair-action-gravelines.png`).
+- **Predicted and inside the gate:** `shipwright` and `shipwright-ahead` 0.036%, `shipwright-furled` 0.044%, `shipwright-astern` 0.000%, `shipwright-hounds` 0.000%. The fluyt shows only in the left 35 px of the 74's frames, and her stern, the part that rose, stands outside them.
+- **Checked because a fluyt voyage might draw a globe marker:** `map-floor` 0.000% and `descent-coast` 0.016%. `globe-default` scored 11.112% on its first capture. The voyage panel read Zheng He at 13°N 47°E where the baseline has 49°E, and every marker on the globe had moved along its track (`pair-globe-default.png`). That is the voyage-position fault r332 and r333 recorded on `globe-crossing`. The 1590 voyage list draws no fluyt. Recaptured alone it scored **0.039%, inside the gate**. Not accepted.
+- **Not run: the other 54 frames.** This round's record changed only the fluyt, and its audit changed only for a sheerRead carrying the new fields. A full run would also write about 200 MB of captures onto a disk with 211 MB free. **r335 runs the full ratchet only once the disk has room.**

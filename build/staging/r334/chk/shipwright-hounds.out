@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-hounds               0.000%     0.000  ok
+
+  all frames within tolerance.
+

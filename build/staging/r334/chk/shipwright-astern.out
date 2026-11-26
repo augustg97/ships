@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-astern               0.000%     0.003  ok
+
+  all frames within tolerance.
+

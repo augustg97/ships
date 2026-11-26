@@ -1,0 +1,12 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · descent-coast                http://localhost:8149/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  descent-coast                   0.016%     0.003  ok
+
+  all frames within tolerance.
+

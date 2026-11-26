@@ -1,0 +1,18 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · globe-default                http://localhost:8149/?frozen=1#v=sea
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  globe-default                  11.112%     3.095  CHANGED
+
+  1 frame(s) moved. Every one must be classified before this ships (§7 — never on an average):
+
+    globe-default
+      11.112% of pixels moved (limit 0.050%), mean |Δ| 3.095 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/globe-default.png
+
+  If a change is an improvement, accept it deliberately:
+    frame_baseline.py accept --project /Users/augustgweon/Ships --frame <name> --reason "..."
+

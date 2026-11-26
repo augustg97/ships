@@ -1,0 +1,18 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  action-gravelines               0.121%     0.032  CHANGED
+
+  1 frame(s) moved. Every one must be classified before this ships (§7 — never on an average):
+
+    action-gravelines
+      0.121% of pixels moved (limit 0.050%), mean |Δ| 0.032 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/action-gravelines.png
+
+  If a change is an improvement, accept it deliberately:
+    frame_baseline.py accept --project /Users/augustgweon/Ships --frame <name> --reason "..."
+
