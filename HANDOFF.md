@@ -30475,3 +30475,22 @@ The largest single staging directories are r204 (871 MB), r315 (707), r314 (637)
 **r336 opens by running `df -m /System/Volumes/Data`.** Below about 1 GB free, it does what this round did: it records the figure, makes no geometry change, and commits only HANDOFF.md. With room, it takes (0y¹⁸⁰), the quarterdeck, or (0y¹⁷⁹), and runs the full ratchet once, because r334 scored only its six predicted frames. Every open item from r334's list stands as written there.
 
 **No build was run and nothing was published, so the live stamp stays at 1795661161 (r334).**
+
+## Round 336 — 2026-11-25 — No model work: the disk was still full when the round opened
+
+**Queue check: August's second list stands worked in full (r57).** The round opened at 19:52 with (0y¹⁸⁰), the fluyt's quarterdeck, or (0y¹⁷⁹), her fore and mizzen stations, next in line. It took neither, and it changed nothing in `web/`, `docs/`, `Research/` or the baselines.
+
+**THE DISK.** `/System/Volumes/Data` had 135 MB free at 19:52 and between 129 and 139 MB through 19:57. Three times the Bash tool could not start a command, because it could not create its output file (ENOSPC on `/tmp/claude-501`). At this level a browser run can fill the disk, and every check that proves a geometry change needs one, so the round made no change (rule 1).
+
+What r336 measured, all read-only:
+
+- **No file over 20 MB under `~`, `/private/var/folders` or `/Library/Caches` was modified in the last three hours** (`find -xdev -size +20M -mmin -180` returned nothing). Whatever is consuming the space is not a large file the project or a browser profile is writing there.
+- **The container's volumes** (`df -m`, MB used): Data 433,364; Preboot 18,322; root snapshot 13,441; Recovery 2,874; VM 2,048 (the swap file, 1,012 MB of it in use); Update 1,147. A Preboot volume of 18 GB is large for that volume, and the Update volume is populated.
+- **Three local snapshots** are held on the volume group: `com.apple.os.update-182F06D7…`, `com.apple.os.update-3C837CB5…` and `com.apple.os.update-MSUPrepareUpdate`. r335 named only the last. The `MSUPrepareUpdate` snapshot and the populated Update and Preboot volumes are what macOS leaves while it prepares a system update. Installing or cancelling that update in System Settings is the step most likely to return space, and it is August's to take; this round did not touch it.
+- `Research/baselines/_current` (5 MB) and `_diff` (1 MB) are the only regenerable project outputs of any size, and clearing them would not change the outcome.
+
+r335's table of what the project holds (`build/staging` 20,880 MB, `.git` 7,204 MB) still stands; nothing was deleted.
+
+**r337 opens by running `df -m /System/Volumes/Data`.** Below about 1 GB free, it records the figure, makes no geometry change and commits only HANDOFF.md. With room, it takes (0y¹⁸⁰) or (0y¹⁷⁹), and runs the full ratchet once, because r334 scored only its six predicted frames. Every open item from r334's list stands as written there.
+
+**No build was run and nothing was published, so the live stamp stays at 1795661161 (r334).**
