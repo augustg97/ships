@@ -4158,6 +4158,11 @@ what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her
 + 'Without it the thing lies flat and drags. The arms leave the foot of the shank '
 + 'at 60° to it, rising toward the ring, and each carries a triangular iron palm on '
 + 'its upper face (Falconer, 1769). The stock is oak, in two halves hooped with iron. '
++ 'On the iron steamer and Preussen it is iron: a round bar with a ball at each end and '
++ 'one end bent square, keyed through the shank with a forelock so it could be drawn and '
++ 'laid along the shank for stowage. Cotsell (1856) records the Royal Navy fitting iron '
++ 'stocks to anchors of up to 15 cwt in 1807 and 60 cwt by 1852, because a wooden stock '
++ 'got in the way aboard a steamer. '
 + 'At sea the ring hangs from the cathead, and the inner arm\'s point rests against '
 + 'the side under the fore channel, where Steel puts a lining of plank to take it.' },
 grapnel:  { stage: 3, name: 'Grapnel anchor',
@@ -10873,10 +10878,19 @@ if (C.aft) one('Aftcastle', C.aft, true,
 }
 function anchorFormOf(S) {
 const L = S.lwl;
+const ironStock = !!S.iron;
 const s = Math.min(L, 48) * 0.115 + Math.max(0, L - 48) * 0.004;
 const f = { s, a: s / 3, armDeg: 60, rCrown: s * 0.021, rEye: s * 0.014, rBill: s * 0.010,
 palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s * 0.062, stockEnd: s * 0.032,
 ringR: s * 0.075, ringT: s * 0.011 };
+f.ironStock = ironStock;
+if (ironStock) {
+f.stockMid = s / 24;
+f.stockEndD = f.stockMid * 2 / 3;
+f.ballR = f.stockEndD * 0.8;
+f.legL = s * 0.09;
+f.stockEnd = f.ballR;
+}
 const k = f.armDeg * Math.PI / 180;
 f.sin = Math.sin(k); f.cos = Math.cos(k);
 f.ringY = s + f.ringR;
@@ -10910,7 +10924,28 @@ pg.computeVertexNormals();
 put(new THREE.Mesh(pg, iron), 'palm');
 }
 const ys = f.s - f.stockMid * 0.9;
+if (f.ironStock) {
+const rM = f.stockMid / 2, rE = f.stockEndD / 2;
 for (const k of [1, -1]) {
+const half = put(new THREE.Mesh(new THREE.CylinderGeometry(rE, rM, f.stockL / 2, 12), iron), 'stock');
+half.rotation.x = k * Math.PI / 2;
+half.position.set(0, ys, k * f.stockL / 4);
+}
+const b1 = put(new THREE.Mesh(new THREE.SphereGeometry(f.ballR, 12, 8), iron), 'stock-ball');
+b1.position.set(0, ys, -f.stockL / 2);
+const elbow = put(new THREE.Mesh(new THREE.SphereGeometry(rE, 10, 6), iron), 'stock-leg');
+elbow.position.set(0, ys, f.stockL / 2);
+const leg = put(new THREE.Mesh(new THREE.CylinderGeometry(rE, rE, f.legL, 10), iron), 'stock-leg');
+leg.position.set(0, ys + f.legL / 2, f.stockL / 2);
+const b2 = put(new THREE.Mesh(new THREE.SphereGeometry(f.ballR, 12, 8), iron), 'stock-ball');
+b2.position.set(0, ys + f.legL, f.stockL / 2);
+const collar = put(new THREE.Mesh(new THREE.CylinderGeometry(rM * 1.05, rM * 1.9, f.s * 0.03, 12), iron), 'stock-collar');
+collar.rotation.x = Math.PI / 2;
+collar.position.set(0, ys, f.rEye + f.s * 0.015);
+const key = put(new THREE.Mesh(new THREE.BoxGeometry(rM * 0.6, f.stockMid * 2.4, f.s * 0.012), iron), 'stock-forelock');
+key.position.set(0, ys - f.stockMid * 0.5, -(f.rEye + f.s * 0.012));
+}
+else for (const k of [1, -1]) {
 const half = put(new THREE.Mesh(new THREE.CylinderGeometry(f.stockEnd * Math.SQRT1_2, f.stockMid * Math.SQRT1_2, f.stockL / 2, 4), oak), 'stock');
 half.rotation.x = k * Math.PI / 2;
 half.rotation.y = Math.PI / 4;
@@ -10976,6 +11011,7 @@ let xA = new THREE.Vector3().crossVectors(yA, zA).normalize();
 if (bill.clone().sub(crown).dot(xA) < 0) { xA.negate(); zA.negate(); }
 const sc = crown.clone().addScaledVector(yA, f.s - f.stockMid * 0.9);
 const ends = [sc.clone().addScaledVector(zA, f.stockL / 2), sc.clone().addScaledVector(zA, -f.stockL / 2)];
+if (f.ironStock) ends.push(sc.clone().addScaledVector(zA, f.stockL / 2).addScaledVector(yA, f.legL));
 const worst = Math.min(...ends.map(clear), clear(crown) - f.rCrown, clear(crown.clone().addScaledVector(xA, -f.a * f.sin).addScaledVector(yA, f.a * f.cos)));
 const cand = { t: deg, crown, xA, yA, zA, worst };
 if (!pick || worst > pick.worst) pick = cand;
@@ -11001,6 +11037,7 @@ A.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(st.xA, st.yA, s
 A.position.copy(st.crown);
 A.userData.anchorStow = { ring: st.ring.toArray().map(q => +q.toFixed(3)), crown: st.crown.toArray().map(q => +q.toFixed(3)),
 bill: st.bill.toArray().map(q => +q.toFixed(3)), tiltDeg: st.tiltDeg, stockClear: st.stockClear, under: st.under, underChannel: st.underChannel, channel: st.channel,
+stock: f.ironStock ? 'iron: Cotsell 1856, pl. 31 fig. 3, the Admiralty iron stock' : 'oak: Falconer 1769, in two halves hooped with iron',
 rule: 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the side under the fore channel' };
 const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), st.ring]], 0.018 + B * 0.0006, mats.ropeSolid || iron);
 if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));

@@ -7220,6 +7220,11 @@ const PARTS = {
                   + 'Without it the thing lies flat and drags. The arms leave the foot of the shank '
                   + 'at 60° to it, rising toward the ring, and each carries a triangular iron palm on '
                   + 'its upper face (Falconer, 1769). The stock is oak, in two halves hooped with iron. '
+                  + 'On the iron steamer and Preussen it is iron: a round bar with a ball at each end and '
+                  + 'one end bent square, keyed through the shank with a forelock so it could be drawn and '
+                  + 'laid along the shank for stowage. Cotsell (1856) records the Royal Navy fitting iron '
+                  + 'stocks to anchors of up to 15 cwt in 1807 and 60 cwt by 1852, because a wooden stock '
+                  + 'got in the way aboard a steamer. '
                   + 'At sea the ring hangs from the cathead, and the inner arm\'s point rests against '
                   + 'the side under the fore channel, where Steel puts a lining of plank to take it.' },
   grapnel:  { stage: 3, name: 'Grapnel anchor',
@@ -17023,6 +17028,7 @@ function buildTieredCastles(S, group, mats, hullMat) {
  * long as the shank; the palm's breadth 0.13 of it. */
 function anchorFormOf(S) {
   const L = S.lwl;
+  const ironStock = !!S.iron;
   /* ⚠ AN ANCHOR DOES NOT SCALE WITH THE SHIP. ~1/8 of the hull is right for the wooden
      sizes the rule was calibrated on — a 74's best bower shank runs about 5.5 m on a 53 m
      hull — but iron hulls kept growing and forged anchors did not: Titanic's centre anchor,
@@ -17034,6 +17040,26 @@ function anchorFormOf(S) {
   const f = { s, a: s / 3, armDeg: 60, rCrown: s * 0.021, rEye: s * 0.014, rBill: s * 0.010,
               palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s * 0.062, stockEnd: s * 0.032,
               ringR: s * 0.075, ringT: s * 0.011 };
+  /* ⚠ AN IRON SHIP'S BOWER HAS AN IRON STOCK (round 368). Cotsell (A Treatise on Ships' Anchors, 1856, pp. 114-117,
+     pl. 31): "Stocks are either of wood or of iron; formerly they were almost all of wood — they are now mostly of
+     iron". In the Royal Navy iron stocks went on anchors up to 15 cwt in 1807, 30 cwt in 1832, 56 cwt in 1847 and 60 cwt
+     in 1852, "chiefly owing to the employment of war steamers ... In these vessels the wood stock has been found to be
+     inconvenient". His rule: the stock, wood or iron, is as long as the shank; an iron stock is "half an inch to the foot
+     in the middle, and about two-thirds of that size at the ends". Plate 31 fig. 3, the Admiralty iron stock: a round
+     bar with a ball at each end, one end bent square, passed "through the shank up to the collar of the stock, and ...
+     secured on the other side by means of a forelock". The ball, the bent leg's length (0.09 of the stock) and the
+     collar's size are read off that engraving, which carries no scale: about 925 px over the stock's length, so they
+     are good to a few percent of it. Which way the leg points in use the plate does not say; it is drawn toward the ring.
+     The wood stock keeps its r366 class figures: Cotsell's wood rule (an inch to the foot in the middle, half an inch at
+     the ends, so 1/12 and 1/24 of the length) is thicker than the 0.062 and 0.032 drawn, and is carried to the next round. */
+  f.ironStock = ironStock;
+  if (ironStock) {
+    f.stockMid = s / 24;                                    // the middle's diameter: half an inch to the foot
+    f.stockEndD = f.stockMid * 2 / 3;                       // the ends': two-thirds of it
+    f.ballR = f.stockEndD * 0.8;                            // pl. 31 fig. 3: the ball is ~1.6 of the bar's end
+    f.legL = s * 0.09;                                      // pl. 31 fig. 3: the bent end
+    f.stockEnd = f.ballR;                                   // what the stow's clearance test must clear
+  }
   const k = f.armDeg * Math.PI / 180;
   f.sin = Math.sin(k); f.cos = Math.cos(k);
   f.ringY = s + f.ringR;                                    // the ring's centre, over the shank's eye
@@ -17071,9 +17097,34 @@ function anchorMeshOf(f, iron, oak) {
     pg.computeVertexNormals();
     put(new THREE.Mesh(pg, iron), 'palm');
   }
-  /* the stock: oak, square, swelling to the middle, in two halves hooped with iron */
+  /* the stock: oak, square, swelling to the middle, in two halves hooped with iron; or, on an iron ship, Cotsell's
+     round iron bar with its balls, its bent end, its collar and its forelock */
   const ys = f.s - f.stockMid * 0.9;
-  for (const k of [1, -1]) {
+  if (f.ironStock) {
+    const rM = f.stockMid / 2, rE = f.stockEndD / 2;
+    for (const k of [1, -1]) {
+      const half = put(new THREE.Mesh(new THREE.CylinderGeometry(rE, rM, f.stockL / 2, 12), iron), 'stock');
+      half.rotation.x = k * Math.PI / 2;                       // along ±Z, the narrow end outboard
+      half.position.set(0, ys, k * f.stockL / 4);
+    }
+    /* the straight end's ball; the bent end turns square toward the ring and carries the other */
+    const b1 = put(new THREE.Mesh(new THREE.SphereGeometry(f.ballR, 12, 8), iron), 'stock-ball');
+    b1.position.set(0, ys, -f.stockL / 2);
+    const elbow = put(new THREE.Mesh(new THREE.SphereGeometry(rE, 10, 6), iron), 'stock-leg');
+    elbow.position.set(0, ys, f.stockL / 2);
+    const leg = put(new THREE.Mesh(new THREE.CylinderGeometry(rE, rE, f.legL, 10), iron), 'stock-leg');
+    leg.position.set(0, ys + f.legL / 2, f.stockL / 2);
+    const b2 = put(new THREE.Mesh(new THREE.SphereGeometry(f.ballR, 12, 8), iron), 'stock-ball');
+    b2.position.set(0, ys + f.legL, f.stockL / 2);
+    /* the collar on the bent end's side of the shank, flaring to the shank's face; the forelock through the bar on
+       the other side */
+    const collar = put(new THREE.Mesh(new THREE.CylinderGeometry(rM * 1.05, rM * 1.9, f.s * 0.03, 12), iron), 'stock-collar');
+    collar.rotation.x = Math.PI / 2;                           // narrow end outboard, the flare against the shank
+    collar.position.set(0, ys, f.rEye + f.s * 0.015);
+    const key = put(new THREE.Mesh(new THREE.BoxGeometry(rM * 0.6, f.stockMid * 2.4, f.s * 0.012), iron), 'stock-forelock');
+    key.position.set(0, ys - f.stockMid * 0.5, -(f.rEye + f.s * 0.012));
+  }
+  else for (const k of [1, -1]) {
     const half = put(new THREE.Mesh(new THREE.CylinderGeometry(f.stockEnd * Math.SQRT1_2, f.stockMid * Math.SQRT1_2, f.stockL / 2, 4), oak), 'stock');
     half.rotation.x = k * Math.PI / 2;                         // along ±Z
     half.rotation.y = Math.PI / 4;
@@ -17164,6 +17215,7 @@ function anchorStowOf(S, H, f, cat) {
     if (bill.clone().sub(crown).dot(xA) < 0) { xA.negate(); zA.negate(); }
     const sc = crown.clone().addScaledVector(yA, f.s - f.stockMid * 0.9);
     const ends = [sc.clone().addScaledVector(zA, f.stockL / 2), sc.clone().addScaledVector(zA, -f.stockL / 2)];
+    if (f.ironStock) ends.push(sc.clone().addScaledVector(zA, f.stockL / 2).addScaledVector(yA, f.legL));
     const worst = Math.min(...ends.map(clear), clear(crown) - f.rCrown, clear(crown.clone().addScaledVector(xA, -f.a * f.sin).addScaledVector(yA, f.a * f.cos)));
     const cand = { t: deg, crown, xA, yA, zA, worst };
     if (!pick || worst > pick.worst) pick = cand;
@@ -17190,6 +17242,7 @@ function buildAnchor(S, group, mats) {
       A.position.copy(st.crown);
       A.userData.anchorStow = { ring: st.ring.toArray().map(q => +q.toFixed(3)), crown: st.crown.toArray().map(q => +q.toFixed(3)),
         bill: st.bill.toArray().map(q => +q.toFixed(3)), tiltDeg: st.tiltDeg, stockClear: st.stockClear, under: st.under, underChannel: st.underChannel, channel: st.channel,
+        stock: f.ironStock ? 'iron: Cotsell 1856, pl. 31 fig. 3, the Admiralty iron stock' : 'oak: Falconer 1769, in two halves hooped with iron',
         rule: 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the side under the fore channel' };
       const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), st.ring]], 0.018 + B * 0.0006, mats.ropeSolid || iron);
       if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));

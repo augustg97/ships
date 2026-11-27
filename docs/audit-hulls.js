@@ -1683,7 +1683,7 @@ const crown = e1.distanceTo(ringC) > e2.distanceTo(ringC) ? e1 : e2;
 const toRing = ringC.clone().sub(crown).normalize();
 const angs = [];
 for (const m of cyl) {
-if (m === shank || m.geometry.parameters.radialSegments < 8) continue;
+if (m === shank || m.geometry.parameters.radialSegments < 8 || /^stock/.test(m.userData.ap || '')) continue;
 const a = m.geometry.attributes.position, w = new THREE.Vector3(); let far = null, fd = -1;
 for (let j = 0; j < a.count; j++) { w.fromBufferAttribute(a, j).applyMatrix4(m.matrixWorld); const d = w.distanceTo(crown); if (d > fd) { fd = d; far = w.clone(); } }
 angs.push(Math.acos(Math.max(-1, Math.min(1, far.sub(crown).normalize().dot(toRing)))) * 180 / Math.PI);
