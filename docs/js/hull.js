@@ -147,11 +147,14 @@ const t = (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0]);
 if (isl.overSheerM) return sheer(u) + isl.overSheerM[0] + (isl.overSheerM[1] - isl.overSheerM[0]) * t;
 return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
 };
-const islandRailM = u => {
+const islandDeck = u => {
 const isl = islandOf(u);
-return isl ? (isl.railM || S.islands.railM || 1.0) : null;
+if (!isl) return null;
+const o = isl.overDeckM;
+return o ? deck(u) + o[0] + (o[1] - o[0]) * (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0])
+: islandTop(u) - (isl.railM || S.islands.railM || 1.0);
 };
-const islandDeck = u => { const t = islandTop(u); return t === null ? null : t - islandRailM(u); };
+const islandRailM = u => { const t = islandTop(u); return t === null ? null : t - islandDeck(u); };
 const wellTop = u => {
 const W = S.islands && S.islands.wells;
 if (!W) return null;
@@ -7231,7 +7234,7 @@ group.add(tag(g, 'superstructure'));
 function buildIslands(S, group, hullMat) {
 if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
 const H = hullSurface(S);
-const L = S.lwl, B = S.beam, railM = S.islands.railM || 1.0;
+const L = S.lwl, B = S.beam;
 const steel = hex => new THREE.ShaderMaterial({
 vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
 side: THREE.DoubleSide,
@@ -7281,7 +7284,7 @@ return new THREE.Mesh(g, mat);
 for (const isl of S.islands.list) {
 const u0 = isl.u[0], u1 = isl.u[1], closedFwd = u0 <= 0, closedAft = u1 >= 1;
 const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
-const iRail = isl.railM || railM;
+const iDeck = H.islandDeck;
 const g = new THREE.Group();
 const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
 const stU = k => {
@@ -7294,7 +7297,7 @@ path.push({ u: u1, x: xAt(u1), z: -halfAt(u1) });
 for (let k = N; k >= 0; k--) { const u = stU(k); path.push({ u, x: xAt(u), z: -halfAt(u) }); }
 path.push({ u: u0, x: xAt(u0), z: halfAt(u0) });
 const wall = [];
-const breast = isl.breastM ? (u => top(u) - iRail + isl.breastM) : null;
+const breast = isl.breastM ? (u => iDeck(u) + isl.breastM) : null;
 const pathW = [];
 for (let k = 0; k < path.length; k++) {
 const p = path[k], q = path[k + 1];
@@ -7320,7 +7323,7 @@ g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat, false,
 }
 const dp = [];
 for (let k = 0; k <= N; k++) {
-const u = stU(k), y = top(u) - iRail, [dx, h] = shellAt(u, y);
+const u = stU(k), y = iDeck(u), [dx, h] = shellAt(u, y);
 dp.push(dx, y, -h, dx, y, h);
 }
 { const dm = strip(dp, deckMat, true); dm.userData.islandDeck = { name: isl.name, u0, u1 }; g.add(dm); }
@@ -7337,7 +7340,7 @@ const sz = q => Math.sign(q.z), corner = sz(path[k]) !== sz(path[k - 1])
 if (acc >= step || corner || k === path.length - 1) { Q.push(path[k]); acc = 0; }
 }
 const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
-const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - iRail, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
+const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: iDeck(q.u), z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
 for (const q of Q) {
 const p = at(q), st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, postH, 5), railMat);
 st.position.set(p.x, p.y + postH / 2, p.z);
@@ -9673,7 +9676,7 @@ const SILL_M = 0.45;
 for (let i = 0; i < storeys.length; i++) {
 const st = storeys[i];
 st.topY = i + 1 < storeys.length ? storeys[i + 1].floorY : anchorY - 0.25;
-st.sillM = Math.min(SILL_M, st.topY - 0.12 - st.lightH - st.floorY);
+st.sillM = Math.max(0, Math.min(SILL_M, st.topY - 0.12 - st.lightH - st.floorY));
 st.lightY = st.floorY + st.sillM + st.lightH / 2;
 }
 const read = {
@@ -10154,7 +10157,7 @@ function islandCovers(S, H) {
 const I = S.islands;
 if (!(I && I.list && I.list.length) || S.build === 'steel' || S.build === 'iron' || S.iron) return [];
 H = H || hullSurface(S);
-const L = S.lwl, railM = I.railM || 1.0, cl = u => Math.max(0, Math.min(1, u));
+const L = S.lwl, cl = u => Math.max(0, Math.min(1, u));
 const xAt = u => (u - 0.5) * L + H.rake(u);
 const shellHalf = (u, y) => {
 const uc = cl(u);
@@ -10165,13 +10168,14 @@ return Math.abs(surfacePoint(S, H, uc, (a + b) / 2)[2]);
 };
 const out = [];
 for (const isl of I.list) {
-const u0 = isl.u[0], u1 = isl.u[1], iRail = isl.railM || railM;
+const u0 = isl.u[0], u1 = isl.u[1];
 const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+const iDeck = H.islandDeck;
 const ends = [...(u0 > 0 ? [-1] : []), ...(u1 < 1 ? [1] : [])];
 for (const w of ends) {
 const a = ends.length === 2 && w > 0 ? (u0 + u1) / 2 : u0, b = ends.length === 2 && w < 0 ? (u0 + u1) / 2 : u1;
 let y = Infinity;
-for (let k = 0; k <= 16; k++) y = Math.min(y, top(a + (b - a) * k / 16) - iRail);
+for (let k = 0; k <= 16; k++) y = Math.min(y, iDeck(a + (b - a) * k / 16));
 const v = new THREE.Vector4(xAt(a), xAt(b), y, w);
 v.hw = [];
 for (let k = 0; k < 8; k++) {
@@ -10179,8 +10183,8 @@ const x = v.x + (v.y - v.x) * k / 7;
 let p = a, q = b;
 for (let j = 0; j < 30; j++) { const m = (p + q) / 2; if (xAt(m) < x) p = m; else q = m; }
 const u = (p + q) / 2;
-v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
-(v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, top(u) - iRail) - COVER_SIDE_M, H.deck(cl(u))]);
+v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, iDeck(u))) + 0.05);
+(v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, iDeck(u)) - COVER_SIDE_M, H.deck(cl(u))]);
 }
 v.endIn = ends.length === 2 ? 0 : COVER_SIDE_M;
 if (ends.length === 2) { v.endOff = 0; v.endLean = 0; }

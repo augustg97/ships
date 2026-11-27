@@ -1,0 +1,12 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island deck off its recorded height",
+  "detail": "Forecastle: at u 0.260 the deck stands at y 5.831, the record (deck + overDeckM) puts it at 6.214"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island deck off its recorded height",
+  "detail": "Quarterdeck: at u 0.972 the deck stands at y 6.665, the record (deck + overDeckM) puts it at 6.873"
+ }
+]

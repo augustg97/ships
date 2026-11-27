@@ -268,6 +268,10 @@ function hullSurface(S) {
      THE SHEER at both ends (overSheerM), linear between them. And an island may carry its own
      railM (the barricade over its deck): a 74's forecastle barricade is lower than her
      quarterdeck's. islandDeck is the one derivation of the deck behind an island's top. */
+  /* ⚠ A TABLE GIVES THE DECK'S HEIGHT OVER THE DECK BELOW, NOT UNDER THE BARRICADE (round 358). Steel's Folio
+     XXXII gives a 74's quarterdeck and forecastle as heights over the upper deck's plank. When the island records
+     overDeckM [fwd, aft], its deck is deck(u) plus that, and the barricade (islandRailM) is what stands between the
+     deck and the top. Without the field the deck is the top less railM, as before. */
   const islandOf = u => {
     if (!(S.islands && S.islands.list)) return null;
     for (const isl of S.islands.list) if (u >= isl.u[0] && u <= isl.u[1]) return isl;
@@ -280,11 +284,14 @@ function hullSurface(S) {
     if (isl.overSheerM) return sheer(u) + isl.overSheerM[0] + (isl.overSheerM[1] - isl.overSheerM[0]) * t;
     return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
   };
-  const islandRailM = u => {
+  const islandDeck = u => {
     const isl = islandOf(u);
-    return isl ? (isl.railM || S.islands.railM || 1.0) : null;
+    if (!isl) return null;
+    const o = isl.overDeckM;
+    return o ? deck(u) + o[0] + (o[1] - o[0]) * (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0])
+             : islandTop(u) - (isl.railM || S.islands.railM || 1.0);
   };
-  const islandDeck = u => { const t = islandTop(u); return t === null ? null : t - islandRailM(u); };
+  const islandRailM = u => { const t = islandTop(u); return t === null ? null : t - islandDeck(u); };
   /* ── THE WELLS' BULWARKS (hull.islands.wells, round 303, Titanic) ────────────────────
      Between a raised end and the house a liner's deck is a WELL, and the side plating does not
      stop at it: it carries on up as a bulwark, which the 1911 side plan draws as a heavy solid
@@ -11623,7 +11630,7 @@ function buildSuperstructure(S, group, hullMat) {
 function buildIslands(S, group, hullMat) {
   if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
   const H = hullSurface(S);
-  const L = S.lwl, B = S.beam, railM = S.islands.railM || 1.0;
+  const L = S.lwl, B = S.beam;
   const steel = hex => new THREE.ShaderMaterial({
     vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
     side: THREE.DoubleSide,
@@ -11696,7 +11703,7 @@ function buildIslands(S, group, hullMat) {
   for (const isl of S.islands.list) {
     const u0 = isl.u[0], u1 = isl.u[1], closedFwd = u0 <= 0, closedAft = u1 >= 1;
     const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
-    const iRail = isl.railM || railM;
+    const iDeck = H.islandDeck;
     const g = new THREE.Group();
     const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
     /* station k of N, graded toward an end that closes on the hull's own end */
@@ -11717,7 +11724,7 @@ function buildIslands(S, group, hullMat) {
        pair of coincident stations, so the wall steps there in one edge. Without the field the
        perimeter is walked exactly as before. */
     const wall = [];
-    const breast = isl.breastM ? (u => top(u) - iRail + isl.breastM) : null;
+    const breast = isl.breastM ? (u => iDeck(u) + isl.breastM) : null;
     const pathW = [];
     for (let k = 0; k < path.length; k++) {
       const p = path[k], q = path[k + 1];
@@ -11757,7 +11764,7 @@ function buildIslands(S, group, hullMat) {
     /* the island's deck, railM under the top, lofted station by station */
     const dp = [];
     for (let k = 0; k <= N; k++) {
-      const u = stU(k), y = top(u) - iRail, [dx, h] = shellAt(u, y);
+      const u = stU(k), y = iDeck(u), [dx, h] = shellAt(u, y);
       dp.push(dx, y, -h, dx, y, h);
     }
     { const dm = strip(dp, deckMat, true); dm.userData.islandDeck = { name: isl.name, u0, u1 }; g.add(dm); }
@@ -11781,7 +11788,7 @@ function buildIslands(S, group, hullMat) {
         if (acc >= step || corner || k === path.length - 1) { Q.push(path[k]); acc = 0; }
       }
       const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
-      const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - iRail, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
+      const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: iDeck(q.u), z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
       for (const q of Q) {
         const p = at(q), st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, postH, 5), railMat);
         st.position.set(p.x, p.y + postH / 2, p.z);
@@ -15201,12 +15208,14 @@ function quarterGallerySpec(S, H) {
   });
   /* each storey runs from its floor to the next storey's floor; the top storey to the roof's foot, 0.25 m under the
      anchor. A light's sill stands SILL_M over its floor (the class's) unless the storey is too low for it, when the
-     light stands 0.12 m under the storey's top and the sill is what is left (read.storeys[].sillM says which) */
+     light stands 0.12 m under the storey's top and the sill is what is left (read.storeys[].sillM says which), and
+     never less than none: on Steel's own heights (r358) the 74's upper storey is 1.04 m and its 0.97 m light stands
+     on the floor */
   const SILL_M = 0.45;
   for (let i = 0; i < storeys.length; i++) {
     const st = storeys[i];
     st.topY = i + 1 < storeys.length ? storeys[i + 1].floorY : anchorY - 0.25;
-    st.sillM = Math.min(SILL_M, st.topY - 0.12 - st.lightH - st.floorY);
+    st.sillM = Math.max(0, Math.min(SILL_M, st.topY - 0.12 - st.lightH - st.floorY));
     st.lightY = st.floorY + st.sillM + st.lightH / 2;
   }
   const read = {
@@ -15863,7 +15872,7 @@ function islandCovers(S, H) {
   const I = S.islands;
   if (!(I && I.list && I.list.length) || S.build === 'steel' || S.build === 'iron' || S.iron) return [];
   H = H || hullSurface(S);
-  const L = S.lwl, railM = I.railM || 1.0, cl = u => Math.max(0, Math.min(1, u));
+  const L = S.lwl, cl = u => Math.max(0, Math.min(1, u));
   const xAt = u => (u - 0.5) * L + H.rake(u);
   /* the shell's half-breadth at height y on station u (buildIslands' shellAt) */
   const shellHalf = (u, y) => {
@@ -15875,14 +15884,15 @@ function islandCovers(S, H) {
   };
   const out = [];
   for (const isl of I.list) {
-    const u0 = isl.u[0], u1 = isl.u[1], iRail = isl.railM || railM;
+    const u0 = isl.u[0], u1 = isl.u[1];
     const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+    const iDeck = H.islandDeck;
     const ends = [...(u0 > 0 ? [-1] : []), ...(u1 < 1 ? [1] : [])];
     for (const w of ends) {
       /* both ends open: each cover takes the half of the span next to its own opening */
       const a = ends.length === 2 && w > 0 ? (u0 + u1) / 2 : u0, b = ends.length === 2 && w < 0 ? (u0 + u1) / 2 : u1;
       let y = Infinity;
-      for (let k = 0; k <= 16; k++) y = Math.min(y, top(a + (b - a) * k / 16) - iRail);
+      for (let k = 0; k <= 16; k++) y = Math.min(y, iDeck(a + (b - a) * k / 16));
       const v = new THREE.Vector4(xAt(a), xAt(b), y, w);
       v.hw = [];
       for (let k = 0; k < 8; k++) {
@@ -15890,9 +15900,9 @@ function islandCovers(S, H) {
         let p = a, q = b;
         for (let j = 0; j < 30; j++) { const m = (p + q) / 2; if (xAt(m) < x) p = m; else q = m; }
         const u = (p + q) / 2;
-        v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
+        v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, iDeck(u))) + 0.05);
         /* r354: for a part, the shell's half-breadth at the deck and at the island deck, and the deck's height */
-        (v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, top(u) - iRail) - COVER_SIDE_M, H.deck(cl(u))]);
+        (v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, iDeck(u)) - COVER_SIDE_M, H.deck(cl(u))]);
       }
       /* r354: the end away from the opening is the hull's own end (a wall a part's span stops short of), or, on an
          island open at both ends, the midpoint where its two covers meet, which is no wall */

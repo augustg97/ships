@@ -1,0 +1,7 @@
+u 0 deck 5.700 islDeck 7.700 over 2.000 top 8.900 rail 1.200
+u 0.13 deck 4.675 islDeck 6.675 over 2.000 top 7.875 rail 1.200
+u 0.26 deck 4.131 islDeck 6.131 over 2.000 top 7.331 rail 1.200
+u 0.43 deck 3.907 islDeck 5.907 over 2.000 top 7.407 rail 1.500
+u 0.7 deck 3.969 islDeck 5.969 over 2.000 top 7.469 rail 1.500
+u 1 deck 4.800 islDeck 6.800 over 2.000 top 8.300 rail 1.500
+{"anchorY":8.3,"balconyDeckY":4.846,"modelDeckY":4.8,"lowerCounterY":2.28,"upperCounterY":3.347,"projectionM":0.76,"projectionFrom":"class: quarterGallery.projectionFromProvenance","storeys":[{"name":"lower","floorY":4.846,"topY":6.8,"rimM":3.962,"lightH":1.067,"lightW":0.864,"lightY":5.829,"sillM":0.45},{"name":"upper","floorY":6.8,"topY":8.05,"rimM":3.124,"lightH":0.965,"lightW":0.737,"lightY":7.447,"sillM":0.165}]}

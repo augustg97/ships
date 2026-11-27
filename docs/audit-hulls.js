@@ -7095,6 +7095,28 @@ if (out) say(v.id, 'a plank under an island lit as open sky', `${I.name}: ${out}
 }
 for (const c of icov) if (c.name === I.name && !ends.includes(c.open)) say(v.id, 'an island cover on a closed end', `${I.name}: a cover opens at ${c.open}`);
 }
+for (const dm of iDecks) {
+const I = dm.userData.islandDeck, isl = H.islands.list.find(i => i.name === I.name);
+if (!isl || isl.overDeckM === undefined) continue;
+const o = isl.overDeckM;
+if (!(Array.isArray(o) && o.length === 2 && o.every(t => t > 1.5 && t < 3.5))) { say(v.id, 'an island overDeckM out of shape', `${I.name}: ${JSON.stringify(o)}`); continue; }
+const HS = SHIPS_HULL.hullSurface(H), xAtU = u => (u - 0.5) * H.lwl + HS.rake(u);
+let worst = 0, at = null, lowRail = Infinity, n = 0;
+for (const q of ptsI(dm)) {
+let a = 0, b = 1;
+for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAtU(m) < q.x) a = m; else b = m; }
+const u = (a + b) / 2;
+if ((isl.u[0] <= 0 && u < 0.02) || (isl.u[1] >= 1 && u > 0.98) || u < isl.u[0] - 1e-3 || u > isl.u[1] + 1e-3) continue;
+const uc = Math.min(isl.u[1], Math.max(isl.u[0], u));
+const want = HS.deck(uc) + o[0] + (o[1] - o[0]) * (uc - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0]);
+n++;
+if (Math.abs(q.y - want) > worst) { worst = Math.abs(q.y - want); at = [uc, q.y, want]; }
+lowRail = Math.min(lowRail, HS.islandTop(uc) - q.y);
+}
+if (!n) say(v.id, 'an island deck with no vertex in its span', `${I.name}`);
+else if (worst > 0.03) say(v.id, 'an island deck off its recorded height', `${I.name}: at u ${at[0].toFixed(3)} the deck stands at y ${at[1].toFixed(3)}, the record (deck + overDeckM) puts it at ${at[2].toFixed(3)}`);
+if (lowRail < 0.3) say(v.id, 'an island deck at its own top', `${I.name}: the barricade over the deck falls to ${lowRail.toFixed(2)} m`);
+}
 }
 }
 {

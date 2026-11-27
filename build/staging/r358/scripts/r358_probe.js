@@ -1,0 +1,13 @@
+const vm = require('vm'), fs = require('fs');
+const ctx = { console, Math, JSON, Float32Array, Uint16Array, Uint32Array, Int32Array, Uint8Array, Float64Array, Array, Object, Map, Set, WeakMap, Symbol, Promise, setTimeout, performance: { now: () => 0 } };
+ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
+ctx.document = { createElement: () => ({ getContext: () => null, style: {} }), createElementNS: () => ({ getContext: () => null, style: {} }) };
+vm.createContext(ctx);
+const W = process.argv[2];
+for (const f of ['js/three.min.js', 'js/shaders.js', 'js/hull.js']) vm.runInContext(fs.readFileSync(W + '/' + f, 'utf8'), ctx);
+const v = JSON.parse(fs.readFileSync(W + '/data/vessels.json', 'utf8')).vessels.find(x => x.id === 'ship-of-the-line');
+const SH = ctx.SHIPS_HULL, H = SH.hullSurface(v.hull);
+for (const u of [0, 0.13, 0.26, 0.43, 0.7, 1]) console.log('u', u, 'deck', H.deck(u).toFixed(3), 'islDeck', H.islandDeck(u)?.toFixed(3), 'over', (H.islandDeck(u) - H.deck(u)).toFixed(3), 'top', H.islandTop(u)?.toFixed(3), 'rail', H.islandRailM(u)?.toFixed(3));
+const g = SH.buildShip(v.hull, { fine: true }); let qg = null;
+g.traverse(o => { if (o.userData && o.userData.quarterGallery && !qg) qg = o.userData.quarterGallery; });
+console.log(JSON.stringify(qg && (qg.read || qg)));
