@@ -2506,13 +2506,18 @@
        so stood a shank-long stock square off it); (b) no lower shroud passes within 0.05 m of an anchor vertex at that
        vertex's height (r365 found a fore shroud 0.82 m inboard of the 74's upper arm); (c) one bill rests on the side, as
        Steel stows it on the anchor-lining under the fore channel: the arm tip nearest the side stands within 0.5 m of the
-       skin and below the sheer. The bows without a cathead (the corbita, and the iron Preussen and steamer) are not
-       judged here: their anchors stand 0.4–0.7 m into the bow, a fault carried to r367 in HANDOFF.md. */
-    if (part.cathead) {
+       skin and below the sheer. Since r367 the rule judges EVERY anchored hull, catted or not: until r367 it judged only
+       hulls with a cathead, so the three uncatted bowers (the corbita, Preussen, the steamer), which stood 0.4–0.7 m
+       inside the bow, were outside it. A forecastle island's shell is the side
+       above the sheer (r367): a vertex over the sheer and under the island's top is judged against the sheer's
+       half-breadth, which until r367 read as open air. */
+    if (part.cathead || part.anchor) {
       const HSa = SHIPS_HULL.hullSurface(H), invA = new THREE.Matrix4().copy(g.matrixWorld).invert();
       const L = H.lwl, w = new THREE.Vector3();
       const uAt = (x, vv) => { let a = 0, b = 1; for (let i = 0; i < 26; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSa, m, vv)[0] < x) a = m; else b = m; } return (a + b) / 2; };
-      const halfAt = (x, y) => { const u = uAt(x, 0.9); if (SHIPS_HULL.surfacePoint(H, HSa, u, 1)[1] < y) return null;
+      const halfAt = (x, y) => { const u = uAt(x, 0.9);
+        if (SHIPS_HULL.surfacePoint(H, HSa, u, 1)[1] < y) { const t = HSa.islandTop ? HSa.islandTop(u) : null;
+          return t !== null && y <= t ? Math.abs(SHIPS_HULL.surfacePoint(H, HSa, u, 1)[2]) : null; }
         let a = 0, b = 1; for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSa, u, m)[1] < y) a = m; else b = m; }
         return Math.abs(SHIPS_HULL.surfacePoint(H, HSa, u, (a + b) / 2)[2]); };
       const segs = [];
@@ -2532,7 +2537,7 @@
         for (const p of P) { const h = halfAt(p[0], p[1]); if (h === null) continue; const d = Math.abs(p[2]) - h;
           if (d < -0.005) { inside++; if (d < worst) { worst = d; at = p; } }
           if (d < near) { near = d; nearAt = p; } }
-        if (inside) say(v.id, 'a catted anchor inside the bow', `${inside} vertices inside the skin, worst ${(-worst).toFixed(3)} m at x ${at[0].toFixed(2)}, y ${at[1].toFixed(2)}`);
+        if (inside) say(v.id, 'an anchor inside the bow', `${inside} vertices inside the skin, worst ${(-worst).toFixed(3)} m at x ${at[0].toFixed(2)}, y ${at[1].toFixed(2)}`);
         if (near > 0.5) say(v.id, 'a catted anchor with no bill on the side', `nearest anchor vertex ${near.toFixed(2)} m off the skin`);
         let hit = null;
         for (const [a, b] of segs) { if (Math.sign(a[2]) !== sg) continue;

@@ -1692,11 +1692,13 @@ const bad = angs.filter(a => Math.abs(a - 60) > 5);
 if (!angs.length) say(v.id, 'an anchor with no arms', 'no round cylinder but the shank');
 else if (bad.length) say(v.id, 'anchor arms not at sixty degrees to the shank', `bill-crown-ring angles ${angs.map(a => a.toFixed(1)).join(', ')}°; Falconer gives 60°, the arms rising from the crown toward the ring`);
 });
-if (part.cathead) {
+if (part.cathead || part.anchor) {
 const HSa = SHIPS_HULL.hullSurface(H), invA = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const L = H.lwl, w = new THREE.Vector3();
 const uAt = (x, vv) => { let a = 0, b = 1; for (let i = 0; i < 26; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSa, m, vv)[0] < x) a = m; else b = m; } return (a + b) / 2; };
-const halfAt = (x, y) => { const u = uAt(x, 0.9); if (SHIPS_HULL.surfacePoint(H, HSa, u, 1)[1] < y) return null;
+const halfAt = (x, y) => { const u = uAt(x, 0.9);
+if (SHIPS_HULL.surfacePoint(H, HSa, u, 1)[1] < y) { const t = HSa.islandTop ? HSa.islandTop(u) : null;
+return t !== null && y <= t ? Math.abs(SHIPS_HULL.surfacePoint(H, HSa, u, 1)[2]) : null; }
 let a = 0, b = 1; for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSa, u, m)[1] < y) a = m; else b = m; }
 return Math.abs(SHIPS_HULL.surfacePoint(H, HSa, u, (a + b) / 2)[2]); };
 const segs = [];
@@ -1716,7 +1718,7 @@ let inside = 0, worst = 1e9, at = null, near = 1e9, nearAt = null;
 for (const p of P) { const h = halfAt(p[0], p[1]); if (h === null) continue; const d = Math.abs(p[2]) - h;
 if (d < -0.005) { inside++; if (d < worst) { worst = d; at = p; } }
 if (d < near) { near = d; nearAt = p; } }
-if (inside) say(v.id, 'a catted anchor inside the bow', `${inside} vertices inside the skin, worst ${(-worst).toFixed(3)} m at x ${at[0].toFixed(2)}, y ${at[1].toFixed(2)}`);
+if (inside) say(v.id, 'an anchor inside the bow', `${inside} vertices inside the skin, worst ${(-worst).toFixed(3)} m at x ${at[0].toFixed(2)}, y ${at[1].toFixed(2)}`);
 if (near > 0.5) say(v.id, 'a catted anchor with no bill on the side', `nearest anchor vertex ${near.toFixed(2)} m off the skin`);
 let hit = null;
 for (const [a, b] of segs) { if (Math.sign(a[2]) !== sg) continue;

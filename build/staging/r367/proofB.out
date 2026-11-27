@@ -1,0 +1,42 @@
+[
+ {
+  "id": "corbita",
+  "rule": "an anchor inside the bow",
+  "detail": "333 vertices inside the skin, worst 0.661 m at x -13.95, y 0.72"
+ },
+ {
+  "id": "corbita",
+  "rule": "an anchor inside the bow",
+  "detail": "333 vertices inside the skin, worst 0.661 m at x -13.95, y 0.72"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor inside the bow",
+  "detail": "311 vertices inside the skin, worst 0.499 m at x -50.52, y 2.23"
+ },
+ {
+  "id": "preussen",
+  "rule": "a shroud through the catted anchor",
+  "detail": "a lower shroud -0.339 m from an anchor vertex at x -52.97, y 6.02"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor inside the bow",
+  "detail": "309 vertices inside the skin, worst 0.499 m at x -50.52, y 2.23"
+ },
+ {
+  "id": "preussen",
+  "rule": "a shroud through the catted anchor",
+  "detail": "a lower shroud -0.339 m from an anchor vertex at x -52.97, y 6.02"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor inside the bow",
+  "detail": "317 vertices inside the skin, worst 0.647 m at x -37.17, y 3.27"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor inside the bow",
+  "detail": "317 vertices inside the skin, worst 0.647 m at x -37.17, y 3.27"
+ }
+]

@@ -4226,7 +4226,10 @@ what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'is a tackle problem: the ring must be caught, lifted clear of the water '
 + 'and swung outboard of the planking, and the cathead is the crane that '
 + 'does it — its sheaves take the cat tackle, and the anchor rides fished '
-+ 'along the topside from its tip until the next letting-go.' },
++ 'along the topside from its tip until the next letting-go. Ancient ships '
++ 'had them too: Torr (1894) has the anchors hung from catheads a little abaft '
++ 'the hawse-holes. An iron ship\'s cathead is an iron beam, and on a ship with '
++ 'a forecastle it stands on the forecastle deck.' },
 head:     { stage: 4, name: 'Head and beakhead',
 what: 'A working platform carried out beyond the stem, and the rails that sweep up '
 + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -9834,12 +9837,14 @@ group.add(tag(m, 'livery', 'Stern name',
 }
 function buildHead(S, group, mats) {
 S.__catheads = null;
-if (!S.bowsprit || S.iron) return;
+if (!S.bowsprit) return;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
-if (S.build === 'frame') {
+{
 const blen = B * 0.26, sq = B * 0.042, ang = 0.70;
-let uc = 0.105;
+const fcsle = S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
+const catMat = S.iron ? (mats.iron || mats.woodDark) : mats.woodDark;
+let uc = fcsle ? fcsle.u[1] * 0.5 : 0.105;
 const kneeAft = u => surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
 {
 const ST = tierPortStations(S), first = ST.filter(Boolean).map(t => t.ports[0]).sort((a, b) => a.x - b.x)[0];
@@ -9855,13 +9860,14 @@ uc = a;
 }
 }
 const pd = surfacePoint(S, H, uc, 1.0);
+if (fcsle) pd[1] = H.islandTop(uc);
 S.__catheads = [];
 for (const sgn of [-1, 1]) {
 const cg = new THREE.Group();
-const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), mats.woodDark);
+const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), catMat);
 beam.position.z = blen / 2;
 cg.add(beam);
-const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), mats.woodDark);
+const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), catMat);
 kn.position.set(0, -B * 0.038, blen * 0.30);
 cg.add(kn);
 cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
@@ -9872,6 +9878,7 @@ const tip = new THREE.Vector3(0, 0, blen).applyEuler(cg.rotation).add(cg.positio
 S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z });
 }
 }
+if (S.iron) return;
 const grade = S.head || 0;
 if (!grade) return;
 const g = new THREE.Group();
@@ -10950,7 +10957,8 @@ const down = new THREE.Vector3().crossVectors(out, e1).normalize();
 if (down.y > 0) down.negate();
 const half = (x, y) => {
 const u = uAtXV(S, H, x, 0.9, Math.max(0.01, Math.min(0.99, x / L + 0.5)));
-if (u === null || surfacePoint(S, H, u, 1)[1] < y) return 0;
+if (u === null) return 0;
+if (surfacePoint(S, H, u, 1)[1] < y) { const t = H.islandTop(u); return t !== null && y <= t ? Math.abs(surfacePoint(S, H, u, 1)[2]) : 0; }
 let a = 0, c = 1; for (let i = 0; i < 24; i++) { const m = (a + c) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else c = m; }
 return Math.abs(surfacePoint(S, H, u, (a + c) / 2)[2]);
 };

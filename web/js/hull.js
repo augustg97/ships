@@ -7288,7 +7288,10 @@ const PARTS = {
                   + 'is a tackle problem: the ring must be caught, lifted clear of the water '
                   + 'and swung outboard of the planking, and the cathead is the crane that '
                   + 'does it — its sheaves take the cat tackle, and the anchor rides fished '
-                  + 'along the topside from its tip until the next letting-go.' },
+                  + 'along the topside from its tip until the next letting-go. Ancient ships '
+                  + 'had them too: Torr (1894) has the anchors hung from catheads a little abaft '
+                  + 'the hawse-holes. An iron ship\'s cathead is an iron beam, and on a ship with '
+                  + 'a forecastle it stands on the forecastle deck.' },
   head:     { stage: 4, name: 'Head and beakhead',
               what: 'A working platform carried out beyond the stem, and the rails that sweep up '
                   + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -15503,7 +15506,7 @@ function buildHead(S, group, mats) {
      Every part here now takes both its ends from geometry that exists — the stem's own
      profile, the bowsprit's own line, the rail curves themselves — so nothing CAN float. */
   S.__catheads = null;
-  if (!S.bowsprit || S.iron) return;
+  if (!S.bowsprit) return;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
 
@@ -15511,14 +15514,28 @@ function buildHead(S, group, mats) {
      Catting the anchor is medieval; the beakhead is not. The carrack and caravel keep
      their bare stems and still get the beam their anchor hangs from. The tips are stashed
      on the spec (the __spars pattern) so buildAnchor hangs from the SAME point this drew. */
-  if (S.build === 'frame') {
+  /* ⚠ AN IRON SHIP CATS HER ANCHOR TOO (round 367). Until r367 only a frame-built hull had a cathead, so the iron
+     steamer's and Preussen's bowers were placed against the bow at a class station and stood 0.4–0.7 m inside it.
+     A stocked bower is catted and fished whatever the hull is made of: the Admiralty pattern stayed the bower of iron
+     merchant ships until the stockless anchor and the hawse pipe replaced it from the 1880s. On an iron hull the
+     cathead is an iron beam. Where a forecastle island covers the bow (Preussen) the cathead stands on the forecastle
+     head at the island's rail, at the middle of its length: a class station, read from no plate. Preussen's own stow
+     is contested in the record's terms: her plates show her at anchor or at sea in halftone, and a ship of 1902 may
+     have housed stockless bowers in hawse pipes.
+     ⚠ AND SO DID AN ANCIENT ONE. Torr (Ancient Ships, 1894, pp. 69–74) has the anchors "suspended from the catheads a
+     little way abaft of these hawse-holes", the bow's eyes "turned to account as hawse-holes for the anchor-cables".
+     So the shell-built corbita is catted too, in timber, and every hull with a bowsprit now cats her bowers. */
+  {
     const blen = B * 0.26, sq = B * 0.042, ang = 0.70;   // 40° forward of athwart
+    const fcsle = S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
+    const catMat = S.iron ? (mats.iron || mats.woodDark) : mats.woodDark;
+    /* the tierPortStations walk below asks a frame hull's ports; a shell or iron hull has none recorded */
     /* ⚠ THE CATHEAD STANDS FORWARD OF THE FOREMOST PORT (round 364). u 0.105 is a CLASS station. On the 74 it put the
        supporting knee across Steel's foremost upper-deck port (13 ft 1 in abaft the foremost perpendicular), and the
        gun in that port ran through the knee. Bellona's model has the knee just forward of that port. Where a tier's
        ports are recorded, the station moves forward until the knee's after face stands 0.10 m forward of the foremost
        port's foreside; S.__catheadMoved records by how much. */
-    let uc = 0.105;
+    let uc = fcsle ? fcsle.u[1] * 0.5 : 0.105;
     const kneeAft = u => surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
     {
       const ST = tierPortStations(S), first = ST.filter(Boolean).map(t => t.ports[0]).sort((a, b) => a.x - b.x)[0];
@@ -15534,14 +15551,15 @@ function buildHead(S, group, mats) {
       }
     }
     const pd = surfacePoint(S, H, uc, 1.0);
+    if (fcsle) pd[1] = H.islandTop(uc);
     S.__catheads = [];
     for (const sgn of [-1, 1]) {
       const cg = new THREE.Group();
-      const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), mats.woodDark);
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), catMat);
       beam.position.z = blen / 2;
       cg.add(beam);
       /* the supporting knee, from the topside up to the beam's underside */
-      const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), mats.woodDark);
+      const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), catMat);
       kn.position.set(0, -B * 0.038, blen * 0.30);
       cg.add(kn);
       cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
@@ -15554,6 +15572,7 @@ function buildHead(S, group, mats) {
       S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z });
     }
   }
+  if (S.iron) return;
 
   const grade = S.head || 0;
   if (!grade) return;
@@ -17119,9 +17138,13 @@ function anchorStowOf(S, H, f, cat) {
      ring and the bill is turned from flat-on-the-side (t = 90°, the crown hanging below the bill) toward
      square-off-the-side (t = 0, the crown outboard), and the first t whose stock ends, crown and ring all
      stand clear of the skin is taken. */
+  /* ⚠ AN ISLAND'S SHELL IS THE SIDE ABOVE THE SHEER (round 367). buildIslands carries the shell straight up from the
+     sheer to the island's top, so a stock end over the sheer but under a forecastle's top is inside the ship. Until
+     r367 no catted hull had an island and this read open air there. */
   const half = (x, y) => {
     const u = uAtXV(S, H, x, 0.9, Math.max(0.01, Math.min(0.99, x / L + 0.5)));
-    if (u === null || surfacePoint(S, H, u, 1)[1] < y) return 0;
+    if (u === null) return 0;
+    if (surfacePoint(S, H, u, 1)[1] < y) { const t = H.islandTop(u); return t !== null && y <= t ? Math.abs(surfacePoint(S, H, u, 1)[2]) : 0; }
     let a = 0, c = 1; for (let i = 0; i < 24; i++) { const m = (a + c) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else c = m; }
     return Math.abs(surfacePoint(S, H, u, (a + c) / 2)[2]);
   };
@@ -17171,7 +17194,8 @@ function buildAnchor(S, group, mats) {
       group.add(tag(A, 'anchor'));
       continue;
     }
-    /* no cathead drawn (iron bows, the shell-built corbita): stowed against the bow, centred as before */
+    /* no cathead drawn: since r367 every hull with a bowsprit has one, so this is reached only when the stow cannot
+       be solved (anchorStowOf returns null). The audit's A-ANCHOR-CLEAR judges whatever lands here. */
     const g = new THREE.Group();
     A.position.y = -f.ringY / 2;
     g.add(A);
