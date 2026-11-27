@@ -1,0 +1,35 @@
+Round 365: the 74's channels are laid from Steel's table, above her upper-deck ports
+
+Steel's Folio LIII ("Outboard", leaf 592 of the 1822 edition) gives each channel
+of a 74 its length, breadth and thickness, and how far its foremost end stands
+forward of its mast. It puts the upper edge level with the top-timber line.
+Main 37 ft 6 in, fore 30 ft 6 in, mizzen 19 ft 6 in, each 1 ft 8 in broad and
+6 in thick at the side (5 in on the mizzen). Until this round every channel was
+a class box 0.075 L long (3.8 m on the 74) at 0.97 of the sheer, and on the 74
+all three stood across the upper-deck ports.
+
+Eckersberg's Asow, the plate the 74's side is painted from, draws each channel
+standing on the top of the upper ochre band, which is the model's sheer. Each
+recorded channel now has its underside on the sheer and its upper edge a
+channel's depth above it. It follows the sheer and the side's curve in plan,
+and carries its mast's deadeyes along its outer edge at an even pitch. New
+record field hull.channels; recordedChannelFeet and channelGeometry in hull.js.
+Every other hull keeps the class channel.
+
+Lowering the upper deck to Steel's 6 ft 9 in waist was tried and reverted: the
+audit convicted the quarter gallery, whose balcony deck is registered on Steel's
+stern heights and agrees with the deck at 1.5 m.
+
+Contested and recorded: the mizzen channel's height (blank in the 74 column);
+the shrouds' pitch (the channels also took the backstays' deadeyes); chains and
+T-plates not drawn; the waist's depth.
+
+Audit: new A-CHANNEL-RECORD; A-PORT-STATIONS (e) now counts channel and deadeye
+vertices over a port; D-SHROUDS reads a deadeye against its recorded channel's
+local top. Proof B (HEAD's builder) and proof C (upper edge on the sheer) each
+convict 7 times. Final audit 33 hulls, 0 problems. r364's 30 carried frames
+scored: all inside the gate (aboard-clipper's 25.4% recaptured alone at
+0.005%). Ratchet part 1: shipwright 1.307%, -astern 1.416%, -furled 3.535%,
+-hounds 1.816% accepted (shrouds, ratlines, channels and deadeyes only).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
