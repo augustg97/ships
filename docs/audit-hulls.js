@@ -6184,7 +6184,7 @@ return e; };
 g.traverse(o => {
 const p = tagOf(o); if (!o.isMesh || !p) return;
 if (p.key === 'deadeye') dead.push({ c: cenOf(worldS(o)), r: o.geometry.parameters ? o.geometry.parameters.radiusTop : 0.1 });
-else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs) }); }
+else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs), rec: !!(o.userData.channel && o.userData.channel.rec), pts }); }
 else if (p.key === 'shroud' && p.name === 'Shrouds') shr.push(o);
 else if (p.key === 'tackle' && o.userData.block) tack.push({ c: cenOf(worldS(o)), ...o.userData.block });
 else if (p.key === 'shroudLashing' && o.userData.lash) {
@@ -6212,7 +6212,9 @@ if (off)
 say(v.id, 'a shroud on no deadeye', `${off} of ${feet} lower shrouds on deadeye-class masts end more than 1.5 r from any deadeye (first: mast ${first.mast}, a foot at x ${first.foot[0].toFixed(2)}, y ${first.foot[1].toFixed(2)}, z ${first.foot[2].toFixed(2)}, ${first.dist === null ? 'no deadeye drawn' : 'the nearest deadeye ' + first.dist.toFixed(2) + ' m away'})`);
 let offC = 0, firstC = null;
 for (const d of dead) {
-const on = chans.some(c => Math.sign(c.c[2]) === Math.sign(d.c[2]) && d.c[0] >= c.xMin - 0.02 && d.c[0] <= c.xMax + 0.02 && d.c[1] - c.c[1] > -0.1 && d.c[1] - c.c[1] < 0.5);
+const localTop = c => { let t = -Infinity; for (const q of c.pts) if (Math.abs(q[0] - d.c[0]) < 0.3 && Math.sign(q[2]) === Math.sign(d.c[2])) t = Math.max(t, q[1]); return t; };
+const on = chans.some(c => Math.sign(c.c[2]) === Math.sign(d.c[2]) && d.c[0] >= c.xMin - 0.02 && d.c[0] <= c.xMax + 0.02
+&& (c.rec ? (d.c[1] - localTop(c) > 0 && d.c[1] - localTop(c) < 0.5) : (d.c[1] - c.c[1] > -0.1 && d.c[1] - c.c[1] < 0.5)));
 if (!on) { offC++; if (!firstC) firstC = d; }
 }
 if (offC)
@@ -6221,7 +6223,7 @@ say(v.id, 'a deadeye off its channel', `${offC} of ${dead.length} deadeyes stand
 if (kindOf(mk) !== 'deadeyes') return;
 const mx = (mk.at - 0.5) * H.lwl;
 for (const sgn of [-1, 1])
-if (!chans.some(c => Math.sign(c.c[2]) === sgn && Math.abs(c.c[0] - mx) < 0.06 * H.lwl))
+if (!chans.some(c => Math.sign(c.c[2]) === sgn && (c.rec ? mx >= c.xMin - 0.06 * H.lwl && mx <= c.xMax + 0.06 * H.lwl : Math.abs(c.c[0] - mx) < 0.06 * H.lwl)))
 say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sideOf(sgn)} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
 });
 let offT = 0, feetT = 0, firstT = null;
@@ -7317,10 +7319,10 @@ const k = xs.findIndex(q => w.x >= q[0] && w.x <= q[1]);
 if (k < 0) outside++; else per[k][w.z > 0 ? 'p' : 's']++; });
 const cov = R.coveredAft || 0, badP = per.filter((c, k) => k < xs.length - cov ? (c.p !== 1 || c.s !== 1) : (c.p !== 0 || c.s !== 0)).length;
 if (outside) say(v.id, 'a gun outside every recorded port', `tier ${d}: ${outside} gun(s)`);
-let over = 0, overC = 0; const covered = new Set();
+let over = 0, overC = 0, overCh = 0; const covered = new Set();
 g.traverse(o => { if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
 let key = null; for (let pp = o; pp && !key; pp = pp.parent) key = pp.userData && pp.userData.part && pp.userData.part.key;
-if (key !== 'gallery' && key !== 'cathead') return;
+if (key !== 'gallery' && key !== 'cathead' && key !== 'channel' && key !== 'deadeye') return;
 const a = o.geometry.attributes.position, M = new THREE.Matrix4().multiplyMatrices(invP, o.matrixWorld), q = new THREE.Vector3();
 for (let j = 0; j < a.count; j++) { q.fromBufferAttribute(a, j).applyMatrix4(M);
 const k = xs.findIndex(r => q.x > r[0] + 0.01 && q.x < r[1] - 0.01); if (k < 0) continue;
@@ -7328,15 +7330,52 @@ const uq = U.uRecPort.value.find(P => Math.round(P.z) === d && Math.abs(SHIPS_HU
 const uu = uq ? (uq.x + uq.y) / 2 : 0.5;
 const sill = SHIPS_HULL.surfacePoint(H, HSp, uu, U.uTierPortLo.value.getComponent(d))[1], head = SHIPS_HULL.surfacePoint(H, HSp, uu, U.uTierPortHi.value.getComponent(d))[1];
 const zS = Math.abs(SHIPS_HULL.surfacePoint(H, HSp, uu, vP)[2]);
-if (q.y > sill && q.y < head && Math.abs(q.z) > zS - 0.02) { if (key === 'cathead') overC++; else if (k < xs.length - cov) over++; else covered.add(k); } } });
+if (q.y > sill && q.y < head && Math.abs(q.z) > zS - 0.02) { if (key === 'cathead') overC++; else if (key === 'channel' || key === 'deadeye') overCh++; else if (k < xs.length - cov) over++; else covered.add(k); } } });
 if (over) say(v.id, 'a quarter gallery over a gunport', `tier ${d}: ${over} gallery vertices inside a drawn port's span`);
 if (overC) say(v.id, 'a cathead over a gunport', `tier ${d}: ${overC} cathead vertices inside a drawn port's span`);
+if (overCh) say(v.id, 'a channel over a gunport', `tier ${d}: ${overCh} channel or deadeye vertices inside a drawn port's span`);
 for (let k = xs.length - cov; k < xs.length; k++) if (!covered.has(k))
 say(v.id, 'a port recorded as under the gallery that is not', `tier ${d}: port ${k + 1} of ${xs.length} has no gun, and no gallery covers it`);
 if (cov) console.warn(`READ ${v.id}: the after ${cov} port(s) of tier ${d} lie under the quarter gallery (contested, a read): ${R.contested}`);
 if (badP) say(v.id, 'a recorded port without one gun a side', `tier ${d}: ${badP} of ${xs.length} ports`);
 });
 }
+}
+if (H.channels && Array.isArray(H.channels.masts)) {
+const HSc = SHIPS_HULL.hullSurface(H);
+const invC = new THREE.Matrix4().copy(g.matrixWorld).invert();
+H.channels.masts.forEach((R, mi) => {
+const mk = (H.masts || [])[mi]; if (!R || !mk) return;
+const mx = (mk.at - 0.5) * H.lwl + HSc.rake(mk.at);
+for (const sgn of [-1, 1]) {
+const ch = []; const des = [];
+g.traverse(o => { if (!o.isMesh || o.userData.mast !== mi && !(o.parent && o.parent.userData.mast === mi)) return;
+let key = null; for (let pp = o; pp && !key; pp = pp.parent) key = pp.userData && pp.userData.part && pp.userData.part.key;
+const M = new THREE.Matrix4().multiplyMatrices(invC, o.matrixWorld), a = o.geometry.attributes.position, q = new THREE.Vector3(), pts = [];
+for (let j = 0; j < a.count; j++) { q.fromBufferAttribute(a, j).applyMatrix4(M); pts.push([q.x, q.y, q.z]); }
+const zc = pts.reduce((s2, p) => s2 + p[2], 0) / pts.length; if (Math.sign(zc) !== sgn) return;
+if (key === 'channel') ch.push({ o, pts }); else if (key === 'deadeye') des.push(pts); });
+const side = sideOf(sgn);
+if (ch.length !== 1 || !ch[0].o.userData.channel || !ch[0].o.userData.channel.rec) { say(v.id, 'a recorded channel not drawn', `mast ${mi}, ${side}: ${ch.length} channel mesh(es), ${ch.length && ch[0].o.userData.channel ? 'recorded' : 'not recorded'}`); continue; }
+const P = ch[0].pts, xs2 = P.map(p => p[0]), x0 = Math.min(...xs2), x1 = Math.max(...xs2);
+if (Math.abs((x1 - x0) - R.lenM) > 0.05) say(v.id, 'a channel not Steel\'s length', `mast ${mi}, ${side}: ${(x1 - x0).toFixed(3)} m against ${R.lenM}`);
+if (Math.abs((mx - x0) - R.foreM) > 0.10) say(v.id, 'a channel\'s foremost end off its station', `mast ${mi}, ${side}: ${(mx - x0).toFixed(3)} m afore the mast against ${R.foreM}`);
+let worstY = 0, worstW = 0;
+const st = [...new Set(xs2.map(x => x.toFixed(3)))].map(Number);
+for (const x of st) {
+const at = P.filter(p => Math.abs(p[0] - x) < 1e-3);
+const top = Math.max(...at.map(p => p[1])), zin = Math.min(...at.map(p => Math.abs(p[2]))), zout = Math.max(...at.map(p => Math.abs(p[2])));
+let lo = 0, hi = 1; for (let it = 0; it < 30; it++) { const m = (lo + hi) / 2; if (SHIPS_HULL.surfacePoint(H, HSc, m, 1)[0] < x) lo = m; else hi = m; }
+const sk = SHIPS_HULL.surfacePoint(H, HSc, (lo + hi) / 2, 1);
+worstY = Math.max(worstY, Math.abs(top - sk[1] - R.thickInM));
+worstW = Math.max(worstW, Math.abs((zout - Math.abs(sk[2])) - R.breadthM));
+}
+if (worstY > 0.03) say(v.id, 'a channel off the top of the side', `mast ${mi}, ${side}: its upper edge stands up to ${worstY.toFixed(3)} m off a channel's depth over the sheer`);
+if (worstW > 0.03) say(v.id, 'a channel not Steel\'s breadth', `mast ${mi}, ${side}: off by up to ${worstW.toFixed(3)} m`);
+if (des.length !== mk.shrouds) say(v.id, 'a recorded channel without a deadeye a shroud', `mast ${mi}, ${side}: ${des.length} deadeyes, ${mk.shrouds} shrouds`);
+}
+});
+console.warn(`READ ${v.id}: channels laid from Steel's Folio LIII (contested: ${H.channels.contested})`);
 }
 if (H.gunDecks || (H.islands && H.islands.list && H.islands.list.some(i => i.ports))) {
 const bad = {}, seen = new Set();

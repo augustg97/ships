@@ -1,0 +1,37 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel over a gunport",
+  "detail": "tier 1: 664 channel or deadeye vertices inside a drawn port's span"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded channel not drawn",
+  "detail": "mast 0, starboard: 1 channel mesh(es), not recorded"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded channel not drawn",
+  "detail": "mast 0, port: 1 channel mesh(es), not recorded"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded channel not drawn",
+  "detail": "mast 1, starboard: 1 channel mesh(es), not recorded"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded channel not drawn",
+  "detail": "mast 1, port: 1 channel mesh(es), not recorded"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded channel not drawn",
+  "detail": "mast 2, starboard: 1 channel mesh(es), not recorded"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded channel not drawn",
+  "detail": "mast 2, port: 1 channel mesh(es), not recorded"
+ }
+]

@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "the gallery registered on the wrong anchor",
+  "detail": "the balcony's deck lands at y 4.846, the model's upper deck at the stern is 4.61"
+ }
+]

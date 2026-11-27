@@ -1,0 +1,37 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel over a gunport",
+  "detail": "tier 1: 460 channel or deadeye vertices inside a drawn port's span"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel off the top of the side",
+  "detail": "mast 0, starboard: its upper edge stands up to 0.152 m off a channel's depth over the sheer"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel off the top of the side",
+  "detail": "mast 0, port: its upper edge stands up to 0.152 m off a channel's depth over the sheer"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel off the top of the side",
+  "detail": "mast 1, starboard: its upper edge stands up to 0.152 m off a channel's depth over the sheer"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel off the top of the side",
+  "detail": "mast 1, port: its upper edge stands up to 0.152 m off a channel's depth over the sheer"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel off the top of the side",
+  "detail": "mast 2, starboard: its upper edge stands up to 0.127 m off a channel's depth over the sheer"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a channel off the top of the side",
+  "detail": "mast 2, port: its upper edge stands up to 0.127 m off a channel's depth over the sheer"
+ }
+]
