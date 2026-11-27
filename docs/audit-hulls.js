@@ -6980,6 +6980,37 @@ if (R.verdict !== want) say(v.id, 'a topmast head read with the wrong verdict', 
 if (R.verdict === 'contested' && !/CONTESTED/.test(R.provenance || '')) say(v.id, 'a contested topmast head whose provenance does not say so', at);
 });
 }
+{
+g.updateMatrixWorld(true);
+const invG = new THREE.Matrix4().copy(g.matrixWorld).invert(), V3 = new THREE.Vector3();
+const DECKS = new Set(['castles', 'gundeck', 'forecast']), decks = [], bars = [];
+g.traverse(o => {
+if (!o.isMesh) return;
+let e = o; while (e && !(e.userData && e.userData.part)) e = e.parent;
+const pt = e ? e.userData.part : null; if (!pt) return;
+const cyl = o.geometry.type === 'CylinderGeometry';
+if (DECKS.has(pt.key) && !cyl) decks.push(o);
+if ((pt.key === 'castles' || pt.key === 'islandRail') && cyl) bars.push(o);
+});
+g.traverse(o => {
+if (!o.isMesh || !o.userData.heelOn) return;
+const A = o.geometry.attributes.position; let lo = null;
+for (let i = 0; i < A.count; i++) { V3.fromBufferAttribute(A, i).applyMatrix4(o.matrixWorld); if (!lo || V3.y < lo.y) lo = V3.clone(); }
+const rc = new THREE.Raycaster(lo.clone().add(new THREE.Vector3(0, 0.01, 0)), new THREE.Vector3(0, 1, 0), 0, 6);
+const hit = rc.intersectObjects(decks, false).find(h => h.face && Math.abs(h.face.normal.clone().transformDirection(h.object.matrixWorld).y) > 0.707);
+const loH = lo.clone().applyMatrix4(invG);
+const at = `heel at x ${loH.x.toFixed(2)} y ${loH.y.toFixed(2)}, bowsed onto ${o.userData.heelOn.on}`;
+if (hit) say(v.id, 'a lateen heel under a deck', `${at}: a deck stands ${hit.distance.toFixed(2)} m over it`);
+if (loH.y < o.userData.heelOn.deckY - 0.02) say(v.id, 'a lateen heel under the deck it is bowsed onto', `${at}: that deck is at y ${o.userData.heelOn.deckY}`);
+});
+for (const b of bars) {
+const h = b.geometry.parameters.height, P0 = new THREE.Vector3(0, -h / 2, 0).applyMatrix4(b.matrixWorld).applyMatrix4(invG),
+P1 = new THREE.Vector3(0, h / 2, 0).applyMatrix4(b.matrixWorld).applyMatrix4(invG);
+if (Math.abs(P0.y - P1.y) > 0.2 * h) continue;
+if (!(Math.sign(P0.z) !== Math.sign(P1.z) && Math.abs(P0.z) > 0.5 && Math.abs(P1.z) > 0.5)) continue;
+if (Math.abs(P0.x - P1.x) > 0.05) say(v.id, 'a rail askew across a deck end', `${b.parent && b.parent.userData.part ? b.parent.userData.part.name : '?'}: ends at x ${P0.x.toFixed(2)} and ${P1.x.toFixed(2)}`);
+}
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

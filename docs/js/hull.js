@@ -2496,7 +2496,14 @@ const dir = [Math.cos(th), Math.sin(th)];
 const sling = [x, base + dir[1] * yardLen / 3];
 const heelX = lr ? x - lr.heelAheadOfMastSpacing * spacing : x - dir[0] * yardLen / 3;
 const heelU = Math.max(0, Math.min(1, heelX / L + 0.5));
-const heel = [heelX, deckMax(heelU, u) + B * 0.045];
+let lo = 0, hi = 1;
+for (let it = 0; it < 40; it++) { const m = (lo + hi) / 2; if ((m - 0.5) * L + H.rake(m) < heelX) lo = m; else hi = m; }
+const rdHeel = raisedDeckAt(S, H, (lo + hi) / 2);
+const heelDeck = Math.max(deckMax(heelU, u), rdHeel ? rdHeel.y : -Infinity);
+const heel = [heelX, heelDeck + B * 0.045];
+const heelOn = rdHeel && rdHeel.y > deckMax(heelU, u)
+? { on: rdHeel.what, u: +heelU.toFixed(4), deckY: +rdHeel.y.toFixed(3), from: 'r351: the highest deck under the heel' }
+: { on: 'the hull’s own deck', u: +heelU.toFixed(4), deckY: +deckMax(heelU, u).toFixed(3) };
 const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
 const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
 const mzD = mixed ? (mainLower * 0.875 * 0.700 / 36) * 2 / 3 : 0;
@@ -2601,6 +2608,7 @@ stowFrom: 'class (round 260): the cloth is brailed to the yard aloft and the rol
 + 'along it on the sail\'s own side; the roll leans outboard off that side by 20°, and '
 + 'by more where it would else stand into the pole the yard lies against; no plate '
 + 'reads it' } : null };
+ym.userData.heelOn = heelOn;
 beside.add(tag(ym, 'yard', 'Lateen yard'));
 {
 const rPar = 0.010 + B * 0.0004, Rp = mastRl(slingY) + rPar, zFace = OFF - rYs;
@@ -7325,7 +7333,9 @@ const postH = 0.89, edge = 0.08, step = B * 0.22, Q = [path[0]];
 let acc = 0;
 for (let k = 1; k < path.length; k++) {
 acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
-if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
+const sz = q => Math.sign(q.z), corner = sz(path[k]) !== sz(path[k - 1])
+|| (k + 1 < path.length && sz(path[k]) !== sz(path[k + 1]));
+if (acc >= step || corner || k === path.length - 1) { Q.push(path[k]); acc = 0; }
 }
 const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
 const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - iRail, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
@@ -9899,6 +9909,23 @@ railH: (S.castles && S.castles.railHM) || 0.9 };
 }
 return top;
 }
+function raisedDeckAt(S, H, u) {
+H = H || hullSurface(S);
+const uc = Math.max(0.001, Math.min(0.999, u));
+let top = null;
+const ct = castleTopAt(S, H, uc);
+if (ct) top = { y: ct.y, what: (ct.end === 'aft' ? 'aftcastle' : 'forecastle') + ' tier ' + ct.tier };
+const GD = S.gunDeck;
+if (GD && uc >= GD.from && uc <= GD.to) {
+const y = surfacePoint(S, H, 0.5, 1.0)[1] + GD.height + S.beam * 0.007;
+if (!top || y > top.y) top = { y, what: 'gun deck' };
+}
+if (S.islands) {
+const y = H.islandDeck(uc);
+if (y !== null && (!top || y > top.y)) top = { y, what: 'island deck' };
+}
+return top;
+}
 function channelRun(S, H, u, halfU) {
 halfU = halfU || 0.0275;
 const top = castleTopAt(S, H, u);
@@ -10073,7 +10100,9 @@ const step = B * 0.20, Q = [];
 let acc = 0; Q.push(path[0]);
 for (let k = 1; k < path.length; k++) {
 acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
-if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
+const sz = q => Math.sign(q.z), corner = sz(path[k]) !== sz(path[k - 1])
+|| (k + 1 < path.length && sz(path[k]) !== sz(path[k + 1]));
+if (acc >= step || corner || k === path.length - 1) { Q.push(path[k]); acc = 0; }
 }
 for (const q of Q) {
 const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.005, B * 0.005, rH, 5), railM);

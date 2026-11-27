@@ -9838,6 +9838,49 @@
         if (R.verdict === 'contested' && !/CONTESTED/.test(R.provenance || '')) say(v.id, 'a contested topmast head whose provenance does not say so', at);
       });
     }
+    /* ── A-LATEEN-HEEL-DECK (round 351): A LATEEN YARD'S HEEL IS BOWSED DOWN ONTO THE HIGHEST DECK UNDER IT. The
+       builder set the heel over the hull's own deck, so on the carrack it stood 0.82 m over the main deck inside the
+       aftcastle and the yard rose through the quarterdeck and the poop, and on the galleass the fore and mizzen heels
+       hung 1.6-1.7 m under the gun deck. TEST, on every yard mesh that carries userData.heelOn: from the yard's lowest
+       vertex, in hull space, a ray straight up must meet no deck of a castle, a gun deck or an island (any face of a
+       non-cylinder mesh of those parts whose normal is within 45 degrees of vertical) inside 6 m; and the heel's lowest
+       vertex stands no lower than heelOn.deckY - 0.02, the deck the builder says it was bowsed onto.
+       ── A-RAIL-END-SQUARE (round 351): A RAIL ACROSS A DECK'S END RUNS SQUARE ACROSS IT. The castle and island rails
+       were resampled by run alone, so a perimeter corner fell between two posts and each end rail ran as a chord from one
+       side's last post to the other side's corner, 0.4 m askew on the carrack's poop. TEST, on every horizontal rail bar of
+       a 'castles' or 'islandRail' part that crosses the centreline (its ends on opposite sides, each over 0.5 m out): its two
+       ends stand at the same x to 0.05 m. */
+    {
+      g.updateMatrixWorld(true);
+      const invG = new THREE.Matrix4().copy(g.matrixWorld).invert(), V3 = new THREE.Vector3();
+      const DECKS = new Set(['castles', 'gundeck', 'forecast']), decks = [], bars = [];
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        let e = o; while (e && !(e.userData && e.userData.part)) e = e.parent;
+        const pt = e ? e.userData.part : null; if (!pt) return;
+        const cyl = o.geometry.type === 'CylinderGeometry';
+        if (DECKS.has(pt.key) && !cyl) decks.push(o);
+        if ((pt.key === 'castles' || pt.key === 'islandRail') && cyl) bars.push(o);
+      });
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.heelOn) return;
+        const A = o.geometry.attributes.position; let lo = null;
+        for (let i = 0; i < A.count; i++) { V3.fromBufferAttribute(A, i).applyMatrix4(o.matrixWorld); if (!lo || V3.y < lo.y) lo = V3.clone(); }
+        const rc = new THREE.Raycaster(lo.clone().add(new THREE.Vector3(0, 0.01, 0)), new THREE.Vector3(0, 1, 0), 0, 6);
+        const hit = rc.intersectObjects(decks, false).find(h => h.face && Math.abs(h.face.normal.clone().transformDirection(h.object.matrixWorld).y) > 0.707);
+        const loH = lo.clone().applyMatrix4(invG);
+        const at = `heel at x ${loH.x.toFixed(2)} y ${loH.y.toFixed(2)}, bowsed onto ${o.userData.heelOn.on}`;
+        if (hit) say(v.id, 'a lateen heel under a deck', `${at}: a deck stands ${hit.distance.toFixed(2)} m over it`);
+        if (loH.y < o.userData.heelOn.deckY - 0.02) say(v.id, 'a lateen heel under the deck it is bowsed onto', `${at}: that deck is at y ${o.userData.heelOn.deckY}`);
+      });
+      for (const b of bars) {
+        const h = b.geometry.parameters.height, P0 = new THREE.Vector3(0, -h / 2, 0).applyMatrix4(b.matrixWorld).applyMatrix4(invG),
+              P1 = new THREE.Vector3(0, h / 2, 0).applyMatrix4(b.matrixWorld).applyMatrix4(invG);
+        if (Math.abs(P0.y - P1.y) > 0.2 * h) continue;                       // a post, not a bar
+        if (!(Math.sign(P0.z) !== Math.sign(P1.z) && Math.abs(P0.z) > 0.5 && Math.abs(P1.z) > 0.5)) continue;
+        if (Math.abs(P0.x - P1.x) > 0.05) say(v.id, 'a rail askew across a deck end', `${b.parent && b.parent.userData.part ? b.parent.userData.part.name : '?'}: ends at x ${P0.x.toFixed(2)} and ${P1.x.toFixed(2)}`);
+      }
+    }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/
        feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig

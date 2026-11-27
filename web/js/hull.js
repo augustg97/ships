@@ -4474,7 +4474,23 @@ function buildRig(S, group, mats, FINE, FURLED) {
          bowsed down ONTO the deck, not through it; take the height from the deck beneath it. */
       const heelX = lr ? x - lr.heelAheadOfMastSpacing * spacing : x - dir[0] * yardLen / 3;
       const heelU = Math.max(0, Math.min(1, heelX / L + 0.5));
-      const heel = [heelX, deckMax(heelU, u) + B * 0.045];
+      /* ── ⚠ AND ONTO THE DECK BUILT OVER IT (round 351) ────────────────────────────────
+         deckMax reads the hull's own deck. On the carrack the mizzen's heel came down 0.63 m
+         over her main deck at u 0.759, inside the aftcastle and 1.02 m under the quarterdeck, and
+         the yard rose out through the quarterdeck and the poop. On the galleass the fore and
+         mizzen heels hung 1.6-1.7 m under the gun deck over the rowers, and both yards came up
+         through its planking. The heel is bowsed down onto the highest deck under it, the
+         castle's top tier or the gun deck (r351/heel-before.txt). Every hull with no deck built
+         over its own at the heel is byte-identical. */
+      /* the castles' stations are in the raked frame, x = (u − 0.5)·L + rake(u): find the heel's */
+      let lo = 0, hi = 1;
+      for (let it = 0; it < 40; it++) { const m = (lo + hi) / 2; if ((m - 0.5) * L + H.rake(m) < heelX) lo = m; else hi = m; }
+      const rdHeel = raisedDeckAt(S, H, (lo + hi) / 2);
+      const heelDeck = Math.max(deckMax(heelU, u), rdHeel ? rdHeel.y : -Infinity);
+      const heel = [heelX, heelDeck + B * 0.045];
+      const heelOn = rdHeel && rdHeel.y > deckMax(heelU, u)
+        ? { on: rdHeel.what, u: +heelU.toFixed(4), deckY: +rdHeel.y.toFixed(3), from: 'r351: the highest deck under the heel' }
+        : { on: 'the hull’s own deck', u: +heelU.toFixed(4), deckY: +deckMax(heelU, u).toFixed(3) };
       const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
 
       const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
@@ -4684,6 +4700,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
             + 'along it on the sail\'s own side; the roll leans outboard off that side by 20°, and '
             + 'by more where it would else stand into the pole the yard lies against; no plate '
             + 'reads it' } : null };
+      ym.userData.heelOn = heelOn;                       // r351: what the heel is bowsed down onto
       beside.add(tag(ym, 'yard', 'Lateen yard'));
       /* ── THE PARREL: one rope loop at the sling, round the mast's far side at the mast's
          radius there and made fast to the yard's near face either side of it — the same
@@ -11755,7 +11772,14 @@ function buildIslands(S, group, hullMat) {
       let acc = 0;
       for (let k = 1; k < path.length; k++) {
         acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
-        if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
+        /* ⚠ r351: AND EVERY CORNER. The posts were resampled by run alone, so a corner of the
+           perimeter fell between two posts and the rail across each end ran as a chord from one
+           side's last post to the other side's corner, diagonally over the deck: on the carrack's
+           poop it crossed the centreline 0.4 m abaft the deck's forward edge. A corner is where
+           the perimeter crosses from one side to the other, and every corner is a post. */
+        const sz = q => Math.sign(q.z), corner = sz(path[k]) !== sz(path[k - 1])
+          || (k + 1 < path.length && sz(path[k]) !== sz(path[k + 1]));
+        if (acc >= step || corner || k === path.length - 1) { Q.push(path[k]); acc = 0; }
       }
       const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
       const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - iRail, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
@@ -15504,6 +15528,31 @@ function castleTopAt(S, H, u) {
   return top;
 }
 
+/* ── THE HIGHEST DECK BUILT OVER THE HULL'S OWN DECK AT STATION u (round 351) ──────────
+ * A castle's top tier, a galleass's or a panokseon's gun deck over the rowers, or a timber or
+ * steel island: whichever stands highest at u, as {y, what}, or null where the hull's own deck
+ * is the top one. y is the walking surface, where a fitting bowsed down onto that deck lands.
+ * The rig asks this where a part is bowsed down to "the deck under it", because H.deck reads
+ * the hull's sheer and not the decks built over it. Ungated by FINE, as r319's clew is: the
+ * coarse build draws none of these decks, and a sail must not change shape with distance. */
+function raisedDeckAt(S, H, u) {
+  H = H || hullSurface(S);
+  const uc = Math.max(0.001, Math.min(0.999, u));
+  let top = null;
+  const ct = castleTopAt(S, H, uc);
+  if (ct) top = { y: ct.y, what: (ct.end === 'aft' ? 'aftcastle' : 'forecastle') + ' tier ' + ct.tier };
+  const GD = S.gunDeck;
+  if (GD && uc >= GD.from && uc <= GD.to) {
+    const y = surfacePoint(S, H, 0.5, 1.0)[1] + GD.height + S.beam * 0.007;   // buildGalleyWorks' surfY
+    if (!top || y > top.y) top = { y, what: 'gun deck' };
+  }
+  if (S.islands) {
+    const y = H.islandDeck(uc);
+    if (y !== null && (!top || y > top.y)) top = { y, what: 'island deck' };
+  }
+  return top;
+}
+
 /* The run a channel (and the shroud feet spread along it) can occupy about station u: the
  * class's ±halfU of the length, SHRUNK toward the mast until both ends stand on the same
  * structure the mast does — a channel fits between the castles, and a shroud's foot lands on
@@ -15803,7 +15852,14 @@ function buildTieredCastles(S, group, mats, hullMat) {
       let acc = 0; Q.push(path[0]);
       for (let k = 1; k < path.length; k++) {
         acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
-        if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
+        /* ⚠ r351: AND EVERY CORNER. The posts were resampled by run alone, so a corner of the
+           perimeter fell between two posts and the rail across each end ran as a chord from one
+           side's last post to the other side's corner, diagonally over the deck: on the carrack's
+           poop it crossed the centreline 0.4 m abaft the deck's forward edge. A corner is where
+           the perimeter crosses from one side to the other, and every corner is a post. */
+        const sz = q => Math.sign(q.z), corner = sz(path[k]) !== sz(path[k - 1])
+          || (k + 1 < path.length && sz(path[k]) !== sz(path[k + 1]));
+        if (acc >= step || corner || k === path.length - 1) { Q.push(path[k]); acc = 0; }
       }
       for (const q of Q) {
         const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.005, B * 0.005, rH, 5), railM);
@@ -18012,8 +18068,9 @@ function seatClassCapstans(S, group, mats) {
     st.seat = { classU: u0, clearAtClass: !firstHit, blockedBy: firstHit, drawnU: uAt };
     if (uAt === null) {
       /* ⚠ NOWHERE CLEAR, NOTHING DRAWN. On the galley the corsia and the oars' looms run the
-         whole length of the centreline; on the carrack the boat, both castles and the lateen
-         mizzen leave no circle of deck 5.8 m across; on Endurance the deckhouse, funnel and
+         whole length of the centreline; on the carrack the lateen mizzen's yard
+         came down into the aftcastle and left no circle of deck 5.8 m across until r351 bowsed its heel
+         onto the poop; on Endurance the deckhouse, funnel and
          boiler casing fill her waist. No plate has been read for where any of them carried a
          capstan, and a machine drawn through a boat or a funnel says something false. The
          builder draws none, records why on the group, and the record's provenance says so; the
