@@ -31862,3 +31862,7 @@ The first version read each mast one metre over the deck and found 1 of 3 masts.
 5. r366's items 2 and 3, and r365's and r364's carried items, still stand.
 
 **RATCHET RECEIPT (r368).** All 65 frames are being captured one process each (`run-each.sh all.txt`, `run1`) on the final `web/` from 14:49, predicted movers first: `ship-steamer`, `ship-preussen`, `aboard-preussen`, then berth neighbours `ship-dreadnought`, `ship-wyoming`, `ship-clipper`. No other frame can move: the vertex hash shows only those two hulls changed. Live stamp at build: 1795819764.
+**RECEIPT (15:33).** `run1` (14:49–15:31) captured 64 of 65 frames. 63 are inside the gate (`score1.out`), the predicted movers included: `ship-steamer` 0.014%, `ship-preussen` 0.031%, `ship-dreadnought` 0.006%, `ship-wyoming` and `ship-clipper` 0.000%. The vertex hash predicted these two hulls' frames would stay sub-gate, since the stock is a few pixels at these cameras. Two capture faults, both recaptured alone in `run1b`:
+- `aboard-preussen` read 20.685%. Its log shows `ERR_CONNECTION_RESET` and `ERR_SOCKET_NOT_CONNECTED`, and the frame has blank parchment above the horizon where the sky should be. Recaptured: 0.010%.
+- `descent-coast` failed to capture (FAILED in `each1.out`). Recaptured: 0.016%.
+**r368: 65 of 65 frames scored on the final tree, all inside the gate, 0 accepts. No frames are carried to r369 as unscored.** Live stamp 1795819764, read live at 14:53.
