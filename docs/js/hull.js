@@ -674,6 +674,35 @@ const y0 = H.deck(0.5) + R.sillM, lo = vAtY(S, H, 0.5, y0), hi = vAtY(S, H, 0.5,
 return { lo, hi, port: (lo + hi) / 2, from: 'record' };
 });
 }
+function steelPerpendiculars(S, H) {
+const P = S.perpendiculars;
+if (!P || !Array.isArray(S.masts) || S.masts.length < 3) return null;
+H = H || hullSurface(S);
+const L = S.lwl, ms = S.masts.map(m => m.at).sort((a, b) => a - b);
+const mx = ms.map(u => (u - 0.5) * L + H.rake(u));
+const T = (Array.isArray(S.tierPorts) ? S.tierPorts : []).find(t => t && t.foreM > 0 && t.aftM > 0 && t.nSide > 0);
+const lpp = T ? T.foreM + T.nSide * T.wM + (T.nSide - 1) * T.clearM + T.aftM : null;
+const est = [mx[0] - P.foreMastM, mx[1] - P.mainMastM];
+if (lpp) est.push(mx[ms.length - 1] + P.mizzenAftM - lpp);
+const fp = est.reduce((a, b) => a + b, 0) / est.length;
+return { fp, ap: lpp ? fp + lpp : null, lpp, mastX: mx.map(x => +x.toFixed(3)), resid: est.map(e => +(e - fp).toFixed(3)) };
+}
+function tierPortStations(S) {
+const rec = Array.isArray(S.tierPorts) ? S.tierPorts : [];
+if (!rec.some(t => t && t.foreM > 0)) return [];
+const H = hullSurface(S), perp = steelPerpendiculars(S, H), rows = tierPortRows(S);
+const uAt = (x, v) => { let a = 0, b = 1; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, m, v)[0] < x) a = m; else b = m; } return (a + b) / 2; };
+return rows.map((row, d) => {
+const R = rec[d];
+if (!R || !(R.foreM > 0) || !perp) return null;
+const ports = [];
+for (let k = 0; k < R.nSide; k++) {
+const x0 = perp.fp + R.foreM + k * (R.wM + R.clearM), x1 = x0 + R.wM;
+ports.push({ x: +((x0 + x1) / 2).toFixed(4), u: uAt((x0 + x1) / 2, row.port), uLo: uAt(x0, row.port), uHi: uAt(x1, row.port) });
+}
+return { ports, perp, from: 'record' };
+});
+}
 function gunHousing(len, r) {
 const c = r / (0.5 + GUN_BARREL.t.vent / 14), D = c * 20 / 21;
 const { pts } = gunBarrelProfile(len, r);
@@ -6569,21 +6598,23 @@ if (!decks) return;
 const g = new THREE.Group();
 const len = S.beam * 0.19, r = S.beam * 0.017;
 const cg = new THREE.Group(), cMat = carriageMat(S);
-const rows = tierPortRows(S), house = gunHousing(len, r);
+const rows = tierPortRows(S), house = gunHousing(len, r), stations = tierPortStations(S);
 for (let d = 0; d < decks; d++) {
 const tier = sideBands(S).tiers[d];
 if (!tier) continue;
 const row = rows[d], v = row.port;
 if (v > 0.985) continue;
-for (let k = 0; k < 26; k++) {
-const u = (k + 0.5) / 26;
+const st = stations[d];
+const cov = st ? (S.tierPorts[d].coveredAft || 0) : 0;
+const us = st ? st.ports.slice(0, st.ports.length - cov).map(p => p.u) : Array.from({ length: 26 }, (_, k) => (k + 0.5) / 26);
+for (const u of us) {
 const aftLimit = Math.min(0.88, 1 - (S.run || 0.3) - 0.02);
-if (u < 0.13 || u > aftLimit) continue;
+if (!st && (u < 0.13 || u > aftLimit)) continue;
 const p = surfacePoint(S, H, u, v);
 for (const sgn of [-1, 1]) {
 const bar = new THREE.Mesh(gunBarrelGeometry(len, r), mat);
 bar.rotation.x = sgn * Math.PI / 2;
-bar.userData.tierGun = { deck: d, u, lenM: len };
+bar.userData.tierGun = { deck: d, u, lenM: len, station: st ? 'record' : 'class' };
 let q = p;
 if (p[1] - r > H.deck(u)) {
 const head = surfacePoint(S, H, u, row.hi)[1], sill = surfacePoint(S, H, u, row.lo)[1], yA = head - house.rise;
@@ -9800,9 +9831,23 @@ if (!S.bowsprit || S.iron) return;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 if (S.build === 'frame') {
-const uc = 0.105;
-const pd = surfacePoint(S, H, uc, 1.0);
 const blen = B * 0.26, sq = B * 0.042, ang = 0.70;
+let uc = 0.105;
+const kneeAft = u => surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
+{
+const ST = tierPortStations(S), first = ST.filter(Boolean).map(t => t.ports[0]).sort((a, b) => a.x - b.x)[0];
+S.__catheadMoved = null;
+if (first) {
+const xFore = first.x - (S.tierPorts.find(t => t && t.wM) || {}).wM / 2 - 0.10;
+if (kneeAft(uc) > xFore) {
+let a = 0.0, b = uc; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (kneeAft(m) > xFore) b = m; else a = m; }
+S.__catheadMoved = { fromU: uc, toU: +a.toFixed(4), byM: +(surfacePoint(S, H, uc, 1.0)[0] - surfacePoint(S, H, a, 1.0)[0]).toFixed(3),
+rule: 'the knee stands 0.10 m forward of the foremost recorded port' };
+uc = a;
+}
+}
+}
+const pd = surfacePoint(S, H, uc, 1.0);
 S.__catheads = [];
 for (const sgn of [-1, 1]) {
 const cg = new THREE.Group();
@@ -12389,7 +12434,16 @@ const t = sideBands(S).tiers, at = (k, i) => (t[i] ? t[i][k] : 0);
 const v4 = k => new THREE.Vector4(at(k, 0), at(k, 1), at(k, 2), at(k, 3));
 const pr = tierPortRows(S), pv4 = k => new THREE.Vector4(...[0, 1, 2, 3].map(i => (pr[i] ? pr[i][k] : 0)));
 return { uTierLo: { value: v4('lo') }, uTierHi: { value: v4('hi') },
-uTierPortLo: { value: pv4('lo') }, uTierPortHi: { value: pv4('hi') }, uTierSoft: { value: sideBands(S).soft } };
+uTierPortLo: { value: pv4('lo') }, uTierPortHi: { value: pv4('hi') }, uTierSoft: { value: sideBands(S).soft },
+...(() => {
+const st = tierPortStations(S), list = [];
+st.forEach((t, d) => { if (t) t.ports.forEach(p => list.push(new THREE.Vector4(p.uLo, p.uHi, d, 0))); });
+const n = Math.min(list.length, 32);
+while (list.length < 32) list.push(new THREE.Vector4(0, 0, -1, 0));
+return { uRecPort: { value: list.slice(0, 32) }, uRecPortN: { value: n },
+uTierPortRec: { value: new THREE.Vector4(...[0, 1, 2, 3].map(i => (st[i] ? 1 : 0))) },
+uRecPortSoft: { value: 0.04 / (S.lwl || 50) } };
+})() };
 })(),
 uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
 uIron: { value: S.iron ? 1 : 0 },
@@ -12676,5 +12730,5 @@ extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;
 }
-window.SHIPS_HULL = { sideBands, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { sideBands, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
 superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

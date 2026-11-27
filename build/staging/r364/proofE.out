@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a cathead over a gunport",
+  "detail": "tier 1: 6 cathead vertices inside a drawn port's span"
+ }
+]

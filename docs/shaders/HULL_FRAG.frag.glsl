@@ -15,6 +15,10 @@ uniform vec4  uTierLo, uTierHi;
 /* r363: each tier's ports' sill and head in v (hull.js tierPortRows: Steel's where recorded, else the class band
    0.023 either side of the old centre, so an unrecorded hull draws as before) */
 uniform vec4  uTierPortLo, uTierPortHi;
+uniform vec4  uRecPort[32];   // r364: recorded ports, (u fore edge, u after edge, tier, 0)
+uniform int   uRecPortN;
+uniform vec4  uTierPortRec;   // 1 where a tier's ports are recorded along the side
+uniform float uRecPortSoft;
 uniform float uTierSoft;
 uniform vec3  uTopside;      // the paint above the waterline
 uniform float uIron;         // 0 = wood, 1 = iron/steel plate
@@ -353,8 +357,19 @@ void main(){
         band = max(band, smoothstep(lo - uTierSoft, lo + uTierSoft, v)
                        * smoothstep(hi + uTierSoft, hi - uTierSoft, v));
         float px = fract(u * 26.0);
-        port = max(port, smoothstep(pl - 0.007, pl + 0.007, v) * smoothstep(ph + 0.007, ph - 0.007, v)
-                       * smoothstep(0.30, 0.22, abs(px - 0.5)));
+        float along = smoothstep(0.30, 0.22, abs(px - 0.5));
+        /* r364: a tier with recorded ports is cut only at Steel's stations (tierPortStations) */
+        if (uTierPortRec[d] > 0.5) {
+          along = 0.0;
+          for (int i = 0; i < 32; i++) {
+            if (i >= uRecPortN) break;
+            vec4 P = uRecPort[i];
+            if (abs(P.z - float(d)) > 0.5) continue;
+            along = max(along, smoothstep(P.x - uRecPortSoft, P.x + uRecPortSoft, u)
+                             * smoothstep(P.y + uRecPortSoft, P.y - uRecPortSoft, u));
+          }
+        }
+        port = max(port, smoothstep(pl - 0.007, pl + 0.007, v) * smoothstep(ph + 0.007, ph - 0.007, v) * along);
       }
       vec3 ochre = vec3(0.780, 0.585, 0.395);        // creamy-orange, not lemon
       vec3 grey  = vec3(0.180, 0.178, 0.172);        // dark grey, not black

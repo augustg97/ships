@@ -1,0 +1,17 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a gun over its deck without one carriage",
+  "detail": "4 case(s), e.g. tier gun at u 0.762 side -1: 2 carriage(s)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "recorded ports drawn the wrong distance apart",
+  "detail": "tier 1: 14 of 14 spaces, e.g. 1.600 against 2.4638"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "the foremost recorded port off its station",
+  "detail": "tier 1: foreside at -19.050, Steel's -23.081 on the masts as built"
+ }
+]

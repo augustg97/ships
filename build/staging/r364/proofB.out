@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "recorded ports not drawn",
+  "detail": "the hull material has no uRecPort: the shader cuts the class pattern"
+ }
+]

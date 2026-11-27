@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "perpendiculars cannot be registered on the built masts",
+  "detail": "1 masts read one metre over the deck; perpendiculars recorded"
+ }
+]

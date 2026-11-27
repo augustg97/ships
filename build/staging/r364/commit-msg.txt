@@ -1,0 +1,34 @@
+Round 364: the 74's upper-deck ports stand at Steel's stations, 15 a side
+
+Steel's Folio XXXII gives a 74's upper-deck ports as 2 ft 10 in fore and aft,
+with 8 ft 1 in clear between them. The foremost port's foreside is 13 ft 1 in
+abaft the foremost perpendicular, and the after port's aftside is 6 ft 9 in
+afore the after perpendicular. These add up to 175 ft 6 in, so 8 ft 1 in is
+the clear space between ports and the centres stand 3.327 m apart. r363 had
+recorded 8 ft 1 in as the pitch.
+
+The model has no perpendiculars. They are registered on the 74's drawn masts
+through Folio XX's mast centres (fore 19 ft 6 in, main 99 ft 6 in, mizzen
+27 ft 3 in from the after perpendicular). The three estimates of the foremost
+perpendicular differ from their mean by +0.25, -0.40 and +0.16 m.
+
+New code: hull.perpendiculars, steelPerpendiculars and tierPortStations. In a
+recorded tier, HULL_FRAG cuts ports only at the recorded stations (uRecPort);
+every other tier still cuts every L/26. buildGuns puts a gun in each recorded
+port.
+
+The after port lies 1.19 m under the quarter gallery: the model's stern stands
+about 1 m short of Steel's at that height. The port is cut, no gun is run out
+of it (coveredAft), and the record says so. The cathead's class station
+(u 0.105) put its knee across the foremost port. Where ports are recorded the
+station now moves forward until the knee clears the port, 1.31 m on the 74.
+
+New audit rule A-PORT-STATIONS checks the drawn ports' count, width and clear
+space, their registration on the built masts, one gun a side in each port,
+and that no gallery or cathead stands over a port. Proofs B (HEAD's builder),
+C (r363's centre-to-centre reading), D (a gun in the covered port) and E (the
+class cathead) are each convicted. Audit: 33 hulls, 0 problems. r363's 9
+carried frames are scored, all inside the gate. The ratchet is running; the
+receipt will follow.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
