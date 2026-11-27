@@ -3122,7 +3122,7 @@ say(v.id, 'post proud of a welded hull',
 }
 if (H.sternLights) {
 if (!part.sternlight) say(v.id, 'declared but not drawn', 'stern lights');
-else if (part.planking && part.sternlight.x[1] < part.planking.x[1])
+else if (part.planking && part.sternlight.x[1] < SHIPS_HULL.surfacePoint(H, SHIPS_HULL.hullSurface(H), 1, 0.62)[0])
 say(v.id, 'stern furniture buried in the hull',
 `lights end ${(part.planking.x[1] - part.sternlight.x[1]).toFixed(2)} m inboard ` +
 'of the aft face');
@@ -7098,14 +7098,44 @@ for (const c of icov) if (c.name === I.name && !ends.includes(c.open)) say(v.id,
 }
 }
 {
+const HSs = SHIPS_HULL.hullSurface(H), memo = {};
+const atY = y => { const k = y.toFixed(2); if (memo[k]) return memo[k];
+let a = 0, b = 1; if (SHIPS_HULL.surfacePoint(H, HSs, 1, 1.0)[1] <= y) a = b = 1;
+for (let i = 0; i < 26 && a < b; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSs, 1, m)[1] < y) a = m; else b = m; }
+const p = SHIPS_HULL.surfacePoint(H, HSs, 1, (a + b) / 2); return (memo[k] = [p[0], Math.abs(p[2])]); };
+g.updateMatrixWorld(true);
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), M = new THREE.Matrix4(), q = new THREE.Vector3();
+const bad = {};
+g.traverse(o => { if (!o.isMesh) return; let key = null;
+for (let pp = o; pp && !key; pp = pp.parent) key = pp.userData && pp.userData.part && pp.userData.part.key;
+if (key !== 'sternlight' && key !== 'gallery' && !(key === 'transom' && o.geometry.type === 'CylinderGeometry')) return;
+M.multiplyMatrices(inv, o.matrixWorld); const a = o.geometry.attributes.position;
+let worst = 0, inside = 0, near = 1e9;
+for (let j = 0; j < a.count; j++) { q.fromBufferAttribute(a, j).applyMatrix4(M); const [xf, hf] = atY(q.y), d = q.x - xf;
+if (key === 'gallery') { if (d < -0.05 && Math.abs(q.z) < hf - 0.05) inside++; near = Math.min(near, Math.hypot(d, Math.abs(q.z) - hf)); }
+else { const fwd = key === 'transom' ? 0.12 : 0.05;
+worst = Math.max(worst, d > 0.35 ? d - 0.35 : d < -fwd ? -fwd - d : 0); } }
+if (key === 'gallery') {
+if (inside) bad['gallery: ' + inside + ' vertices inside the stern'] = (bad['gallery: ' + inside + ' vertices inside the stern'] || 0) + 1;
+if (a.count > 40 && near > 0.08) bad['gallery drum ' + near.toFixed(2) + ' m off the corner'] = 1;
+} else if (worst > 0) { const k = key + ' off the face by ' + worst.toFixed(2) + ' m'; bad[k] = (bad[k] || 0) + 1; } });
+for (const [k, n] of Object.entries(bad)) say(v.id, 'stern furniture off the raked face', `${k} (${n} mesh(es))`);
+}
+{
 let covM = null; g.traverse(o => { if (o.isMesh && o.material && o.material.userData && o.material.userData.covers && o.material.userData.covers.length) covM = o.material; });
 if (covM) {
 const cvs = covM.userData.covers;
 for (const c of cvs) if (!c.st || c.st.length !== 8) say(v.id, 'a deck cover with no per-station record for its parts', `${c.from} ${c.name}: st has ${c.st ? c.st.length : 0} stations`);
 g.updateMatrixWorld(true);
 const invP = new THREE.Matrix4().copy(g.matrixWorld).invert(), Mi = new THREE.Matrix4(), Mm = new THREE.Matrix4(), q = new THREE.Vector3();
+const HSc = SHIPS_HULL.hullSurface(H), endX = {};
+const skinEnd = (uE, y) => { const k = uE + ':' + y.toFixed(2); if (endX[k] !== undefined) return endX[k];
+let a = 0, b = 1; if (SHIPS_HULL.surfacePoint(H, HSc, uE, 1.0)[1] <= y) a = b = 1;
+for (let i = 0; i < 26 && a < b; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSc, uE, m)[1] < y) a = m; else b = m; }
+return (endX[k] = SHIPS_HULL.surfacePoint(H, HSc, uE, (a + b) / 2)[0]); };
 const under = q2 => cvs.some(c => { if (!c.st || q2.x < c.x0 || q2.x > c.x1 || q2.y > c.y - 0.05) return false;
-if (c.open < 0 ? q2.x > c.x1 - (c.endIn || 0) : q2.x < c.x0 + (c.endIn || 0)) return false;
+if (c.endIn) { const xe = skinEnd(c.open < 0 ? 1 : 0, q2.y);
+if (c.open < 0 ? q2.x > xe - c.endIn : q2.x < xe + c.endIn) return false; }
 const t = Math.min(6.999, (q2.x - c.x0) / Math.max(c.x1 - c.x0, 1e-3) * 7), k = Math.floor(t), f = t - k;
 const st = [0, 1, 2].map(j => c.st[k][j] + (c.st[k + 1][j] - c.st[k][j]) * f);
 if (q2.y < st[2] - 0.05) return false;

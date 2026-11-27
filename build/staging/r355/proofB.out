@@ -1,0 +1,132 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 0.74 m (1 mesh(es))"
+ },
+ {
+  "id": "fluyt",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 0.65 m (1 mesh(es))"
+ },
+ {
+  "id": "fluyt",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.81 m (1 mesh(es))"
+ },
+ {
+  "id": "fluyt",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.33 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 1.60 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 1.44 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 1.71 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 1.03 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 0.79 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 0.63 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.91 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.22 m (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery drum 0.71 m off the corner (1 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery: 8 vertices inside the stern (2 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery drum 0.26 m off the corner (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 1.17 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 1.00 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 1.24 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.73 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 0.57 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "sternlight off the face by 0.40 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.64 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.13 m (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery drum 0.78 m off the corner (1 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery: 8 vertices inside the stern (2 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery drum 0.20 m off the corner (1 mesh(es))"
+ }
+]

@@ -1,0 +1,37 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "stern furniture buried in the hull",
+  "detail": "lights end 0.61 m inboard of the aft face"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture buried in the hull",
+  "detail": "lights end 0.40 m inboard of the aft face"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.01 m (4 mesh(es))"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery: 4 vertices inside the stern (2 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture buried in the hull",
+  "detail": "lights end 0.21 m inboard of the aft face"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "transom off the face by 0.01 m (4 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery: 4 vertices inside the stern (2 mesh(es))"
+ }
+]

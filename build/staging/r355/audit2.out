@@ -1,0 +1,12 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery: 4 vertices inside the stern (2 mesh(es))"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture off the raked face",
+  "detail": "gallery: 4 vertices inside the stern (2 mesh(es))"
+ }
+]

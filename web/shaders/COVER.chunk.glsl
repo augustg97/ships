@@ -46,15 +46,19 @@ vec2 coverVis(vec3 o, vec3 lo) {
 uniform vec3 uCoverSt[32];
 /* and how far short of the closed end (the end away from the opening) a part's span stops: the hull's own end is a
    wall as the side is, so a sternpost or a rudder head proud of the stern stands in the open (COVER_SIDE_M, 0 where
-   the far end is the midpoint of an island open at both ends) */
-uniform float uCoverEnd[4];
+   the far end is the midpoint of an island open at both ends); since r355 a vec3, the end being a leaning line */
+uniform vec3 uCoverEnd[4];
 vec2 coverVisPart(vec3 o, vec3 lo) {
   vec2 v = vec2(1.0);
   for (int i = 0; i < 4; i++) {
     if (float(i) >= uCoverN) break;
     vec4 C = uCover[i];
     if (o.x < C.x || o.x > C.y || o.y > C.z - 0.05) continue;
-    if (C.w < 0.0 ? o.x > C.y - uCoverEnd[i] : o.x < C.x + uCoverEnd[i]) continue;
+    /* r355: the closed end is the skin's end, a line leaning with height: (inset, its x at the cover's height
+       less the cover's end x, dx/dy) */
+    vec3 E = uCoverEnd[i];
+    float xEnd = (C.w < 0.0 ? C.y : C.x) + E.y + (o.y - C.z) * E.z;
+    if (C.w < 0.0 ? o.x > xEnd - E.x : o.x < xEnd + E.x) continue;
     float t = clamp((o.x - C.x) / max(C.y - C.x, 1e-3), 0.0, 1.0) * 7.0;
     vec3 st = vec3(0.0);
     for (int k = 0; k < 7; k++) {

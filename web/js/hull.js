@@ -15182,10 +15182,29 @@ function buildStern(S, group, mats) {
   const L = S.lwl, B = S.beam;
   const g = new THREE.Group();
   const fb = H.sheer(1.0);
-  /* the aft face: x is constant over height at u = 1, half-breadth is not */
+  /* ⚠ THE AFT FACE IS RAKED, AND EVERYTHING ON IT STOOD AT THE TOP'S x (round 355). This
+     comment used to read "x is constant over height at u = 1"; the loft's rake made that
+     false long ago. On the 74 the face runs from x 25.50 at the waterline to 27.50 at the
+     sheer, and every light, moulding and gallery here was set at the sheer's x: the lower
+     tier of lights stood 1.2 m aft of the face it is glazed into, and each gallery's drum
+     hung off its corner by up to 1.3 m at the bottom while its full-circle cornice stood
+     half inside the stern. Each fitting now stands on the face at its OWN height (faceX),
+     leans with the face (faceLean), and the gallery is lofted round the corner line itself. */
   const xF = surfacePoint(S, H, 1.0, 1.0)[0];
-  const atH = zH => surfacePoint(S, H, 1.0, 0.62 + 0.38 * Math.max(0, Math.min(1, zH / fb)));
+  /* r355: the face's point AT height zH, by bisecting v; the old map v = 0.62 + 0.38·zH/fb is linear in a skin that
+     is not, and returned a corner from another height, 4 gallery vertices inside the stern */
+  const atH = zH => {
+    let lo = 0.62, hi = 1.0;
+    if (surfacePoint(S, H, 1.0, hi)[1] <= zH) return surfacePoint(S, H, 1.0, hi);
+    for (let i = 0; i < 26; i++) { const m = (lo + hi) / 2; if (surfacePoint(S, H, 1.0, m)[1] < zH) lo = m; else hi = m; }
+    return surfacePoint(S, H, 1.0, (lo + hi) / 2);
+  };
   const halfAt = zH => atH(zH)[2];
+  const faceX = zH => atH(zH)[0];
+  const faceLean = zH => {                       // the face's rake there, dx/dy, as an angle
+    const a = atH(zH - 0.25), b = atH(zH + 0.25);
+    return Math.atan2(b[0] - a[0], Math.max(1e-3, b[1] - a[1]));
+  };
   const glass = new THREE.MeshStandardMaterial({
     color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
 
@@ -15219,12 +15238,12 @@ function buildStern(S, group, mats) {
     const pitch = (2 * hw) / N, lw = pitch * (1 - pierF), gh = wh * 0.80;
     const pw = (lw - (plC - 1) * barW) / plC, ph = (gh - (plR - 1) * barW) / plR;
     const sash = new THREE.Shape();
-    sash.moveTo(-hw, zc - wh / 2); sash.lineTo(hw, zc - wh / 2);
-    sash.lineTo(hw, zc + wh / 2); sash.lineTo(-hw, zc + wh / 2); sash.closePath();
+    sash.moveTo(-hw, -wh / 2); sash.lineTo(hw, -wh / 2);
+    sash.lineTo(hw, wh / 2); sash.lineTo(-hw, wh / 2); sash.closePath();
     for (let i = 0; i < N; i++) {
       const zi = -hw + pitch * (i + 0.5);
       for (let cx = 0; cx < plC; cx++) for (let cy = 0; cy < plR; cy++) {
-        const h0 = zi - lw / 2 + cx * (pw + barW), v0 = zc - gh / 2 + cy * (ph + barW);
+        const h0 = zi - lw / 2 + cx * (pw + barW), v0 = -gh / 2 + cy * (ph + barW);
         const hole = new THREE.Path();
         hole.moveTo(h0, v0); hole.lineTo(h0 + pw, v0);
         hole.lineTo(h0 + pw, v0 + ph); hole.lineTo(h0, v0 + ph); hole.closePath();
@@ -15235,11 +15254,16 @@ function buildStern(S, group, mats) {
       new THREE.ExtrudeGeometry(sash, { depth: sashT, bevelEnabled: false }),
       mats.woodPale);
     fr.rotation.y = Math.PI / 2;               // shape (breadth, height) → ship (z, y)
-    fr.position.set(xF + B * 0.002, 0, 0);
-    g.add(tag(fr, 'sternlight'));
+    fr.position.set(B * 0.002, 0, 0);
+    /* the tier's own frame: its centre on the face at zc, its height axis up the face */
+    const tierG = new THREE.Group();
+    tierG.position.set(faceX(zc), zc, 0);
+    tierG.rotation.z = -faceLean(zc);
+    g.add(tierG);
+    tierG.add(tag(fr, 'sternlight'));
     const gl = new THREE.Mesh(new THREE.BoxGeometry(0.012, gh, 2 * hw), glass);
-    gl.position.set(xF + B * 0.004, zc, 0);
-    g.add(tag(gl, 'sternlight'));
+    gl.position.set(B * 0.004, 0, 0);
+    tierG.add(tag(gl, 'sternlight'));
     /* the mouldings that band the stern above and below each tier — the horizontal lines
        every stern drawing shows. Tagged as the transom: they are its structure, and they
        keep the stage card reachable now that the face itself is the hull's own cap. */
@@ -15248,7 +15272,7 @@ function buildStern(S, group, mats) {
       const rail = new THREE.Mesh(
         new THREE.CylinderGeometry(B * 0.008, B * 0.008, w2 * 2, 6), mats.woodDark);
       rail.rotation.x = Math.PI / 2;
-      rail.position.set(xF + B * 0.004, zm, 0);
+      rail.position.set(faceX(zm) + B * 0.004, zm, 0);
       g.add(tag(rail, 'transom'));
     }
   }
@@ -15312,7 +15336,7 @@ function buildStern(S, group, mats) {
         const cz = sgn * c[2] * 0.995, r = rAt(zH);
         for (let i = 0; i <= NA; i++) {
           const a = (i / NA) * Math.PI / 2;      // 0 → dead aft, π/2 → square outboard
-          gp.push(xF + r * Math.cos(a), zH, cz + sgn * r * Math.sin(a));
+          gp.push(c[0] + r * Math.cos(a), zH, cz + sgn * r * Math.sin(a));
         }
       }
       for (let j = 0; j < NZ; j++)
@@ -15321,17 +15345,47 @@ function buildStern(S, group, mats) {
           if (sgn > 0) gi.push(a, a + 1, a + NA + 1, a + 1, a + NA + 2, a + NA + 1);
           else         gi.push(a, a + NA + 1, a + 1, a + 1, a + NA + 1, a + NA + 2);
         }
+      /* the two cheeks that close the bay on the hull: one square across the face from the
+         corner aft (a = 0), one square to the side from the corner outboard (a = π/2). Until
+         r355 both were open, and from astern or from forward the drum showed its hollow. */
+      const nRing = (NZ + 1) * (NA + 1);
+      for (let j = 0; j <= NZ; j++) {
+        const zH = zG0 + (zG1 - zG0) * (j / NZ), c = atH(zH);
+        gp.push(c[0], zH, sgn * c[2] * 0.995);     // the corner line at this height
+      }
+      for (let j = 0; j < NZ; j++) {
+        const k0 = nRing + j, k1 = k0 + 1;
+        for (const i of [0, NA]) {
+          const a0 = j * (NA + 1) + i, a1 = a0 + NA + 1;
+          if ((sgn > 0) === (i === 0)) gi.push(k0, a1, a0, k0, k1, a1);
+          else                         gi.push(k0, a0, a1, k0, a1, k1);
+        }
+      }
       const gg = new THREE.BufferGeometry();
       gg.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3));
       gg.setIndex(gi); gg.computeVertexNormals();
       const bay = new THREE.Mesh(gg, new THREE.MeshStandardMaterial({
         color: 0x9c8259, roughness: 0.68, side: THREE.DoubleSide }));
       g.add(tag(bay, 'gallery'));
-      /* the cornice closing the drum's top */
-      const cT = atH(zG1);
-      const lid = new THREE.Mesh(
-        new THREE.CylinderGeometry(rMax * 1.12, rMax * 1.12, B * 0.012, 10), mats.woodDark);
-      lid.position.set(xF, zG1 + B * 0.006, sgn * cT[2] * 0.995);
+      /* the cornice closing the drum's top: the drum's own quarter, 12% proud of it. Until
+         r355 it was a full disc about the corner, so three quarters of it stood inside the
+         stern and showed through the seam as dark slivers once the deck's cover lit it. */
+      const cT = atH(zG1), rL = rMax * 1.12, pie = new THREE.Shape();
+      pie.moveTo(0, 0);
+      for (let i = 0; i <= 8; i++) {
+        const a = (i / 8) * Math.PI / 2;
+        pie.lineTo(rL * Math.cos(a), -sgn * rL * Math.sin(a));   // shape y → ship −z
+      }
+      pie.closePath();
+      const lidG = new THREE.ExtrudeGeometry(pie, { depth: B * 0.012, bevelEnabled: false });
+      /* sheared with the face's rake, so its inboard corner lies on the face top and bottom (flat, its top corner
+         stood 5.6 cm inside the 74's stern) */
+      { const pa = lidG.attributes.position, sl = Math.tan(faceLean(zG1));
+        for (let i = 0; i < pa.count; i++) pa.setX(i, pa.getX(i) + sl * pa.getZ(i));
+        lidG.computeVertexNormals(); }
+      const lid = new THREE.Mesh(lidG, mats.woodDark);
+      lid.rotation.x = -Math.PI / 2;               // extrusion depth → up
+      lid.position.set(cT[0], zG1, sgn * cT[2] * 0.995);
       g.add(tag(lid, 'gallery'));
       /* panes at the tier heights, looking out over the quarter */
       for (const zc of (rowZ.length ? rowZ : [(zG0 + zG1) / 2])) {
@@ -15339,7 +15393,7 @@ function buildStern(S, group, mats) {
         const c = atH(zc), r = rAt(zc);
         const pane = new THREE.Mesh(
           new THREE.BoxGeometry(B * 0.010, wh * 0.8, B * 0.045), glass);
-        pane.position.set(xF + (r + B * 0.004) * Math.SQRT1_2,
+        pane.position.set(c[0] + (r + B * 0.004) * Math.SQRT1_2,
                           zc, sgn * (c[2] * 0.995 + (r + B * 0.004) * Math.SQRT1_2));
         pane.rotation.y = -sgn * Math.PI / 4;
         g.add(tag(pane, 'gallery'));
@@ -15541,6 +15595,7 @@ function deckCovers(S, H) {
       (v.st = v.st || []).push([T.half((a + b) / 2) - COVER_SIDE_M, T.half((a + b) / 2) - COVER_SIDE_M, H.deck(cl((a + b) / 2))]);
     }
     v.endIn = COVER_SIDE_M;   // r354: the castle closes on the hull's own end, a wall a part's span stops short of
+    coverEndLine(S, H, v, T.end === 'aft' ? 1 : 0, H.deck(T.end === 'aft' ? 0.999 : 0.001));   // r355: and that end leans
     v.from = 'castle'; v.name = T.end;
     out.push(v);
   }
@@ -15554,6 +15609,23 @@ function deckCovers(S, H) {
    upper deck is frame and two skins of plank; no record gives the 74's or the carrack's, so this is a CLASS default,
    named here and in HANDOFF r354: a fitting within it of the skin takes the open light. */
 const COVER_SIDE_M = 0.25;
+/* ⚠ A CLOSED END IS THE SKIN'S END, AND THE SKIN'S END LEANS (round 355). r354 stopped a part's span
+   COVER_SIDE_M short of x1 (or x0), a vertical plane at the deck line's end. The 74's stern rakes 2 m
+   aft from the waterline to the sheer, so once her stern lights were stood on the face at their own
+   heights (r355) the upper tier counted 0.3–0.6 m in under the quarterdeck and its top went dark.
+   Each cover with a closed end now records that end as a line: endOff, the skin's end x at the
+   cover's height less the cover's own end x; endLean, its dx/dy between the deck and the cover. */
+function coverEndLine(S, H, v, uEnd, yDeck) {
+  const xe = y => {
+    if (y >= H.sheer(uEnd)) return surfacePoint(S, H, uEnd, 1.0)[0];
+    let a = 0, b = 1;
+    for (let i = 0; i < 26; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, uEnd, m)[1] < y) a = m; else b = m; }
+    return surfacePoint(S, H, uEnd, (a + b) / 2)[0];
+  };
+  const xc = xe(v.z), xd = xe(yDeck);
+  v.endOff = xc - (v.w < 0 ? v.y : v.x);
+  v.endLean = Math.abs(v.z - yDeck) > 0.1 ? (xc - xd) / (v.z - yDeck) : 0;
+}
 /* ⚠ A TIMBER ISLAND OPEN ON THE WAIST COVERS THE DECK UNDER IT (round 353). r345 opened the space
    under the 74's forecastle and quarterdeck on the waist: buildIslands draws no bulkhead below a
    timber island's end, so its deck's edge is the edge the waist sees. r352 shaded the main deck
@@ -15606,6 +15678,8 @@ function islandCovers(S, H) {
       /* r354: the end away from the opening is the hull's own end (a wall a part's span stops short of), or, on an
          island open at both ends, the midpoint where its two covers meet, which is no wall */
       v.endIn = ends.length === 2 ? 0 : COVER_SIDE_M;
+      if (ends.length === 2) { v.endOff = 0; v.endLean = 0; }
+      else coverEndLine(S, H, v, w < 0 ? 1 : 0, H.deck(w < 0 ? 0.999 : 0.001));   // r355: the hull's end, leaning
       v.from = 'island'; v.name = isl.name;
       out.push(v);
     }
@@ -18580,8 +18654,8 @@ function buildShip(S, opts) {
     const st = []; for (let i = 0; i < 32; i++) st.push(new THREE.Vector3());
     cv.forEach((c, i) => c.st.forEach((q, k) => st[i * 8 + k].set(q[0], q[1], q[2])));
     deckMat.uniforms.uCoverSt = { value: st };
-    deckMat.uniforms.uCoverEnd = { value: [0, 1, 2, 3].map(i => cv[i] ? cv[i].endIn || 0 : 0) };   // r354: read by the parts under a cover (lightUnderCovers), not by the deck
-    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, endIn: c.endIn || 0, from: c.from, name: c.name }));
+    deckMat.uniforms.uCoverEnd = { value: [0, 1, 2, 3].map(i => cv[i] ? new THREE.Vector3(cv[i].endIn || 0, cv[i].endOff || 0, cv[i].endLean || 0) : new THREE.Vector3()) };   // r354: read by the parts under a cover (lightUnderCovers), not by the deck
+    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, endIn: c.endIn || 0, endOff: c.endOff || 0, endLean: c.endLean || 0, from: c.from, name: c.name }));
   }
   if (cover.mode === 0) {
     /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────
