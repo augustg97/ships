@@ -9916,12 +9916,14 @@ const x = v.x + (v.y - v.x) * k / 7;
 let a = T.u0, b = T.u1;
 for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; else b = m; }
 v.hw.push(T.half((a + b) / 2));
+(v.st = v.st || []).push([T.half((a + b) / 2) - COVER_SIDE_M, T.half((a + b) / 2) - COVER_SIDE_M, H.deck(cl((a + b) / 2))]);
 }
 v.from = 'castle'; v.name = T.end;
 out.push(v);
 }
 return out.slice(0, 4);
 }
+const COVER_SIDE_M = 0.25;
 function islandCovers(S, H) {
 const I = S.islands;
 if (!(I && I.list && I.list.length) || S.build === 'steel' || S.build === 'iron' || S.iron) return [];
@@ -9952,12 +9954,75 @@ let p = a, q = b;
 for (let j = 0; j < 30; j++) { const m = (p + q) / 2; if (xAt(m) < x) p = m; else q = m; }
 const u = (p + q) / 2;
 v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
+(v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, top(u) - iRail) - COVER_SIDE_M, H.deck(cl(u))]);
 }
 v.from = 'island'; v.name = isl.name;
 out.push(v);
 }
 }
 return out;
+}
+let COVER_GLSL = null;
+function coverGlsl() {
+if (COVER_GLSL !== null) return COVER_GLSL;
+const s = (typeof SHADERS !== 'undefined' && SHADERS['DECK_FRAG.frag']) || '';
+const a = s.indexOf('#define COVER_TERM_BEGIN'), b = s.indexOf('#define COVER_TERM_END');
+COVER_GLSL = a >= 0 && b > a ? s.slice(s.indexOf('\n', a) + 1, b) : '';
+return COVER_GLSL;
+}
+function lightUnderCovers(group, deckMat) {
+const U = deckMat && deckMat.uniforms, covers = deckMat && deckMat.userData.covers;
+if (!U || !covers || !covers.length || !coverGlsl()) return 0;
+group.updateMatrixWorld(true);
+const inv = new THREE.Matrix4().copy(group.matrixWorld).invert(), M = new THREE.Matrix4(), I = new THREE.Matrix4();
+const hullInv = { value: new THREE.Matrix4() }, clones = new Map(), box = new THREE.Box3(), b = new THREE.Box3();
+const hwMax = c => Math.max(...c.hw, ...c.st.map(q => Math.max(q[0], q[1])));
+const y0 = c => Math.min(...c.st.map(q => q[2])) - 0.05;
+const reaches = bb => covers.some(c => bb.max.x > c.x0 && bb.min.x < c.x1 && bb.min.y < c.y - 0.02 && bb.max.y > y0(c) &&
+bb.max.z > -hwMax(c) && bb.min.z < hwMax(c));
+let n = 0;
+group.traverse(o => {
+if (!o.isMesh || Array.isArray(o.material) || !o.material || !o.material.isMeshStandardMaterial) return;
+if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+M.multiplyMatrices(inv, o.matrixWorld);
+if (o.isInstancedMesh) {
+box.makeEmpty();
+for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, I); box.union(b.copy(o.geometry.boundingBox).applyMatrix4(I.premultiply(M))); }
+} else box.copy(o.geometry.boundingBox).applyMatrix4(M);
+if (!reaches(box)) return;
+let m = clones.get(o.material);
+if (!m) {
+m = o.material.clone();
+m.userData = Object.assign({}, o.material.userData, { coverLit: true, coverUniforms: U.uCover });
+m.onBeforeCompile = sh => {
+sh.uniforms.uCover = U.uCover; sh.uniforms.uCoverN = U.uCoverN; sh.uniforms.uCoverHW = U.uCoverHW; sh.uniforms.uCoverSt = U.uCoverSt;
+sh.uniforms.uSun = U.uSun; sh.uniforms.uHullInv = hullInv;
+sh.vertexShader = 'uniform mat4 uHullInv;\nuniform vec3 uSun;\nvarying vec3 vCovO;\nvarying vec3 vCovLo;\n' +
+sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
+{ vec4 cp = vec4(transformed, 1.0);
+#ifdef USE_INSTANCING
+cp = instanceMatrix * cp;
+#endif
+vCovO = (uHullInv * modelMatrix * cp).xyz;
+/* uSun is a view-space direction: the transpose of the view rotation takes it to world, then to hull */
+vec3 ws = vec3(dot(viewMatrix[0].xyz, uSun), dot(viewMatrix[1].xyz, uSun), dot(viewMatrix[2].xyz, uSun));
+vCovLo = normalize(mat3(uHullInv) * ws); }`);
+sh.fragmentShader = '#define COVER_PARTS\n' + coverGlsl() + 'varying vec3 vCovO;\nvarying vec3 vCovLo;\n' +
+sh.fragmentShader.replace('#include <aomap_fragment>', `#include <aomap_fragment>
+{ vec2 cvis = coverVisPart(vCovO, vCovLo);
+reflectedLight.directDiffuse *= cvis.x; reflectedLight.directSpecular *= cvis.x;
+float skv = max(cvis.y, 0.08);
+reflectedLight.indirectDiffuse *= skv; reflectedLight.indirectSpecular *= skv; }`);
+};
+m.customProgramCacheKey = () => 'cover-lit-r354';
+clones.set(o.material, m);
+}
+o.material = m;
+const prev = o.onBeforeRender;
+o.onBeforeRender = function (...a) { hullInv.value.copy(group.matrixWorld).invert(); return prev.apply(this, a); };
+n++;
+});
+return n;
 }
 function castleTopAt(S, H, u) {
 let top = null;
@@ -11940,7 +12005,10 @@ deckMat.uniforms.uCover = { value: pad };
 deckMat.uniforms.uCoverN = { value: cv.length };
 const hw = new Array(32).fill(0); cv.forEach((c, i) => c.hw.forEach((h, k) => { hw[i * 8 + k] = h; }));
 deckMat.uniforms.uCoverHW = { value: hw };
-deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, from: c.from, name: c.name }));
+const st = []; for (let i = 0; i < 32; i++) st.push(new THREE.Vector3());
+cv.forEach((c, i) => c.st.forEach((q, k) => st[i * 8 + k].set(q[0], q[1], q[2])));
+deckMat.uniforms.uCoverSt = { value: st };
+deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, from: c.from, name: c.name }));
 }
 if (cover.mode === 0) {
 const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
@@ -12106,8 +12174,9 @@ byMi[ud.seg.mi] = Object.assign({ mi: ud.seg.mi, ruleInPerYd: ud.head.inPerYd },
 return Object.keys(byMi).map(Number).sort((a, b) => a - b).map(k => byMi[k]); })() };
 }
 } }
+const coverLitN = FINE ? lightUnderCovers(group, deckMat) : 0;
 const capstanUnseated = group.userData.capstanUnseated;
-group.userData = { hullMat, sails, spec: S, furled: FURLED, capstanUnseated,
+group.userData = { hullMat, sails, spec: S, furled: FURLED, capstanUnseated, coverLitN,
 rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom, rigTruckHow,
 extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };

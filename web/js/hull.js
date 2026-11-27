@@ -15537,6 +15537,8 @@ function deckCovers(S, H) {
       let a = T.u0, b = T.u1;
       for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; else b = m; }
       v.hw.push(T.half((a + b) / 2));
+      /* r354: a part's record per station, [half-breadth at the deck, at the cover, the deck's height] */
+      (v.st = v.st || []).push([T.half((a + b) / 2) - COVER_SIDE_M, T.half((a + b) / 2) - COVER_SIDE_M, H.deck(cl((a + b) / 2))]);
     }
     v.from = 'castle'; v.name = T.end;
     out.push(v);
@@ -15544,6 +15546,13 @@ function deckCovers(S, H) {
   return out.slice(0, 4);
 }
 
+/* ⚠ THE SPACE A COVER ROOFS ENDS AT THE INNER FACE OF THE SIDE (round 354). The model draws a ship's side as one
+   skin with no thickness, and a part's record (v.st) is read by every fragment of every part under the cover. Taken
+   at the skin (plus r353's 0.05 m), it blacked out the faces of the quarter galleries and the inboard edge of the
+   mizzen channel where they meet the side (r354/wit/crop-stern.png), which stand outside it. A ship's side at the
+   upper deck is frame and two skins of plank; no record gives the 74's or the carrack's, so this is a CLASS default,
+   named here and in HANDOFF r354: a fitting within it of the skin takes the open light. */
+const COVER_SIDE_M = 0.25;
 /* ⚠ A TIMBER ISLAND OPEN ON THE WAIST COVERS THE DECK UNDER IT (round 353). r345 opened the space
    under the 74's forecastle and quarterdeck on the waist: buildIslands draws no bulkhead below a
    timber island's end, so its deck's edge is the edge the waist sees. r352 shaded the main deck
@@ -15590,12 +15599,91 @@ function islandCovers(S, H) {
         for (let j = 0; j < 30; j++) { const m = (p + q) / 2; if (xAt(m) < x) p = m; else q = m; }
         const u = (p + q) / 2;
         v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
+        /* r354: for a part, the shell's half-breadth at the deck and at the island deck, and the deck's height */
+        (v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, top(u) - iRail) - COVER_SIDE_M, H.deck(cl(u))]);
       }
       v.from = 'island'; v.name = isl.name;
       out.push(v);
     }
   }
   return out;
+}
+
+/* ── A PART UNDER A COVER IS LIT AS THE DECK UNDER IT IS (round 354) ─────────────────────────
+   r352 and r353 shade the main deck under a deck built over it (DECK_FRAG's cover term), and every
+   fitting standing on that deck kept the scene's full light: the Shipwright has no shadow map, so a
+   MeshStandardMaterial part is lit by the key light and the whole hemisphere wherever it stands. On
+   the 74 the main capstan under the quarterdeck, the jeer capstan under the forecastle's edge, the
+   gratings and the upper-deck guns under both islands stood in full sun in the shade (r353's
+   under.txt); on the carrack her capstan and gratings under the half deck. A real fitting under a
+   deck is lit as the planks under it are: the sun only through the opening, the sky in the share
+   h / (h + 2d). So every scene-lit part whose box reaches under a cover takes the SAME term: the
+   text of COVER.chunk.glsl sliced out of the bundled DECK_FRAG between its two markers, reading
+   the deck material's own uniform objects, so the deck and the part cannot drift apart. Direct
+   light (the key and the fills) takes the sun's visibility, and the hemisphere and environment
+   take the sky's, floored at 0.08 as the deck's sky is. The material is cloned per hull, so a
+   material shared across the fleet is not changed on any other ship. */
+let COVER_GLSL = null;
+function coverGlsl() {
+  if (COVER_GLSL !== null) return COVER_GLSL;
+  const s = (typeof SHADERS !== 'undefined' && SHADERS['DECK_FRAG.frag']) || '';
+  const a = s.indexOf('#define COVER_TERM_BEGIN'), b = s.indexOf('#define COVER_TERM_END');
+  COVER_GLSL = a >= 0 && b > a ? s.slice(s.indexOf('\n', a) + 1, b) : '';
+  return COVER_GLSL;
+}
+function lightUnderCovers(group, deckMat) {
+  const U = deckMat && deckMat.uniforms, covers = deckMat && deckMat.userData.covers;
+  if (!U || !covers || !covers.length || !coverGlsl()) return 0;
+  group.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(group.matrixWorld).invert(), M = new THREE.Matrix4(), I = new THREE.Matrix4();
+  const hullInv = { value: new THREE.Matrix4() }, clones = new Map(), box = new THREE.Box3(), b = new THREE.Box3();
+  const hwMax = c => Math.max(...c.hw, ...c.st.map(q => Math.max(q[0], q[1])));
+  const y0 = c => Math.min(...c.st.map(q => q[2])) - 0.05;
+  const reaches = bb => covers.some(c => bb.max.x > c.x0 && bb.min.x < c.x1 && bb.min.y < c.y - 0.02 && bb.max.y > y0(c) &&
+                                         bb.max.z > -hwMax(c) && bb.min.z < hwMax(c));
+  let n = 0;
+  group.traverse(o => {
+    if (!o.isMesh || Array.isArray(o.material) || !o.material || !o.material.isMeshStandardMaterial) return;
+    if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+    M.multiplyMatrices(inv, o.matrixWorld);
+    if (o.isInstancedMesh) {
+      box.makeEmpty();
+      for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, I); box.union(b.copy(o.geometry.boundingBox).applyMatrix4(I.premultiply(M))); }
+    } else box.copy(o.geometry.boundingBox).applyMatrix4(M);
+    if (!reaches(box)) return;
+    let m = clones.get(o.material);
+    if (!m) {
+      m = o.material.clone();
+      m.userData = Object.assign({}, o.material.userData, { coverLit: true, coverUniforms: U.uCover });
+      m.onBeforeCompile = sh => {
+        sh.uniforms.uCover = U.uCover; sh.uniforms.uCoverN = U.uCoverN; sh.uniforms.uCoverHW = U.uCoverHW; sh.uniforms.uCoverSt = U.uCoverSt;
+        sh.uniforms.uSun = U.uSun; sh.uniforms.uHullInv = hullInv;
+        sh.vertexShader = 'uniform mat4 uHullInv;\nuniform vec3 uSun;\nvarying vec3 vCovO;\nvarying vec3 vCovLo;\n' +
+          sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
+  { vec4 cp = vec4(transformed, 1.0);
+  #ifdef USE_INSTANCING
+    cp = instanceMatrix * cp;
+  #endif
+    vCovO = (uHullInv * modelMatrix * cp).xyz;
+    /* uSun is a view-space direction: the transpose of the view rotation takes it to world, then to hull */
+    vec3 ws = vec3(dot(viewMatrix[0].xyz, uSun), dot(viewMatrix[1].xyz, uSun), dot(viewMatrix[2].xyz, uSun));
+    vCovLo = normalize(mat3(uHullInv) * ws); }`);
+        sh.fragmentShader = '#define COVER_PARTS\n' + coverGlsl() + 'varying vec3 vCovO;\nvarying vec3 vCovLo;\n' +
+          sh.fragmentShader.replace('#include <aomap_fragment>', `#include <aomap_fragment>
+  { vec2 cvis = coverVisPart(vCovO, vCovLo);
+    reflectedLight.directDiffuse *= cvis.x; reflectedLight.directSpecular *= cvis.x;
+    float skv = max(cvis.y, 0.08);
+    reflectedLight.indirectDiffuse *= skv; reflectedLight.indirectSpecular *= skv; }`);
+      };
+      m.customProgramCacheKey = () => 'cover-lit-r354';
+      clones.set(o.material, m);
+    }
+    o.material = m;
+    const prev = o.onBeforeRender;
+    o.onBeforeRender = function (...a) { hullInv.value.copy(group.matrixWorld).invert(); return prev.apply(this, a); };
+    n++;
+  });
+  return n;
 }
 
 /* The highest walled tier covering station u, or null: {y: its deck's height there, half: its
@@ -18485,7 +18573,10 @@ function buildShip(S, opts) {
     deckMat.uniforms.uCoverN = { value: cv.length };
     const hw = new Array(32).fill(0); cv.forEach((c, i) => c.hw.forEach((h, k) => { hw[i * 8 + k] = h; }));
     deckMat.uniforms.uCoverHW = { value: hw };
-    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, from: c.from, name: c.name }));
+    const st = []; for (let i = 0; i < 32; i++) st.push(new THREE.Vector3());
+    cv.forEach((c, i) => c.st.forEach((q, k) => st[i * 8 + k].set(q[0], q[1], q[2])));
+    deckMat.uniforms.uCoverSt = { value: st };   // r354: read by the parts under a cover (lightUnderCovers), not by the deck
+    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, from: c.from, name: c.name }));
   }
   if (cover.mode === 0) {
     /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────
@@ -18752,8 +18843,9 @@ function buildShip(S, opts) {
                           return Object.keys(byMi).map(Number).sort((a, b) => a - b).map(k => byMi[k]); })() };
       }
     } }
+  const coverLitN = FINE ? lightUnderCovers(group, deckMat) : 0;   // r354
   const capstanUnseated = group.userData.capstanUnseated;   // r346, set by seatClassCapstans
-  group.userData = { hullMat, sails, spec: S, furled: FURLED, capstanUnseated,
+  group.userData = { hullMat, sails, spec: S, furled: FURLED, capstanUnseated, coverLitN,
                      rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom, rigTruckHow,
                      extentX: bb.max.x - bb.min.x,     // a lateen yard overhangs the stem
                      /* ── THE FLOAT DATUM IS A CONSTRUCTION FACT, NOT A MEASUREMENT ──────

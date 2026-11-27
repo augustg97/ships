@@ -7097,6 +7097,34 @@ for (const c of icov) if (c.name === I.name && !ends.includes(c.open)) say(v.id,
 }
 }
 }
+{
+let covM = null; g.traverse(o => { if (o.isMesh && o.material && o.material.userData && o.material.userData.covers && o.material.userData.covers.length) covM = o.material; });
+if (covM) {
+const cvs = covM.userData.covers;
+for (const c of cvs) if (!c.st || c.st.length !== 8) say(v.id, 'a deck cover with no per-station record for its parts', `${c.from} ${c.name}: st has ${c.st ? c.st.length : 0} stations`);
+g.updateMatrixWorld(true);
+const invP = new THREE.Matrix4().copy(g.matrixWorld).invert(), Mi = new THREE.Matrix4(), Mm = new THREE.Matrix4(), q = new THREE.Vector3();
+const under = q2 => cvs.some(c => { if (!c.st || q2.x < c.x0 || q2.x > c.x1 || q2.y > c.y - 0.05) return false;
+const t = Math.min(6.999, (q2.x - c.x0) / Math.max(c.x1 - c.x0, 1e-3) * 7), k = Math.floor(t), f = t - k;
+const st = [0, 1, 2].map(j => c.st[k][j] + (c.st[k + 1][j] - c.st[k][j]) * f);
+if (q2.y < st[2] - 0.05) return false;
+const hw = st[0] + (st[1] - st[0]) * Math.max(0, Math.min(1, (q2.y - st[2]) / Math.max(c.y - st[2], 0.1)));
+return Math.abs(q2.z) < hw; });
+const tally = {};
+g.traverse(o => { const m = o.isMesh && o.material;
+if (!m || Array.isArray(m) || !(m.isMeshStandardMaterial || m.isMeshLambertMaterial || m.isMeshPhongMaterial)) return;
+if (m.userData && m.userData.coverLit && m.userData.coverUniforms === covM.uniforms.uCover) return;
+const a = o.geometry.attributes.position, nI = o.isInstancedMesh ? o.count : 1; let hit = 0;
+for (let i = 0; i < nI && !hit; i++) {
+Mm.multiplyMatrices(invP, o.matrixWorld); if (o.isInstancedMesh) { o.getMatrixAt(i, Mi); Mm.multiply(Mi); }
+for (let j = 0; j < a.count; j++) { q.fromBufferAttribute(a, j).applyMatrix4(Mm); if (under(q)) { hit = 1; break; } } }
+if (!hit) return;
+let nm = o.name || ''; for (let pp = o; pp && !nm; pp = pp.parent) nm = (pp.userData && pp.userData.part && (pp.userData.part.name || pp.userData.part.key)) || pp.name || '';
+const why = !(m.userData && m.userData.coverLit) ? 'no cover term' : 'the cover term on its own uniforms';
+const key = (nm || '?') + ' (' + why + ')'; tally[key] = (tally[key] || 0) + 1; });
+for (const [k, n] of Object.entries(tally)) say(v.id, 'a part under a deck cover lit as open sky', `${k}: ${n} mesh(es)`);
+}
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
