@@ -15607,7 +15607,11 @@ function deckCovers(S, H) {
    at the skin (plus r353's 0.05 m), it blacked out the faces of the quarter galleries and the inboard edge of the
    mizzen channel where they meet the side (r354/wit/crop-stern.png), which stand outside it. A ship's side at the
    upper deck is frame and two skins of plank; no record gives the 74's or the carrack's, so this is a CLASS default,
-   named here and in HANDOFF r354: a fitting within it of the skin takes the open light. */
+   named here and in HANDOFF r354: a fitting within it of the skin takes the open light.
+   r356: the 74's record now gives her side from Steel (hull.side: 0.514 m at the upper deck, 0.356 m at the quarterdeck),
+   and this is NOT that figure. It is a tolerance for the skin the model draws, which has no thickness: her waterway lies
+   0.00-0.36 m inside it, so a 0.514 m margin lights the waterway under the quarterdeck as open sky. The margin can take
+   the record when the side is drawn at the record's thickness; hull.side.contested says so, and A-SIDE-AS-DRAWN holds it. */
 const COVER_SIDE_M = 0.25;
 /* ⚠ A CLOSED END IS THE SKIN'S END, AND THE SKIN'S END LEANS (round 355). r354 stopped a part's span
    COVER_SIDE_M short of x1 (or x0), a vertical plane at the deck line's end. The 74's stern rakes 2 m

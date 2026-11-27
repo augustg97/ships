@@ -1,0 +1,22 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "castle aft: sideFrom record, the hull does not record side.atDeckM"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "island Forecastle: station 7 off by 0.264 m at the deck, 0.106 m at the cover, 0.010 m in the deck's height (side 0.514 / 0.356 m)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "island Forecastle: its closed end stands 0.250 m in from the skin; the record gives 0.356 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "island Quarterdeck: station 7 off by 0.266 m at the deck, 0.106 m at the cover, 0.005 m in the deck's height (side 0.514 / 0.356 m)"
+ }
+]

@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded side still marked contested after the model draws it",
+  "detail": "the waterway's outboard edge stands -0.005 m inside the skin, within 0.1 m of the record's 0.01 m"
+ }
+]

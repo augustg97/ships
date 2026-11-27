@@ -1,0 +1,17 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "castle aft: sideFrom none, the hull does not record side.atDeckM"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "island Forecastle: sideFrom none, the hull records side.atDeckM"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck cover whose side is not its record",
+  "detail": "island Quarterdeck: sideFrom none, the hull records side.atDeckM"
+ }
+]

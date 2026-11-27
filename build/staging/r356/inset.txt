@@ -1,0 +1,6 @@
+Bulwark stanchion            n 1104 inset min 0.042 p10 0.045 median 0.192 max 0.208
+Pin rail                     n 408 inset min 0.200 p10 0.200 median 0.360 max 0.360
+Fife rail                    n 432 inset min 3.883 p10 3.995 median 5.054 max 5.240
+Fife rail pins               n 960 inset min 3.959 p10 4.018 median 5.129 max 6.270
+Waterway                     n 416 inset min -0.006 p10 -0.005 median 0.286 max 0.363
+Grating                      n 954 inset min 3.004 p10 3.526 median 4.598 max 6.477

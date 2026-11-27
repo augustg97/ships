@@ -1,0 +1,87 @@
+ship-of-the-line Belaying pins under 0 of 9840
+ship-of-the-line Bobstay under 0 of 16
+ship-of-the-line Bower anchor under 6 of 708
+ship-of-the-line Bowsprit under 0 of 100
+ship-of-the-line Braces under 0 of 272
+ship-of-the-line Cathead under 12 of 48
+ship-of-the-line Channels under 12 of 144
+ship-of-the-line Coils under 0 of 21120
+ship-of-the-line Deadeyes under 0 of 2600
+ship-of-the-line Frame 1 of 30 under 4 of 108
+ship-of-the-line Frame 13 of 30 under 2 of 108
+ship-of-the-line Frame 14 of 30 under 4 of 108
+ship-of-the-line Frame 15 of 30 under 4 of 108
+ship-of-the-line Frame 16 of 30 under 4 of 108
+ship-of-the-line Frame 17 of 30 under 4 of 108
+ship-of-the-line Frame 18 of 30 under 4 of 108
+ship-of-the-line Frame 19 of 30 under 4 of 108
+ship-of-the-line Frame 2 of 30 under 4 of 108
+ship-of-the-line Frame 20 of 30 under 2 of 108
+ship-of-the-line Frame 21 of 30 under 2 of 108
+ship-of-the-line Frame 22 of 30 under 4 of 108
+ship-of-the-line Frame 23 of 30 under 4 of 108
+ship-of-the-line Frame 24 of 30 under 4 of 108
+ship-of-the-line Frame 25 of 30 under 4 of 108
+ship-of-the-line Frame 26 of 30 under 4 of 108
+ship-of-the-line Frame 27 of 30 under 4 of 108
+ship-of-the-line Frame 28 of 30 under 4 of 108
+ship-of-the-line Frame 29 of 30 under 2 of 108
+ship-of-the-line Frame 3 of 30 under 4 of 108
+ship-of-the-line Frame 30 of 30 under 2 of 108
+ship-of-the-line Frame 4 of 30 under 6 of 108
+ship-of-the-line Frame 5 of 30 under 4 of 108
+ship-of-the-line Frame 6 of 30 under 4 of 108
+ship-of-the-line Frame 7 of 30 under 4 of 108
+ship-of-the-line Grating under 31556 of 31560
+ship-of-the-line Great guns under 1100 of 2200
+ship-of-the-line Head and beakhead under 0 of 1418
+ship-of-the-line Mast under 30 of 60
+ship-of-the-line Pin rail under 0 of 728
+ship-of-the-line Quarter galleries under 0 of 390
+ship-of-the-line Rail under 0 of 760
+ship-of-the-line Ratlines under 0 of 6912
+ship-of-the-line Sheets under 0 of 64
+ship-of-the-line Shrouds under 0 of 240
+ship-of-the-line Stays and backstays under 8 of 80
+ship-of-the-line Stem under 2 of 108
+ship-of-the-line Stern lights under 0 of 2256
+ship-of-the-line Sternpost under 4 of 108
+ship-of-the-line Tacks under 0 of 32
+ship-of-the-line Transom under 0 of 40
+ship-of-the-line Waterway under 4 of 728
+ship-of-the-line cap-bar under 858 of 988
+ship-of-the-line cap-chock under 432 of 432
+ship-of-the-line cap-core under 76 of 76
+ship-of-the-line cap-head under 124 of 124
+ship-of-the-line cap-pawl under 48 of 48
+ship-of-the-line cap-whelp under 288 of 288
+carrack Aftcastle under 0 of 24
+carrack Braces under 16 of 64
+carrack Frame 18 of 30 under 0 of 108
+carrack Frame 19 of 30 under 0 of 108
+carrack Frame 20 of 30 under 0 of 108
+carrack Frame 21 of 30 under 0 of 108
+carrack Frame 22 of 30 under 0 of 108
+carrack Frame 23 of 30 under 0 of 108
+carrack Frame 24 of 30 under 0 of 108
+carrack Frame 25 of 30 under 0 of 108
+carrack Frame 26 of 30 under 0 of 108
+carrack Frame 27 of 30 under 0 of 108
+carrack Frame 28 of 30 under 0 of 108
+carrack Frame 29 of 30 under 0 of 108
+carrack Frame 30 of 30 under 0 of 108
+carrack Grating under 7556 of 7560
+carrack Halyard under 0 of 16
+carrack Mast under 56 of 112
+carrack Rail under 0 of 728
+carrack Sheets under 0 of 32
+carrack Stays and backstays under 0 of 48
+carrack Sternpost under 0 of 108
+carrack Tacks under 0 of 16
+carrack Waterway under 0 of 728
+carrack cap-bar under 416 of 416
+carrack cap-chock under 432 of 432
+carrack cap-core under 76 of 76
+carrack cap-head under 124 of 124
+carrack cap-pawl under 48 of 48
+carrack cap-whelp under 288 of 288
