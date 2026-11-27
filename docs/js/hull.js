@@ -4157,7 +4157,10 @@ what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her
 + 'is the whole invention: it rolls the anchor over until a fluke bites. '
 + 'Without it the thing lies flat and drags. The arms leave the foot of the shank '
 + 'at 60° to it, rising toward the ring, and each carries a triangular iron palm on '
-+ 'its upper face (Falconer, 1769). The stock is oak, in two halves hooped with iron. '
++ 'its upper face (Falconer, 1769). The stock is oak, two pieces of timber set up on the '
++ 'shank by six iron hoops, and it is heavy: Cotsell (1856) makes it as long as the shank, '
++ 'an inch thick for every foot of that length in the middle and half that at the ends, so '
++ 'an 18-foot stock is 18 inches square where it crosses the shank. '
 + 'On the iron steamer and Preussen it is iron: a round bar with a ball at each end and '
 + 'one end bent square, keyed through the shank with a forelock so it could be drawn and '
 + 'laid along the shank for stowage. Cotsell (1856) records the Royal Navy fitting iron '
@@ -10881,7 +10884,8 @@ const L = S.lwl;
 const ironStock = !!S.iron;
 const s = Math.min(L, 48) * 0.115 + Math.max(0, L - 48) * 0.004;
 const f = { s, a: s / 3, armDeg: 60, rCrown: s * 0.021, rEye: s * 0.014, rBill: s * 0.010,
-palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s * 0.062, stockEnd: s * 0.032,
+palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s / 12, stockEnd: s / 24,
+hoopAt: [0.26, 0.55, 0.84], hoopT: s * 0.004, hoopW: s * 0.012,
 ringR: s * 0.075, ringT: s * 0.011 };
 f.ironStock = ironStock;
 if (ironStock) {
@@ -10950,9 +10954,10 @@ const half = put(new THREE.Mesh(new THREE.CylinderGeometry(f.stockEnd * Math.SQR
 half.rotation.x = k * Math.PI / 2;
 half.rotation.y = Math.PI / 4;
 half.position.set(0, ys, k * f.stockL / 4);
-for (const t of [0.18, 0.40]) {
-const hoop = put(new THREE.Mesh(new THREE.BoxGeometry(f.stockMid * 1.5, f.stockMid * 1.5, f.s * 0.012), iron), 'hoop');
-hoop.position.set(0, ys, k * f.stockL * t);
+for (const h of f.hoopAt) {
+const side = f.stockMid + (f.stockEnd - f.stockMid) * h + 2 * f.hoopT;
+const hoop = put(new THREE.Mesh(new THREE.BoxGeometry(side, side, f.hoopW), iron), 'hoop');
+hoop.position.set(0, ys, k * f.stockL / 2 * h);
 }
 }
 const ring = put(new THREE.Mesh(new THREE.TorusGeometry(f.ringR, f.ringT, 6, 16), iron), 'ring');
@@ -11037,7 +11042,7 @@ A.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(st.xA, st.yA, s
 A.position.copy(st.crown);
 A.userData.anchorStow = { ring: st.ring.toArray().map(q => +q.toFixed(3)), crown: st.crown.toArray().map(q => +q.toFixed(3)),
 bill: st.bill.toArray().map(q => +q.toFixed(3)), tiltDeg: st.tiltDeg, stockClear: st.stockClear, under: st.under, underChannel: st.underChannel, channel: st.channel,
-stock: f.ironStock ? 'iron: Cotsell 1856, pl. 31 fig. 3, the Admiralty iron stock' : 'oak: Falconer 1769, in two halves hooped with iron',
+stock: f.ironStock ? 'iron: Cotsell 1856, pl. 31 fig. 3, the Admiralty iron stock' : 'oak: Falconer 1769, in two halves; Cotsell 1856 p. 114 and pl. 31 fig. 1, 1/12 of its length square in the middle, 1/24 at the ends, six hoops',
 rule: 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the side under the fore channel' };
 const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), st.ring]], 0.018 + B * 0.0006, mats.ropeSolid || iron);
 if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));

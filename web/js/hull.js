@@ -7219,7 +7219,10 @@ const PARTS = {
                   + 'is the whole invention: it rolls the anchor over until a fluke bites. '
                   + 'Without it the thing lies flat and drags. The arms leave the foot of the shank '
                   + 'at 60° to it, rising toward the ring, and each carries a triangular iron palm on '
-                  + 'its upper face (Falconer, 1769). The stock is oak, in two halves hooped with iron. '
+                  + 'its upper face (Falconer, 1769). The stock is oak, two pieces of timber set up on the '
+                  + 'shank by six iron hoops, and it is heavy: Cotsell (1856) makes it as long as the shank, '
+                  + 'an inch thick for every foot of that length in the middle and half that at the ends, so '
+                  + 'an 18-foot stock is 18 inches square where it crosses the shank. '
                   + 'On the iron steamer and Preussen it is iron: a round bar with a ball at each end and '
                   + 'one end bent square, keyed through the shank with a forelock so it could be drawn and '
                   + 'laid along the shank for stowage. Cotsell (1856) records the Royal Navy fitting iron '
@@ -17038,7 +17041,8 @@ function anchorFormOf(S) {
      nearly stops. */
   const s = Math.min(L, 48) * 0.115 + Math.max(0, L - 48) * 0.004;
   const f = { s, a: s / 3, armDeg: 60, rCrown: s * 0.021, rEye: s * 0.014, rBill: s * 0.010,
-              palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s * 0.062, stockEnd: s * 0.032,
+              palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s / 12, stockEnd: s / 24,
+              hoopAt: [0.26, 0.55, 0.84], hoopT: s * 0.004, hoopW: s * 0.012,
               ringR: s * 0.075, ringT: s * 0.011 };
   /* ⚠ AN IRON SHIP'S BOWER HAS AN IRON STOCK (round 368). Cotsell (A Treatise on Ships' Anchors, 1856, pp. 114-117,
      pl. 31): "Stocks are either of wood or of iron; formerly they were almost all of wood — they are now mostly of
@@ -17050,8 +17054,15 @@ function anchorFormOf(S) {
      secured on the other side by means of a forelock". The ball, the bent leg's length (0.09 of the stock) and the
      collar's size are read off that engraving, which carries no scale: about 925 px over the stock's length, so they
      are good to a few percent of it. Which way the leg points in use the plate does not say; it is drawn toward the ring.
-     The wood stock keeps its r366 class figures: Cotsell's wood rule (an inch to the foot in the middle, half an inch at
-     the ends, so 1/12 and 1/24 of the length) is thicker than the 0.062 and 0.032 drawn, and is carried to the next round. */
+     ⚠ THE WOOD STOCK IS COTSELL'S TOO (round 369). Same page: "The size of the stocks at the middle, when of wood, is one
+     inch to the foot in length, at the ends half an inch", so a square section 1/12 of the length in the middle and 1/24
+     at the ends. Until r369 it was drawn at r366's class figures, 0.062 and 0.032, three-quarters of the rule. Plate 31
+     fig. 1, the Admiralty wood stock: two pieces of timber, set up on the shank by six iron hoops, three a side, which
+     "can always be kept set up taut upon the square ... by simply driving the hoops up a little" (p. 117). The hoops'
+     stations are read off the engraving, about 1170 px over the stock's length, at 0.26, 0.55 and 0.84 of the half-length
+     from the middle (both halves agree within 0.03). Each hoop is drawn at the stock's own size where it sits: until
+     r369 every hoop was 1.5 times the MIDDLE's size, so the outer pair stood 2.4 times the stock they bound, loose boxes
+     round its ends. */
   f.ironStock = ironStock;
   if (ironStock) {
     f.stockMid = s / 24;                                    // the middle's diameter: half an inch to the foot
@@ -17097,7 +17108,7 @@ function anchorMeshOf(f, iron, oak) {
     pg.computeVertexNormals();
     put(new THREE.Mesh(pg, iron), 'palm');
   }
-  /* the stock: oak, square, swelling to the middle, in two halves hooped with iron; or, on an iron ship, Cotsell's
+  /* the stock: oak, square, swelling to the middle, in two halves set up by six iron hoops; or, on an iron ship, Cotsell's
      round iron bar with its balls, its bent end, its collar and its forelock */
   const ys = f.s - f.stockMid * 0.9;
   if (f.ironStock) {
@@ -17129,9 +17140,10 @@ function anchorMeshOf(f, iron, oak) {
     half.rotation.x = k * Math.PI / 2;                         // along ±Z
     half.rotation.y = Math.PI / 4;
     half.position.set(0, ys, k * f.stockL / 4);
-    for (const t of [0.18, 0.40]) {
-      const hoop = put(new THREE.Mesh(new THREE.BoxGeometry(f.stockMid * 1.5, f.stockMid * 1.5, f.s * 0.012), iron), 'hoop');
-      hoop.position.set(0, ys, k * f.stockL * t);
+    for (const h of f.hoopAt) {                                 // fraction of the half-length from the middle
+      const side = f.stockMid + (f.stockEnd - f.stockMid) * h + 2 * f.hoopT;   // the stock's own size there, and the iron round it
+      const hoop = put(new THREE.Mesh(new THREE.BoxGeometry(side, side, f.hoopW), iron), 'hoop');
+      hoop.position.set(0, ys, k * f.stockL / 2 * h);
     }
   }
   const ring = put(new THREE.Mesh(new THREE.TorusGeometry(f.ringR, f.ringT, 6, 16), iron), 'ring');
@@ -17242,7 +17254,7 @@ function buildAnchor(S, group, mats) {
       A.position.copy(st.crown);
       A.userData.anchorStow = { ring: st.ring.toArray().map(q => +q.toFixed(3)), crown: st.crown.toArray().map(q => +q.toFixed(3)),
         bill: st.bill.toArray().map(q => +q.toFixed(3)), tiltDeg: st.tiltDeg, stockClear: st.stockClear, under: st.under, underChannel: st.underChannel, channel: st.channel,
-        stock: f.ironStock ? 'iron: Cotsell 1856, pl. 31 fig. 3, the Admiralty iron stock' : 'oak: Falconer 1769, in two halves hooped with iron',
+        stock: f.ironStock ? 'iron: Cotsell 1856, pl. 31 fig. 3, the Admiralty iron stock' : 'oak: Falconer 1769, in two halves; Cotsell 1856 p. 114 and pl. 31 fig. 1, 1/12 of its length square in the middle, 1/24 at the ends, six hoops',
         rule: 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the side under the fore channel' };
       const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), st.ring]], 0.018 + B * 0.0006, mats.ropeSolid || iron);
       if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));

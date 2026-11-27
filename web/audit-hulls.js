@@ -2501,6 +2501,38 @@
       else if (bad.length) say(v.id, 'anchor arms not at sixty degrees to the shank', `bill-crown-ring angles ${angs.map(a => a.toFixed(1)).join(', ')}°; Falconer gives 60°, the arms rising from the crown toward the ring`);
     });
 
+    /* ── A-ANCHOR-STOCK (round 369): THE STOCK IS COTSELL'S SIZE, AND ITS HOOPS BIND IT. Cotsell (1856, p. 114): the stock
+       is as long as the shank; a wood stock is an inch to the foot of its length square in the middle and half an inch
+       at the ends (1/12 and 1/24), an iron one half an inch to the foot in the middle. Plate 31 fig. 1: six hoops on the
+       wood stock, three a side. Until r369 the oak stock was 0.062 and 0.032 of its length with four hoops, each 1.5 times
+       the middle's size, so the outer hoops stood 2.4 times the stock they bound. Read off the anchor's own frame (every
+       stock piece and hoop is a direct child of the anchor): the shank's height is the length the rule keys to; a square
+       stock half (4 sides) gives its middle and end sizes from its radii; each hoop's breadth is judged against the
+       stock's size at the hoop's own station, and must lie within 1.0 to 1.25 times it. */
+    g.traverse(o => {
+      if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
+      const ms = []; o.traverse(m => { if (m.isMesh && m.geometry && m.userData.ap) ms.push(m); });
+      const shank = ms.find(m => m.userData.ap === 'shank');
+      const halves = ms.filter(m => m.userData.ap === 'stock');
+      if (!shank || !halves.length) return;
+      const s = shank.geometry.parameters.height, P = halves[0].geometry.parameters;
+      const sq = P.radialSegments === 4, k = sq ? Math.SQRT2 : 2;
+      const mid = P.radiusBottom * k, end = P.radiusTop * k, len = halves.reduce((a, m) => a + m.geometry.parameters.height, 0);
+      const off = (a, b) => Math.abs(a / b - 1) > 0.05;
+      if (off(len, s)) say(v.id, 'anchor stock not as long as the shank', `stock ${len.toFixed(2)} m, shank ${s.toFixed(2)} m; Cotsell: equal`);
+      if (sq && (off(mid, s / 12) || off(end, s / 24)))
+        say(v.id, 'wood anchor stock not Cotsell\'s size', `middle ${(mid / s).toFixed(3)}, ends ${(end / s).toFixed(3)} of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)`);
+      if (!sq && off(mid, s / 24)) say(v.id, 'iron anchor stock not Cotsell\'s size', `middle ${(mid / s).toFixed(3)} of the length; Cotsell: 1/24 (0.042)`);
+      if (sq) {
+        const hoops = ms.filter(m => m.userData.ap === 'hoop');
+        if (hoops.length !== 6) say(v.id, 'wood anchor stock without six hoops', `${hoops.length} hoops; Cotsell pl. 31 fig. 1 shows six, three a side`);
+        for (const h of hoops) {
+          const t = Math.min(1, Math.abs(h.position.z) / (len / 2)), here = mid + (end - mid) * t, w = h.geometry.parameters.width;
+          if (w < here || w > here * 1.25) { say(v.id, 'anchor stock hoop does not bind the stock', `hoop ${w.toFixed(3)} m across where the stock is ${here.toFixed(3)} m (${(w / here).toFixed(2)}x)`); break; }
+        }
+      }
+    });
+
     /* ── A-ANCHOR-CLEAR (round 366): A CATTED BOWER STANDS OUTSIDE THE SHIP AND CLEAR OF THE SHROUDS. On a hull with a
        cathead, (a) no anchor vertex stands inside the skin at its own station and height (r366 found the stock's
        inboard half 0.30–0.92 m inside the bow on six hulls, from the round-99 stow that laid the arms flat on the side and

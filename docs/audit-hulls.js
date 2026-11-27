@@ -1692,6 +1692,29 @@ const bad = angs.filter(a => Math.abs(a - 60) > 5);
 if (!angs.length) say(v.id, 'an anchor with no arms', 'no round cylinder but the shank');
 else if (bad.length) say(v.id, 'anchor arms not at sixty degrees to the shank', `bill-crown-ring angles ${angs.map(a => a.toFixed(1)).join(', ')}°; Falconer gives 60°, the arms rising from the crown toward the ring`);
 });
+g.traverse(o => {
+if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
+const ms = []; o.traverse(m => { if (m.isMesh && m.geometry && m.userData.ap) ms.push(m); });
+const shank = ms.find(m => m.userData.ap === 'shank');
+const halves = ms.filter(m => m.userData.ap === 'stock');
+if (!shank || !halves.length) return;
+const s = shank.geometry.parameters.height, P = halves[0].geometry.parameters;
+const sq = P.radialSegments === 4, k = sq ? Math.SQRT2 : 2;
+const mid = P.radiusBottom * k, end = P.radiusTop * k, len = halves.reduce((a, m) => a + m.geometry.parameters.height, 0);
+const off = (a, b) => Math.abs(a / b - 1) > 0.05;
+if (off(len, s)) say(v.id, 'anchor stock not as long as the shank', `stock ${len.toFixed(2)} m, shank ${s.toFixed(2)} m; Cotsell: equal`);
+if (sq && (off(mid, s / 12) || off(end, s / 24)))
+say(v.id, 'wood anchor stock not Cotsell\'s size', `middle ${(mid / s).toFixed(3)}, ends ${(end / s).toFixed(3)} of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)`);
+if (!sq && off(mid, s / 24)) say(v.id, 'iron anchor stock not Cotsell\'s size', `middle ${(mid / s).toFixed(3)} of the length; Cotsell: 1/24 (0.042)`);
+if (sq) {
+const hoops = ms.filter(m => m.userData.ap === 'hoop');
+if (hoops.length !== 6) say(v.id, 'wood anchor stock without six hoops', `${hoops.length} hoops; Cotsell pl. 31 fig. 1 shows six, three a side`);
+for (const h of hoops) {
+const t = Math.min(1, Math.abs(h.position.z) / (len / 2)), here = mid + (end - mid) * t, w = h.geometry.parameters.width;
+if (w < here || w > here * 1.25) { say(v.id, 'anchor stock hoop does not bind the stock', `hoop ${w.toFixed(3)} m across where the stock is ${here.toFixed(3)} m (${(w / here).toFixed(2)}x)`); break; }
+}
+}
+});
 if (part.cathead || part.anchor) {
 const HSa = SHIPS_HULL.hullSurface(H), invA = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const L = H.lwl, w = new THREE.Vector3();
