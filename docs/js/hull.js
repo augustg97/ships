@@ -9842,7 +9842,7 @@ const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 {
 const blen = B * 0.26, sq = B * 0.042, ang = 0.70;
-const fcsle = S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
+const fcsle = S.iron && S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
 const catMat = S.iron ? (mats.iron || mats.woodDark) : mats.woodDark;
 let uc = fcsle ? fcsle.u[1] * 0.5 : 0.105;
 const kneeAft = u => surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;

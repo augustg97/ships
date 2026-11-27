@@ -15527,7 +15527,9 @@ function buildHead(S, group, mats) {
      So the shell-built corbita is catted too, in timber, and every hull with a bowsprit now cats her bowers. */
   {
     const blen = B * 0.26, sq = B * 0.042, ang = 0.70;   // 40° forward of athwart
-    const fcsle = S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
+    /* iron hulls only: the 74's timber forecastle also starts at the stem, and her cathead keeps r364's station
+       forward of her foremost port, at the sheer (r367 first moved it onto her forecastle and the ratchet caught it) */
+    const fcsle = S.iron && S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
     const catMat = S.iron ? (mats.iron || mats.woodDark) : mats.woodDark;
     /* the tierPortStations walk below asks a frame hull's ports; a shell or iron hull has none recorded */
     /* ⚠ THE CATHEAD STANDS FORWARD OF THE FOREMOST PORT (round 364). u 0.105 is a CLASS station. On the 74 it put the
