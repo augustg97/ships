@@ -1,0 +1,22 @@
+[
+ {
+  "id": "preussen",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 60.9, 59.2, 27.1, 27.1, 26.0, 0.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "preussen",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 60.9, 59.2, 27.1, 27.1, 26.0, 0.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "steamer",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 58.3, 58.3, 27.1, 27.1, 26.0, 0.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "steamer",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 58.3, 58.3, 27.1, 27.1, 26.0, 0.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ }
+]
