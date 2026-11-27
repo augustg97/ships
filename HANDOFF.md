@@ -31152,4 +31152,4 @@ The bound is ±6 px on the head and ±8 px on the span. The plate's head in metr
 2. **The carrack's heel station.** The heel now stands 0.4 m abaft the poop's forward edge, because the yard's class figures (1.15 of the lower mast, 56°, slung a third along) put it there. A carrack plate showing the mizzen yard's heel would replace those figures (the record's `lateenYardProvenance` says none has been read).
 3. r350's items 2–5 stand: the 74's waterline in the furled broadside; r345's items 2–6; a second plate for the 74's mizzen topmast head; the disk check each round.
 
-**Disk at close: 7,121 MB free, no `tmp_pack_*` file.** Live stamp 1795742343 (verified live in the receipt commit).
+**Disk at close: 7,121 MB free, no `tmp_pack_*` file.** Live stamp 1795742343, verified live at 17:21.
