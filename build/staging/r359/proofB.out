@@ -1,0 +1,17 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island port count off its record",
+  "detail": "Quarterdeck: the record 7, the build none"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "island guns off the port count",
+  "detail": "0 barrels for 7 ports a side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "island ports not painted",
+  "detail": "the build reports 7 ports, the barricade's material uploads []"
+ }
+]

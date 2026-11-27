@@ -4319,6 +4319,11 @@ what: 'The exhaust rank, signal mast and communications radomes, packed amidship
 + 'No published drawing gives these heights: every figure is DERIVED from the '
 + 'photograph on this card, scaled against the recorded length. Derived '
 + 'figures, labelled as such.' },
+islandGun: { stage: 3, name: 'Quarterdeck guns',
+what: 'The guns on the quarterdeck, one in each port cut in its barricade. Steel (1805) '
++ 'gives a 74 seven such ports a side, 2 ft 9 in wide and 2 ft 6 in deep, with the sill '
++ '1 ft 10 in over the deck. He gives their number and size but not their stations; the '
++ 'model spaces them evenly between the breast and the quarter gallery.' },
 gun:      { stage: 3, name: 'Great guns',
 what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
 + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
@@ -7231,7 +7236,25 @@ g.add(tag(bell, 'vent', 'Cowl ventilator',
 }
 group.add(tag(g, 'superstructure'));
 }
-function buildIslands(S, group, hullMat) {
+function islandPorts(S, H) {
+const out = [];
+if (!(S.islands && S.islands.list)) return out;
+const L = S.lwl, xAt = u => (u - 0.5) * L + H.rake(u);
+for (const isl of S.islands.list) {
+const P = isl.ports;
+if (!P || !(P.n > 0) || !P.u) continue;
+for (let i = 0; i < P.n; i++) {
+const u = P.n > 1 ? P.u[0] + (P.u[1] - P.u[0]) * i / (P.n - 1) : P.u[0];
+const sill = H.islandDeck(u) + P.sillM, want = sill + P.hM;
+const head = Math.min(want, H.islandTop(u) - (P.capM || 0));
+const dxdu = (xAt(Math.min(1, u + 0.002)) - xAt(Math.max(0, u - 0.002))) / 0.004;
+out.push({ island: isl.name, u, sill, head, clipM: Math.max(0, want - head), halfU: P.wM / 2 / dxdu,
+half: Math.abs(surfacePoint(S, H, u, 1.0)[2]) });
+}
+}
+return out;
+}
+function buildIslands(S, group, hullMat, gunMat) {
 if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
@@ -7241,15 +7264,26 @@ side: THREE.DoubleSide,
 uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
 uCol: { value: new THREE.Color(hex) } } });
 const timberWall = !(S.build === 'steel' || S.build === 'iron') && !S.iron && hullMat.fragmentShader === HULL_FRAG;
+const wlV = hullMat.uniforms.uWaterline ? hullMat.uniforms.uWaterline.value : 0.62;
+const wallV = (u, y) => wlV + (1 - wlV) * y / Math.max(0.5, H.sheer(Math.max(0, Math.min(1, u))));
+const QP = timberWall ? islandPorts(S, H).slice(0, 8) : [];
+function qpUniforms() {
+const a = [];
+for (let i = 0; i < 8; i++) {
+const q = QP[i];
+a.push(q ? new THREE.Vector4(q.u, q.halfU, wallV(q.u, q.sill), wallV(q.u, q.head)) : new THREE.Vector4());
+}
+return { uQPN: { value: QP.length }, uQP: { value: a },
+uQPSoft: { value: new THREE.Vector2(0.02 / L, 0.02 * (1 - wlV) / Math.max(0.5, H.sheer(0.5))) } };
+}
 const wallCol = S.islands.finish
 ? waleFinish({ wale: { finish: S.islands.finish }, topside: S.topside }).color
 : new THREE.Color(S.topside || '#3a3a3c');
 const wallMat = timberWall
 ? new THREE.ShaderMaterial({ vertexShader: HULL_VERT, fragmentShader: HULL_FRAG, side: THREE.DoubleSide,
 uniforms: { ...hullMat.uniforms, uTopside: { value: wallCol.clone() }, uChequer: { value: 0 },
-uHGrpN: { value: 0 }, uCopper: { value: 0 } } })
+uHGrpN: { value: 0 }, uCopper: { value: 0 }, ...qpUniforms() } })
 : (() => { const m = steel('#000000'); m.uniforms.uCol.value = wallCol; return m; })();
-const wlV = hullMat.uniforms.uWaterline ? hullMat.uniforms.uWaterline.value : 0.62;
 const wallUV = (u, y) => [u, wlV + (1 - wlV) * y / Math.max(0.5, H.sheer(Math.max(0, Math.min(1, u))))];
 const cover = deckCovering(S);
 const deckMat = new THREE.ShaderMaterial({
@@ -7328,6 +7362,19 @@ dp.push(dx, y, -h, dx, y, h);
 }
 { const dm = strip(dp, deckMat, true); dm.userData.islandDeck = { name: isl.name, u0, u1 }; g.add(dm); }
 group.add(tag(g, 'forecast', isl.name, isl.what));
+const mine = QP.filter(q => q.island === isl.name);
+if (mine.length) {
+g.userData.islandPorts = mine.map(q => ({ u: +q.u.toFixed(4), sill: +q.sill.toFixed(3), head: +q.head.toFixed(3),
+clipM: +q.clipM.toFixed(3), halfU: +q.halfU.toFixed(5) }));
+const gg = new THREE.Group(), len = B * 0.19 * 0.75, r = B * 0.017 * 0.75;
+for (const q of mine) for (const sgn of [-1, 1]) {
+const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 16), gunMat);
+bar.rotation.x = Math.PI / 2;
+bar.position.set(xAt(q.u), (q.sill + q.head) / 2, sgn * (q.half + len * 0.30));
+gg.add(bar);
+}
+group.add(tag(gg, 'islandGun'));
+}
 if (S.islands.openRail) {
 const rg = new THREE.Group(), up = new THREE.Vector3(0, 1, 0);
 const railMat = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
@@ -12304,7 +12351,7 @@ if (FINE) buildFittings(S, group, mats);
 if (FINE) buildFunnel(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
 if (FINE && S.cluster) buildCluster(S, group);
-if (FINE && S.islands) buildIslands(S, group, hullMat);
+if (FINE && S.islands) buildIslands(S, group, hullMat, mats.iron || mats.woodDark);
 if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
 if (FINE) buildJunkCastle(S, group);
 if (FINE) buildTieredCastles(S, group, mats, hullMat);

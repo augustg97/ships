@@ -39,6 +39,13 @@ uniform int  uHGrpN;
 uniform vec4 uHGrpA[16];
 uniform vec4 uHGrpB[16];
 uniform vec2 uHullDims;
+/* ── PORTS CUT IN AN ISLAND'S BARRICADE (round 359) ─────────────────────────────────
+   One rectangle per port, in the loft's (u, v): x = centre u, y = half-width in u, z and w =
+   sill and head in v, from hull.js islandPorts(), which also places the guns in them. A
+   material without ports uploads uQPN = 0 (the hull's own side never sets it). */
+uniform int  uQPN;
+uniform vec4 uQP[8];
+uniform vec2 uQPSoft;
 
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
@@ -352,6 +359,17 @@ void main(){
       col *= (0.84 + 0.30 * grain);
       col *= mix(0.52, 1.0, seam);
       col = mix(col, vec3(0.055, 0.052, 0.050), port);   // the open port is a hole
+    }
+    {
+      float qp = 0.0;
+      for (int i = 0; i < 8; i++) {
+        if (i >= uQPN) break;
+        vec4 P = uQP[i];
+        qp = max(qp, smoothstep(P.y + uQPSoft.x, P.y - uQPSoft.x, abs(u - P.x))
+                   * smoothstep(P.z - uQPSoft.y, P.z + uQPSoft.y, v)
+                   * smoothstep(P.w + uQPSoft.y, P.w - uQPSoft.y, v));
+      }
+      col = mix(col, vec3(0.055, 0.052, 0.050), qp);
     }
     col *= taper * 0.25 + 0.75;
   }

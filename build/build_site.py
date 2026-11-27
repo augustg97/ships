@@ -337,6 +337,35 @@ def split_provenance(data_dir):
     return {"n": n, "bytes": nbytes}
 
 
+def strip_glsl(src):
+    """GLSL with its comments removed (see the r359 note in stamp_and_copy). A scanner, not a
+    regex: a '//' inside a block comment, or a '*/' after a line comment, must not end the
+    wrong one. Blank lines left behind are dropped and indentation is kept."""
+    out, i, n = [], 0, len(src)
+    while i < n:
+        if src.startswith("/*", i):
+            j = src.find("*/", i + 2)
+            j = n if j < 0 else j + 2
+            out.append("\n" if "\n" in src[i:j] else " ")
+            i = j
+        elif src.startswith("//", i):
+            j = src.find("\n", i)
+            i = n if j < 0 else j
+        else:
+            out.append(src[i]); i += 1
+    lines = [l.rstrip() for l in "".join(out).split("\n")]
+    return "\n".join(l for l in lines if l.strip()) + "\n"
+
+
+def strip_glsl_bundle(js):
+    """every value string of the generated window.SHADERS object, comment-stripped; keys and
+    the JS around them unchanged"""
+    import re
+    def sub(m):
+        return m.group(1) + json.dumps(strip_glsl(json.loads(m.group(2))))
+    return re.sub(r'(:\s*)("(?:[^"\\]|\\.)*")', sub, js)
+
+
 def stamp_and_copy():
     """⚠ THE STAMP IS WRITTEN INTO web/ BEFORE web/ IS COPIED TO docs/.
     Doing it the other way round publishes the old stamp with the new data, and the failure is
@@ -381,6 +410,19 @@ def stamp_and_copy():
             out = minify_css(raw) if f.endswith(".css") else minify_js(raw)
             open(fp, "w", encoding="utf-8").write(out)
             mb += len(raw.encode()); ma += len(out.encode())
+    # r359: THE SHADERS' COMMENTS ARE INSIDE STRINGS. js/shaders.js is the GLSL bundle, one JSON
+    # string per shader, so minify_js above keeps every GLSL comment: they are string contents
+    # to it. Measured at r359 they were most of the file, and the file is in first paint. GLSL
+    # has no string literals, so a comment is any /* … */ or // … outside another comment;
+    # each is replaced by a newline when it held one (a preprocessor line must stay on its
+    # own line) and by a space otherwise. web/js/shaders.js and web/shaders/*.glsl keep them.
+    sp = os.path.join(DOCS, "js", "shaders.js")
+    if os.path.exists(sp):
+        raw = open(sp, encoding="utf-8").read()
+        out = strip_glsl_bundle(raw)
+        open(sp, "w", encoding="utf-8").write(out)
+        mb += len(raw.encode()); ma += len(out.encode())
+        log(f"   shaders.js comments stripped: {len(raw.encode())} -> {len(out.encode())} bytes")
     # r271: the same rule for the page itself. web/index.html keeps its HTML comments (3.3 KB:
     # which script must load before which, and why); docs/ ships the page without them. A
     # conditional comment would be kept; nothing the browser renders or runs is inside an HTML
