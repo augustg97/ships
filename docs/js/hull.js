@@ -4328,7 +4328,10 @@ gunCarriage: { stage: 3, name: 'Gun carriages',
 what: 'Each quarterdeck gun rides a truck carriage: two stepped cheeks joined by a transom '
 + 'and two axletrees, on four solid wooden trucks. Falconer (1769) gives the transom as two '
 + 'shot diameters high and one broad, the trucks as broad as the cheeks, and the cheeks\' height '
-+ 'as whatever brings the gun to its port. The other proportions are class figures. The '
++ 'as whatever brings the gun to its port. Muller (1768) lays the rest off the gun itself: the '
++ 'cheeks a calibre thick, as far apart as the second reinforce ring at the trunnions and the base '
++ 'ring at the breech, so they open toward the rear; 4.5 shot diameters high before and half that '
++ 'behind, stepped four times; long enough to run from the fore truck to the button. The '
 + 'breeching and tackles that held a gun in its port are not drawn.' },
 gun:      { stage: 3, name: 'Great guns',
 what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
@@ -7316,63 +7319,83 @@ return red ? new THREE.MeshStandardMaterial({ color: 0x7a3226, roughness: 0.72 }
 : new THREE.MeshStandardMaterial({ color: 0x54402a, roughness: 0.78 });
 }
 function gunCarriage(x, yDeck, yAxis, zFace, sgn, len, r, mat) {
-const d = r / 1.75;
-const sF = 0.06, sT = len * (2 / 3 - 0.43), sR = len * (2 / 3 - 0.05);
-const rTr = gunBarrelRadiusAt(len, r, len * 3 / 7);
-const cheekIn = rTr + 0.01, wC = d;
-const RF = Math.min(0.24, Math.max(0.12, (yAxis - yDeck) * 0.22)), RH = RF * 0.9;
-const axH = 1.1 * d;
-const yBot = yDeck + RF + axH / 2;
-const hTop = yAxis - yBot;
+const T = GUN_BARREL.t, c = r / (0.5 + T.vent / 14);
+const D = c * 20 / 21;
+const pr = gunBarrelProfile(len, r);
+const Rb = Math.max(...pr.pts.map(p => p[0]));
+const R2 = (0.5 + T.r2end / 14 + GUN_BARREL.rise) * c;
+const sD = len * 2 / 3, sT = sD - len * 3 / 7, sR = sD + GUN_BARREL.cascabel * c;
+const slope = (Rb - R2) / (sD - sT), half = s => R2 + slope * (s - sT), wC = c;
+const yTop = yAxis + 0.00635, hF0 = 4.5 * D, RFmax = 2 * D, RFmin = D;
+let RF = yTop - hF0 - yDeck, hF = hF0;
+if (RF > RFmax) { RF = RFmax; hF = yTop - yDeck - RF; }
+if (RF < RFmin) { RF = RFmin; hF = yTop - yDeck - RF; }
+const hR = hF / 2, RH = RF * 3.5 / 4;
+const y0 = yTop - hF - yDeck;
+const sAF = sT - 0.5 * c, sAH = sD, sF = sAF - RF, axB = 0.3048;
+const hAF = 1.75 * D;
 const parts = [], M = new THREE.Matrix4();
 const put = (geo, lx, ly, ls) => {
 geo.applyMatrix4(M.makeTranslation(lx, ly, ls)); parts.push(geo); };
+const sMid = (sF + sR) / 2, q = Math.min(D, hF / 3), yT = y0 + hF;
 for (const side of [-1, 1]) {
-const sh = new THREE.Shape(), y0 = yBot - yDeck, steps = 3;
-const sStep0 = Math.min(sR - 0.1, sT + 1.3 * d);
-sh.moveTo(sF, y0); sh.lineTo(sF, y0 + hTop); sh.lineTo(sStep0, y0 + hTop);
-const hRear = Math.max(2.2 * d, hTop * 0.45);
-for (let k = 1; k <= steps; k++) {
-const yk = y0 + hTop - (hTop - hRear) * k / steps;
-const sk = sStep0 + (sR - sStep0) * k / steps;
-sh.lineTo(sStep0 + (sR - sStep0) * (k - 1) / steps, yk);
-sh.lineTo(k === steps ? sR : sk, yk);
+const sh = new THREE.Shape();
+sh.moveTo(sF, y0); sh.lineTo(sF, yT - q);
+for (let k = 1; k <= 6; k++) { const a = Math.PI / 2 * k / 6; sh.lineTo(sF + q - q * Math.cos(a), yT - q + q * Math.sin(a)); }
+sh.lineTo(sMid, yT);
+for (let k = 1; k <= 4; k++) {
+const yk = yT - (hF - hR) * k / 4;
+sh.lineTo(sMid + (sR - sMid) * (k - 1) / 4, yk); sh.lineTo(sMid + (sR - sMid) * k / 4, yk);
 }
-sh.lineTo(sR, y0); sh.lineTo(sF, y0);
+sh.lineTo(sR, y0);
+const h0 = sAH - axB / 2, h1 = sAF + axB / 2, dep = 0.5 * D;
+sh.lineTo(h0, y0);
+for (let k = 1; k < 12; k++) { const t = k / 12; sh.lineTo(h0 + (h1 - h0) * t, y0 + dep * Math.sin(Math.PI * t)); }
+sh.lineTo(h1, y0); sh.lineTo(sF, y0);
 const geo = new THREE.ExtrudeGeometry(sh, { depth: wC, bevelEnabled: false });
 geo.applyMatrix4(M.makeRotationY(-Math.PI / 2));
-geo.applyMatrix4(M.makeTranslation(side > 0 ? cheekIn + wC : -cheekIn, 0, 0));
+geo.applyMatrix4(M.makeTranslation(side > 0 ? R2 + wC : -R2, 0, 0));
+const k = side * slope;
+geo.applyMatrix4(new THREE.Matrix4().set(1, 0, k, -k * sT, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
 parts.push(geo);
 }
-const sAF = sF + RF + 0.03, sAH = sR - RH - 0.03, span = 2 * (cheekIn + wC) + 0.10;
-put(new THREE.BoxGeometry(span, axH, 1.3 * d), 0, RF, sAF);
-put(new THREE.BoxGeometry(span, yBot - yDeck - (RH - axH / 2), 1.3 * d), 0, (yBot - yDeck + RH - axH / 2) / 2, sAH);
-for (const [R, sA] of [[RF, sAF], [RH, sAH]]) for (const side of [-1, 1]) {
-const t = new THREE.CylinderGeometry(R, R, wC * 0.95, 14);
+const armOut = s => half(s) + wC + 0.012 + wC;
+put(new THREE.BoxGeometry(2 * (half(sAF) + wC), hAF, axB), 0, y0, sAF);
+const hindTop = y0 + 0.625 * D, hindBot = RH - 0.625 * D;
+put(new THREE.BoxGeometry(2 * (half(sAH) + wC), hindTop - hindBot, axB), 0, (hindTop + hindBot) / 2, sAH);
+for (const [R, sA] of [[RF, sAF], [RH, sAH]]) {
+const arm = new THREE.CylinderGeometry(D / 2, D / 2, 2 * armOut(sA) + 0.03, 10);
+arm.applyMatrix4(M.makeRotationZ(Math.PI / 2)); put(arm, 0, R, sA);
+for (const side of [-1, 1]) {
+const t = new THREE.CylinderGeometry(R, R, wC, 16);
 t.applyMatrix4(M.makeRotationZ(Math.PI / 2));
-put(t, side * (cheekIn + wC / 2), R, sA);
+put(t, side * (half(sA) + wC + 0.012 + wC / 2), R, sA);
 }
-put(new THREE.BoxGeometry(2 * cheekIn, 2 * d, d), 0, yBot - yDeck + hTop / 2, sAF);
-const yBed = yBot - yDeck + 0.4 * d;
-put(new THREE.BoxGeometry(2 * cheekIn, 0.8 * d, sR - sT - 0.1), 0, yBed, (sR + sT) / 2 + 0.05);
+}
+put(new THREE.BoxGeometry(2 * half(sAF), 2 * D, D), 0, y0 + hF / 2, sAF);
+const yBed = hindTop + 0.4 * c, sBed0 = sT + 0.1;
+put(new THREE.BoxGeometry(2 * half(sBed0), 0.8 * c, sR - sBed0 - 0.05), 0, yBed, (sR + sBed0 - 0.05) / 2);
 const sB = len * 2 / 3 - 0.12;
 let rB = 0;
 for (let k = 0; k <= 16; k++) rB = Math.max(rB, gunBarrelRadiusAt(len, r, len * 2 / 3 - (Math.min(sR - 0.17, sB) - 0.16 + 0.32 * k / 16)));
-const qH = Math.max(0.02, (yAxis - yDeck) - rB - (yBed + 0.4 * d));
-put(new THREE.BoxGeometry(1.6 * rTr, qH, 0.32), 0, yBed + 0.4 * d + qH / 2, Math.min(sR - 0.17, sB));
-const tr = new THREE.CylinderGeometry(0.5 * d, 0.5 * d, 2 * (cheekIn + wC) + 0.04, 12);
+const qH = Math.max(0.02, (yAxis - yDeck) - rB - (yBed + 0.4 * c));
+put(new THREE.BoxGeometry(1.6 * R2, qH, 0.32), 0, yBed + 0.4 * c + qH / 2, Math.min(sR - 0.17, sB));
+const tr = new THREE.CylinderGeometry(0.5 * c, 0.5 * c, 2 * (half(sT) + wC) + 0.04, 12);
 tr.applyMatrix4(M.makeRotationZ(Math.PI / 2));
 put(tr, 0, yAxis - yDeck, sT);
-let n = 0; const ga = parts.map(g => { const q = g.index ? g.toNonIndexed() : g; q.computeVertexNormals(); n += q.attributes.position.count; return q; });
+let n = 0; const ga = parts.map(g => { const qq = g.index ? g.toNonIndexed() : g; qq.computeVertexNormals(); n += qq.attributes.position.count; return qq; });
 const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3); let o = 0;
-for (const q of ga) { pos.set(q.attributes.position.array, o * 3); nor.set(q.attributes.normal.array, o * 3); o += q.attributes.position.count; }
+for (const qq of ga) { pos.set(qq.attributes.position.array, o * 3); nor.set(qq.attributes.normal.array, o * 3); o += qq.attributes.position.count; }
 const geo = new THREE.BufferGeometry();
 geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
 geo.applyMatrix4(new THREE.Matrix4().makeScale(-sgn, 1, -sgn));
 geo.applyMatrix4(new THREE.Matrix4().makeTranslation(x, yDeck, sgn * zFace));
 const m = new THREE.Mesh(geo, mat);
-m.userData.carriage = { x, sgn, yDeck, yAxis, zFace, sF, sR, sT };
+m.userData.carriage = { x, sgn, yDeck, yAxis, zFace, sF, sR, sT,
+muller: { calibre: +c.toFixed(4), shot: +D.toFixed(4), halfFore: +R2.toFixed(4), halfHind: +Rb.toFixed(4),
+hFore: +hF.toFixed(4), hRule: +hF0.toFixed(4), truckFore: +RF.toFixed(4), truckHind: +RH.toFixed(4),
+contested: Math.abs(hF - hF0) > 0.005 ? `side pieces ${(hF - hF0).toFixed(3)} m off Muller's 4.5 shot: the trucks are held to ${RF === RFmax ? 'his 4-shot ceiling' : 'the 2-shot floor'} and the gun is laid at its port's centre` : null } };
 return m;
 }
 function islandPorts(S, H) {

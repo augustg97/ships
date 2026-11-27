@@ -1,0 +1,27 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a carriage not run back to the button",
+  "detail": "44 case(s), e.g. tier gun at u 0.135 side -1: carriage's inboard end 2.351, the button 1.873"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a carriage not as wide as its gun's rings",
+  "detail": "44 case(s), e.g. tier gun at u 0.135 side -1 carriage: within 0.446 at the trunnions (ring 0.436), 0.446 at the breech (base ring 0.540)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "side pieces not a calibre broad",
+  "detail": "44 case(s), e.g. tier gun at u 0.135 side -1 carriage: 0.142 against a calibre of 0.151"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "side pieces not 4.5 shot high before",
+  "detail": "44 case(s), e.g. tier gun at u 0.135 side -1 carriage: 0.565 against 0.647"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "side pieces not half as high behind",
+  "detail": "22 case(s), e.g. tier gun at u 0.135 side -1 carriage: 0.312 behind, 0.565 before"
+ }
+]

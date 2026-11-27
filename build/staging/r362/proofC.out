@@ -1,0 +1,12 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a carriage not as wide as its gun's rings",
+  "detail": "44 case(s), e.g. tier gun at u 0.135 side -1 carriage: within 0.436 at the trunnions (ring 0.436), 0.436 at the breech (base ring 0.540)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "side pieces not 4.5 shot high before",
+  "detail": "30 case(s), e.g. tier gun at u 0.135 side -1 carriage: 0.576 against 0.647, the fore truck 0.255 in radius"
+ }
+]

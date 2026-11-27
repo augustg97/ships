@@ -7199,10 +7199,48 @@ if (Math.abs(cb.min.y - deck) > 0.02) note('a carriage off its deck', `${tag}: t
 if (cb.max.y < yC || cb.max.y > yC + 0.08) note('a carriage not under its trunnions', `${tag}: carriage top ${cb.max.y.toFixed(3)}, the axis ${yC.toFixed(3)}`);
 const cOut = sg > 0 ? cb.max.z : -cb.min.z, cIn = sg > 0 ? cb.min.z : -cb.max.z;
 if (cOut > face + 0.005) note('a carriage through its barricade', `${tag}: carriage to ${cOut.toFixed(2)}, the face ${face.toFixed(2)}`);
-if (cIn - breech > 0.25 || cIn < breech - 0.005) note('a breech off its carriage', `${tag}: carriage's inboard end ${cIn.toFixed(2)}, the breech ${breech.toFixed(2)}`);
+const casc = GP ? gBase - Math.min(...GP.map(q => q.y)) : 0;
+if (GP) { if (Math.abs(cIn - (breech - casc)) > 0.01) note('a carriage not run back to the button', `${tag}: carriage's inboard end ${cIn.toFixed(3)}, the button ${(breech - casc).toFixed(3)}`); }
+else if (cIn - breech > 0.25 || cIn < breech - 0.005) note('a breech off its carriage', `${tag}: carriage's inboard end ${cIn.toFixed(2)}, the breech ${breech.toFixed(2)}`);
+if (GP) {
+const cm = mine[0][0], ca = cm.geometry.attributes.position, Mc = new THREE.Matrix4().multiplyMatrices(invG, cm.matrixWorld), pv = new THREE.Vector3();
+const bore = 2 * GP[GP.length - 2].x, shot = bore * 20 / 21, tTr = len * 3 / 7;
+const R2m = Math.max(...GP.filter(q => q.y >= gBase + tTr + 0.7 * bore && q.y <= gBase + tTr + 1.05 * bore).map(q => q.x));
+const V = [];
+for (let j = 0; j < ca.count; j++) { pv.fromBufferAttribute(ca, j).applyMatrix4(Mc); V.push([Math.abs(pv.x - xC), pv.y, Math.abs(pv.z) - breech]); }
+const band = V.filter(w => w[1] > yC - 0.12 && w[1] < yC + 0.01 && w[0] > 0.02 && Math.abs(w[2] - tTr) > 0.6 * bore);
+const dmin = Math.min(...band.map(w => w[0]));
+const fit = pts => { const n = pts.length, mt = pts.reduce((a, w) => a + w[2], 0) / n, md = pts.reduce((a, w) => a + w[0], 0) / n;
+let sxy = 0, sxx = 0; for (const w of pts) { sxy += (w[2] - mt) * (w[0] - md); sxx += (w[2] - mt) ** 2; }
+const b1 = sxx > 1e-9 ? sxy / sxx : 0; return t => md + b1 * (t - mt); };
+const inner = band.filter(w => w[0] < dmin + 0.5 * bore), outer = band.filter(w => w[0] > dmin + 0.5 * bore && w[0] < dmin + 1.5 * bore);
+const tagC = `${tag} carriage`;
+if (inner.length < 2 || outer.length < 2) note('a carriage whose side pieces cannot be read', `${tagC}: ${inner.length} inner, ${outer.length} outer vertices`);
+else {
+const fi = fit(inner), fo = fit(outer);
+if (Math.abs(fi(tTr) - R2m) > 0.006 || Math.abs(fi(0) - gRmax) > 0.006)
+note('a carriage not as wide as its gun\'s rings', `${tagC}: within ${(2 * fi(tTr)).toFixed(3)} at the trunnions (ring ${(2 * R2m).toFixed(3)}), ${(2 * fi(0)).toFixed(3)} at the breech (base ring ${(2 * gRmax).toFixed(3)})`);
+if (Math.abs(fo(tTr) - fi(tTr) - bore) > 0.005) note('side pieces not a calibre broad', `${tagC}: ${(fo(tTr) - fi(tTr)).toFixed(3)} against a calibre of ${bore.toFixed(3)}`);
+const inCheek = w => w[0] >= fi(w[2]) - 0.003 && w[0] <= fo(w[2]) + 0.003;
+const tF = Math.max(...V.filter(inCheek).map(w => w[2])), tR = Math.min(...V.filter(inCheek).map(w => w[2]));
+const top = Math.max(...V.filter(inCheek).map(w => w[1]));
+const foreLow = Math.min(...V.filter(w => inCheek(w) && w[2] > tF - 0.003).map(w => w[1]));
+const rear = V.filter(w => inCheek(w) && w[2] < tR + 0.003), hRear = Math.max(...rear.map(w => w[1])) - Math.min(...rear.map(w => w[1]));
+const hFore = top - foreLow, rec = cm.userData.carriage && cm.userData.carriage.muller;
+const truckFront = V.filter(w => !inCheek(w) && w[2] > tF - 0.003 && w[1] < yC - 0.6 * bore);
+const RFm = truckFront.length ? truckFront.reduce((a, w) => a + w[1], 0) / truckFront.length - deck : NaN;
+const excused = rec && rec.contested && Math.abs(rec.hFore - hFore) < 0.005 &&
+((Math.abs(RFm - 2 * shot) < 0.004 && hFore > 4.5 * shot) || (Math.abs(RFm - shot) < 0.004 && hFore < 4.5 * shot));
+if (Math.abs(hFore - 4.5 * shot) > 0.005 && !excused)
+note('side pieces not 4.5 shot high before', `${tagC}: ${hFore.toFixed(3)} against ${(4.5 * shot).toFixed(3)}, the fore truck ${RFm.toFixed(3)} in radius${rec && rec.contested ? ' (the record\'s contested height ' + rec.hFore + ' is not what is drawn)' : ''}`);
+if (Math.abs(hRear - hFore / 2) > 0.005) note('side pieces not half as high behind', `${tagC}: ${hRear.toFixed(3)} behind, ${hFore.toFixed(3)} before`);
+if (rec && rec.contested) note('a carriage stretched to its port (contested, a read)', `${tagC}: ${rec.contested}`);
+}
+}
 }
 if (cars.length !== nCarried) note('carriages off the gun count', `${cars.length} carriages for ${nCarried} guns standing over their decks`);
-for (const [k, { n, ex }] of Object.entries(bad)) say(v.id, k, `${n} case(s), e.g. ${ex}`);
+for (const [k, { n, ex }] of Object.entries(bad)) if (!/\(contested, a read\)/.test(k)) say(v.id, k, `${n} case(s), e.g. ${ex}`);
+for (const [k, { n, ex }] of Object.entries(bad)) if (/\(contested, a read\)/.test(k)) console.warn(`READ ${v.id}: ${k}, ${n} case(s), e.g. ${ex}`);
 }
 if (H.gunDecks || (H.islands && H.islands.list && H.islands.list.some(i => i.ports))) {
 const bad = {}, seen = new Set();
