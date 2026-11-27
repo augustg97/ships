@@ -15514,6 +15514,35 @@ function castleTiers(S, H) {
   return out;
 }
 
+/* ── THE DECKS BUILT OVER THE MAIN DECK WITH AN END OPEN ON THE WAIST (round 352) ──────
+ * As DECK_FRAG's uCover: one THREE.Vector4 per castle whose lowest tier stands open on the waist
+ * (castles.openToWaist), (x from, x to, the tier's lowest deck height over its span, the open
+ * end: -1 at x from for the aftcastle, +1 at x to for the forecastle), in hull metres on the
+ * loft's deck-level line. A closed castle covers nothing anyone can see, so it is not listed. */
+function deckCovers(S, H) {
+  const C = S.castles; if (!C || !C.openToWaist || !C.openToWaist.length) return [];
+  H = H || hullSurface(S);
+  const L = S.lwl, cl = u => Math.max(0.001, Math.min(0.999, u)), xAt = u => (u - 0.5) * L + H.rake(cl(u));
+  const out = [];
+  for (const T of castleTiers(S, H)) {
+    if (T.t !== 0 || !C.openToWaist.includes(T.end)) continue;
+    let y = Infinity;
+    for (let k = 0; k <= 16; k++) y = Math.min(y, T.yT(T.u0 + (T.u1 - T.u0) * k / 16));
+    const v = new THREE.Vector4(xAt(T.u0), xAt(T.u1), y, T.end === 'aft' ? -1 : 1);
+    /* the wall's half-breadth at eight stations evenly spaced in x: the station's u by bisection
+       on the loft's deck-level line, which the rake makes nonlinear near the ends */
+    v.hw = [];
+    for (let k = 0; k < 8; k++) {
+      const x = v.x + (v.y - v.x) * k / 7;
+      let a = T.u0, b = T.u1;
+      for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; else b = m; }
+      v.hw.push(T.half((a + b) / 2));
+    }
+    out.push(v);
+  }
+  return out.slice(0, 4);
+}
+
 /* The highest walled tier covering station u, or null: {y: its deck's height there, half: its
  * wall's half-breadth there, end, tier, dh, railH}. A mast standing within a castle steps its
  * shrouds' chainplates on THIS wall at THIS height — the Mataró model's fore shrouds set up on
@@ -15800,8 +15829,26 @@ function buildTieredCastles(S, group, mats, hullMat) {
   const xAt = u => (u - 0.5) * L + H.rake(cl(u));
   /* the shader's v: 0.62 at the load line, 1.0 at the sheer, continued above it */
   const vOf = (u, y) => 0.62 + 0.38 * (y / Math.max(0.5, H.sheer(cl(u))));
-  const deckM = new THREE.MeshStandardMaterial({ color: 0xb09566, roughness: 0.80, side: THREE.DoubleSide });
+  /* ⚠ r352: A CASTLE DECK IS A WEATHER DECK. r107 put every weather deck in DECK_FRAG, the recorded
+     covering's planking lit by the shell's own sun; r243's castles came after and drew theirs in a flat
+     tan MeshStandardMaterial, so the quarterdeck, the poop and the forecastle read as three smooth
+     slabs beside a planked waist. They take the same recipe the island decks take (buildIslands). */
+  const cover = deckCovering(S);
+  const deckM = new THREE.ShaderMaterial({
+    vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+    side: THREE.DoubleSide,
+    uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                uCol: { value: new THREE.Color(cover.col) }, uMode: { value: cover.mode },
+                uPlankW: { value: cover.plankW || 1 }, uButtL: { value: cover.buttL || 1 },
+                uPlankRun: { value: cover.run || 0 } } });
   const railM = mats.woodDark;
+  /* ── THE END THAT FACES THE WAIST, OPEN BELOW ITS DECK (round 352) ─────────────────
+     castles.openToWaist lists the castles whose lowest tier stands open on the waist from the
+     main deck up to its own deck. The Mataró model (c. 1450) shows the half deck so: seen from
+     ahead the space under the quarterdeck is open, a heavy beam carries the deck's forward edge
+     and the breast rail stands on it. Such a tier's wall leaves out its waist-facing end, and a
+     breast beam spans the opening under the deck's edge. A tier above it keeps its own end. */
+  const openW = new Set((C.openToWaist || []).filter(e => e === 'fore' || e === 'aft'));
   const up = new THREE.Vector3(0, 1, 0);
 
   const one = (label, spec, aft, what) => {
@@ -15826,21 +15873,38 @@ function buildTieredCastles(S, group, mats, hullMat) {
         tp.push(p.x, y0, p.z, p.x, y1, p.z);
         tuv.push(uu, vOf(p.u, y0), uu, vOf(p.u, y1));
       }
-      for (let k = 0; k + 1 < path.length; k++) { const q = k * 2, r = q + 2; ti.push(q, r, q + 1, q + 1, r, r + 1); }
+      /* the waist-facing end of an open tier: the aftcastle's forward end is the closing segment
+         (starboard at u0 round to port at u0), the forecastle's after end the segment at u1 */
+      const endName = aft ? 'aft' : 'fore', open = t === 0 && openW.has(endName);
+      const skipK = open ? (aft ? path.length - 2 : N) : -1;
+      for (let k = 0; k + 1 < path.length; k++) { if (k === skipK) continue; const q = k * 2, r = q + 2; ti.push(q, r, q + 1, q + 1, r, r + 1); }
       const wg = new THREE.BufferGeometry();
       wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
       wg.setAttribute('uv', new THREE.Float32BufferAttribute(tuv, 2));
       wg.setIndex(ti); wg.computeVertexNormals();
       const wall = new THREE.Mesh(wg, hullMat);
-      wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh, railH: rH };
+      wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh, railH: rH,
+                               openEnd: open ? (aft ? 'forward' : 'after') : null };
       g.add(wall);
+      if (open) {
+        /* the breast beam: across the opening under the deck's edge, its top a centimetre into
+           the planks (the castles' own rule against a coplanar cap), its ends a centimetre
+           inside the walls so no end grain stands in the wall's face. Sided and moulded at a
+           class figure (B·0.024 by B·0.026, 0.26 by 0.29 m on the carrack), read from no plate. */
+        const ue = aft ? a : b, bw = B * 0.024, bh = B * 0.026, hh = half(ue) - 0.01, top = yT(ue) + 0.01;
+        const beam = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 2 * hh), railM);
+        beam.position.set(xAt(ue) + (aft ? bw / 2 : -bw / 2), top - bh / 2, 0);
+        beam.userData.breastBeam = { end: endName, u: ue, deckY: yT(ue), top, half: hh, x0: xAt(ue) };
+        g.add(beam);
+      }
       /* the deck: a lofted strip at the tier's head, carrying the sheer out to the end */
       const dp = [], di = [];
       for (let k = 0; k <= N; k++) {
         const u = a + (b - a) * k / N, y = yT(u), h = half(u);
         dp.push(xAt(u), y, -h, xAt(u), y, h);
       }
-      for (let k = 0; k < N; k++) { const q = k * 2, r = q + 2; di.push(q, r, q + 1, q + 1, r, r + 1); }
+      /* wound up: DECK_FRAG lights by the declared normal, and the pairs run −z to +z (buildIslands' strip) */
+      for (let k = 0; k < N; k++) { const q = k * 2, r = q + 2; di.push(q, q + 1, r, q + 1, r + 1, r); }
       const dg = new THREE.BufferGeometry();
       dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
       dg.setIndex(di); dg.computeVertexNormals();
@@ -15882,7 +15946,7 @@ function buildTieredCastles(S, group, mats, hullMat) {
   if (C.fore) one('Forecastle', C.fore, false,
     'The walled deck over the bow, one deck high, the hull\'s own side carried up: the fighting platform of the age before broadside guns, and why a nau\'s bow stood so tall. The foremast passes through it and the bowsprit runs out over its rail.');
   if (C.aft) one('Aftcastle', C.aft, true,
-    'The high stern that names the type: the quarterdeck from abaft the mainmast to the stern, and the poop stepped up again over its after half, each walled and railed, the officers\' quarters beneath. On the India naus the stern rose three and four decks over the waist; here two, a class default.');
+    'The high stern that names the type: the quarterdeck from abaft the mainmast to the stern, and the poop stepped up again over its after half, each walled and railed. ' + (C.openToWaist && C.openToWaist.includes('aft') ? 'The space under the quarterdeck stands open on the waist, its forward edge carried on a breast beam, as on the Mataró model of about 1450. ' : '') + 'On the India naus the stern rose three and four decks over the waist; here two, a class default.');
 }
 
 
@@ -18356,6 +18420,17 @@ function buildShip(S, opts) {
                 uButtL:  { value: cover.buttL || 1 },
                 uPlankRun: { value: cover.run || 0 } } });
   const deckMat = deckShader(cover.col);
+  /* r352: the main deck under a castle open on the waist takes the castle's shade (DECK_FRAG's
+     uCover). FINE only, as the castles are: the coarse build draws no castle to stand over it. */
+  {
+    const cv = FINE ? deckCovers(S) : [];
+    const pad = [...cv]; while (pad.length < 4) pad.push(new THREE.Vector4(0, 0, 0, 0));
+    deckMat.uniforms.uCover = { value: pad };
+    deckMat.uniforms.uCoverN = { value: cv.length };
+    const hw = new Array(32).fill(0); cv.forEach((c, i) => c.hw.forEach((h, k) => { hw[i * 8 + k] = h; }));
+    deckMat.uniforms.uCoverHW = { value: hw };
+    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw }));
+  }
   if (cover.mode === 0) {
     /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────
        deckLaid: false used to buy a "bare timber" CAP across the sheer — a deck by any

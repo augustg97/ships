@@ -9900,6 +9900,27 @@ yT: u => H.deck(cl(u)) + dh * (t + 1) });
 }
 return out;
 }
+function deckCovers(S, H) {
+const C = S.castles; if (!C || !C.openToWaist || !C.openToWaist.length) return [];
+H = H || hullSurface(S);
+const L = S.lwl, cl = u => Math.max(0.001, Math.min(0.999, u)), xAt = u => (u - 0.5) * L + H.rake(cl(u));
+const out = [];
+for (const T of castleTiers(S, H)) {
+if (T.t !== 0 || !C.openToWaist.includes(T.end)) continue;
+let y = Infinity;
+for (let k = 0; k <= 16; k++) y = Math.min(y, T.yT(T.u0 + (T.u1 - T.u0) * k / 16));
+const v = new THREE.Vector4(xAt(T.u0), xAt(T.u1), y, T.end === 'aft' ? -1 : 1);
+v.hw = [];
+for (let k = 0; k < 8; k++) {
+const x = v.x + (v.y - v.x) * k / 7;
+let a = T.u0, b = T.u1;
+for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; else b = m; }
+v.hw.push(T.half((a + b) / 2));
+}
+out.push(v);
+}
+return out.slice(0, 4);
+}
 function castleTopAt(S, H, u) {
 let top = null;
 for (const T of castleTiers(S, H)) {
@@ -10054,8 +10075,16 @@ const cl = u => Math.max(0.001, Math.min(0.999, u));
 const TIERS = castleTiers(S, H);
 const xAt = u => (u - 0.5) * L + H.rake(cl(u));
 const vOf = (u, y) => 0.62 + 0.38 * (y / Math.max(0.5, H.sheer(cl(u))));
-const deckM = new THREE.MeshStandardMaterial({ color: 0xb09566, roughness: 0.80, side: THREE.DoubleSide });
+const cover = deckCovering(S);
+const deckM = new THREE.ShaderMaterial({
+vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+side: THREE.DoubleSide,
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+uCol: { value: new THREE.Color(cover.col) }, uMode: { value: cover.mode },
+uPlankW: { value: cover.plankW || 1 }, uButtL: { value: cover.buttL || 1 },
+uPlankRun: { value: cover.run || 0 } } });
 const railM = mats.woodDark;
+const openW = new Set((C.openToWaist || []).filter(e => e === 'fore' || e === 'aft'));
 const up = new THREE.Vector3(0, 1, 0);
 const one = (label, spec, aft, what) => {
 const g = new THREE.Group();
@@ -10076,20 +10105,30 @@ const uu = 0.5 + (p.x / L);
 tp.push(p.x, y0, p.z, p.x, y1, p.z);
 tuv.push(uu, vOf(p.u, y0), uu, vOf(p.u, y1));
 }
-for (let k = 0; k + 1 < path.length; k++) { const q = k * 2, r = q + 2; ti.push(q, r, q + 1, q + 1, r, r + 1); }
+const endName = aft ? 'aft' : 'fore', open = t === 0 && openW.has(endName);
+const skipK = open ? (aft ? path.length - 2 : N) : -1;
+for (let k = 0; k + 1 < path.length; k++) { if (k === skipK) continue; const q = k * 2, r = q + 2; ti.push(q, r, q + 1, q + 1, r, r + 1); }
 const wg = new THREE.BufferGeometry();
 wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
 wg.setAttribute('uv', new THREE.Float32BufferAttribute(tuv, 2));
 wg.setIndex(ti); wg.computeVertexNormals();
 const wall = new THREE.Mesh(wg, hullMat);
-wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh, railH: rH };
+wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh, railH: rH,
+openEnd: open ? (aft ? 'forward' : 'after') : null };
 g.add(wall);
+if (open) {
+const ue = aft ? a : b, bw = B * 0.024, bh = B * 0.026, hh = half(ue) - 0.01, top = yT(ue) + 0.01;
+const beam = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 2 * hh), railM);
+beam.position.set(xAt(ue) + (aft ? bw / 2 : -bw / 2), top - bh / 2, 0);
+beam.userData.breastBeam = { end: endName, u: ue, deckY: yT(ue), top, half: hh, x0: xAt(ue) };
+g.add(beam);
+}
 const dp = [], di = [];
 for (let k = 0; k <= N; k++) {
 const u = a + (b - a) * k / N, y = yT(u), h = half(u);
 dp.push(xAt(u), y, -h, xAt(u), y, h);
 }
-for (let k = 0; k < N; k++) { const q = k * 2, r = q + 2; di.push(q, r, q + 1, q + 1, r, r + 1); }
+for (let k = 0; k < N; k++) { const q = k * 2, r = q + 2; di.push(q, q + 1, r, q + 1, r + 1, r); }
 const dg = new THREE.BufferGeometry();
 dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
 dg.setIndex(di); dg.computeVertexNormals();
@@ -10125,7 +10164,7 @@ group.add(tag(g, 'castles', label, what));
 if (C.fore) one('Forecastle', C.fore, false,
 'The walled deck over the bow, one deck high, the hull\'s own side carried up: the fighting platform of the age before broadside guns, and why a nau\'s bow stood so tall. The foremast passes through it and the bowsprit runs out over its rail.');
 if (C.aft) one('Aftcastle', C.aft, true,
-'The high stern that names the type: the quarterdeck from abaft the mainmast to the stern, and the poop stepped up again over its after half, each walled and railed, the officers\' quarters beneath. On the India naus the stern rose three and four decks over the waist; here two, a class default.');
+'The high stern that names the type: the quarterdeck from abaft the mainmast to the stern, and the poop stepped up again over its after half, each walled and railed. ' + (C.openToWaist && C.openToWaist.includes('aft') ? 'The space under the quarterdeck stands open on the waist, its forward edge carried on a breast beam, as on the Mataró model of about 1450. ' : '') + 'On the India naus the stern rose three and four decks over the waist; here two, a class default.');
 }
 function buildAnchor(S, group, mats) {
 if (!S.bowsprit) return;
@@ -11856,6 +11895,15 @@ uPlankW: { value: cover.plankW || 1 },
 uButtL:  { value: cover.buttL || 1 },
 uPlankRun: { value: cover.run || 0 } } });
 const deckMat = deckShader(cover.col);
+{
+const cv = FINE ? deckCovers(S) : [];
+const pad = [...cv]; while (pad.length < 4) pad.push(new THREE.Vector4(0, 0, 0, 0));
+deckMat.uniforms.uCover = { value: pad };
+deckMat.uniforms.uCoverN = { value: cv.length };
+const hw = new Array(32).fill(0); cv.forEach((c, i) => c.hw.forEach((h, k) => { hw[i * 8 + k] = h; }));
+deckMat.uniforms.uCoverHW = { value: hw };
+deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw }));
+}
 if (cover.mode === 0) {
 const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
 : Math.max(0.02, S.beam * 0.020);

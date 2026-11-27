@@ -7011,6 +7011,53 @@ if (!(Math.sign(P0.z) !== Math.sign(P1.z) && Math.abs(P0.z) > 0.5 && Math.abs(P1
 if (Math.abs(P0.x - P1.x) > 0.05) say(v.id, 'a rail askew across a deck end', `${b.parent && b.parent.userData.part ? b.parent.userData.part.name : '?'}: ends at x ${P0.x.toFixed(2)} and ${P1.x.toFixed(2)}`);
 }
 }
+if (H.castles) {
+const C = H.castles, openL = new Set(C.openToWaist || []);
+if (C.openToWaist && !C.openToWaistProvenance) say(v.id, 'a castle opened on the waist with no provenance', 'castles.openToWaist set, castles.openToWaistProvenance absent');
+for (const e of openL) if (e !== 'fore' && e !== 'aft' || !C[e]) say(v.id, 'a castle opened on the waist that is not declared', `openToWaist names '${e}'`);
+g.updateMatrixWorld(true);
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const ptsOf = o => { const a = o.geometry.attributes.position, out = [];
+for (let i = 0; i < a.count; i++) out.push(new THREE.Vector3().fromBufferAttribute(a, i).applyMatrix4(o.matrixWorld).applyMatrix4(inv)); return out; };
+const walls = [], decks = [], beams = []; let coverMat = null;
+g.traverse(o => { if (!o.isMesh) return;
+const c = o.userData.castle;
+if (c && c.tier === 0 && c.kind === 'wall') walls.push(o);
+if (c && c.tier === 0 && c.kind === 'deck') decks.push(o);
+if (o.userData.breastBeam) beams.push(o);
+if (o.material && o.material.userData && o.material.userData.covers) coverMat = o.material; });
+const spans = [];
+for (const w of walls) {
+const end = w.userData.castle.end, pts = ptsOf(w), idx = w.geometry.index;
+const xs = pts.map(q => q.x), xEnd = end === 'aft' ? Math.min(...xs) : Math.max(...xs);
+spans.push({ end, x0: Math.min(...xs), x1: Math.max(...xs) });
+let across = 0;
+for (let t = 0; t < idx.count; t += 3) {
+const tri = [pts[idx.getX(t)], pts[idx.getX(t + 1)], pts[idx.getX(t + 2)]];
+if (tri.every(q => Math.abs(q.x - xEnd) < 0.05) && tri.some(q => q.z > 0.5) && tri.some(q => q.z < -0.5)) across++;
+}
+const open = openL.has(end), which = end === 'aft' ? 'forward' : 'after';
+if (open && across) say(v.id, 'a castle end drawn closed that the record opens on the waist', `the ${end} castle's ${which} end: ${across} faces across it at x ${xEnd.toFixed(2)}`);
+if (!open && !across) say(v.id, 'a castle end left open that the record does not open', `the ${end} castle's ${which} end at x ${xEnd.toFixed(2)} has no face across it`);
+if (!open) continue;
+const bm = beams.find(b => b.userData.breastBeam.end === end);
+if (!bm) { say(v.id, 'an open castle end with no breast beam', `the ${end} castle's ${which} end`); continue; }
+const bp = ptsOf(bm), top = Math.max(...bp.map(q => q.y)), zs = bp.map(q => q.z), bx = bp.map(q => q.x);
+let deckY = null;
+for (const d of decks) if (d.userData.castle.end === end) for (const q of ptsOf(d)) if (Math.abs(q.x - xEnd) < 0.05 && (deckY === null || q.y < deckY)) deckY = q.y;
+let half = 0; for (const q of pts) if (Math.abs(q.x - xEnd) < 0.05) half = Math.max(half, Math.abs(q.z));
+if (deckY === null || Math.abs(top - deckY) > 0.03) say(v.id, 'a breast beam off its deck', `top at y ${top.toFixed(2)}, the deck at the end at ${deckY === null ? 'none' : deckY.toFixed(2)}`);
+if (Math.max(...zs) - Math.min(...zs) < 2 * half - 0.1) say(v.id, 'a breast beam short of the opening', `${(Math.max(...zs) - Math.min(...zs)).toFixed(2)} m across an opening ${(2 * half).toFixed(2)} m wide`);
+const inSide = end === 'aft' ? (Math.min(...bx) >= xEnd - 0.02 && Math.max(...bx) <= xEnd + 0.4) : (Math.max(...bx) <= xEnd + 0.02 && Math.min(...bx) >= xEnd - 0.4);
+if (!inSide) say(v.id, 'a breast beam away from the deck edge it carries', `beam x ${Math.min(...bx).toFixed(2)}-${Math.max(...bx).toFixed(2)}, the end at ${xEnd.toFixed(2)}`);
+}
+const covers = coverMat ? coverMat.userData.covers : [];
+if (covers.length !== openL.size) say(v.id, 'a deck under an open castle not lit as covered', `${openL.size} open end(s), ${covers.length} cover(s) on the main deck's material`);
+for (const cv of covers) {
+const sp = spans.find(s2 => Math.abs(s2.x0 - cv.x0) < 0.05 && Math.abs(s2.x1 - cv.x1) < 0.05);
+if (!sp) say(v.id, 'a deck cover that matches no castle', `cover x ${cv.x0.toFixed(2)}-${cv.x1.toFixed(2)}`);
+}
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

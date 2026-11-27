@@ -19,6 +19,19 @@ uniform float uMode;     // 0 = bare timber, 1 = laid planks, 2 = painted steel
 uniform float uPlankW;   // plank width, metres
 uniform float uButtL;    // plank length between butts, metres
 uniform float uPlankRun; // 0 = planks run fore-and-aft (the king plank on the centreline), 1 = athwartships
+/* ── A DECK UNDER A DECK (round 352). Each uCover is a deck built over this one with an end open on
+   the waist: (x from, x to, the covering deck's height, which end is open: -1 at x from, +1 at x to),
+   in hull metres. Under it the sun reaches a plank only through the opening, when its ray climbs less
+   than the deck's height over the run out to the open end, and the sky reaches it in the share
+   h / (h + 2d) of a plank d metres in from the opening under a deck h metres over it. Without this
+   the main deck under the carrack's half deck was lit as the open waist is, and the two read as one
+   surface. uCoverN is 0 on every deck that has nothing built over it. */
+uniform vec4 uCover[4];
+uniform float uCoverN;
+/* and the covering wall's half-breadth at eight stations evenly spaced in x over each cover's span
+   (cover i at 8i..8i+7): a plank outboard of the castle's wall lies under the open sky */
+uniform float uCoverHW[32];
+varying vec3 vLo;
 
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
@@ -89,13 +102,30 @@ void main(){
     col *= 0.90 + 0.20 * mix(0.5, noise(vec2(vO.x * 6.0, vO.z * 6.0)), barRes);
   }
 
-  float lam = max(dot(N, L), 0.0);
-  float sky = 0.5 + 0.5 * N.y;
+  float sunVis = 1.0, skyVis = 1.0;
+  for (int i = 0; i < 4; i++) {
+    if (float(i) >= uCoverN) break;
+    vec4 C = uCover[i];
+    if (vO.x < C.x || vO.x > C.y || vO.y > C.z - 0.05) continue;
+    float t = clamp((vO.x - C.x) / max(C.y - C.x, 1e-3), 0.0, 1.0) * 7.0, hw = 0.0;
+    for (int k = 0; k < 7; k++) {
+      if (t >= float(k) && t <= float(k + 1)) hw = mix(uCoverHW[i * 8 + k], uCoverHW[i * 8 + k + 1], t - float(k));
+    }
+    if (abs(vO.z) > hw) continue;
+    float h = C.z - vO.y;
+    float d = C.w < 0.0 ? vO.x - C.x : C.y - vO.x;      // metres in from the open end
+    float toward = C.w < 0.0 ? -vLo.x : vLo.x;            // the sun's run out toward it
+    float climb = toward > 1e-3 ? d * max(vLo.y, 0.0) / toward : 1e6;
+    sunVis = min(sunVis, smoothstep(0.0, 0.08, h - climb));
+    skyVis = min(skyVis, h / (h + 2.0 * d));
+  }
+  float lam = max(dot(N, L), 0.0) * sunVis;
+  float sky = (0.5 + 0.5 * N.y) * max(skyVis, 0.08);
   float bounce = max(0.0, -N.y) * 0.30;
   vec3 lit = col * (0.24 * sky + 0.95 * lam) + col * bounce * vec3(0.34, 0.52, 0.62);
   vec3 Hv = normalize(L + V);
   float specK = uMode > 1.5 ? 0.16 : 0.09;       // oiled wood sheens broader than paint
   float spec = pow(max(dot(N, Hv), 0.0), 22.0) * specK;
-  lit += vec3(1.0, 0.97, 0.90) * spec * lam;
+  lit += vec3(1.0, 0.97, 0.90) * spec * lam;   // lam carries sunVis: no sheen under a deck
   gl_FragColor = vec4(pow(clamp(lit, 0.0, 1.6), vec3(0.4545)), 1.0);
 }
