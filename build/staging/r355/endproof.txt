@@ -1,0 +1,2 @@
+ship-of-the-line {"stempost under by the vertical end only":4,"planking under by the vertical end only":12,"deck under by the vertical end only":16,"bowsprit under by the vertical end only":14,"sternlight under by the vertical end only":249,"transom under by the vertical end only":8}
+carrack {"deck under by the leaning end only":7}
