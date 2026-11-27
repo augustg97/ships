@@ -10105,20 +10105,25 @@
       const uOfX = x => { let a = 0, b = 1; for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (xAtG(m) < x) a = m; else b = m; } return (a + b) / 2; };
       g.traverse(o => { if (!o.isMesh) return; let key = null;
         for (let pp = o; pp && !key; pp = pp.parent) key = pp.userData && pp.userData.part && pp.userData.part.key;
-        if ((key === 'gun' && H.gunDecks) || key === 'islandGun') if (o.geometry.type === 'CylinderGeometry') guns.push([o, key === 'islandGun']);
+        if ((key === 'gun' && H.gunDecks) || key === 'islandGun') if (o.geometry.type === 'CylinderGeometry' || o.geometry.type === 'LatheGeometry') guns.push([o, key === 'islandGun']);
         if (key === 'gunCarriage' || o.userData.carriage) cars.push([o, box(o)]); });
       let nCarried = 0;
       for (const [o, isl] of guns) {
-        const b = box(o), len = o.geometry.parameters.height, sg = Math.sign(b.max.z + b.min.z);
+        /* r361: a turned barrel (LatheGeometry) is read off its profile: its length runs from the hind part of the base
+           ring (the profile's widest point) to the mouth, as Muller reckons a gun's length; the cascabel lies behind it */
+        const GP = o.geometry.type === 'LatheGeometry' ? o.geometry.parameters.points : null;
+        const gRmax = GP ? Math.max(...GP.map(q => q.x)) : 0, gBase = GP ? Math.min(...GP.filter(q => q.x >= 0.98 * gRmax).map(q => q.y)) : 0;
+        const b = box(o), len = GP ? Math.max(...GP.map(q => q.y)) - gBase : o.geometry.parameters.height, sg = Math.sign(b.max.z + b.min.z);
         const yC = (b.min.y + b.max.y) / 2, gi = { u: isl ? uOfX((b.min.x + b.max.x) / 2) : uOfXY((b.min.x + b.max.x) / 2, yC) };
         const face = isl ? Math.abs(SHIPS_HULL.surfacePoint(H, HSg, gi.u, 1)[2]) : faceAt(gi.u, yC);
-        const outer = sg > 0 ? b.max.z : -b.min.z, breech = sg > 0 ? b.min.z : -b.max.z, f = (outer - face) / len;
+        const outer = sg > 0 ? b.max.z : -b.min.z, breech = outer - len, f = (outer - face) / len;   // r361: the breech is the base ring
         const tag = (isl ? 'island' : 'tier') + ` gun at u ${gi.u.toFixed(3)} side ${sg}`;
         if (!(f >= 0.28 && f <= 0.40)) note('a gun not a third outboard', `${tag}: ${(f * 100).toFixed(0)}% of the barrel outboard of the face`);
         const tip = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld).transformDirection(invG);
-        if (o.geometry.parameters && o.geometry.parameters.radiusTop < o.geometry.parameters.radiusBottom && Math.sign(tip.z) !== sg)
+        const muzzleUp = GP ? gBase < 0 : (o.geometry.parameters && o.geometry.parameters.radiusTop < o.geometry.parameters.radiusBottom);
+        if (muzzleUp && Math.sign(tip.z) !== sg)
           note('a gun with its muzzle inboard', tag);
-        const r0 = (b.max.y - b.min.y) / 2;
+        const r0 = GP ? gRmax * 1.643 / 1.787 : (b.max.y - b.min.y) / 2;   // the breech radius the builder tests the deck with
         if (!isl && !(yC - r0 > HSg.deck(gi.u))) continue;
         nCarried++;
         const xC = (b.min.x + b.max.x) / 2;
@@ -10132,6 +10137,58 @@
         if (cIn - breech > 0.25 || cIn < breech - 0.005) note('a breech off its carriage', `${tag}: carriage's inboard end ${cIn.toFixed(2)}, the breech ${breech.toFixed(2)}`);
       }
       if (cars.length !== nCarried) note('carriages off the gun count', `${cars.length} carriages for ${nCarried} guns standing over their decks`);
+      for (const [k, { n, ex }] of Object.entries(bad)) say(v.id, k, `${n} case(s), e.g. ${ex}`);
+    }
+    /* ── A-GUN-FORM (round 361): EVERY GREAT GUN IS TURNED TO ARMSTRONG'S RULE. Until r361 every tier and quarterdeck
+       barrel was a plain cylinder tapering to 0.72 of its breech, with no base ring, reinforces, muzzle or cascabel.
+       Muller (A Treatise of Artillery, 1768, pp. 29-32) gives General Armstrong's construction for iron guns: the
+       length from the base ring's hind part to the mouth in sevenths (first reinforce 2, second 1 and a calibre), the
+       metal from the bore in fourteenths of the calibre (16 at the vent, 14.5 at the first reinforce's end, 13.5 at the
+       second's beginning, 12.5 at its end, 11.5 at the chase's beginning, 8 at the muzzle), the muzzle swelled to the
+       second reinforce ring's diameter, the base ring's rise on the line through the two rings' tops, and the
+       cascabel 2.25 calibres long. TEST, on the profile of every 'gun' barrel on a gun-decked hull and every
+       'islandGun', with the calibre read off the BORE (the profile's run back from the mouth): (a) the barrel is turned
+       (a LatheGeometry), its mouth is bored, and the bore is at least 2 calibres deep; (b) the outer radius, in
+       calibres, at six stations Armstrong fixes, within 0.04: 0.3 behind the first reinforce's end 1.536+, midway down
+       the second reinforce 1.429, 0.35 into the chase 1.321-, 0.5 behind the muzzle astragal 1.071+, the muzzle's
+       swelling 1.443 (the ring's rise, 0.05, is CLASS), and at the vent field's start 1.643; (c) the base ring's top
+       within 0.03 calibre of the line through the ring tops; (d) the cascabel 2.25 calibres within 0.05. */
+    if (H.gunDecks || (H.islands && H.islands.list && H.islands.list.some(i => i.ports))) {
+      const bad = {}, seen = new Set();
+      const note = (k, ex) => { if (!bad[k]) bad[k] = { n: 0, ex }; bad[k].n++; };
+      g.traverse(o => { if (!o.isMesh) return; let key = null;
+        for (let pp = o; pp && !key; pp = pp.parent) key = pp.userData && pp.userData.part && pp.userData.part.key;
+        if (!((key === 'gun' && H.gunDecks) || key === 'islandGun')) return;
+        if (o.geometry.type !== 'LatheGeometry') { note('a great gun that is not turned', `a ${o.geometry.type} barrel (${key})`); return; }
+        if (seen.has(o.geometry)) return; seen.add(o.geometry);
+        const P = o.geometry.parameters.points.map(q => [q.x, q.y]);
+        const yMouth = Math.max(...P.map(q => q[1]));
+        /* the bore: the points at the mouth's y with the smallest non-zero radius, and the run back from it */
+        let iB = -1; for (let i = P.length - 1; i > 0; i--) if (P[i][1] < P[i - 1][1] - 1e-6) { iB = i; break; }
+        if (iB < 0) { note('a great gun with no bore', `${key}`); return; }
+        const rBore = P[iB][0], c = 2 * rBore, depth = (yMouth - P[iB][1]) / c;
+        if (!(depth >= 2)) note('a great gun bored too shallow', `${key}: ${depth.toFixed(1)} calibres`);
+        const rMax = Math.max(...P.map(q => q[0])), yBase = Math.min(...P.filter(q => q[0] >= 0.98 * rMax).map(q => q[1]));
+        const Lc = (yMouth - yBase) / c, at = xc => { const y = yBase + xc * c; let best = 0;
+          for (let i = 0; i + 1 < P.length; i++) { const [ra, ya] = P[i], [rb, yb] = P[i + 1];
+            if (yb > ya && y >= ya && y <= yb) best = Math.max(best, ra + (rb - ra) * (y - ya) / (yb - ya)); }
+          return best / c; };
+        const R = t => 0.5 + t / 14, x1 = Lc * 2 / 7, x2 = Lc * 3 / 7 + 1, ring2 = R(12.5) + 0.05, xm = Lc - 2 * ring2;
+        const lin = (x, xa, ra, xb, rb) => ra + (rb - ra) * (x - xa) / (xb - xa);
+        const stations = [
+          ['the vent field\'s start', 0.7, R(16) - (R(16) - R(14.5)) * 0.08 / (x1 - 0.62)],
+          ['0.3 behind the first reinforce\'s end', x1 - 0.3, R(14.5) + (R(16) - R(14.5)) * 0.3 / (x1 - 0.62)],
+          ['midway down the second reinforce', (x1 + x2) / 2, (R(13.5) + R(12.5)) / 2],
+          ['0.35 into the chase', x2 + 0.35, lin(x2 + 0.35, x2 + 0.26, R(11.5), xm, R(8))],
+          ['0.5 behind the muzzle astragal', xm - 0.5, lin(xm - 0.5, x2 + 0.26, R(11.5), xm, R(8))],
+          ['the muzzle\'s swelling', Lc - 0.45, ring2]];
+        for (const [nm, xc, want] of stations) { const got = at(xc);
+          if (Math.abs(got - want) > 0.04) note('a great gun off Armstrong\'s metal', `${key}, ${nm}: ${got.toFixed(3)} calibres, the rule ${want.toFixed(3)}`); }
+        const r1 = at(x1 - 0.1), r2 = at(x2 - 0.1), baseTop = at(0.13), onLine = r1 + (r1 - r2) * (x1 - 0.1 - 0.13) / (x2 - x1);
+        if (Math.abs(baseTop - onLine) > 0.03) note('a base ring off the rings\' line', `${key}: ${baseTop.toFixed(3)}, the line ${onLine.toFixed(3)} calibres`);
+        const casc = (yBase - Math.min(...P.map(q => q[1]))) / c;
+        if (Math.abs(casc - 2.25) > 0.05) note('a cascabel off Armstrong\'s length', `${key}: ${casc.toFixed(2)} calibres`);
+      });
       for (const [k, { n, ex }] of Object.entries(bad)) say(v.id, k, `${n} case(s), e.g. ${ex}`);
     }
     /* ── A-STERN-ON-FACE (round 355): THE STERN'S FURNITURE STANDS ON THE FACE AT ITS OWN HEIGHT. buildStern set every

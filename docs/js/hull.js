@@ -4335,7 +4335,11 @@ what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third
 + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
 + 'can — which is the whole reason fleets learned to fight in line. And they '
 + 'are why she fights on one tack at a time: the lee ports must stay shut or '
-+ 'she floods through them.' },
++ 'she floods through them. Each barrel is turned to General Armstrong\'s rule for '
++ 'iron guns, as Muller gives it (1768): a base ring, two reinforces and the chase, '
++ 'their lengths in sevenths of the gun, the metal thinning from 16 fourteenths of '
++ 'the bore at the vent to 8 at the muzzle, which swells out again at its mouth; '
++ 'behind the base ring the cascabel and its button, which the breeching is made fast to (Falconer, BREECHING).' },
 stay:     { stage: 5, name: 'Stays and backstays',
 what: 'Standing rigging in the fore-and-aft plane. Stays run FORWARD from each '
 + 'masthead and stop it falling aft; backstays run aft and take the forward '
@@ -6539,8 +6543,7 @@ const aftLimit = Math.min(0.88, 1 - (S.run || 0.3) - 0.02);
 if (u < 0.13 || u > aftLimit) continue;
 const p = surfacePoint(S, H, u, v);
 for (const sgn of [-1, 1]) {
-const bar = new THREE.Mesh(
-new THREE.CylinderGeometry(r * 0.72, r, len, 16), mat);
+const bar = new THREE.Mesh(gunBarrelGeometry(len, r), mat);
 bar.rotation.x = sgn * Math.PI / 2;
 bar.position.set(p[0], p[1], sgn * (Math.abs(p[2]) - len / 6));
 bar.userData.tierGun = { deck: d, u, lenM: len };
@@ -6551,6 +6554,67 @@ if (p[1] - r > H.deck(u)) cg.add(gunCarriage(p[0], H.deck(u), p[1], Math.abs(p[2
 }
 group.add(tag(g, 'gun'));
 if (cg.children.length) group.add(tag(cg, 'gunCarriage'));
+}
+const GUN_BARREL = {
+t: { vent: 16, r1end: 14.5, r2beg: 13.5, r2end: 12.5, chBeg: 11.5, muzzle: 8 },
+rise: 0.05, cascabel: 2.25
+};
+function gunBarrelProfile(len, r) {
+const c = r / (0.5 + GUN_BARREL.t.vent / 14), Lc = len / c, R = t => 0.5 + t / 14, T = GUN_BARREL.t;
+const x1 = Lc * 2 / 7, x2 = Lc * 3 / 7 + 1, rise = GUN_BARREL.rise;
+const R2ring = R(T.r2end) + rise, xm = Lc - 2 * R2ring;
+const P = [];
+const pt = (rad, x, sharp) => { P.push([rad, x]); if (sharp) P.push([rad, x]); };
+const xb = -GUN_BARREL.cascabel + 0.55, rb = 0.55, rn = 0.375, th1 = Math.PI - Math.asin(rn / rb);
+for (let k = 0; k <= 8; k++) { const th = th1 * k / 8; pt(rb * Math.sin(th), xb - rb * Math.cos(th), k === 8); }
+pt(rn, -0.85, true); pt(0.75, -0.85, true); pt(0.75, -0.72, true);
+for (let k = 1; k <= 6; k++) { const ph = Math.PI / 2 * k / 6; pt(0.75 + (R(T.vent) + 0.06 - 0.75) * Math.sin(ph), -0.72 * Math.cos(ph), k === 6); }
+const Rb = (R(T.r1end) + rise) + ((R(T.r1end) + rise) - R2ring) * (x1 - 0.135) / (x2 - x1);
+pt(Rb, 0, true); pt(Rb, 0.27, true);
+pt(Rb - 0.03, 0.33); pt((Rb + R(T.vent)) / 2, 0.45); pt(R(T.vent) + 0.02, 0.56); pt(R(T.vent), 0.62, true);
+const lin = (x, xa, ra, xb2, rb2) => ra + (rb2 - ra) * (x - xa) / (xb2 - xa);
+const rV = x => lin(x, 0.62, R(T.vent), x1, R(T.r1end));
+const astragal = (xa, rAt) => {
+const a = rAt(xa), b = rAt(xa + 0.2);
+pt(a, xa, true); pt(a + 0.025, xa, true); pt(a + 0.025, xa + 0.04);
+pt(a + 0.06, xa + 0.07); pt(a + 0.07, xa + 0.10); pt(a + 0.06, xa + 0.13);
+pt(b + 0.025, xa + 0.16, true); pt(b + 0.025, xa + 0.2, true); pt(b, xa + 0.2, true);
+};
+astragal(1.42, rV);
+pt(R(T.r1end), x1 - 0.21, true); pt(R(T.r1end) + rise, x1 - 0.21, true); pt(R(T.r1end) + rise, x1, true);
+pt(R(T.r1end) + rise - 0.03, x1 + 0.07); pt((R(T.r1end) + R(T.r2beg)) / 2, x1 + 0.15); pt(R(T.r2beg) + 0.01, x1 + 0.22); pt(R(T.r2beg), x1 + 0.26, true);
+pt(R(T.r2end), x2 - 0.21, true); pt(R2ring, x2 - 0.21, true); pt(R2ring, x2, true);
+pt(R2ring - 0.03, x2 + 0.07); pt((R(T.r2end) + R(T.chBeg)) / 2 + 0.01, x2 + 0.15); pt(R(T.chBeg) + 0.01, x2 + 0.22); pt(R(T.chBeg), x2 + 0.26, true);
+const rC = x => lin(x, x2 + 0.26, R(T.chBeg), xm, R(T.muzzle));
+astragal(x2 + 1.06, rC);
+astragal(xm - 0.2, rC);
+const xs0 = xm + 0.15, xs1 = Lc - 0.5;
+for (let k = 0; k <= 6; k++) { const t = k / 6; pt(R(T.muzzle) + (R2ring - R(T.muzzle)) * Math.pow(t, 2.2), xs0 + (xs1 - xs0) * t, k === 6); }
+pt(R2ring, Lc - 0.32, true); pt(R2ring - 0.05, Lc - 0.32, true); pt(R2ring - 0.05, Lc - 0.24, true);
+pt(R2ring - 0.09, Lc - 0.17); pt(R2ring - 0.12, Lc - 0.06, true); pt(R2ring - 0.12, Lc, true);
+pt(0.5, Lc, true); pt(0.5, Lc - 4, true); pt(0, Lc - 4);
+return { c, Lc, x1, x2, xm, pts: P.map(([rad, x]) => [rad * c, (x - Lc / 2) * c]) };
+}
+function gunBarrelRadiusAt(len, r, s) {
+const { pts } = gunBarrelProfile(len, r), y = s - len / 2;
+let best = 0;
+for (let i = 0; i + 1 < pts.length; i++) {
+const [ra, ya] = pts[i], [rb, yb] = pts[i + 1];
+if (yb <= ya) continue;
+if (y >= ya && y <= yb) best = Math.max(best, ra + (rb - ra) * (y - ya) / (yb - ya));
+}
+return best;
+}
+const GUN_BARREL_GEO = new Map();
+function gunBarrelGeometry(len, r, seg) {
+const k = `${len.toFixed(4)}|${r.toFixed(4)}|${seg || 16}`;
+if (!GUN_BARREL_GEO.has(k)) {
+const pr = gunBarrelProfile(len, r);
+const geo = new THREE.LatheGeometry(pr.pts.map(([rad, y]) => new THREE.Vector2(rad, y)), seg || 16);
+geo.userData = { gunBarrel: { len, r, calibre: pr.c } };
+GUN_BARREL_GEO.set(k, geo);
+}
+return GUN_BARREL_GEO.get(k);
 }
 function buildRigging(S, group, mats, spars, mastTops) {
 const H = hullSurface(S);
@@ -7254,7 +7318,7 @@ return red ? new THREE.MeshStandardMaterial({ color: 0x7a3226, roughness: 0.72 }
 function gunCarriage(x, yDeck, yAxis, zFace, sgn, len, r, mat) {
 const d = r / 1.75;
 const sF = 0.06, sT = len * (2 / 3 - 0.43), sR = len * (2 / 3 - 0.05);
-const rTr = r * (1 - 0.28 * 0.43);
+const rTr = gunBarrelRadiusAt(len, r, len * 3 / 7);
 const cheekIn = rTr + 0.01, wC = d;
 const RF = Math.min(0.24, Math.max(0.12, (yAxis - yDeck) * 0.22)), RH = RF * 0.9;
 const axH = 1.1 * d;
@@ -7291,7 +7355,9 @@ put(t, side * (cheekIn + wC / 2), R, sA);
 put(new THREE.BoxGeometry(2 * cheekIn, 2 * d, d), 0, yBot - yDeck + hTop / 2, sAF);
 const yBed = yBot - yDeck + 0.4 * d;
 put(new THREE.BoxGeometry(2 * cheekIn, 0.8 * d, sR - sT - 0.1), 0, yBed, (sR + sT) / 2 + 0.05);
-const sB = len * 2 / 3 - 0.12, rB = r * (1 - 0.28 * 0.04);
+const sB = len * 2 / 3 - 0.12;
+let rB = 0;
+for (let k = 0; k <= 16; k++) rB = Math.max(rB, gunBarrelRadiusAt(len, r, len * 2 / 3 - (Math.min(sR - 0.17, sB) - 0.16 + 0.32 * k / 16)));
 const qH = Math.max(0.02, (yAxis - yDeck) - rB - (yBed + 0.4 * d));
 put(new THREE.BoxGeometry(1.6 * rTr, qH, 0.32), 0, yBed + 0.4 * d + qH / 2, Math.min(sR - 0.17, sB));
 const tr = new THREE.CylinderGeometry(0.5 * d, 0.5 * d, 2 * (cheekIn + wC) + 0.04, 12);
@@ -7443,7 +7509,7 @@ const gg = new THREE.Group(), len = B * 0.19 * 0.75, r = B * 0.017 * 0.75;
 const cg = new THREE.Group(), cMat = carriageMat(S);
 for (const q of mine) for (const sgn of [-1, 1]) {
 const ya = (q.sill + q.head) / 2;
-const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 16), gunMat);
+const bar = new THREE.Mesh(gunBarrelGeometry(len, r), gunMat);
 bar.rotation.x = sgn * Math.PI / 2;
 bar.position.set(xAt(q.u), ya, sgn * (q.half - len / 6));
 bar.userData.islandGun = { u: q.u, lenM: len };

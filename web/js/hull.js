@@ -7343,7 +7343,11 @@ const PARTS = {
                   + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
                   + 'can — which is the whole reason fleets learned to fight in line. And they '
                   + 'are why she fights on one tack at a time: the lee ports must stay shut or '
-                  + 'she floods through them.' },
+                  + 'she floods through them. Each barrel is turned to General Armstrong\'s rule for '
+                  + 'iron guns, as Muller gives it (1768): a base ring, two reinforces and the chase, '
+                  + 'their lengths in sevenths of the gun, the metal thinning from 16 fourteenths of '
+                  + 'the bore at the vent to 8 at the muzzle, which swells out again at its mouth; '
+                  + 'behind the base ring the cascabel and its button, which the breeching is made fast to (Falconer, BREECHING).' },
   stay:     { stage: 5, name: 'Stays and backstays',
               what: 'Standing rigging in the fore-and-aft plane. Stays run FORWARD from each '
                   + 'masthead and stop it falling aft; backstays run aft and take the forward '
@@ -10448,8 +10452,7 @@ function buildGuns(S, group, mat) {
       if (u < 0.13 || u > aftLimit) continue;
       const p = surfacePoint(S, H, u, v);
       for (const sgn of [-1, 1]) {
-        const bar = new THREE.Mesh(
-          new THREE.CylinderGeometry(r * 0.72, r, len, 16), mat);
+        const bar = new THREE.Mesh(gunBarrelGeometry(len, r), mat);   // r361: Armstrong's barrel
         /* ⚠ A THIRD OF THE BARREL OUTBOARD (round 360). Until r360 the centre stood at the skin
            plus 0.3 of the length, which put 80% of every barrel outside the ship and left its
            breech in the air off the side. A third outboard puts the centre a sixth of the
@@ -10466,6 +10469,109 @@ function buildGuns(S, group, mat) {
   }
   group.add(tag(g, 'gun'));
   if (cg.children.length) group.add(tag(cg, 'gunCarriage'));
+}
+
+/* ── THE GREAT GUN'S BARREL (round 361) ─────────────────────────────────────────────────
+ * Until r361 every barrel was a plain cylinder tapering from the breech to 0.72 of it at the
+ * muzzle, with no base ring, no reinforces, no muzzle and no cascabel: a pipe. It is now turned
+ * to General Armstrong's rule, which Muller gives as the English construction (A Treatise of
+ * Artillery, 1768, pp. 29-32: "General rule for brass and iron guns" and "General dimensions for
+ * iron guns"; build/staging/r361/dl/muller1768.txt, lines 6176-6345).
+ *   LENGTH, from the hind part of the base ring to the mouth, in sevenths: the first reinforce
+ *   two, the second one and a calibre, the chase the rest. The trunnions' centre stands three
+ *   sevenths from the base ring (gunCarriage's sT is that point). The cascabel, behind the base
+ *   ring, is two and a quarter calibres long; its fillet is 1.5 calibres across, the button's
+ *   centre a calibre behind the fillet, the button something more than a calibre across.
+ *   METAL, from the bore, in fourteenths of the calibre: 16 at the vent, 14.5 at the end of the
+ *   first reinforce, 13.5 at the beginning of the second, 12.5 at its end, 11.5 at the beginning
+ *   of the chase, 8 at the muzzle with the mouldings excluded. The muzzle swells to the second
+ *   reinforce ring's diameter, and from the mouth to the muzzle astragal is that diameter.
+ *   MOULDINGS (Armstrong's brass figures, which Muller says the iron guns share): the base ring
+ *   and the ogee next to it, the vent astragal a calibre ahead of the ogee, the two reinforce
+ *   rings with their ogees, the chase girdle and astragal a calibre long, the muzzle astragal.
+ *   Their breadths are Armstrong's inches over a 24-pounder's 5.8 in bore. The rise of each ring
+ *   (0.05 calibre) is CLASS: Muller gives an eighth of an inch for brass and no figure for iron.
+ *   The base ring's rise follows from the rings': its top lies on the line through theirs.
+ * The scale is the breech's outer radius r that every caller already passes: r is the metal at
+ * the vent, 0.5 + 16/14 = 1.643 calibres, so the calibre is r / 1.643. len is the length from
+ * the base ring to the mouth (Muller: "the length of any cannon is always reckoned from the hind
+ * part of the base ring"), so the cascabel stands 2.25 calibres behind it, and the barrel's
+ * centre, where callers place it, is the middle of len.
+ * The mouth is bored a calibre wide and four deep, so a muzzle seen end-on reads as a gun.
+ * Built as a LatheGeometry whose axis is +y with the muzzle at +y, the cylinder's convention, so
+ * the callers' turn sgn·π/2 still points it outboard. One geometry per (len, r), shared. */
+const GUN_BARREL = {
+  t: { vent: 16, r1end: 14.5, r2beg: 13.5, r2end: 12.5, chBeg: 11.5, muzzle: 8 },   // fourteenths of the calibre
+  rise: 0.05, cascabel: 2.25
+};
+/* the barrel's profile, in metres: [[radius, y], ...] from the button's end to the bottom of the bore,
+   y measured from the middle of len. Corners are doubled so the lathe's normals keep their edges. */
+function gunBarrelProfile(len, r) {
+  const c = r / (0.5 + GUN_BARREL.t.vent / 14), Lc = len / c, R = t => 0.5 + t / 14, T = GUN_BARREL.t;
+  const x1 = Lc * 2 / 7, x2 = Lc * 3 / 7 + 1, rise = GUN_BARREL.rise;
+  const R2ring = R(T.r2end) + rise, xm = Lc - 2 * R2ring;          // mouth to muzzle astragal = the ring's diameter
+  const P = [];
+  const pt = (rad, x, sharp) => { P.push([rad, x]); if (sharp) P.push([rad, x]); };
+  /* the cascabel: the button, the neck, the fillet, the breech's dome */
+  const xb = -GUN_BARREL.cascabel + 0.55, rb = 0.55, rn = 0.375, th1 = Math.PI - Math.asin(rn / rb);
+  for (let k = 0; k <= 8; k++) { const th = th1 * k / 8; pt(rb * Math.sin(th), xb - rb * Math.cos(th), k === 8); }
+  pt(rn, -0.85, true); pt(0.75, -0.85, true); pt(0.75, -0.72, true);
+  for (let k = 1; k <= 6; k++) { const ph = Math.PI / 2 * k / 6; pt(0.75 + (R(T.vent) + 0.06 - 0.75) * Math.sin(ph), -0.72 * Math.cos(ph), k === 6); }
+  /* the base ring and its ogee. Its rise is Armstrong's: "determined by laying a ruler to the extremities of the
+     first and second reinforce mouldings", so its top lies on the line through the two rings' tops */
+  const Rb = (R(T.r1end) + rise) + ((R(T.r1end) + rise) - R2ring) * (x1 - 0.135) / (x2 - x1);
+  pt(Rb, 0, true); pt(Rb, 0.27, true);
+  pt(Rb - 0.03, 0.33); pt((Rb + R(T.vent)) / 2, 0.45); pt(R(T.vent) + 0.02, 0.56); pt(R(T.vent), 0.62, true);
+  /* the vent field, tapering to the end of the first reinforce; the vent astragal a calibre ahead of the ogee */
+  const lin = (x, xa, ra, xb2, rb2) => ra + (rb2 - ra) * (x - xa) / (xb2 - xa);
+  const rV = x => lin(x, 0.62, R(T.vent), x1, R(T.r1end));
+  const astragal = (xa, rAt) => {               // fillet, half-round, fillet: 0.2 calibre
+    const a = rAt(xa), b = rAt(xa + 0.2);
+    pt(a, xa, true); pt(a + 0.025, xa, true); pt(a + 0.025, xa + 0.04);
+    pt(a + 0.06, xa + 0.07); pt(a + 0.07, xa + 0.10); pt(a + 0.06, xa + 0.13);
+    pt(b + 0.025, xa + 0.16, true); pt(b + 0.025, xa + 0.2, true); pt(b, xa + 0.2, true);
+  };
+  astragal(1.42, rV);
+  /* the first reinforce ring, and the ogee down to the second reinforce */
+  pt(R(T.r1end), x1 - 0.21, true); pt(R(T.r1end) + rise, x1 - 0.21, true); pt(R(T.r1end) + rise, x1, true);
+  pt(R(T.r1end) + rise - 0.03, x1 + 0.07); pt((R(T.r1end) + R(T.r2beg)) / 2, x1 + 0.15); pt(R(T.r2beg) + 0.01, x1 + 0.22); pt(R(T.r2beg), x1 + 0.26, true);
+  /* the second reinforce, the second reinforce ring, and the ogee down to the chase */
+  pt(R(T.r2end), x2 - 0.21, true); pt(R2ring, x2 - 0.21, true); pt(R2ring, x2, true);
+  pt(R2ring - 0.03, x2 + 0.07); pt((R(T.r2end) + R(T.chBeg)) / 2 + 0.01, x2 + 0.15); pt(R(T.chBeg) + 0.01, x2 + 0.22); pt(R(T.chBeg), x2 + 0.26, true);
+  /* the chase, with its girdle and astragal a calibre long at its beginning, tapering to the muzzle */
+  const rC = x => lin(x, x2 + 0.26, R(T.chBeg), xm, R(T.muzzle));
+  astragal(x2 + 1.06, rC);
+  astragal(xm - 0.2, rC);
+  /* the muzzle: its neck, the swelling to the second reinforce ring's diameter, the mouldings, the mouth */
+  const xs0 = xm + 0.15, xs1 = Lc - 0.5;
+  for (let k = 0; k <= 6; k++) { const t = k / 6; pt(R(T.muzzle) + (R2ring - R(T.muzzle)) * Math.pow(t, 2.2), xs0 + (xs1 - xs0) * t, k === 6); }
+  pt(R2ring, Lc - 0.32, true); pt(R2ring - 0.05, Lc - 0.32, true); pt(R2ring - 0.05, Lc - 0.24, true);
+  pt(R2ring - 0.09, Lc - 0.17); pt(R2ring - 0.12, Lc - 0.06, true); pt(R2ring - 0.12, Lc, true);
+  /* the mouth's face and the bore */
+  pt(0.5, Lc, true); pt(0.5, Lc - 4, true); pt(0, Lc - 4);
+  return { c, Lc, x1, x2, xm, pts: P.map(([rad, x]) => [rad * c, (x - Lc / 2) * c]) };
+}
+/* the barrel's outer radius at s metres from the hind part of the base ring (mouldings included) */
+function gunBarrelRadiusAt(len, r, s) {
+  const { pts } = gunBarrelProfile(len, r), y = s - len / 2;
+  let best = 0;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const [ra, ya] = pts[i], [rb, yb] = pts[i + 1];
+    if (yb <= ya) continue;                       // the bore runs back; only the outside counts
+    if (y >= ya && y <= yb) best = Math.max(best, ra + (rb - ra) * (y - ya) / (yb - ya));
+  }
+  return best;
+}
+const GUN_BARREL_GEO = new Map();
+function gunBarrelGeometry(len, r, seg) {
+  const k = `${len.toFixed(4)}|${r.toFixed(4)}|${seg || 16}`;
+  if (!GUN_BARREL_GEO.has(k)) {
+    const pr = gunBarrelProfile(len, r);
+    const geo = new THREE.LatheGeometry(pr.pts.map(([rad, y]) => new THREE.Vector2(rad, y)), seg || 16);
+    geo.userData = { gunBarrel: { len, r, calibre: pr.c } };
+    GUN_BARREL_GEO.set(k, geo);
+  }
+  return GUN_BARREL_GEO.get(k);
 }
 
 /* ── RIGGING THAT ACTUALLY LEADS SOMEWHERE ─────────────────────────────────────────────
@@ -11681,7 +11787,9 @@ function carriageMat(S, fallback) {
 function gunCarriage(x, yDeck, yAxis, zFace, sgn, len, r, mat) {
   const d = r / 1.75;
   const sF = 0.06, sT = len * (2 / 3 - 0.43), sR = len * (2 / 3 - 0.05);   // along the gun, inboard of the face
-  const rTr = r * (1 - 0.28 * 0.43);                       // the barrel's radius at the trunnions
+  /* r361: the barrel's radius at the trunnions and over the quoin, read off its own profile (gunBarrelProfile);
+     until r361 both came from a straight taper that was the old cylinder's */
+  const rTr = gunBarrelRadiusAt(len, r, len * 3 / 7);        // the barrel's radius at the trunnions
   const cheekIn = rTr + 0.01, wC = d;                      // the cheeks clasp the barrel
   const RF = Math.min(0.24, Math.max(0.12, (yAxis - yDeck) * 0.22)), RH = RF * 0.9;
   const axH = 1.1 * d;
@@ -11724,7 +11832,10 @@ function gunCarriage(x, yDeck, yAxis, zFace, sgn, len, r, mat) {
   /* the bed on the hind axletree, and the quoin under the breech */
   const yBed = yBot - yDeck + 0.4 * d;
   put(new THREE.BoxGeometry(2 * cheekIn, 0.8 * d, sR - sT - 0.1), 0, yBed, (sR + sT) / 2 + 0.05);
-  const sB = len * 2 / 3 - 0.12, rB = r * (1 - 0.28 * 0.04);
+  const sB = len * 2 / 3 - 0.12;
+  /* the quoin's top meets the lowest point of the barrel over its 0.32 m: the base ring, where it lies on it */
+  let rB = 0;
+  for (let k = 0; k <= 16; k++) rB = Math.max(rB, gunBarrelRadiusAt(len, r, len * 2 / 3 - (Math.min(sR - 0.17, sB) - 0.16 + 0.32 * k / 16)));
   const qH = Math.max(0.02, (yAxis - yDeck) - rB - (yBed + 0.4 * d));
   put(new THREE.BoxGeometry(1.6 * rTr, qH, 0.32), 0, yBed + 0.4 * d + qH / 2, Math.min(sR - 0.17, sB));
   /* the trunnions, on the cheeks' fore tops */
@@ -11940,7 +12051,7 @@ function buildIslands(S, group, hullMat, gunMat) {
       const cg = new THREE.Group(), cMat = carriageMat(S);
       for (const q of mine) for (const sgn of [-1, 1]) {
         const ya = (q.sill + q.head) / 2;
-        const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 16), gunMat);
+        const bar = new THREE.Mesh(gunBarrelGeometry(len, r), gunMat);   // r361: Armstrong's barrel
         /* r360: a third outboard of the barricade's face, the muzzle outboard on both sides */
         bar.rotation.x = sgn * Math.PI / 2;
         bar.position.set(xAt(q.u), ya, sgn * (q.half - len / 6));
