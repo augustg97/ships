@@ -1,0 +1,23 @@
+const vm = require('vm'), fs = require('fs');
+const ctx = { console, Math, JSON, Float32Array, Uint16Array, Uint32Array, Int32Array, Uint8Array, Float64Array, Array, Object, Map, Set, WeakMap, Symbol, Promise, setTimeout, performance: { now: () => 0 } };
+ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
+ctx.document = { createElement: () => ({ getContext: () => null, style: {} }), createElementNS: () => ({ getContext: () => null, style: {} }) };
+vm.createContext(ctx);
+const W = process.argv[2];
+for (const f of ['js/three.min.js', 'js/shaders.js', 'js/hull.js']) vm.runInContext(fs.readFileSync(W + '/' + f, 'utf8'), ctx);
+ctx.__V = JSON.parse(fs.readFileSync(W + '/data/vessels.json', 'utf8')).vessels;
+vm.runInContext(`
+const S = __V.find(x => x.id === 'ship-of-the-line').hull, H = hullSurface(S);
+const g = SHIPS_HULL.buildShip(S, { fine: true }); g.updateMatrixWorld(true);
+const st = tierPortStations(S)[1].ports, rows = tierPortRows(S)[1];
+const keyOf = o => { for (let p = o; p; p = p.parent) if (p.userData.part) return p.userData.part.key; return null; };
+const cnt = {}; const v = new THREE.Vector3();
+g.traverse(o => { if (!o.isMesh) return; const k = keyOf(o); if (!k || /gun|gallery|cathead|hull|wale|deck|carriage/i.test(k)) return;
+  const a = o.geometry.attributes.position; if (!a) return;
+  for (let j = 0; j < a.count; j++) { v.fromBufferAttribute(a, j).applyMatrix4(o.matrixWorld);
+    for (const p of st) { const xa = surfacePoint(S, H, p.uLo, rows.port)[0], xb = surfacePoint(S, H, p.uHi, rows.port)[0];
+      if (v.x <= xa + 0.01 || v.x >= xb - 0.01) continue;
+      const sill = surfacePoint(S, H, p.u, rows.lo)[1], head = surfacePoint(S, H, p.u, rows.hi)[1], zS = Math.abs(surfacePoint(S, H, p.u, rows.port)[2]);
+      if (v.y > sill && v.y < head && Math.abs(v.z) > zS - 0.02) { cnt[k] = cnt[k] || new Set(); cnt[k].add(st.indexOf(p)); } } } });
+for (const [k, s] of Object.entries(cnt)) console.log(k, 'ports', [...s].sort((a,b)=>a-b).join(','));
+`, ctx);
