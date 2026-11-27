@@ -15540,6 +15540,7 @@ function deckCovers(S, H) {
       /* r354: a part's record per station, [half-breadth at the deck, at the cover, the deck's height] */
       (v.st = v.st || []).push([T.half((a + b) / 2) - COVER_SIDE_M, T.half((a + b) / 2) - COVER_SIDE_M, H.deck(cl((a + b) / 2))]);
     }
+    v.endIn = COVER_SIDE_M;   // r354: the castle closes on the hull's own end, a wall a part's span stops short of
     v.from = 'castle'; v.name = T.end;
     out.push(v);
   }
@@ -15602,6 +15603,9 @@ function islandCovers(S, H) {
         /* r354: for a part, the shell's half-breadth at the deck and at the island deck, and the deck's height */
         (v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, top(u) - iRail) - COVER_SIDE_M, H.deck(cl(u))]);
       }
+      /* r354: the end away from the opening is the hull's own end (a wall a part's span stops short of), or, on an
+         island open at both ends, the midpoint where its two covers meet, which is no wall */
+      v.endIn = ends.length === 2 ? 0 : COVER_SIDE_M;
       v.from = 'island'; v.name = isl.name;
       out.push(v);
     }
@@ -15656,7 +15660,7 @@ function lightUnderCovers(group, deckMat) {
       m = o.material.clone();
       m.userData = Object.assign({}, o.material.userData, { coverLit: true, coverUniforms: U.uCover });
       m.onBeforeCompile = sh => {
-        sh.uniforms.uCover = U.uCover; sh.uniforms.uCoverN = U.uCoverN; sh.uniforms.uCoverHW = U.uCoverHW; sh.uniforms.uCoverSt = U.uCoverSt;
+        sh.uniforms.uCover = U.uCover; sh.uniforms.uCoverN = U.uCoverN; sh.uniforms.uCoverHW = U.uCoverHW; sh.uniforms.uCoverSt = U.uCoverSt; sh.uniforms.uCoverEnd = U.uCoverEnd;
         sh.uniforms.uSun = U.uSun; sh.uniforms.uHullInv = hullInv;
         sh.vertexShader = 'uniform mat4 uHullInv;\nuniform vec3 uSun;\nvarying vec3 vCovO;\nvarying vec3 vCovLo;\n' +
           sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
@@ -18575,8 +18579,9 @@ function buildShip(S, opts) {
     deckMat.uniforms.uCoverHW = { value: hw };
     const st = []; for (let i = 0; i < 32; i++) st.push(new THREE.Vector3());
     cv.forEach((c, i) => c.st.forEach((q, k) => st[i * 8 + k].set(q[0], q[1], q[2])));
-    deckMat.uniforms.uCoverSt = { value: st };   // r354: read by the parts under a cover (lightUnderCovers), not by the deck
-    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, from: c.from, name: c.name }));
+    deckMat.uniforms.uCoverSt = { value: st };
+    deckMat.uniforms.uCoverEnd = { value: [0, 1, 2, 3].map(i => cv[i] ? cv[i].endIn || 0 : 0) };   // r354: read by the parts under a cover (lightUnderCovers), not by the deck
+    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, endIn: c.endIn || 0, from: c.from, name: c.name }));
   }
   if (cover.mode === 0) {
     /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────

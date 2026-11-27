@@ -9918,6 +9918,7 @@ for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; els
 v.hw.push(T.half((a + b) / 2));
 (v.st = v.st || []).push([T.half((a + b) / 2) - COVER_SIDE_M, T.half((a + b) / 2) - COVER_SIDE_M, H.deck(cl((a + b) / 2))]);
 }
+v.endIn = COVER_SIDE_M;
 v.from = 'castle'; v.name = T.end;
 out.push(v);
 }
@@ -9956,6 +9957,7 @@ const u = (p + q) / 2;
 v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
 (v.st = v.st || []).push([shellHalf(u, H.deck(cl(u))) - COVER_SIDE_M, shellHalf(u, top(u) - iRail) - COVER_SIDE_M, H.deck(cl(u))]);
 }
+v.endIn = ends.length === 2 ? 0 : COVER_SIDE_M;
 v.from = 'island'; v.name = isl.name;
 out.push(v);
 }
@@ -9995,7 +9997,7 @@ if (!m) {
 m = o.material.clone();
 m.userData = Object.assign({}, o.material.userData, { coverLit: true, coverUniforms: U.uCover });
 m.onBeforeCompile = sh => {
-sh.uniforms.uCover = U.uCover; sh.uniforms.uCoverN = U.uCoverN; sh.uniforms.uCoverHW = U.uCoverHW; sh.uniforms.uCoverSt = U.uCoverSt;
+sh.uniforms.uCover = U.uCover; sh.uniforms.uCoverN = U.uCoverN; sh.uniforms.uCoverHW = U.uCoverHW; sh.uniforms.uCoverSt = U.uCoverSt; sh.uniforms.uCoverEnd = U.uCoverEnd;
 sh.uniforms.uSun = U.uSun; sh.uniforms.uHullInv = hullInv;
 sh.vertexShader = 'uniform mat4 uHullInv;\nuniform vec3 uSun;\nvarying vec3 vCovO;\nvarying vec3 vCovLo;\n' +
 sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
@@ -12008,7 +12010,8 @@ deckMat.uniforms.uCoverHW = { value: hw };
 const st = []; for (let i = 0; i < 32; i++) st.push(new THREE.Vector3());
 cv.forEach((c, i) => c.st.forEach((q, k) => st[i * 8 + k].set(q[0], q[1], q[2])));
 deckMat.uniforms.uCoverSt = { value: st };
-deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, from: c.from, name: c.name }));
+deckMat.uniforms.uCoverEnd = { value: [0, 1, 2, 3].map(i => cv[i] ? cv[i].endIn || 0 : 0) };
+deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, st: c.st, endIn: c.endIn || 0, from: c.from, name: c.name }));
 }
 if (cover.mode === 0) {
 const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)

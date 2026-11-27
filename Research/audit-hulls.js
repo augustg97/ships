@@ -10006,6 +10006,7 @@
         g.updateMatrixWorld(true);
         const invP = new THREE.Matrix4().copy(g.matrixWorld).invert(), Mi = new THREE.Matrix4(), Mm = new THREE.Matrix4(), q = new THREE.Vector3();
         const under = q2 => cvs.some(c => { if (!c.st || q2.x < c.x0 || q2.x > c.x1 || q2.y > c.y - 0.05) return false;
+          if (c.open < 0 ? q2.x > c.x1 - (c.endIn || 0) : q2.x < c.x0 + (c.endIn || 0)) return false;   // short of a closed end (r354)
           const t = Math.min(6.999, (q2.x - c.x0) / Math.max(c.x1 - c.x0, 1e-3) * 7), k = Math.floor(t), f = t - k;
           const st = [0, 1, 2].map(j => c.st[k][j] + (c.st[k + 1][j] - c.st[k][j]) * f);
           if (q2.y < st[2] - 0.05) return false;
