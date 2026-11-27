@@ -4300,9 +4300,8 @@ what: 'The rail crowning the stern, carried up over the sheer and rising toward 
 + 'proper, and on a man-of-war it carried the carved work and the stern '
 + 'lanterns by which one ship knew another at night.' },
 gallery:  { stage: 3, name: 'Quarter galleries',
-what: 'Cantilevered out at the after corners, where the hull has narrowed to nothing '
-+ 'and there is no side left to put a window in. Light and air for the officers '
-+ '— and the ship\'s only private necessary house.' },
+what: 'A bay built out on the side at each after corner of the stern, with its own windows. '
++ 'It carried the cabins across the stern round the corner, and it held the officers\' privies.' },
 funnel:   { stage: 3, name: 'Funnel',
 what: 'Not decoration and not arbitrary: its HEIGHT is set by the draught a boiler '
 + 'needs, because the taller the stack the harder it pulls air through the '
@@ -9655,6 +9654,171 @@ new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gpts), TURNS * SEG, B * 0.008,
 mats.ropeSolid));
 group.add(tag(g, 'head'));
 }
+function quarterGallerySpec(S, H) {
+const R = S.quarterGallery;
+if (!R || !R.heightsFt || !R.storeys || !R.storeys.length) return null;
+const FT = 0.3048, ft = v => (Array.isArray(v) ? v[0] + v[1] / 12 : v);
+const hf = R.heightsFt;
+const islT = H.islandTop(1), anchorY = islT !== null ? islT : H.sheer(1);
+const Y = h => anchorY - (ft(hf.taffrailTop) - ft(h)) * FT;
+const balconyDeckY = Y(ft(hf.lowerBreastrail) - ft(hf.breastrailOverDeck));
+const qdY = H.islandDeck(1);
+const P = R.projectionM || 0.76;
+const storeys = R.storeys.map((st, i) => {
+const floorY = i === 0 ? balconyDeckY : (qdY !== null ? qdY : balconyDeckY + 2.0);
+const lightH = ft(st.lightsFt[0]) * FT, lightW = ft(st.lightsFt[1]) * FT;
+return { name: st.name, floorY, rimM: ft(st.rimFt) * FT, lightH, lightW };
+});
+const SILL_M = 0.45;
+for (let i = 0; i < storeys.length; i++) {
+const st = storeys[i];
+st.topY = i + 1 < storeys.length ? storeys[i + 1].floorY : anchorY - 0.25;
+st.sillM = Math.min(SILL_M, st.topY - 0.12 - st.lightH - st.floorY);
+st.lightY = st.floorY + st.sillM + st.lightH / 2;
+}
+const read = {
+anchorY: +anchorY.toFixed(3),
+balconyDeckY: +balconyDeckY.toFixed(3), modelDeckY: +H.deck(1).toFixed(3),
+lowerCounterY: +Y(hf.lowerCounter).toFixed(3), upperCounterY: +Y(hf.upperCounter).toFixed(3),
+projectionM: P, projectionFrom: R.projectionM ? 'class: quarterGallery.projectionFromProvenance' : 'class',
+storeys: storeys.map(st => ({ name: st.name, floorY: +st.floorY.toFixed(3), topY: +st.topY.toFixed(3),
+rimM: +st.rimM.toFixed(3), lightH: +st.lightH.toFixed(3), lightW: +st.lightW.toFixed(3), lightY: +st.lightY.toFixed(3),
+sillM: +st.sillM.toFixed(3) }))
+};
+return { P, storeys, anchorY, lowerCounterY: Y(hf.lowerCounter), upperCounterY: Y(hf.upperCounter),
+pierM: R.pierM || 0.25, read };
+}
+function buildQuarterGalleryBay(S, H, QG, g, mats, glass) {
+const L = S.lwl;
+const xAt = u => (u - 0.5) * L + H.rake(u);
+const sideAt = (u, y) => {
+if (y >= H.sheer(u)) { const p = surfacePoint(S, H, u, 1.0); return [p[0], Math.abs(p[2])]; }
+let a = 0, b = 1;
+for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else b = m; }
+const p = surfacePoint(S, H, u, (a + b) / 2); return [p[0], Math.abs(p[2])];
+};
+const memo = new Map();
+const lineAt = y => {
+const k = y.toFixed(3); if (memo.has(k)) return memo.get(k);
+const pts = []; let acc = 0, prev = null;
+for (let i = 0; i <= 160; i++) {
+const u = 1 - i * 0.0009375;
+const q = sideAt(u, y);
+if (prev) acc += Math.hypot(q[0] - prev[0], q[1] - prev[1]);
+pts.push({ s: acc, x: q[0], z: q[1] }); prev = q;
+}
+memo.set(k, pts); return pts;
+};
+const at = (y, s) => {
+const pts = lineAt(y);
+let i = 1; while (i < pts.length - 1 && pts[i].s < s) i++;
+const a = pts[i - 1], b = pts[i], t = Math.max(0, Math.min(1, (s - a.s) / Math.max(1e-9, b.s - a.s)));
+const dl = Math.max(1e-9, b.s - a.s);
+return [a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t, (b.x - a.x) / dl, (b.z - a.z) / dl];
+};
+const { P, storeys } = QG;
+const off = (s, Lr) => { const f = Math.min(0.6, 0.3 * Lr), s0 = Lr - f;
+return s <= s0 ? 1 : 0.5 * (1 + Math.cos(Math.PI * Math.min(1, (s - s0) / f))); };
+const NS = 16;
+const loft = (rows, caps, mat) => {
+const pos = [], idx = [], nC = NS + 2;
+const vtx = (y, s, d, sgn, cheek) => {
+const [x, z, tx, tz] = at(y, s);
+let nx = -tz, nz = tx; if (nz < 0) { nx = -nx; nz = -nz; }
+return cheek ? [x, y, sgn * (z + d)] : [x + nx * d, y, sgn * (z + nz * d)];
+};
+for (const sgn of [-1, 1]) {
+const base = pos.length / 3;
+for (const r of rows) {
+pos.push(...vtx(r.y, 0, 0, sgn, true));
+for (let c = 0; c <= NS; c++) {
+const s = (c / NS) * r.Lr, d = r.d * off(s, r.Lr);
+pos.push(...vtx(r.y, s, d, sgn, c === 0));
+}
+}
+for (let j = 0; j + 1 < rows.length; j++)
+for (let c = 0; c + 1 < nC; c++) {
+const a = base + j * nC + c, b = a + nC;
+if (sgn > 0) idx.push(a, b, a + 1, a + 1, b, b + 1); else idx.push(a, a + 1, b, a + 1, b + 1, b);
+}
+for (const j of caps) {
+const r = rows[j], cb = pos.length / 3;
+for (let c = 0; c <= NS; c++) { const s = (c / NS) * r.Lr; pos.push(...vtx(r.y, s, 0, sgn, true)); }
+for (let c = 0; c < NS; c++) {
+const o0 = base + j * nC + 1 + c, o1 = o0 + 1, i0 = cb + c, i1 = i0 + 1;
+idx.push(o0, i0, o1, o1, i0, i1);
+}
+}
+}
+const gg = new THREE.BufferGeometry();
+gg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+gg.setIndex(idx); gg.computeVertexNormals();
+const m = new THREE.Mesh(gg, mat);
+m.userData.quarterGallery = QG.read;
+return m;
+};
+const body = new THREE.MeshStandardMaterial({ color: 0x9c8259, roughness: 0.68, side: THREE.DoubleSide });
+const S0 = storeys[0];
+const yF = Math.min(QG.upperCounterY, S0.floorY - 0.4), fin = [];
+for (let j = 0; j <= 6; j++) {
+const t = j / 6, y = yF + (S0.floorY - yF) * t;
+fin.push({ y, Lr: S0.rimM * (0.25 + 0.75 * Math.sqrt(t)), d: P * Math.pow(t, 0.7) });
+}
+const shells = [];
+storeys.forEach((st, i) => {
+const rows = i === 0 ? fin.slice(0, -1) : [];
+rows.push({ y: st.floorY, Lr: st.rimM, d: P }, { y: st.topY, Lr: st.rimM, d: P });
+const caps = [rows.length - 1];
+if (i === storeys.length - 1) {
+const yR = Math.max(st.topY + 0.1, QG.anchorY);
+rows.pop(); caps.length = 0;
+rows.push({ y: st.topY, Lr: st.rimM, d: P });
+for (let j = 1; j <= 4; j++) { const t = j / 4;
+rows.push({ y: st.topY + (yR - st.topY) * t, Lr: st.rimM * (1 - 0.35 * t), d: P * Math.cos(t * Math.PI / 2) }); }
+}
+shells.push({ rows, caps, storey: st.name });
+});
+const txt = `Two storeys of lights built out ${P.toFixed(2)} m from the side (the class's figure; Steel's table does not give it). `
++ `The lower storey's rim runs ${storeys[0].rimM.toFixed(2)} m forward from the corner of the stern`
++ (storeys[1] ? `, the upper's ${storeys[1].rimM.toFixed(2)} m` : '') + `, and its lights are `
++ storeys.map(st => `${st.lightH.toFixed(2)} by ${st.lightW.toFixed(2)} m`).join(' and ')
++ ` (Steel, 1805, Folio LI). A carved drop hangs under the lower storey to the upper counter.`;
+for (const sh of shells) { const m = loft(sh.rows, sh.caps, body); m.userData.galleryStorey = sh.storey;
+g.add(tag(m, 'gallery', 'Quarter gallery', txt)); }
+const rims = storeys.map(st => ({ y: st.floorY, Lr: st.rimM }));
+const top = storeys[storeys.length - 1]; rims.push({ y: top.topY, Lr: top.rimM });
+for (const r of rims) {
+const hR = 0.07, rows = [{ y: r.y - hR, Lr: r.Lr, d: P + 0.06 }, { y: r.y + hR, Lr: r.Lr, d: P + 0.06 }];
+g.add(tag(loft(rows, [0, 1], mats.woodDark), 'gallery'));
+}
+const [plC, plR] = S.sternLightPanes || [3, 3];
+const UP = new THREE.Vector3(0, 1, 0);
+for (const st of storeys) {
+const f = Math.min(0.6, 0.3 * st.rimM), run = st.rimM - f - 0.15;
+const N = Math.max(1, Math.floor((run + QG.pierM) / (st.lightW + QG.pierM)));
+const pitch = st.lightW + QG.pierM, s0 = 0.15 + (run - N * pitch + QG.pierM) / 2 + st.lightW / 2;
+for (const sgn of [-1, 1]) for (let k = 0; k < N; k++) {
+const s = s0 + k * pitch, [x, z, tx, tz] = at(st.lightY, s);
+let nx = -tz, nz = tx; if (nz < 0) { nx = -nx; nz = -nz; }
+const lg = new THREE.Group();
+lg.position.set(x + nx * P, st.lightY, sgn * (z + nz * P));
+lg.rotation.y = -Math.atan2(sgn * nz, nx);
+const sheet = new THREE.Mesh(new THREE.BoxGeometry(0.02, st.lightH, st.lightW), glass);
+sheet.position.x = 0.005; lg.add(tag(sheet, 'gallery'));
+const bw = 0.05, bt = 0.05;
+for (let c = 0; c <= plC; c++) {
+const bar = new THREE.Mesh(new THREE.BoxGeometry(bt, st.lightH + bw, bw), mats.woodPale);
+bar.position.set(0.02, 0, -st.lightW / 2 + (c / plC) * st.lightW); lg.add(tag(bar, 'gallery'));
+}
+for (let r = 0; r <= plR; r++) {
+const bar = new THREE.Mesh(new THREE.BoxGeometry(bt, bw, st.lightW + bw), mats.woodPale);
+bar.position.set(0.02, -st.lightH / 2 + (r / plR) * st.lightH, 0); lg.add(tag(bar, 'gallery'));
+}
+lg.userData.galleryLight = { storey: st.name, s: +s.toFixed(3), w: +st.lightW.toFixed(3), h: +st.lightH.toFixed(3) };
+g.add(lg);
+}
+}
+}
 function buildStern(S, group, mats) {
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
@@ -9675,9 +9839,11 @@ return Math.atan2(b[0] - a[0], Math.max(1e-3, b[1] - a[1]));
 };
 const glass = new THREE.MeshStandardMaterial({
 color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
+const QG = quarterGallerySpec(S, H);
 const rows = S.sternLights || 0;
 const rowZ = [];
-for (let r = 0; r < rows; r++)
+if (QG && QG.storeys.length === rows) for (const st of QG.storeys) rowZ.push(st.lightY);
+else for (let r = 0; r < rows; r++)
 rowZ.push(fb * (rows === 1 ? 0.55 : 0.42 + 0.30 * r));
 const wh = fb * 0.16;
 const [plC, plR] = S.sternLightPanes || [3, 3];
@@ -9715,7 +9881,7 @@ tierG.add(tag(fr, 'sternlight'));
 const gl = new THREE.Mesh(new THREE.BoxGeometry(0.012, gh, 2 * hw), glass);
 gl.position.set(B * 0.004, 0, 0);
 tierG.add(tag(gl, 'sternlight'));
-for (const zm of [zc - wh * 0.80, zc + wh * 0.80]) {
+for (const zm of (QG ? [] : [zc - wh * 0.80, zc + wh * 0.80])) {
 const w2 = halfAt(zm) * 0.94;
 const rail = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.008, w2 * 2, 6), mats.woodDark);
@@ -9723,6 +9889,15 @@ rail.rotation.x = Math.PI / 2;
 rail.position.set(faceX(zm) + B * 0.004, zm, 0);
 g.add(tag(rail, 'transom'));
 }
+}
+if (QG) for (const zm of [QG.lowerCounterY, QG.upperCounterY, ...QG.storeys.map(st => st.floorY)]) {
+const w2 = halfAt(zm) * 0.94;
+const rail = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.008, B * 0.008, w2 * 2, 6), mats.woodDark);
+rail.rotation.x = Math.PI / 2;
+rail.position.set(faceX(zm) + B * 0.004, zm, 0);
+rail.userData.sternRecord = QG.read;
+g.add(tag(rail, 'transom'));
 }
 const islT = H.islandTop(1);
 if ((rows || S.gunDecks) && islT !== null) {
@@ -9752,7 +9927,8 @@ bal.position.set(xF, fb + h / 2, p.z);
 g.add(tag(bal, 'taffrail'));
 }
 }
-if (S.gunDecks) {
+if (QG) buildQuarterGalleryBay(S, H, QG, g, mats, glass);
+else if (S.gunDecks) {
 const zG0 = fb * 0.30, zG1 = fb * (rows >= 2 ? 0.88 : 0.62);
 const NZ = 8, NA = 5, rMax = B * 0.052;
 const rAt = zH => {

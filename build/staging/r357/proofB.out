@@ -1,0 +1,32 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded gallery drawn as the class drum",
+  "detail": "a 63-vertex gallery mesh with no record"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded gallery drawn as the class drum",
+  "detail": "a 108-vertex gallery mesh with no record"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded gallery drawn as the class drum",
+  "detail": "a 63-vertex gallery mesh with no record"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded gallery drawn as the class drum",
+  "detail": "a 108-vertex gallery mesh with no record"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a recorded quarter gallery not drawn",
+  "detail": "no gallery mesh carries userData.quarterGallery"
+ },
+ {
+  "id": "audit-hulls.js",
+  "rule": "a side spelled outside sideOf",
+  "detail": "2 lines spell a side from a sign (lines 10069, 10071); every side-naming message goes through sideOf"
+ }
+]

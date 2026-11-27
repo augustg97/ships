@@ -7121,6 +7121,51 @@ if (a.count > 40 && near > 0.08) bad['gallery drum ' + near.toFixed(2) + ' m off
 } else if (worst > 0) { const k = key + ' off the face by ' + worst.toFixed(2) + ' m'; bad[k] = (bad[k] || 0) + 1; } });
 for (const [k, n] of Object.entries(bad)) say(v.id, 'stern furniture off the raked face', `${k} (${n} mesh(es))`);
 }
+if (H.quarterGallery) {
+g.updateMatrixWorld(true);
+const invG = new THREE.Matrix4().copy(g.matrixWorld).invert(), Mg = new THREE.Matrix4(), q = new THREE.Vector3();
+const HSg = SHIPS_HULL.hullSurface(H);
+const cornerX = y => { let a = 0, b = 1; if (SHIPS_HULL.surfacePoint(H, HSg, 1, 1.0)[1] <= y) return SHIPS_HULL.surfacePoint(H, HSg, 1, 1.0)[0];
+for (let i = 0; i < 26; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSg, 1, m)[1] < y) a = m; else b = m; }
+return SHIPS_HULL.surfacePoint(H, HSg, 1, (a + b) / 2)[0]; };
+let rd = null; const bodies = [], lights = [], sashes = [];
+g.traverse(o => { if (!o.isMesh) return; let key = null;
+for (let pp = o; pp && !key; pp = pp.parent) key = pp.userData && pp.userData.part && pp.userData.part.key;
+if (key === 'gallery') {
+if (o.userData.quarterGallery) { rd = o.userData.quarterGallery; bodies.push(o); }
+else if (o.geometry.attributes.position.count > 40) say(v.id, 'a recorded gallery drawn as the class drum', `a ${o.geometry.attributes.position.count}-vertex gallery mesh with no record`);
+if (o.parent && o.parent.userData.galleryLight && o.material && o.material.metalness >= 0.3) lights.push(o);
+}
+if (key === 'sternlight' && o.geometry.type === 'ExtrudeGeometry') sashes.push(o); });
+if (!rd) say(v.id, 'a recorded quarter gallery not drawn', 'no gallery mesh carries userData.quarterGallery');
+else {
+if (Math.abs(rd.balconyDeckY - rd.modelDeckY) > 0.15)
+say(v.id, 'the gallery registered on the wrong anchor', `the balcony's deck lands at y ${rd.balconyDeckY}, the model's upper deck at the stern is ${rd.modelDeckY}`);
+const ftv = x => (Array.isArray(x) ? x[0] + x[1] / 12 : x) * 0.3048;
+for (const [si, st0] of rd.storeys.entries()) {
+const rec = H.quarterGallery.storeys[si] || {};
+const st = { ...st0, rimM: +ftv(rec.rimFt).toFixed(3), lightH: +ftv(rec.lightsFt[0]).toFixed(3), lightW: +ftv(rec.lightsFt[1]).toFixed(3) };
+if (H.quarterGallery.storeys.length !== rd.storeys.length) say(v.id, 'a gallery storey not drawn', `the record has ${H.quarterGallery.storeys.length} storeys, the build ${rd.storeys.length}`);
+for (const sgn of [-1, 1]) {
+let xf = 1e9;
+for (const o of bodies.filter(o => o.userData.galleryStorey === st.name)) { Mg.multiplyMatrices(invG, o.matrixWorld); const a = o.geometry.attributes.position;
+for (let j = 0; j < a.count; j++) { q.fromBufferAttribute(a, j).applyMatrix4(Mg);
+if (Math.abs(q.y - st.floorY) < 0.02 && Math.sign(q.z) === sgn) xf = Math.min(xf, q.x); } }
+const run = cornerX(st.floorY) - xf;
+if (!(run >= st.rimM - 0.15 && run <= st.rimM + 0.05))
+say(v.id, 'a gallery storey off its recorded rim', `${st.name} storey, ${sideOf(sgn)}: ${xf > 1e8 ? 'no body at its floor' : run.toFixed(2) + ' m forward of the corner'}, the record ${st.rimM} m`);
+const mine = lights.filter(o => o.parent.userData.galleryLight.storey === st.name && Math.sign(o.parent.position.z) === sgn);
+if (!mine.length) say(v.id, 'a gallery storey with no lights', `${st.name}, ${sideOf(sgn)}`);
+for (const o of mine) { const pr = o.geometry.parameters;
+if (Math.abs(pr.height - st.lightH) > 0.01 || Math.abs(pr.depth - st.lightW) > 0.01)
+say(v.id, 'a gallery light off the record', `${st.name}: ${pr.height.toFixed(3)} by ${pr.depth.toFixed(3)} m, the record ${st.lightH} by ${st.lightW}`); }
+}
+}
+for (const o of sashes) { const yc = new THREE.Vector3().setFromMatrixPosition(o.parent.matrixWorld).applyMatrix4(invG).y;
+if (!rd.storeys.some(st => Math.abs(st.lightY - yc) <= 0.05))
+say(v.id, 'a stern-light tier off the recorded storeys', `a tier centred at y ${yc.toFixed(2)}; the storeys' lights at ${rd.storeys.map(st => st.lightY).join(', ')}`); }
+}
+}
 {
 let covM = null; g.traverse(o => { if (o.isMesh && o.material && o.material.userData && o.material.userData.covers && o.material.userData.covers.length) covM = o.material; });
 if (covM) {
