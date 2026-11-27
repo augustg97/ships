@@ -31315,7 +31315,7 @@ The bound is ±6 px on the head and ±8 px on the span. The plate's head in metr
 
 **RULE 0.** No frame changes this round: the builder is HEAD's apart from one comment, and the shaders and the card are untouched. The ratchet receipt below is the check that nothing moved. The record's facts are not on the surface yet; they will be when the side is drawn (item 1).
 
-**RATCHET RECEIPT (r356).** __RECEIPT__
+**RATCHET RECEIPT (r356).** The full check (`ratchet.out`), launched at 23:09 on the final tree at a load of 6–8, captured 27 frames and died on `aboard-off`, a 150 s readiness timeout (r355 died at `aboard-titanic`, r353 and r354 at `sea-magnified`). The 27 were copied to `run1` and scored offline with r277's scorer (`score1.out`): all 27 inside the gate. The other 38 frames were captured one process each (`run-each.sh missing.txt`, `each1.log`, no failure; `aboard-off` took 26 s alone) and scored (`score2.out`): all 38 inside the gate. **65 of 65 frames captured and scored, 65 inside the gate, no baseline moved, no unscored frames carried.** That is what the round predicted: the builder is HEAD's bytes apart from one comment, and the record's new fields are read only by the audit. The page views in run1/run2 are not committed.
 
 **FOR r357:**
 1. **Draw the 74's side at its recorded thickness.** At the upper deck, an inner face (the spirketting and quickwork) 0.514 m inside the outer skin, from the waterway up to the port sills and on to the cover. Under the islands it is 0.356 m at the quarterdeck's height. Each port is cut through both faces with a lining. The waterway moves to 0.387–0.667 m inside the skin, and the deck stops at it. Then `COVER_SIDE_M` can take `hull.side` (the reverted `r356_edit_REVERTED.py` is the code for that), `contested` comes off the record, and A-SIDE-AS-DRAWN convicts until it does. The guns' trucks stand on the deck inboard of the new face: check them with `r356_inset.js` before and after.
@@ -31323,4 +31323,4 @@ The bound is ±6 px on the head and ±8 px on the span. The plate's head in metr
 3. The 0.25 m tolerance counts the head and beakhead, the cathead and the bower anchor under the forecastle at the bow (`under-head.txt`). Each stands outside the hull. A closed end should stop where the hull's own end is at each half-breadth, not at its centreline x; check with `r356_under.js`.
 4. r353's item 2 (what moves a voyage frame's ship under load) and its item 3 stand.
 
-**Disk at close:** __DISK__. Live stamp __STAMP__.
+**Disk at close:** 5.4Gi free on the Data volume, no tmp_pack_* file. Live stamp 1795763440.
