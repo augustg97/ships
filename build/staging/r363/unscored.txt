@@ -1,11 +1,3 @@
-ship-clipper
-aboard-clipper
-ship-azzam
-ship-endurance
-action-salamis
-board-salamis
-action-gravelines
-action-lepanto
 action-myeongnyang
 wake-plan
 ship-ever-given
