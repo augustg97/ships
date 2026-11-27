@@ -31289,4 +31289,4 @@ The bound is ±6 px on the head and ±8 px on the span. The plate's head in metr
 3. The taffrail stands at the sheer's x; it is at the top, so it is on the face, but the island wall above the sheer on the 74 also rakes. Check the taffrail's seat with A-STERN-ON-FACE extended to `taffrail`.
 4. r353's item 2 (what moves a voyage frame's ship under load) and its item 3 stand.
 
-**Disk at close:** 5.5 GB free on the Data volume, no `tmp_pack_*` file. Live stamp 1795761225 (the first push carried 1795758682, verified live at 21:53).
+**Disk at close:** 5.5 GB free on the Data volume, no `tmp_pack_*` file. Live stamp 1795761225, verified live at 22:36 (the first push carried 1795758682, verified live at 21:53).
