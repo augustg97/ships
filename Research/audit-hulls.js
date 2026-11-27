@@ -9932,11 +9932,61 @@
         const inSide = end === 'aft' ? (Math.min(...bx) >= xEnd - 0.02 && Math.max(...bx) <= xEnd + 0.4) : (Math.max(...bx) <= xEnd + 0.02 && Math.min(...bx) >= xEnd - 0.4);
         if (!inSide) say(v.id, 'a breast beam away from the deck edge it carries', `beam x ${Math.min(...bx).toFixed(2)}-${Math.max(...bx).toFixed(2)}, the end at ${xEnd.toFixed(2)}`);
       }
-      const covers = coverMat ? coverMat.userData.covers : [];
+      const covers = coverMat ? coverMat.userData.covers.filter(c => c.from !== 'island') : [];
       if (covers.length !== openL.size) say(v.id, 'a deck under an open castle not lit as covered', `${openL.size} open end(s), ${covers.length} cover(s) on the main deck's material`);
       for (const cv of covers) {
         const sp = spans.find(s2 => Math.abs(s2.x0 - cv.x0) < 0.05 && Math.abs(s2.x1 - cv.x1) < 0.05);
         if (!sp) say(v.id, 'a deck cover that matches no castle', `cover x ${cv.x0.toFixed(2)}-${cv.x1.toFixed(2)}`);
+      }
+    }
+    /* ── A-ISLAND-WAIST-COVER (round 353): THE DECK UNDER A TIMBER ISLAND OPEN ON THE WAIST IS LIT AS COVERED.
+       r345 opened the space under the 74's forecastle and quarterdeck on the waist (a timber island draws no bulkhead
+       below its end), and r352 taught DECK_FRAG to shade a deck under a deck, but only under castles: the upper deck
+       under both of the 74's islands took the full sun and sky, as the open waist does. TEST, on every hull with
+       islands, from the BUILT scene: each island's deck mesh (userData.islandDeck), read in hull space. On a timber hull
+       (not build steel or iron), every island end that does not close on the hull's own end must have a cover on the
+       main deck's material (userData.covers, from 'island', the island's name, the end's sign) whose open end lies
+       within 0.05 m of the deck mesh's end on that side, whose height lies within 0.05 m of the deck mesh's lowest
+       vertex (on an island open at one end only), and whose half-breadth reaches every vertex of the main deck under
+       it, so no plank inside the island's shell is lit as open sky. On a steel or iron hull the island faces its well
+       with a bulkhead, and an island cover is convicted. */
+    if (H.islands && H.islands.list && H.islands.list.length) {
+      const steelI = H.build === 'steel' || H.build === 'iron' || !!H.iron;
+      g.updateMatrixWorld(true);
+      const invI = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const ptsI = o => { const a = o.geometry.attributes.position, out = [];
+        for (let i = 0; i < a.count; i++) out.push(new THREE.Vector3().fromBufferAttribute(a, i).applyMatrix4(o.matrixWorld).applyMatrix4(invI)); return out; };
+      const iDecks = [], mainDecks = []; let covMat = null;
+      g.traverse(o => { if (!o.isMesh) return;
+        if (o.userData.islandDeck) iDecks.push(o);
+        if (o.material && o.material.userData && o.material.userData.covers) { covMat = o.material; mainDecks.push(o); } });
+      const icov = covMat ? covMat.userData.covers.filter(c => c.from === 'island') : [];
+      if (steelI) { if (icov.length) say(v.id, 'a steel island lit as open on the waist', `${icov.length} island cover(s) on a ${H.build || 'iron'} hull`); }
+      else {
+        if (!iDecks.length) say(v.id, 'an island with no tagged deck mesh', `${H.islands.list.length} island(s), no userData.islandDeck`);
+        const mainPts = mainDecks.flatMap(ptsI);
+        for (const dm of iDecks) {
+          const I = dm.userData.islandDeck, pts = ptsI(dm), xs = pts.map(q => q.x);
+          const x0 = Math.min(...xs), x1 = Math.max(...xs), yLo = Math.min(...pts.map(q => q.y));
+          const ends = [...(I.u0 > 0 ? [-1] : []), ...(I.u1 < 1 ? [1] : [])];
+          for (const w of ends) {
+            const which = w < 0 ? 'forward' : 'after', xe = w < 0 ? x0 : x1;
+            const cv = icov.find(c => c.name === I.name && c.open === w);
+            if (!cv) { say(v.id, 'a deck under an open island not lit as covered', `${I.name}: its ${which} end at x ${xe.toFixed(2)} opens on the waist, no cover`); continue; }
+            const xc = w < 0 ? cv.x0 : cv.x1;
+            if (Math.abs(xc - xe) > 0.05) say(v.id, 'an island cover off its opening', `${I.name} ${which} end: the deck ends at x ${xe.toFixed(2)}, the cover opens at ${xc.toFixed(2)}`);
+            if (ends.length === 1 && Math.abs(cv.y - yLo) > 0.05) say(v.id, 'an island cover at the wrong height', `${I.name}: the deck's lowest vertex at y ${yLo.toFixed(2)}, the cover at ${cv.y.toFixed(2)}`);
+            let out = 0, worst = 0;
+            for (const q of mainPts) {
+              if (q.x < cv.x0 || q.x > cv.x1 || q.y > cv.y - 0.05) continue;
+              const t = (q.x - cv.x0) / Math.max(cv.x1 - cv.x0, 1e-3) * 7, k = Math.min(6, Math.floor(t));
+              const hw = cv.hw[k] + (cv.hw[k + 1] - cv.hw[k]) * (t - k);
+              if (Math.abs(q.z) > hw + 0.01) { out++; worst = Math.max(worst, Math.abs(q.z) - hw); }
+            }
+            if (out) say(v.id, 'a plank under an island lit as open sky', `${I.name}: ${out} main-deck vertices outboard of the cover's half-breadth, by up to ${worst.toFixed(2)} m`);
+          }
+          for (const c of icov) if (c.name === I.name && !ends.includes(c.open)) say(v.id, 'an island cover on a closed end', `${I.name}: a cover opens at ${c.open}`);
+        }
       }
     }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's

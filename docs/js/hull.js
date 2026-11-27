@@ -7324,7 +7324,7 @@ for (let k = 0; k <= N; k++) {
 const u = stU(k), y = top(u) - iRail, [dx, h] = shellAt(u, y);
 dp.push(dx, y, -h, dx, y, h);
 }
-g.add(strip(dp, deckMat, true));
+{ const dm = strip(dp, deckMat, true); dm.userData.islandDeck = { name: isl.name, u0, u1 }; g.add(dm); }
 group.add(tag(g, 'forecast', isl.name, isl.what));
 if (S.islands.openRail) {
 const rg = new THREE.Group(), up = new THREE.Vector3(0, 1, 0);
@@ -9901,10 +9901,10 @@ yT: u => H.deck(cl(u)) + dh * (t + 1) });
 return out;
 }
 function deckCovers(S, H) {
-const C = S.castles; if (!C || !C.openToWaist || !C.openToWaist.length) return [];
 H = H || hullSurface(S);
+const out = [...islandCovers(S, H)];
+const C = S.castles; if (!C || !C.openToWaist || !C.openToWaist.length) return out.slice(0, 4);
 const L = S.lwl, cl = u => Math.max(0.001, Math.min(0.999, u)), xAt = u => (u - 0.5) * L + H.rake(cl(u));
-const out = [];
 for (const T of castleTiers(S, H)) {
 if (T.t !== 0 || !C.openToWaist.includes(T.end)) continue;
 let y = Infinity;
@@ -9917,9 +9917,47 @@ let a = T.u0, b = T.u1;
 for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; else b = m; }
 v.hw.push(T.half((a + b) / 2));
 }
+v.from = 'castle'; v.name = T.end;
 out.push(v);
 }
 return out.slice(0, 4);
+}
+function islandCovers(S, H) {
+const I = S.islands;
+if (!(I && I.list && I.list.length) || S.build === 'steel' || S.build === 'iron' || S.iron) return [];
+H = H || hullSurface(S);
+const L = S.lwl, railM = I.railM || 1.0, cl = u => Math.max(0, Math.min(1, u));
+const xAt = u => (u - 0.5) * L + H.rake(u);
+const shellHalf = (u, y) => {
+const uc = cl(u);
+if (y >= H.sheer(uc)) return Math.abs(surfacePoint(S, H, uc, 1.0)[2]);
+let a = 0, b = 1;
+for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, uc, m)[1] < y) a = m; else b = m; }
+return Math.abs(surfacePoint(S, H, uc, (a + b) / 2)[2]);
+};
+const out = [];
+for (const isl of I.list) {
+const u0 = isl.u[0], u1 = isl.u[1], iRail = isl.railM || railM;
+const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+const ends = [...(u0 > 0 ? [-1] : []), ...(u1 < 1 ? [1] : [])];
+for (const w of ends) {
+const a = ends.length === 2 && w > 0 ? (u0 + u1) / 2 : u0, b = ends.length === 2 && w < 0 ? (u0 + u1) / 2 : u1;
+let y = Infinity;
+for (let k = 0; k <= 16; k++) y = Math.min(y, top(a + (b - a) * k / 16) - iRail);
+const v = new THREE.Vector4(xAt(a), xAt(b), y, w);
+v.hw = [];
+for (let k = 0; k < 8; k++) {
+const x = v.x + (v.y - v.x) * k / 7;
+let p = a, q = b;
+for (let j = 0; j < 30; j++) { const m = (p + q) / 2; if (xAt(m) < x) p = m; else q = m; }
+const u = (p + q) / 2;
+v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
+}
+v.from = 'island'; v.name = isl.name;
+out.push(v);
+}
+}
+return out;
 }
 function castleTopAt(S, H, u) {
 let top = null;
@@ -11902,7 +11940,7 @@ deckMat.uniforms.uCover = { value: pad };
 deckMat.uniforms.uCoverN = { value: cv.length };
 const hw = new Array(32).fill(0); cv.forEach((c, i) => c.hw.forEach((h, k) => { hw[i * 8 + k] = h; }));
 deckMat.uniforms.uCoverHW = { value: hw };
-deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw }));
+deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, from: c.from, name: c.name }));
 }
 if (cover.mode === 0) {
 const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)

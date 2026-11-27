@@ -11761,7 +11761,7 @@ function buildIslands(S, group, hullMat) {
       const u = stU(k), y = top(u) - iRail, [dx, h] = shellAt(u, y);
       dp.push(dx, y, -h, dx, y, h);
     }
-    g.add(strip(dp, deckMat, true));
+    { const dm = strip(dp, deckMat, true); dm.userData.islandDeck = { name: isl.name, u0, u1 }; g.add(dm); }
     group.add(tag(g, 'forecast', isl.name, isl.what));
     /* an OPEN RAIL on the deck's edge, where the record says the ship has one (islands.openRail,
        round 295). It is its own part, so an island's built top stays the top of its plating. */
@@ -15520,10 +15520,10 @@ function castleTiers(S, H) {
  * end: -1 at x from for the aftcastle, +1 at x to for the forecastle), in hull metres on the
  * loft's deck-level line. A closed castle covers nothing anyone can see, so it is not listed. */
 function deckCovers(S, H) {
-  const C = S.castles; if (!C || !C.openToWaist || !C.openToWaist.length) return [];
   H = H || hullSurface(S);
+  const out = [...islandCovers(S, H)];
+  const C = S.castles; if (!C || !C.openToWaist || !C.openToWaist.length) return out.slice(0, 4);
   const L = S.lwl, cl = u => Math.max(0.001, Math.min(0.999, u)), xAt = u => (u - 0.5) * L + H.rake(cl(u));
-  const out = [];
   for (const T of castleTiers(S, H)) {
     if (T.t !== 0 || !C.openToWaist.includes(T.end)) continue;
     let y = Infinity;
@@ -15538,9 +15538,64 @@ function deckCovers(S, H) {
       for (let j = 0; j < 30; j++) { const m = (a + b) / 2; if (xAt(m) < x) a = m; else b = m; }
       v.hw.push(T.half((a + b) / 2));
     }
+    v.from = 'castle'; v.name = T.end;
     out.push(v);
   }
   return out.slice(0, 4);
+}
+
+/* ⚠ A TIMBER ISLAND OPEN ON THE WAIST COVERS THE DECK UNDER IT (round 353). r345 opened the space
+   under the 74's forecastle and quarterdeck on the waist: buildIslands draws no bulkhead below a
+   timber island's end, so its deck's edge is the edge the waist sees. r352 shaded the main deck
+   under the carrack's half deck, and deckCovers read only castles, so the upper deck under the
+   74's quarterdeck and forecastle still took the full sun and the full sky, exactly as the open
+   waist does. An island's cover is the same quantity a castle's is: its span on the loft's
+   deck-level line (the xAt buildIslands draws with), its deck's lowest height over that span
+   (the island's top less its own railM), and its open end: an end that does not close on the
+   hull's own end and that the builder draws without a bulkhead. A steel island faces its well
+   with a closed bulkhead (Preussen's plates draw one) and covers nothing anyone can see. The
+   half-breadth is the SHELL's: the island is the side carried up, so every plank of the deck
+   under it lies inside it, out to the deck's own edge, which on a hull with tumblehome stands
+   outboard of the sheer. An island open at both ends gives the shader one cover per end, each
+   over its half of the span. */
+function islandCovers(S, H) {
+  const I = S.islands;
+  if (!(I && I.list && I.list.length) || S.build === 'steel' || S.build === 'iron' || S.iron) return [];
+  H = H || hullSurface(S);
+  const L = S.lwl, railM = I.railM || 1.0, cl = u => Math.max(0, Math.min(1, u));
+  const xAt = u => (u - 0.5) * L + H.rake(u);
+  /* the shell's half-breadth at height y on station u (buildIslands' shellAt) */
+  const shellHalf = (u, y) => {
+    const uc = cl(u);
+    if (y >= H.sheer(uc)) return Math.abs(surfacePoint(S, H, uc, 1.0)[2]);
+    let a = 0, b = 1;
+    for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, uc, m)[1] < y) a = m; else b = m; }
+    return Math.abs(surfacePoint(S, H, uc, (a + b) / 2)[2]);
+  };
+  const out = [];
+  for (const isl of I.list) {
+    const u0 = isl.u[0], u1 = isl.u[1], iRail = isl.railM || railM;
+    const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+    const ends = [...(u0 > 0 ? [-1] : []), ...(u1 < 1 ? [1] : [])];
+    for (const w of ends) {
+      /* both ends open: each cover takes the half of the span next to its own opening */
+      const a = ends.length === 2 && w > 0 ? (u0 + u1) / 2 : u0, b = ends.length === 2 && w < 0 ? (u0 + u1) / 2 : u1;
+      let y = Infinity;
+      for (let k = 0; k <= 16; k++) y = Math.min(y, top(a + (b - a) * k / 16) - iRail);
+      const v = new THREE.Vector4(xAt(a), xAt(b), y, w);
+      v.hw = [];
+      for (let k = 0; k < 8; k++) {
+        const x = v.x + (v.y - v.x) * k / 7;
+        let p = a, q = b;
+        for (let j = 0; j < 30; j++) { const m = (p + q) / 2; if (xAt(m) < x) p = m; else q = m; }
+        const u = (p + q) / 2;
+        v.hw.push(Math.max(shellHalf(u, H.deck(cl(u))), shellHalf(u, top(u) - iRail)) + 0.05);
+      }
+      v.from = 'island'; v.name = isl.name;
+      out.push(v);
+    }
+  }
+  return out;
 }
 
 /* The highest walled tier covering station u, or null: {y: its deck's height there, half: its
@@ -18421,7 +18476,8 @@ function buildShip(S, opts) {
                 uPlankRun: { value: cover.run || 0 } } });
   const deckMat = deckShader(cover.col);
   /* r352: the main deck under a castle open on the waist takes the castle's shade (DECK_FRAG's
-     uCover). FINE only, as the castles are: the coarse build draws no castle to stand over it. */
+     uCover). FINE only, as the castles are: the coarse build draws no castle to stand over it.
+     r353: and under a timber island open on the waist (islandCovers), FINE only as the islands are. */
   {
     const cv = FINE ? deckCovers(S) : [];
     const pad = [...cv]; while (pad.length < 4) pad.push(new THREE.Vector4(0, 0, 0, 0));
@@ -18429,7 +18485,7 @@ function buildShip(S, opts) {
     deckMat.uniforms.uCoverN = { value: cv.length };
     const hw = new Array(32).fill(0); cv.forEach((c, i) => c.hw.forEach((h, k) => { hw[i * 8 + k] = h; }));
     deckMat.uniforms.uCoverHW = { value: hw };
-    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw }));
+    deckMat.userData.covers = cv.map(c => ({ x0: c.x, x1: c.y, y: c.z, open: c.w, hw: c.hw, from: c.from, name: c.name }));
   }
   if (cover.mode === 0) {
     /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────
