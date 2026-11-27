@@ -1,0 +1,192 @@
+[
+ {
+  "id": "corbita",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.5, 93.5\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "corbita",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.5, 93.5\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "caravel",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.5, 92.5\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "caravel",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.5, 92.5\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "carrack",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.8, 92.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "carrack",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.8, 92.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "fluyt",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.7, 93.7\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "fluyt",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.7, 93.7\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.447 m at x -12.55, y 3.41"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.447 m at x -12.55, y 3.41"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.1, 93.1\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.1, 93.1\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.298 m at x -19.95, y 5.14"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.298 m at x -19.95, y 5.14"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.9, 92.9\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.9, 92.9\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a shroud through the catted anchor",
+  "detail": "a lower shroud -0.820 m from an anchor vertex at x -19.32, y 7.93"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a shroud through the catted anchor",
+  "detail": "a lower shroud -0.820 m from an anchor vertex at x -19.32, y 7.93"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.9, 92.9\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.9, 92.9\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "wyoming",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.9, 92.9\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "wyoming",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.9, 92.9\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.750 m at x -42.39, y 4.78"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.750 m at x -42.39, y 4.78"
+ },
+ {
+  "id": "preussen",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.7, 92.7\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "preussen",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.7, 92.7\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "clipper",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.8, 93.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "clipper",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 93.8, 93.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "clipper",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.906 m at x -25.77, y 3.80"
+ },
+ {
+  "id": "clipper",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.906 m at x -25.77, y 3.80"
+ },
+ {
+  "id": "steamer",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.8, 92.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "steamer",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 92.8, 92.8\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "endurance",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 94.3, 94.3\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "endurance",
+  "rule": "anchor arms not at sixty degrees to the shank",
+  "detail": "bill-crown-ring angles 94.3, 94.3\u00b0; Falconer gives 60\u00b0, the arms rising from the crown toward the ring"
+ },
+ {
+  "id": "endurance",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.917 m at x -17.52, y 3.77"
+ },
+ {
+  "id": "endurance",
+  "rule": "a shroud through the catted anchor",
+  "detail": "a lower shroud -0.158 m from an anchor vertex at x -12.55, y 5.35"
+ },
+ {
+  "id": "endurance",
+  "rule": "a catted anchor inside the bow",
+  "detail": "12 vertices inside the skin, worst 0.917 m at x -17.52, y 3.77"
+ },
+ {
+  "id": "endurance",
+  "rule": "a shroud through the catted anchor",
+  "detail": "a lower shroud -0.158 m from an anchor vertex at x -12.55, y 5.35"
+ }
+]

@@ -4155,7 +4155,11 @@ what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her
 + 'thick to pass round the capstan at all — it has to be nipped to a lighter '
 + 'messenger line. The STOCK is set at right angles to the arms, and that 90° '
 + 'is the whole invention: it rolls the anchor over until a fluke bites. '
-+ 'Without it the thing lies flat and drags.' },
++ 'Without it the thing lies flat and drags. The arms leave the foot of the shank '
++ 'at 60° to it, rising toward the ring, and each carries a triangular iron palm on '
++ 'its upper face (Falconer, 1769). The stock is oak, in two halves hooped with iron. '
++ 'At sea the ring hangs from the cathead, and the inner arm\'s point rests against '
++ 'the side under the fore channel, where Steel puts a lining of plank to take it.' },
 grapnel:  { stage: 3, name: 'Grapnel anchor',
 what: 'The Indian Ocean\'s own ground tackle, and the one anchor in this fleet '
 + 'lifted from its own ship\'s wreck: a wooden shank carrying four wrought-'
@@ -10860,67 +10864,146 @@ if (C.fore) one('Forecastle', C.fore, false,
 if (C.aft) one('Aftcastle', C.aft, true,
 'The high stern that names the type: the quarterdeck from abaft the mainmast to the stern, and the poop stepped up again over its after half, each walled and railed. ' + (C.openToWaist && C.openToWaist.includes('aft') ? 'The space under the quarterdeck stands open on the waist, its forward edge carried on a breast beam, as on the Mataró model of about 1450. ' : '') + 'On the India naus the stern rose three and four decks over the waist; here two, a class default.');
 }
+function anchorFormOf(S) {
+const L = S.lwl;
+const s = Math.min(L, 48) * 0.115 + Math.max(0, L - 48) * 0.004;
+const f = { s, a: s / 3, armDeg: 60, rCrown: s * 0.021, rEye: s * 0.014, rBill: s * 0.010,
+palmB: s * 0.13, palmT: s * 0.009, stockL: s, stockMid: s * 0.062, stockEnd: s * 0.032,
+ringR: s * 0.075, ringT: s * 0.011 };
+const k = f.armDeg * Math.PI / 180;
+f.sin = Math.sin(k); f.cos = Math.cos(k);
+f.ringY = s + f.ringR;
+f.rBillDist = Math.hypot(f.a * f.sin, f.ringY - f.a * f.cos);
+f.phi = Math.atan2(f.a * f.sin, f.ringY - f.a * f.cos);
+return f;
+}
+function anchorMeshOf(f, iron, oak) {
+const A = new THREE.Group();
+const put = (m, ap) => { m.userData.ap = ap; A.add(m); return m; };
+const sh = put(new THREE.Mesh(new THREE.CylinderGeometry(f.rEye, f.rCrown, f.s, 12), iron), 'shank');
+sh.position.y = f.s / 2;
+put(new THREE.Mesh(new THREE.SphereGeometry(f.rCrown * 1.15, 12, 8), iron), 'crown');
+for (const k of [1, -1]) {
+const dx = k * f.sin, dy = f.cos;
+const arm = put(new THREE.Mesh(new THREE.CylinderGeometry(f.rBill, f.rCrown, f.a, 12), iron), 'arm');
+arm.rotation.z = -k * f.armDeg * Math.PI / 180;
+arm.position.set(dx * f.a / 2, dy * f.a / 2, 0);
+const nx = -k * f.cos, ny = f.sin;
+const off = f.rCrown * 0.75;
+const P = (t, n, z) => [dx * t + nx * n, dy * t + ny * n, z];
+const tri = [P(f.a, off * 0.6, 0), P(f.a * 0.5, off, f.palmB / 2), P(f.a * 0.5, off, -f.palmB / 2)];
+const top = tri.map(p => [p[0] + nx * f.palmT, p[1] + ny * f.palmT, p[2]]);
+const pos = [];
+const face = (a, b, c) => pos.push(...a, ...b, ...c, ...a, ...c, ...b);
+face(tri[0], tri[2], tri[1]); face(top[0], top[1], top[2]);
+for (let i = 0; i < 3; i++) { const j = (i + 1) % 3; face(tri[i], tri[j], top[j]); face(tri[i], top[j], top[i]); }
+const pg = new THREE.BufferGeometry();
+pg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+pg.computeVertexNormals();
+put(new THREE.Mesh(pg, iron), 'palm');
+}
+const ys = f.s - f.stockMid * 0.9;
+for (const k of [1, -1]) {
+const half = put(new THREE.Mesh(new THREE.CylinderGeometry(f.stockEnd * Math.SQRT1_2, f.stockMid * Math.SQRT1_2, f.stockL / 2, 4), oak), 'stock');
+half.rotation.x = k * Math.PI / 2;
+half.rotation.y = Math.PI / 4;
+half.position.set(0, ys, k * f.stockL / 4);
+for (const t of [0.18, 0.40]) {
+const hoop = put(new THREE.Mesh(new THREE.BoxGeometry(f.stockMid * 1.5, f.stockMid * 1.5, f.s * 0.012), iron), 'hoop');
+hoop.position.set(0, ys, k * f.stockL * t);
+}
+}
+const ring = put(new THREE.Mesh(new THREE.TorusGeometry(f.ringR, f.ringT, 6, 16), iron), 'ring');
+ring.position.y = f.ringY;
+return A;
+}
+function anchorStowOf(S, H, f, cat) {
+const L = S.lwl, B = S.beam;
+const ring = new THREE.Vector3(cat.x, cat.y - B * 0.035, cat.z);
+const fm = (S.masts || []).filter(m => m.shrouds).sort((p, q) => p.at - q.at)[0];
+let FC = null; try { const F = fm ? shroudFeet(S, H, fm, true) : null; FC = F && F.chan ? F.chan : null; } catch (e) { FC = null; }
+const gap = f.rBill + 0.04;
+const billAt = x => {
+const u = uAtXV(S, H, x, 1, Math.max(0.01, Math.min(0.99, x / L + 0.5)));
+if (u === null) return null;
+const p = surfacePoint(S, H, u, 1), q = surfacePoint(S, H, u, 0.9);
+let y = p[1];
+let under = 'sheer';
+if (FC && FC.rec && x >= FC.x0 && x <= FC.x1) under = 'recorded channel';
+if (FC && !FC.rec && x >= FC.x - FC.len / 2 && x <= FC.x + FC.len / 2 && FC.y - FC.d / 2 < y) { y = FC.y - FC.d / 2; under = 'class channel'; }
+const z = Math.max(Math.abs(p[2]), Math.abs(q[2])) + f.palmB / 2 + 0.03;
+return { u, v: new THREE.Vector3(x, y - gap, z * Math.sign(cat.z || 1)), under };
+};
+const fx = x => { const b = billAt(x); return b ? b.v.distanceTo(ring) - f.rBillDist : NaN; };
+let lo = ring.x, hi = ring.x + f.rBillDist + 1;
+if (!(fx(lo) < 0) || !(fx(hi) > 0)) return null;
+for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (fx(m) < 0) lo = m; else hi = m; }
+const b = billAt((lo + hi) / 2);
+const bill = b.v, e1 = bill.clone().sub(ring).normalize();
+const sgn = Math.sign(cat.z || 1);
+const sp = (u, v) => { const p = surfacePoint(S, H, u, v); return new THREE.Vector3(p[0], p[1], sgn * Math.abs(p[2])); };
+const p0 = sp(b.u, 0.95), tU = sp(Math.min(1, b.u + 0.01), 0.95).sub(p0), tV = sp(b.u, 0.99).sub(p0);
+const nrm = tU.cross(tV).normalize();
+if (nrm.z * sgn < 0) nrm.negate();
+const out = nrm.clone().addScaledVector(e1, -nrm.dot(e1)).normalize();
+const down = new THREE.Vector3().crossVectors(out, e1).normalize();
+if (down.y > 0) down.negate();
+const half = (x, y) => {
+const u = uAtXV(S, H, x, 0.9, Math.max(0.01, Math.min(0.99, x / L + 0.5)));
+if (u === null || surfacePoint(S, H, u, 1)[1] < y) return 0;
+let a = 0, c = 1; for (let i = 0; i < 24; i++) { const m = (a + c) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else c = m; }
+return Math.abs(surfacePoint(S, H, u, (a + c) / 2)[2]);
+};
+const clear = q => Math.abs(q.z) - half(q.x, q.y);
+let pick = null;
+for (let deg = 90; deg >= 0; deg -= 5) {
+const t = deg * Math.PI / 180;
+const w = out.clone().multiplyScalar(Math.cos(t)).addScaledVector(down, Math.sin(t)).normalize();
+const sd = e1.clone().multiplyScalar(Math.cos(f.phi)).addScaledVector(w, Math.sin(f.phi)).normalize();
+const crown = ring.clone().addScaledVector(sd, f.ringY);
+const yA = sd.clone().negate();
+let zA = new THREE.Vector3().crossVectors(e1, w).normalize();
+zA.addScaledVector(yA, -zA.dot(yA)).normalize();
+let xA = new THREE.Vector3().crossVectors(yA, zA).normalize();
+if (bill.clone().sub(crown).dot(xA) < 0) { xA.negate(); zA.negate(); }
+const sc = crown.clone().addScaledVector(yA, f.s - f.stockMid * 0.9);
+const ends = [sc.clone().addScaledVector(zA, f.stockL / 2), sc.clone().addScaledVector(zA, -f.stockL / 2)];
+const worst = Math.min(...ends.map(clear), clear(crown) - f.rCrown, clear(crown.clone().addScaledVector(xA, -f.a * f.sin).addScaledVector(yA, f.a * f.cos)));
+const cand = { t: deg, crown, xA, yA, zA, worst };
+if (!pick || worst > pick.worst) pick = cand;
+if (worst > f.stockEnd + 0.03) { pick = cand; break; }
+}
+const { crown, xA, yA, zA } = pick;
+const inRun = FC ? (FC.rec ? bill.x >= FC.x0 && bill.x <= FC.x1 : Math.abs(bill.x - FC.x) <= FC.len / 2) : false;
+return { ring, crown, bill, xA, yA, zA, under: b.under, underChannel: inRun, tiltDeg: pick.t, stockClear: +pick.worst.toFixed(3),
+channel: FC ? (FC.rec ? [FC.x0, FC.x1] : [FC.x - FC.len / 2, FC.x + FC.len / 2]) : null };
+}
 function buildAnchor(S, group, mats) {
 if (!S.bowsprit) return;
-const mat = mats.iron || mats.woodDark;
+const iron = mats.iron || mats.woodDark, oak = mats.woodDark || iron;
 const H = hullSurface(S);
-const L = S.lwl, B = S.beam;
-const shank = Math.min(L, 48) * 0.115 + Math.max(0, L - 48) * 0.004;
+const B = S.beam;
+const f = anchorFormOf(S);
 for (const sgn of [-1, 1]) {
-const g = new THREE.Group();
-const sh = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.011, B * 0.016, shank, 14), mat);
-g.add(sh);
-for (const a of [-1, 1]) {
-const arm = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.008, B * 0.012, shank * 0.52, 14), mat);
-arm.rotation.z = a * 1.05;
-arm.position.set(a * shank * 0.20, -shank * 0.42, 0);
-g.add(arm);
-const fluke = new THREE.Mesh(
-new THREE.ConeGeometry(B * 0.030, shank * 0.24, 4), mat);
-fluke.rotation.z = a * 1.05;
-fluke.position.set(a * shank * 0.40, -shank * 0.60, 0);
-g.add(fluke);
-}
-const stock = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.020, B * 0.020, shank * 0.82), mat);
-stock.position.y = shank * 0.42;
-g.add(stock);
-const ring = new THREE.Mesh(
-new THREE.TorusGeometry(B * 0.026, B * 0.007, 5, 10), mat);
-ring.position.y = shank * 0.52;
-g.add(ring);
+const A = anchorMeshOf(f, iron, oak);
 const cat = S.__catheads && S.__catheads[sgn > 0 ? 1 : 0];
-if (cat) {
-const ring = new THREE.Vector3(cat.x, cat.y - B * 0.035, cat.z);
-const uT = Math.min(0.32, 0.105 + (shank * 1.05) / L);
-const fb = H.sheer(uT);
-const vT = Math.max(0.70, Math.min(0.95,
-0.62 + 0.38 * ((ring.y - B * 0.10) / Math.max(0.01, fb))));
-const tpv = surfacePoint(S, H, uT, vT);
-const tp = new THREE.Vector3(tpv[0], tpv[1], sgn * (tpv[2] + B * 0.030));
-const d = tp.clone().sub(ring).normalize();
-const nu = surfacePoint(S, H, Math.min(1, uT + 0.01), vT);
-const nv = surfacePoint(S, H, uT, Math.min(0.99, vT + 0.02));
-const tU = new THREE.Vector3(nu[0] - tpv[0], nu[1] - tpv[1], nu[2] - tpv[2]);
-const tV = new THREE.Vector3(nv[0] - tpv[0], nv[1] - tpv[1], nv[2] - tpv[2]);
-const nrm = tU.cross(tV).normalize();
-if (nrm.z < 0) nrm.negate();
-nrm.z *= sgn;
-const yA = d.clone().negate();
-const xA = new THREE.Vector3().crossVectors(yA, nrm).normalize();
-const zA = new THREE.Vector3().crossVectors(xA, yA).normalize();
-g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
-g.position.copy(ring).addScaledVector(d, shank * 0.52);
-const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), ring]],
-0.018 + B * 0.0006, mats.ropeSolid || mat);
+const st = cat ? anchorStowOf(S, H, f, cat) : null;
+if (st) {
+A.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(st.xA, st.yA, st.zA));
+A.position.copy(st.crown);
+A.userData.anchorStow = { ring: st.ring.toArray().map(q => +q.toFixed(3)), crown: st.crown.toArray().map(q => +q.toFixed(3)),
+bill: st.bill.toArray().map(q => +q.toFixed(3)), tiltDeg: st.tiltDeg, stockClear: st.stockClear, under: st.under, underChannel: st.underChannel, channel: st.channel,
+rule: 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the side under the fore channel' };
+const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), st.ring]], 0.018 + B * 0.0006, mats.ropeSolid || iron);
 if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));
-group.add(tag(g, 'anchor'));
+group.add(tag(A, 'anchor'));
 continue;
 }
+const g = new THREE.Group();
+A.position.y = -f.ringY / 2;
+g.add(A);
 const p = surfacePoint(S, H, 0.09, 0.94);
-g.position.set(p[0], p[1] - shank * 0.12, sgn * (p[2] + B * 0.05));
+g.position.set(p[0], p[1] - f.s * 0.12, sgn * (p[2] + B * 0.05));
 g.rotation.x = sgn * 0.30;
 g.rotation.z = 0.42;
 group.add(tag(g, 'anchor'));

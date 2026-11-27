@@ -1,0 +1,17 @@
+Round 366: every bower anchor is built to Falconer's Admiralty form and catted as Steel stows it
+
+Falconer (1769, ANCHOR) puts the arms at the shank's foot, inclined 60 degrees to it
+toward the ring, with a triangular palm on each arm's upper face and an oak stock hooped
+with iron. The model's arms ran down and outward at 92.5-94.3 degrees, so each anchor
+drew a straight bar across the shank's foot. The stow is now solved from Steel's
+sheer-draught rule: the bill swings from the cathead at the anchor's length to the bill
+and rests against the side under the fore channel. On the 74 the whole anchor now lies
+under the channel, clear of the fore shrouds (r365: a shroud 0.82 m through it). The
+arms' plane is tilted off the side until the stock clears the bow; in HEAD the stock
+stood up to 0.92 m inside the bow on six hulls.
+
+New audit rules A-ANCHOR-FORM and A-ANCHOR-CLEAR; proof B convicts HEAD 38 times;
+final audit 33 hulls, 0 problems. r365's 19 carried frames scored, all inside the gate.
+The full ratchet is still capturing; its result goes in the receipt commit.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
