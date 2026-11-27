@@ -7230,11 +7230,41 @@ const hFore = top - foreLow, rec = cm.userData.carriage && cm.userData.carriage.
 const truckFront = V.filter(w => !inCheek(w) && w[2] > tF - 0.003 && w[1] < yC - 0.6 * bore);
 const RFm = truckFront.length ? truckFront.reduce((a, w) => a + w[1], 0) / truckFront.length - deck : NaN;
 const excused = rec && rec.contested && Math.abs(rec.hFore - hFore) < 0.005 &&
-((Math.abs(RFm - 2 * shot) < 0.004 && hFore > 4.5 * shot) || (Math.abs(RFm - shot) < 0.004 && hFore < 4.5 * shot));
+Math.abs(RFm - shot) < 0.004 && hFore < 4.5 * shot;
 if (Math.abs(hFore - 4.5 * shot) > 0.005 && !excused)
-note('side pieces not 4.5 shot high before', `${tagC}: ${hFore.toFixed(3)} against ${(4.5 * shot).toFixed(3)}, the fore truck ${RFm.toFixed(3)} in radius${rec && rec.contested ? ' (the record\'s contested height ' + rec.hFore + ' is not what is drawn)' : ''}`);
+note('side pieces not 4.5 shot high before', `${tagC}: ${hFore.toFixed(3)} against ${(4.5 * shot).toFixed(3)}, the fore truck ${RFm.toFixed(3)} in radius${rec && rec.contested ? ' (the record calls it contested: ' + rec.contested + ')' : ''}`);
 if (Math.abs(hRear - hFore / 2) > 0.005) note('side pieces not half as high behind', `${tagC}: ${hRear.toFixed(3)} behind, ${hFore.toFixed(3)} before`);
 if (rec && rec.contested) note('a carriage stretched to its port (contested, a read)', `${tagC}: ${rec.contested}`);
+const ud = o.userData.tierGun || o.userData.islandGun || {};
+let port = null;
+if (isl) { const ip = []; g.traverse(n => { if (n.userData.islandPorts) ip.push(...n.userData.islandPorts); });
+const pq = ip.filter(w => Math.abs(w.u - gi.u) < 0.01)[0]; if (pq) port = { sill: pq.sill, head: pq.head }; }
+else { let hm = null; g.traverse(n => { if (!hm && n.material && n.material.uniforms && n.material.uniforms.uTierPortHi) hm = n.material; });
+const d = ud.deck;
+if (hm && d !== undefined) { const lo = hm.uniforms.uTierPortLo.value.getComponent(d), hi = hm.uniforms.uTierPortHi.value.getComponent(d);
+port = { sill: SHIPS_HULL.surfacePoint(H, HSg, gi.u, lo)[1], head: SHIPS_HULL.surfacePoint(H, HSg, gi.u, hi)[1] }; } }
+if (!port) note('a gun whose port cannot be read', tag);
+else {
+const yF = gBase + (face - breech); let rF = 0;
+for (let k = 0; k + 1 < GP.length; k++) { const A = GP[k], B = GP[k + 1];
+if (B.y > A.y && yF >= A.y && yF <= B.y) rF = Math.max(rF, A.x + (B.x - A.x) * (yF - A.y) / (B.y - A.y)); }
+const fLo = yC - rF, fHi = yC + rF;
+if (!(rF > 0) || fLo < port.sill - 0.003 || fHi > port.head + 0.003)
+note('a gun not inside its port', `${tag}: barrel ${fLo.toFixed(3)}-${fHi.toFixed(3)} at the face, the port ${port.sill.toFixed(3)}-${port.head.toFixed(3)}`);
+if (!isl) {
+const yUnder = Math.min(...rear.map(w => w[1])), axTop = yUnder + 0.625 * shot;
+const yT = gBase + tTr, aft = GP.filter(q => q.y >= gBase - 0.1524 && q.y <= gBase + 0.1524), fwd = GP.filter(q => q.y > yT);
+const dep = th => Math.max(...aft.map(q => (yT - q.y) * Math.sin(th) + q.x * Math.cos(th)));
+let a0 = 0, b0 = 0.8; for (let k = 0; k < 40; k++) { const m = (a0 + b0) / 2; if (dep(m) < yC - axTop) a0 = m; else b0 = m; }
+const th = (a0 + b0) / 2, rise = Math.max(...fwd.map(q => (q.y - yT) * Math.sin(th) + q.x * Math.cos(th)));
+if (Math.abs(yC + rise - port.head) > 0.010)
+note('a gun not laid from its port\'s head (Muller, housed)', `${tag}: housed at ${(th * 180 / Math.PI).toFixed(1)} deg its muzzle stands ${(yC + rise).toFixed(3)}, the port's head ${port.head.toFixed(3)}`);
+} else {
+const want = deck + 6.5 * shot - 0.00635;
+if (Math.abs(yC - want) > 0.005 && !(yC > want && Math.abs(fLo - port.sill) < 0.003))
+note('an island gun not on Muller\'s construction', `${tag}: trunnions ${(yC - deck).toFixed(3)} over the deck, the construction ${(want - deck).toFixed(3)}, the barrel ${(fLo - port.sill).toFixed(3)} over the sill at the face`);
+}
+}
 }
 }
 }

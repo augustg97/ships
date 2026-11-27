@@ -11,7 +11,10 @@ uniform float uChequer;      // 0 = plain, 1 = Nelson chequer with gunport bands
 uniform float uGunDecks;
 /* the chequer's tiers, from hull.js sideBands() (round 341): per gun deck, the ochre band's
    lower and upper edge and the port centre, in the loft's v, and the edge's half-softness */
-uniform vec4  uTierLo, uTierHi, uTierPort;
+uniform vec4  uTierLo, uTierHi;
+/* r363: each tier's ports' sill and head in v (hull.js tierPortRows: Steel's where recorded, else the class band
+   0.023 either side of the old centre, so an unrecorded hull draws as before) */
+uniform vec4  uTierPortLo, uTierPortHi;
 uniform float uTierSoft;
 uniform vec3  uTopside;      // the paint above the waterline
 uniform float uIron;         // 0 = wood, 1 = iron/steel plate
@@ -346,11 +349,11 @@ void main(){
          wales, the gunports' guns and these ports. */
       for (int d = 0; d < 4; d++) {
         if (float(d) >= uGunDecks) break;
-        float lo = uTierLo[d], hi = uTierHi[d], pc = uTierPort[d];
+        float lo = uTierLo[d], hi = uTierHi[d], pl = uTierPortLo[d], ph = uTierPortHi[d];
         band = max(band, smoothstep(lo - uTierSoft, lo + uTierSoft, v)
                        * smoothstep(hi + uTierSoft, hi - uTierSoft, v));
         float px = fract(u * 26.0);
-        port = max(port, smoothstep(0.030, 0.016, abs(v - pc))
+        port = max(port, smoothstep(pl - 0.007, pl + 0.007, v) * smoothstep(ph + 0.007, ph - 0.007, v)
                        * smoothstep(0.30, 0.22, abs(px - 0.5)));
       }
       vec3 ochre = vec3(0.780, 0.585, 0.395);        // creamy-orange, not lemon

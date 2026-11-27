@@ -658,6 +658,35 @@ tiers.push({ lo: c - 0.041, hi: c + 0.041, port: c });
 }
 return { tiers, wales: [{ v0: 0.655, thick: 0.030 }, { v0: 0.760, thick: 0.026 }], soft: 0.011, from: 'class' };
 }
+function vAtY(S, H, u, y) {
+let a = 0, b = 1;
+for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else b = m; }
+return (a + b) / 2;
+}
+function tierPortRows(S) {
+const T = sideBands(S).tiers, rec = Array.isArray(S.tierPorts) ? S.tierPorts : [];
+let H = null;
+return T.map((t, d) => {
+const R = rec[d];
+if (!R || !(R.hM > 0)) return { lo: t.port - 0.023, hi: t.port + 0.023, port: t.port, from: 'class' };
+H = H || hullSurface(S);
+const y0 = H.deck(0.5) + R.sillM, lo = vAtY(S, H, 0.5, y0), hi = vAtY(S, H, 0.5, y0 + R.hM);
+return { lo, hi, port: (lo + hi) / 2, from: 'record' };
+});
+}
+function gunHousing(len, r) {
+const c = r / (0.5 + GUN_BARREL.t.vent / 14), D = c * 20 / 21;
+const { pts } = gunBarrelProfile(len, r);
+const yT = -len / 2 + len * 3 / 7, yB = -len / 2, axHalf = 0.1524;
+const drop = 3.875 * D - 0.00635;
+const aft = pts.filter(q => q[1] >= yB - axHalf && q[1] <= yB + axHalf), fwd = pts.filter(q => q[1] > yT);
+const depth = th => Math.max(...aft.map(([q, y]) => (yT - y) * Math.sin(th) + q * Math.cos(th)));
+let a = 0, b = 0.8;
+for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (depth(m) < drop) a = m; else b = m; }
+const theta = (a + b) / 2;
+const rise = Math.max(...fwd.map(([q, y]) => (y - yT) * Math.sin(theta) + q * Math.cos(theta)));
+return { theta, rise, drop, calibre: c, shot: D };
+}
 function waleFinish(S) {
 const f = S.wale && S.wale.finish;
 if (f === 'tarred') return { color: new THREE.Color().setRGB(0.180, 0.178, 0.172), finish: f, from: 'record' };
@@ -4332,7 +4361,12 @@ what: 'Each quarterdeck gun rides a truck carriage: two stepped cheeks joined by
 + 'cheeks a calibre thick, as far apart as the second reinforce ring at the trunnions and the base '
 + 'ring at the breech, so they open toward the rear; 4.5 shot diameters high before and half that '
 + 'behind, stepped four times; long enough to run from the fore truck to the button. The '
-+ 'breeching and tackles that held a gun in its port are not drawn.' },
++ 'trucks take up whatever height the port leaves. The upper-deck guns are laid as Muller lays a '
++ 'lower tier\'s: with the breech let down onto the hind axletree, the muzzle touches the top of the '
++ 'port, so it cannot push the port lid open when the ship rolls. That puts each axis 0.84 m over '
++ 'the deck, low in a port 0.81 m deep whose sill is 0.61 m up (Steel, 1805). Muller gives no such '
++ 'rule for a quarterdeck; its guns stand on his standard carriage, with trucks four shot across. '
++ 'The breeching and tackles that held a gun in its port are not drawn.' },
 gun:      { stage: 3, name: 'Great guns',
 what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
 + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
@@ -6535,10 +6569,11 @@ if (!decks) return;
 const g = new THREE.Group();
 const len = S.beam * 0.19, r = S.beam * 0.017;
 const cg = new THREE.Group(), cMat = carriageMat(S);
+const rows = tierPortRows(S), house = gunHousing(len, r);
 for (let d = 0; d < decks; d++) {
 const tier = sideBands(S).tiers[d];
 if (!tier) continue;
-const v = tier.port;
+const row = rows[d], v = row.port;
 if (v > 0.985) continue;
 for (let k = 0; k < 26; k++) {
 const u = (k + 0.5) / 26;
@@ -6548,10 +6583,18 @@ const p = surfacePoint(S, H, u, v);
 for (const sgn of [-1, 1]) {
 const bar = new THREE.Mesh(gunBarrelGeometry(len, r), mat);
 bar.rotation.x = sgn * Math.PI / 2;
-bar.position.set(p[0], p[1], sgn * (Math.abs(p[2]) - len / 6));
 bar.userData.tierGun = { deck: d, u, lenM: len };
+let q = p;
+if (p[1] - r > H.deck(u)) {
+const head = surfacePoint(S, H, u, row.hi)[1], sill = surfacePoint(S, H, u, row.lo)[1], yA = head - house.rise;
+q = surfacePoint(S, H, u, vAtY(S, H, u, yA));
+bar.userData.tierGun.laid = { rule: 'housed', head: +head.toFixed(4), sill: +sill.toFixed(4), axis: +yA.toFixed(4),
+rise: +house.rise.toFixed(4), thetaDeg: +(house.theta * 180 / Math.PI).toFixed(2), port: row.from,
+contested: `Muller lays the housed breech on the hind axletree; the model's bed lies on it ${(0.8 * house.calibre).toFixed(3)} m thick, and laid on the bed the gun would stand higher` };
+cg.add(gunCarriage(q[0], H.deck(u), yA, Math.abs(q[2]), sgn, len, r, cMat));
+}
+bar.position.set(q[0], q[1], sgn * (Math.abs(q[2]) - len / 6));
 g.add(bar);
-if (p[1] - r > H.deck(u)) cg.add(gunCarriage(p[0], H.deck(u), p[1], Math.abs(p[2]), sgn, len, r, cMat));
 }
 }
 }
@@ -7326,9 +7369,8 @@ const Rb = Math.max(...pr.pts.map(p => p[0]));
 const R2 = (0.5 + T.r2end / 14 + GUN_BARREL.rise) * c;
 const sD = len * 2 / 3, sT = sD - len * 3 / 7, sR = sD + GUN_BARREL.cascabel * c;
 const slope = (Rb - R2) / (sD - sT), half = s => R2 + slope * (s - sT), wC = c;
-const yTop = yAxis + 0.00635, hF0 = 4.5 * D, RFmax = 2 * D, RFmin = D;
+const yTop = yAxis + 0.00635, hF0 = 4.5 * D, RFmin = D;
 let RF = yTop - hF0 - yDeck, hF = hF0;
-if (RF > RFmax) { RF = RFmax; hF = yTop - yDeck - RF; }
 if (RF < RFmin) { RF = RFmin; hF = yTop - yDeck - RF; }
 const hR = hF / 2, RH = RF * 3.5 / 4;
 const y0 = yTop - hF - yDeck;
@@ -7395,7 +7437,8 @@ const m = new THREE.Mesh(geo, mat);
 m.userData.carriage = { x, sgn, yDeck, yAxis, zFace, sF, sR, sT,
 muller: { calibre: +c.toFixed(4), shot: +D.toFixed(4), halfFore: +R2.toFixed(4), halfHind: +Rb.toFixed(4),
 hFore: +hF.toFixed(4), hRule: +hF0.toFixed(4), truckFore: +RF.toFixed(4), truckHind: +RH.toFixed(4),
-contested: Math.abs(hF - hF0) > 0.005 ? `side pieces ${(hF - hF0).toFixed(3)} m off Muller's 4.5 shot: the trucks are held to ${RF === RFmax ? 'his 4-shot ceiling' : 'the 2-shot floor'} and the gun is laid at its port's centre` : null } };
+truckForeShot: +(2 * RF / D).toFixed(2),
+contested: Math.abs(hF - hF0) > 0.005 ? `side pieces ${(hF - hF0).toFixed(3)} m off Muller's 4.5 shot: the trucks are held to the 2-shot floor` : null } };
 return m;
 }
 function islandPorts(S, H) {
@@ -7530,12 +7573,14 @@ g.userData.islandPorts = mine.map(q => ({ u: +q.u.toFixed(4), sill: +q.sill.toFi
 clipM: +q.clipM.toFixed(3), halfU: +q.halfU.toFixed(5) }));
 const gg = new THREE.Group(), len = B * 0.19 * 0.75, r = B * 0.017 * 0.75;
 const cg = new THREE.Group(), cMat = carriageMat(S);
+const cI = r / (0.5 + GUN_BARREL.t.vent / 14), DI = cI * 20 / 21, rFace = gunBarrelRadiusAt(len, r, len * 2 / 3);
 for (const q of mine) for (const sgn of [-1, 1]) {
-const ya = (q.sill + q.head) / 2;
+const yM = iDeck(q.u) + 6.5 * DI - 0.00635, ya = Math.max(yM, q.sill + rFace);
 const bar = new THREE.Mesh(gunBarrelGeometry(len, r), gunMat);
 bar.rotation.x = sgn * Math.PI / 2;
 bar.position.set(xAt(q.u), ya, sgn * (q.half - len / 6));
-bar.userData.islandGun = { u: q.u, lenM: len };
+bar.userData.islandGun = { u: q.u, lenM: len, laid: { rule: 'construction', axis: +ya.toFixed(4), sill: q.sill, head: q.head,
+raisedM: +(ya - yM).toFixed(4), faceR: +rFace.toFixed(4) } };
 gg.add(bar);
 cg.add(gunCarriage(xAt(q.u), iDeck(q.u), ya, q.half, sgn, len, r, cMat));
 }
@@ -12342,8 +12387,9 @@ uGunDecks: { value: S.gunDecks || 0 },
 ...(() => {
 const t = sideBands(S).tiers, at = (k, i) => (t[i] ? t[i][k] : 0);
 const v4 = k => new THREE.Vector4(at(k, 0), at(k, 1), at(k, 2), at(k, 3));
+const pr = tierPortRows(S), pv4 = k => new THREE.Vector4(...[0, 1, 2, 3].map(i => (pr[i] ? pr[i][k] : 0)));
 return { uTierLo: { value: v4('lo') }, uTierHi: { value: v4('hi') },
-uTierPort: { value: v4('port') }, uTierSoft: { value: sideBands(S).soft } };
+uTierPortLo: { value: pv4('lo') }, uTierPortHi: { value: pv4('hi') }, uTierSoft: { value: sideBands(S).soft } };
 })(),
 uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
 uIron: { value: S.iron ? 1 : 0 },

@@ -1,0 +1,17 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a gun whose port cannot be read",
+  "detail": "30 case(s), e.g. tier gun at u 0.135 side -1"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "side pieces not 4.5 shot high before",
+  "detail": "14 case(s), e.g. island gun at u 0.458 side -1 carriage: 0.714 against 0.486, the fore truck 0.216 in radius (the record's contested height 0.7143 is not what is drawn)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun not on Muller's construction",
+  "detail": "14 case(s), e.g. island gun at u 0.458 side -1: trunnions 0.924 over the deck, the construction 0.695, the barrel 0.229 over the sill at the face"
+ }
+]
