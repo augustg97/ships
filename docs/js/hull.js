@@ -4324,6 +4324,12 @@ what: 'The guns on the quarterdeck, one in each port cut in its barricade. Steel
 + 'gives a 74 seven such ports a side, 2 ft 9 in wide and 2 ft 6 in deep, with the sill '
 + '1 ft 10 in over the deck. He gives their number and size but not their stations; the '
 + 'model spaces them evenly between the breast and the quarter gallery.' },
+gunCarriage: { stage: 3, name: 'Gun carriages',
+what: 'Each quarterdeck gun rides a truck carriage: two stepped cheeks joined by a transom '
++ 'and two axletrees, on four solid wooden trucks. Falconer (1769) gives the transom as two '
++ 'shot diameters high and one broad, the trucks as broad as the cheeks, and the cheeks\' height '
++ 'as whatever brings the gun to its port. The other proportions are class figures. The '
++ 'breeching and tackles that held a gun in its port are not drawn.' },
 gun:      { stage: 3, name: 'Great guns',
 what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
 + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
@@ -6521,6 +6527,7 @@ const decks = S.gunDecks || 0;
 if (!decks) return;
 const g = new THREE.Group();
 const len = S.beam * 0.19, r = S.beam * 0.017;
+const cg = new THREE.Group(), cMat = carriageMat(S);
 for (let d = 0; d < decks; d++) {
 const tier = sideBands(S).tiers[d];
 if (!tier) continue;
@@ -6534,13 +6541,16 @@ const p = surfacePoint(S, H, u, v);
 for (const sgn of [-1, 1]) {
 const bar = new THREE.Mesh(
 new THREE.CylinderGeometry(r * 0.72, r, len, 16), mat);
-bar.rotation.x = Math.PI / 2;
-bar.position.set(p[0], p[1], sgn * (p[2] + len * 0.30));
+bar.rotation.x = sgn * Math.PI / 2;
+bar.position.set(p[0], p[1], sgn * (Math.abs(p[2]) - len / 6));
+bar.userData.tierGun = { deck: d, u, lenM: len };
 g.add(bar);
+if (p[1] - r > H.deck(u)) cg.add(gunCarriage(p[0], H.deck(u), p[1], Math.abs(p[2]), sgn, len, r, cMat));
 }
 }
 }
 group.add(tag(g, 'gun'));
+if (cg.children.length) group.add(tag(cg, 'gunCarriage'));
 }
 function buildRigging(S, group, mats, spars, mastTops) {
 const H = hullSurface(S);
@@ -7236,6 +7246,69 @@ g.add(tag(bell, 'vent', 'Cowl ventilator',
 }
 group.add(tag(g, 'superstructure'));
 }
+function carriageMat(S, fallback) {
+const red = S.gunCarriage && S.gunCarriage.paint === 'red';
+return red ? new THREE.MeshStandardMaterial({ color: 0x7a3226, roughness: 0.72 })
+: new THREE.MeshStandardMaterial({ color: 0x54402a, roughness: 0.78 });
+}
+function gunCarriage(x, yDeck, yAxis, zFace, sgn, len, r, mat) {
+const d = r / 1.75;
+const sF = 0.06, sT = len * (2 / 3 - 0.43), sR = len * (2 / 3 - 0.05);
+const rTr = r * (1 - 0.28 * 0.43);
+const cheekIn = rTr + 0.01, wC = d;
+const RF = Math.min(0.24, Math.max(0.12, (yAxis - yDeck) * 0.22)), RH = RF * 0.9;
+const axH = 1.1 * d;
+const yBot = yDeck + RF + axH / 2;
+const hTop = yAxis - yBot;
+const parts = [], M = new THREE.Matrix4();
+const put = (geo, lx, ly, ls) => {
+geo.applyMatrix4(M.makeTranslation(lx, ly, ls)); parts.push(geo); };
+for (const side of [-1, 1]) {
+const sh = new THREE.Shape(), y0 = yBot - yDeck, steps = 3;
+const sStep0 = Math.min(sR - 0.1, sT + 1.3 * d);
+sh.moveTo(sF, y0); sh.lineTo(sF, y0 + hTop); sh.lineTo(sStep0, y0 + hTop);
+const hRear = Math.max(2.2 * d, hTop * 0.45);
+for (let k = 1; k <= steps; k++) {
+const yk = y0 + hTop - (hTop - hRear) * k / steps;
+const sk = sStep0 + (sR - sStep0) * k / steps;
+sh.lineTo(sStep0 + (sR - sStep0) * (k - 1) / steps, yk);
+sh.lineTo(k === steps ? sR : sk, yk);
+}
+sh.lineTo(sR, y0); sh.lineTo(sF, y0);
+const geo = new THREE.ExtrudeGeometry(sh, { depth: wC, bevelEnabled: false });
+geo.applyMatrix4(M.makeRotationY(-Math.PI / 2));
+geo.applyMatrix4(M.makeTranslation(side > 0 ? cheekIn + wC : -cheekIn, 0, 0));
+parts.push(geo);
+}
+const sAF = sF + RF + 0.03, sAH = sR - RH - 0.03, span = 2 * (cheekIn + wC) + 0.10;
+put(new THREE.BoxGeometry(span, axH, 1.3 * d), 0, RF, sAF);
+put(new THREE.BoxGeometry(span, yBot - yDeck - (RH - axH / 2), 1.3 * d), 0, (yBot - yDeck + RH - axH / 2) / 2, sAH);
+for (const [R, sA] of [[RF, sAF], [RH, sAH]]) for (const side of [-1, 1]) {
+const t = new THREE.CylinderGeometry(R, R, wC * 0.95, 14);
+t.applyMatrix4(M.makeRotationZ(Math.PI / 2));
+put(t, side * (cheekIn + wC / 2), R, sA);
+}
+put(new THREE.BoxGeometry(2 * cheekIn, 2 * d, d), 0, yBot - yDeck + hTop / 2, sAF);
+const yBed = yBot - yDeck + 0.4 * d;
+put(new THREE.BoxGeometry(2 * cheekIn, 0.8 * d, sR - sT - 0.1), 0, yBed, (sR + sT) / 2 + 0.05);
+const sB = len * 2 / 3 - 0.12, rB = r * (1 - 0.28 * 0.04);
+const qH = Math.max(0.02, (yAxis - yDeck) - rB - (yBed + 0.4 * d));
+put(new THREE.BoxGeometry(1.6 * rTr, qH, 0.32), 0, yBed + 0.4 * d + qH / 2, Math.min(sR - 0.17, sB));
+const tr = new THREE.CylinderGeometry(0.5 * d, 0.5 * d, 2 * (cheekIn + wC) + 0.04, 12);
+tr.applyMatrix4(M.makeRotationZ(Math.PI / 2));
+put(tr, 0, yAxis - yDeck, sT);
+let n = 0; const ga = parts.map(g => { const q = g.index ? g.toNonIndexed() : g; q.computeVertexNormals(); n += q.attributes.position.count; return q; });
+const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3); let o = 0;
+for (const q of ga) { pos.set(q.attributes.position.array, o * 3); nor.set(q.attributes.normal.array, o * 3); o += q.attributes.position.count; }
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+geo.applyMatrix4(new THREE.Matrix4().makeScale(-sgn, 1, -sgn));
+geo.applyMatrix4(new THREE.Matrix4().makeTranslation(x, yDeck, sgn * zFace));
+const m = new THREE.Mesh(geo, mat);
+m.userData.carriage = { x, sgn, yDeck, yAxis, zFace, sF, sR, sT };
+return m;
+}
 function islandPorts(S, H) {
 const out = [];
 if (!(S.islands && S.islands.list)) return out;
@@ -7367,13 +7440,18 @@ if (mine.length) {
 g.userData.islandPorts = mine.map(q => ({ u: +q.u.toFixed(4), sill: +q.sill.toFixed(3), head: +q.head.toFixed(3),
 clipM: +q.clipM.toFixed(3), halfU: +q.halfU.toFixed(5) }));
 const gg = new THREE.Group(), len = B * 0.19 * 0.75, r = B * 0.017 * 0.75;
+const cg = new THREE.Group(), cMat = carriageMat(S);
 for (const q of mine) for (const sgn of [-1, 1]) {
+const ya = (q.sill + q.head) / 2;
 const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 16), gunMat);
-bar.rotation.x = Math.PI / 2;
-bar.position.set(xAt(q.u), (q.sill + q.head) / 2, sgn * (q.half + len * 0.30));
+bar.rotation.x = sgn * Math.PI / 2;
+bar.position.set(xAt(q.u), ya, sgn * (q.half - len / 6));
+bar.userData.islandGun = { u: q.u, lenM: len };
 gg.add(bar);
+cg.add(gunCarriage(xAt(q.u), iDeck(q.u), ya, q.half, sgn, len, r, cMat));
 }
 group.add(tag(gg, 'islandGun'));
+group.add(tag(cg, 'gunCarriage'));
 }
 if (S.islands.openRail) {
 const rg = new THREE.Group(), up = new THREE.Vector3(0, 1, 0);

@@ -1,0 +1,102 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a gun not a third outboard",
+  "detail": "30 case(s), e.g. tier gun at u 0.149 side -1: 70% of the barrel outboard of the face"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a gun with its muzzle inboard",
+  "detail": "15 case(s), e.g. tier gun at u 0.149 side -1"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 1: barrel at y 6.99, z -6.91; port 6.622-7.352, face 6.29"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 1: barrel at y 6.99, z 6.91; port 6.622-7.352, face 6.29"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 2: barrel at y 6.99, z -6.91; port 6.628-7.35, face 6.29"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 2: barrel at y 6.99, z 6.91; port 6.628-7.35, face 6.29"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 3: barrel at y 7.01, z -6.84; port 6.647-7.363, face 6.22"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 3: barrel at y 7.01, z 6.84; port 6.647-7.363, face 6.22"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 4: barrel at y 7.05, z -6.59; port 6.697-7.406, face 5.96"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 4: barrel at y 7.05, z 6.59; port 6.697-7.406, face 5.96"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 5: barrel at y 7.15, z -6.12; port 6.795-7.497, face 5.50"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 5: barrel at y 7.15, z 6.12; port 6.795-7.497, face 5.50"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 6: barrel at y 7.30, z -5.72; port 6.955-7.651, face 5.09"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 6: barrel at y 7.30, z 5.72; port 6.955-7.651, face 5.09"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 7: barrel at y 7.54, z -5.34; port 7.192-7.881, face 4.72"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun out of its port",
+  "detail": "Quarterdeck port 7: barrel at y 7.54, z 5.34; port 7.192-7.881, face 4.72"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a gun not a third outboard",
+  "detail": "74 case(s), e.g. tier gun at u 0.142 side -1: 75% of the barrel outboard of the face"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a gun with its muzzle inboard",
+  "detail": "37 case(s), e.g. tier gun at u 0.142 side -1"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an island gun without one carriage",
+  "detail": "14 case(s), e.g. island gun at u 0.458 side -1: 0 carriage(s)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "carriages off the island-gun count",
+  "detail": "1 case(s), e.g. 0 carriages for 14 island guns"
+ }
+]
