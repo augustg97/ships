@@ -1,0 +1,7 @@
+1 frames to capture
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+      ! Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED
+captured 1
