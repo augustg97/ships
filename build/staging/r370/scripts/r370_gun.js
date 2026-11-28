@@ -1,0 +1,14 @@
+const vm = require('vm'), fs = require('fs');
+const ctx = { console, Math, JSON, Float32Array, Uint16Array, Uint32Array, Int32Array, Uint8Array, Float64Array, Array, Object, Map, Set, WeakMap, Symbol, Promise, setTimeout, performance: { now: () => 0 } };
+ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
+ctx.document = { createElement: () => ({ getContext: () => null, style: {} }), createElementNS: () => ({ getContext: () => null, style: {} }) };
+vm.createContext(ctx);
+for (const f of ['js/three.min.js', 'js/shaders.js', 'js/hull.js']) vm.runInContext(fs.readFileSync('web/' + f, 'utf8'), ctx);
+ctx.__V = JSON.parse(fs.readFileSync('web/data/vessels.json', 'utf8')).vessels;
+vm.runInContext(`const V = __V.find(v => v.id === 'ship-of-the-line'), S = V.hull, g = SHIPS_HULL.buildShip(S, { fine: true }); g.updateMatrixWorld(true);
+const v = new THREE.Vector3(); const keyOf = o => { for (let p = o; p; p = p.parent) if (p.userData.part) return p.userData.part.key; return null; };
+let zmax = -1, crown = [], nG = 0;
+g.traverse(o => { if (!o.isMesh) return; const k = keyOf(o); const a = o.geometry.attributes.position;
+  for (let j = 0; j < a.count; j++) { v.fromBufferAttribute(a, j).applyMatrix4(o.matrixWorld);
+    if (v.z > 0 && v.x > -19.9 && v.x < -18.7 && v.y > 5.0 && v.y < 6.2) { if (k === 'anchor') crown.push(v.z); else if (/gun/i.test(k)) { nG++; zmax = Math.max(zmax, v.z); } } } });
+console.log('gun verts', nG, 'gun max z', zmax.toFixed(3), 'anchor z range', Math.min(...crown).toFixed(3), Math.max(...crown).toFixed(3), 'side z', Math.abs(surfacePoint(S, hullSurface(S), uAtXV(S, hullSurface(S), -19.3, 0.97, 0.14), 0.97)[2]).toFixed(3));`, ctx);

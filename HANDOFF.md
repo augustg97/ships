@@ -31940,3 +31940,10 @@ The other ten predicted movers (`shipwright-astern`, `shipwright-corbis`, `ship-
 3. r369's item 2 (the wood stock's seam and ends), r368's items 2–4, r366's item 3 and r365's and r364's carried items still stand.
 
 **RATCHET RECEIPT (r370).** All 65 frames are being captured one process each (`run-each.sh all.txt`, `run1`) on the final `web/` from 17:13. The predicted movers go first: the six `shipwright*` frames and `action`. The vertex hash shows that only the 74 changed. Live stamp at build: 1795828389.
+**RECEIPT (17:51).** `run1` (17:13–17:51) captured 65 of 65 frames, none failed (`score1.out`). Two predicted movers were accepted at 17:18 with reasons in FRAME-LOG.md, each checked by its moved-pixel clusters (`scripts/r370_clusters.py`, `wit/mv-<frame>.png`):
+- `shipwright-ahead` 0.053%: the 74's two bowers from ahead (x 1292–1380 and 1509–1588).
+- `shipwright-furled` 0.133%: the port bower under the card strip (x 447–679) and the starboard stock over the forecastle rail (x 821–860).
+
+The other five predicted movers (`shipwright` 0.034%, `shipwright-astern`, `shipwright-corbis`, `shipwright-hounds`, `action` 0.000%) stayed inside the gate. No capture faults this round.
+
+**r370: 65 of 65 frames scored on the final tree, all inside the gate after 2 accepts. No frames are carried to r371 as unscored.** Live stamp 1795828389, read live at 17:20, with `anchorLiningOf` in the live `hull.js`.

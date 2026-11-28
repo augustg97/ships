@@ -1,0 +1,32 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a stowed bill under the fore channel",
+  "detail": "bill at y 6.10, the channel's upper side at 6.33; Steel stows it on the bill-board above the channel"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "no bill-board under the stowed bill",
+  "detail": "no Bill-board covers x -20.06"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "no anchor-lining under the fore channel",
+  "detail": "no Anchor-lining within 1 m of the bill's station x -20.06"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a stowed bill under the fore channel",
+  "detail": "bill at y 6.10, the channel's upper side at 6.33; Steel stows it on the bill-board above the channel"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "no bill-board under the stowed bill",
+  "detail": "no Bill-board covers x -20.06"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "no anchor-lining under the fore channel",
+  "detail": "no Anchor-lining within 1 m of the bill's station x -20.06"
+ }
+]
