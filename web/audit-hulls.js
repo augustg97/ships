@@ -2849,6 +2849,25 @@
       }
     }
 
+    /* ── A-SOLID-OUT (round 379): A CLOSED TIMBER IS WOUND OUTWARD. A builder that sweeps a closed section marks the
+       mesh userData.solid. Its signed volume (the sum over its triangles of p0·(p1×p2)/6, over the geometry as built) must be
+       positive. A mirrored side (scale.z = -1) is not re-signed: three.js flips the front face for a negative
+       determinant, so the mirror is inside-out exactly when its geometry is. A negative volume means every face's
+       front looks INTO the timber: the outer face is culled and a viewer sees the inner face through it. r377's cheeks
+       were drawn that way on the 74 and stood unseen under the planking for two rounds; A-CHEEK passed throughout,
+       because it reads vertex positions, which were all right. */
+    { g.traverse(o => {
+        if (!(o.isMesh && o.userData.solid)) return;
+        const P = o.geometry.attributes.position, I = o.geometry.index; if (!I) return;
+        let vol = 0;
+        for (let t = 0; t + 2 < I.count; t += 3) {
+          const a = I.getX(t), b = I.getX(t + 1), c = I.getX(t + 2);
+          const ax = P.getX(a), ay = P.getY(a), az = P.getZ(a), bx = P.getX(b), by = P.getY(b), bz = P.getZ(b), cx = P.getX(c), cy = P.getY(c), cz = P.getZ(c);
+          vol += (ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx)) / 6;
+        }
+        if (!(vol > 0)) say(v.id, 'a closed timber wound inward', `${(o.userData.part && o.userData.part.key) || o.name}: signed volume ${vol.toFixed(4)} m³`);
+      }); }
+
     /* ── A-CHEEK (round 377): STEEL'S CHEEKS ARE THEIR RECORD, ON THE BOW, WITH THE HAWSE-HOLES BETWEEN THEM.
        Where hull.cheeks is recorded: (a) two cheeks a side, tagged 'headCheek'; (b) each cheek's depth (its siding) and
        its standing-off from the side (its moulding) at its after and fore ends are the record's within 1 cm; (c) where

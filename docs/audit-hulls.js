@@ -1952,6 +1952,17 @@ if (fore < aft) say(v.id, 'a lower-tier port across a hawse-hole', `the first cl
 }
 }
 }
+{ g.traverse(o => {
+if (!(o.isMesh && o.userData.solid)) return;
+const P = o.geometry.attributes.position, I = o.geometry.index; if (!I) return;
+let vol = 0;
+for (let t = 0; t + 2 < I.count; t += 3) {
+const a = I.getX(t), b = I.getX(t + 1), c = I.getX(t + 2);
+const ax = P.getX(a), ay = P.getY(a), az = P.getZ(a), bx = P.getX(b), by = P.getY(b), bz = P.getZ(b), cx = P.getX(c), cy = P.getY(c), cz = P.getZ(c);
+vol += (ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx)) / 6;
+}
+if (!(vol > 0)) say(v.id, 'a closed timber wound inward', `${(o.userData.part && o.userData.part.key) || o.name}: signed volume ${vol.toFixed(4)} m³`);
+}); }
 if (H.cheeks) {
 const CK = H.cheeks, HSc = SHIPS_HULL.hullSurface(H);
 const vAtYc = (u, y) => { let a = 0, b = 1; for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSc, u, m)[1] < y) a = m; else b = m; } return (a + b) / 2; };
