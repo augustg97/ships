@@ -1952,6 +1952,71 @@ if (fore < aft) say(v.id, 'a lower-tier port across a hawse-hole', `the first cl
 }
 }
 }
+if (H.cheeks) {
+const CK = H.cheeks, HSc = SHIPS_HULL.hullSurface(H);
+const vAtYc = (u, y) => { let a = 0, b = 1; for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSc, u, m)[1] < y) a = m; else b = m; } return (a + b) / 2; };
+const ck = {}; let nCk = 0;
+g.traverse(o => {
+if (!(o.isMesh && o.userData.part && o.userData.part.key === 'headCheek')) return;
+nCk++;
+const d = o.userData.headCheek || {};
+if (d.sgn !== 1) return;
+const P = o.geometry.attributes.position, rows = [];
+for (let i = 0; i + 3 < P.count; i += 4) {
+const q = k => [P.getX(i + k), P.getY(i + k), P.getZ(i + k)];
+const inLo = q(0), outLo = q(1), outHi = q(2), inHi = q(3);
+rows.push({ x: inLo[0], yLo: inLo[1], yHi: inHi[1], zIn: (inLo[2] + inHi[2]) / 2, zLo: inLo[2],
+dep: inHi[1] - inLo[1], mo: Math.hypot(outLo[0] - inLo[0], outLo[2] - inLo[2]) });
+}
+ck[d.which] = rows;
+});
+if (nCk !== 4 || !ck.lower || !ck.upper) say(v.id, 'cheeks off their recorded number', `${nCk} drawn, 4 recorded (two a side)`);
+else {
+for (const w of ['lower', 'upper']) {
+const R = CK[w], rows = ck[w], a = rows[0], f = rows[rows.length - 1];
+const kneeArm = Math.abs(rows.find(r => r.zIn <= rows[rows.length - 1].zIn + 0.02).x - f.x);
+const fullTot = CK.armSideM + CK.armKneeM, tot = CK.armSideM + kneeArm;
+if (Math.abs(a.dep - R.sidedM[0]) > 0.01 || (Math.abs(tot - fullTot) < 0.05 && Math.abs(f.dep - R.sidedM[1]) > 0.01))
+say(v.id, 'a cheek off its recorded siding', `${w}: ${a.dep.toFixed(3)} m deep aft and ${f.dep.toFixed(3)} m forward, recorded ${R.sidedM.join(' and ')}`);
+if (Math.abs(a.mo - R.mouldedM[0]) > 0.01 || (Math.abs(tot - fullTot) < 0.05 && Math.abs(f.mo - R.mouldedM[1]) > 0.01))
+say(v.id, 'a cheek off its recorded moulding', `${w}: stands ${a.mo.toFixed(3)} m off the side aft and ${f.mo.toFixed(3)} m forward, recorded ${R.mouldedM.join(' and ')}`);
+if (kneeArm < CK.armKneeM - 0.05 && !CK.contested)
+say(v.id, 'a cheek\'s knee arm short of its record, unstated', `${w}: ${kneeArm.toFixed(2)} m on the knee, recorded at least ${CK.armKneeM} m, and the record has no contested field`);
+for (const r of rows) {
+if (r.zIn < rows[rows.length - 1].zIn + 0.05) continue;
+const y = r.yLo;
+let lo = 0.0005, hi = 0.4;
+for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (SHIPS_HULL.surfacePoint(H, HSc, m, vAtYc(m, y))[0] < r.x) lo = m; else hi = m; }
+const sp = SHIPS_HULL.surfacePoint(H, HSc, (lo + hi) / 2, vAtYc((lo + hi) / 2, y));
+const off = Math.abs(Math.abs(sp[2]) - r.zLo);
+if (off > 0.06) { say(v.id, 'a cheek off the bow', `${w}: its inner face at x ${r.x.toFixed(2)}, y ${y.toFixed(2)} stands ${off.toFixed(3)} m off the skin's half-breadth there`); break; }
+}
+}
+const at = (rows, x) => { for (let i = 0; i + 1 < rows.length; i++) { const a = rows[i], b = rows[i + 1];
+if ((a.x - x) * (b.x - x) <= 0 && a.x !== b.x) { const t = (x - a.x) / (b.x - a.x); return { yLo: a.yLo + (b.yLo - a.yLo) * t, yHi: a.yHi + (b.yHi - a.yHi) * t }; } }
+return null; };
+const kneeZ = ck.lower[ck.lower.length - 1].zIn;
+const stemOf = rows => { let r = null; for (const q of rows) if (q.zIn > kneeZ + 0.05) r = q; return r; };
+const L0 = stemOf(ck.lower), U0 = stemOf(ck.upper);
+if (!L0 || !U0) say(v.id, 'cheeks with no section on the side', 'a cheek has no arm on the ship\'s side');
+else if (Math.abs((U0.yLo - L0.yHi) - CK.stemGapM) > 0.01)
+say(v.id, 'cheeks off their recorded distance at the stem', `${(U0.yLo - L0.yHi).toFixed(3)} m clear at the stem, recorded ${CK.stemGapM} m`);
+if (H.hawse) {
+const rr = H.hawse.diaM / 2 + (H.hawse.pipeThickM || 0.03);
+g.traverse(o => {
+if (!(o.isGroup && o.userData.part && o.userData.part.key === 'hawse' && o.position.z > 0)) return;
+const x = o.position.x, y = o.position.y, Lh = at(ck.lower, x), Uh = at(ck.upper, x);
+if (!Lh || !Uh) { say(v.id, 'a hawse-hole outside the cheeks\' length', `the hole at x ${x.toFixed(2)} has no cheek at its station`); return; }
+const below = (y - rr) - Lh.yHi, above = Uh.yLo - (y + rr);
+if (below < 0.05 || above < 0.05)
+say(v.id, 'a hawse-hole not between the cheeks', `the hole at x ${x.toFixed(2)}: ${below.toFixed(3)} m of bolster over the lower cheek and ${above.toFixed(3)} m under the upper, each must be 0.05 m or more`);
+});
+}
+const HR = H.__headRead;
+if (HR && HR.steelLowerSideToMainRailM && Math.abs(HR.lowerSideToMainRailM - HR.steelLowerSideToMainRailM) > 0.15 && !CK.contested)
+say(v.id, 'a main rail off Steel\'s height over the lower cheek, unstated', `${HR.lowerSideToMainRailM} m, Steel ${HR.steelLowerSideToMainRailM} m, and the record has no contested field`);
+}
+}
 {
 let untagged = 0, first = null;
 g.traverse(o => {

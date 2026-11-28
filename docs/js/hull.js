@@ -671,6 +671,37 @@ return [c1, c1 + s.pieces[1] + s.pieces[2]];
 }
 return Array.isArray(HW && HW.centresM) ? HW.centresM : [];
 }
+const KNEE_TH = S => S.beam * 0.035;
+function cheekLines(S, H) {
+const CK = S.cheeks; if (!CK) return null;
+H = H || hullSurface(S);
+const vPort = sideBands(S).tiers[0].port;
+const yLine = u => surfacePoint(S, H, u, vPort)[1];
+const zAtY = (u, y) => Math.abs(surfacePoint(S, H, u, vAtY(S, H, u, y))[2]);
+const half = KNEE_TH(S) / 2;
+let a = 0.0002, b = 0.2; const y0 = yLine(0.01);
+for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (zAtY(m, y0) < half) a = m; else b = m; }
+const uT = (a + b) / 2;
+const sideU = [uT], sideAcc = [0];
+{ let acc = 0, u = uT, prev = surfacePoint(S, H, uT, vPort);
+while (acc < CK.armSideM && u < 0.3) { u += 0.0004; const p = surfacePoint(S, H, u, vPort);
+acc += Math.hypot(p[0] - prev[0], p[2] - prev[2]); prev = p; sideU.push(u); sideAcc.push(acc); } }
+const sideLen = sideAcc[sideAcc.length - 1], uAft = sideU[sideU.length - 1];
+const arcAt = u => { if (u <= uT) return 0; let i = 1; while (i < sideU.length - 1 && sideU[i] < u) i++;
+const t = Math.max(0, Math.min(1, (u - sideU[i - 1]) / (sideU[i] - sideU[i - 1]))); return sideAcc[i - 1] + (sideAcc[i] - sideAcc[i - 1]) * t; };
+const uAtArc = r => { let i = 1; while (i < sideAcc.length - 1 && sideAcc[i] < r) i++;
+const t = Math.max(0, Math.min(1, (r - sideAcc[i - 1]) / Math.max(1e-9, sideAcc[i] - sideAcc[i - 1]))); return sideU[i - 1] + (sideU[i] - sideU[i - 1]) * t; };
+const total = CK.armSideM + CK.armKneeM;
+const sOf = u => CK.armSideM * (1 - arcAt(u) / sideLen);
+const dep = (which, s) => { const P = CK[which].sidedM; return P[0] + (P[1] - P[0]) * s / total; };
+const mould = (which, s) => { const P = CK[which].mouldedM; return P[0] + (P[1] - P[0]) * s / total; };
+const dStem = dep('lower', CK.armSideM);
+const lowerSide = (which, yRef) => which === 'lower' ? yRef - CK.stemGapM / 2 - dStem : yRef + CK.stemGapM / 2;
+const lowerTop = u => lowerSide('lower', yLine(u)) + dep('lower', sOf(u));
+const upperBot = u => lowerSide('upper', yLine(u));
+return { CK, uT, yT: yLine(uT), uAft, sideLen, total, half, yLine, sOf, uAtArc, dep, mould, lowerSide, lowerTop, upperBot,
+holeY: u => (lowerTop(u) + upperBot(u)) / 2 };
+}
 function hawseHoles(S, H) {
 const HW = S.hawse, CS = hawseCentres(HW);
 if (!HW || !(HW.diaM > 0) || !CS.length) return { holes: [], aftU: 0 };
@@ -678,12 +709,14 @@ H = H || hullSurface(S);
 const vPort = sideBands(S).tiers[0].port;
 const zAt = (u, y) => Math.abs(surfacePoint(S, H, u, vAtY(S, H, u, y))[2]);
 const holes = [];
+const CL = S.cheeks ? cheekLines(S, H) : null;
+const yAtU = u => (CL ? CL.holeY(u) : surfacePoint(S, H, u, vPort)[1]);
 for (const c of CS) {
-let u = 0.03, y = surfacePoint(S, H, u, vPort)[1];
-for (let it = 0; it < 4; it++) {
+let u = 0.03, y = yAtU(u);
+for (let it = 0; it < 5; it++) {
 let a = 0.0005, b = 0.3;
 for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (zAt(m, y) < c) a = m; else b = m; }
-u = (a + b) / 2; y = surfacePoint(S, H, u, vPort)[1];
+u = (a + b) / 2; y = yAtU(u);
 }
 const v = vAtY(S, H, u, y);
 holes.push({ c, u, v, p: surfacePoint(S, H, u, v) });
@@ -4295,6 +4328,15 @@ what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'for every rate. The 74\'s is 0.44 m by 0.42 m in section and reaches 2.6 m out from '
 + 'the side. It rises 6 inches in every foot of its length, and its underside rests on '
 + 'the forecastle deck where it passes through the side.' },
+headCheek: { stage: 3, name: 'Cheeks of the head',
+what: 'The two knees on each side of the bow that bind the knee of the head to the ship. Each has '
++ 'one arm along the side and one along the knee, and the hawse-holes stand between them. Steel '
++ '(1822) gives a 74 two a side, 2 ft 6 in apart at the stem, with arms 11 ft 9 in long on the side '
++ 'and at least 6 ft 3 in on the knee. The lower cheek is 1 ft deep at its after end and 7 in at its '
++ 'fore end, and stands 1 ft 2 in off the side, thinning to 5 in forward. For the 74, Steel lets '
++ 'the hawse-holes fix the height of the lower cheek. Here each hole stands in the middle of the gap, '
++ 'with 4 to 5 in of solid wood, the bolster, above and below it. The rise of the arms on the knee is a '
++ 'class shape, because Steel\'s plate of the head is not online.' },
 hawse:    { stage: 3, name: 'Hawse-holes',
 what: 'The holes in the bow that the anchor cables run out through. Steel (1822) gives a 74 '
 + 'two on each side of the stem. Each is 17 inches across inside a lead pipe 1.5 inches thick, '
@@ -10059,7 +10101,7 @@ shape.lineTo(kneeX, kneeTopY);
 shape.quadraticCurveTo(kneeX - L * 0.014, kneeTopY - B * 0.10,
 base[0] - L * 0.012, base[1] + B * 0.04);
 shape.quadraticCurveTo(base[0] - L * 0.004, base[1] + B * 0.01, base[0], base[1]);
-const kneeTh = B * 0.035;
+const kneeTh = KNEE_TH(S);
 const knee = new THREE.Mesh(
 new THREE.ExtrudeGeometry(shape, { depth: kneeTh, bevelEnabled: false }), mats.woodPale);
 knee.position.z = -kneeTh / 2;
@@ -10088,6 +10130,83 @@ g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 20, railR, 6, false), mats.wo
 side.push(curve);
 }
 rails.push(side);
+}
+if (S.cheeks && S.__hawse && S.__hawse.length) {
+const CL = cheekLines(S, H), CK = CL.CK, HB = hawseHoles(S, H);
+const half = CL.half, uT = CL.uT, yT = CL.yT;
+const xAtStem = y => surfacePoint(S, H, uT, vAtY(S, H, uT, y))[0];
+const xT = xAtStem(yT);
+const outline = shape.getPoints(24);
+const foreEdge = y => { let xm = Infinity;
+for (let i = 0; i < outline.length; i++) { const a = outline[i], b = outline[(i + 1) % outline.length];
+if ((a.y - y) * (b.y - y) <= 0 && a.y !== b.y) xm = Math.min(xm, a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y)); }
+return xm; };
+const lift = d => CK.kneeRisePerM * d + CK.kneeCurve * d * d;
+const headRead = { cheeks: [] };
+const nSide = 26, nKnee = 10, embed = 0.01;
+for (const which of ['lower', 'upper']) {
+const xS = xAtStem(CL.lowerSide(which, yT) + CL.dep(which, CK.armSideM) / 2);
+let armK = CK.armKneeM;
+for (let i = 0; i < 40; i++) {
+const yLo = CL.lowerSide(which, yT + lift(armK));
+const xf = Math.max(foreEdge(yLo), foreEdge(yLo + CL.dep(which, CK.armSideM + armK)));
+if (xS - armK >= xf + 0.05) break; armK *= 0.95; }
+const st = [];
+for (let k = 0; k <= nSide; k++) { const u = CL.uAtArc(CL.sideLen * (1 - k / nSide));
+st.push({ kind: 'side', u, s: CL.sOf(u), yRef: CL.yLine(u) }); }
+for (let k = 1; k <= nKnee; k++) { const d = armK * k / nKnee;
+st.push({ kind: 'knee', x: xS - d, s: CK.armSideM + d, yRef: yT + lift(d) }); }
+const pos = [], idx = [];
+const rows = st.map(p => {
+const dep = CL.dep(which, p.s), mo = CL.mould(which, p.s);
+const yLo = CL.lowerSide(which, p.yRef), yHi = yLo + dep;
+let inLo, inHi, n;
+if (p.kind === 'side') {
+inLo = surfacePoint(S, H, p.u, vAtY(S, H, p.u, yLo)); inHi = surfacePoint(S, H, p.u, vAtY(S, H, p.u, yHi));
+const um = Math.min(0.3, p.u + 0.002), ul = Math.max(0, p.u - 0.002), ym = (yLo + yHi) / 2;
+const a = surfacePoint(S, H, ul, vAtY(S, H, ul, ym)), b = surfacePoint(S, H, um, vAtY(S, H, um, ym));
+const tx = b[0] - a[0], tz = Math.abs(b[2]) - Math.abs(a[2]), tl = Math.hypot(tx, tz);
+n = [-tz / tl, tx / tl]; if (n[1] < 0) n = [-n[0], -n[1]];
+inLo = [inLo[0], yLo, Math.max(half, Math.abs(inLo[2])) - embed]; inHi = [inHi[0], yHi, Math.max(half, Math.abs(inHi[2])) - embed];
+} else {
+inLo = [p.x, yLo, half - embed]; inHi = [p.x, yHi, half - embed]; n = [0, 1];
+}
+const outLo = [inLo[0] + n[0] * mo, yLo, inLo[2] + n[1] * mo], outHi = [inHi[0] + n[0] * mo, yHi, inHi[2] + n[1] * mo];
+const base = pos.length / 3;
+for (const q of [inLo, outLo, outHi, inHi]) pos.push(q[0], q[1], q[2]);
+return { base, s: +p.s.toFixed(3), x: +inLo[0].toFixed(3), yLo: +yLo.toFixed(3), yHi: +yHi.toFixed(3), dep: +dep.toFixed(4), mo: +mo.toFixed(4),
+kind: p.kind, u: p.u !== undefined ? +p.u.toFixed(5) : null };
+});
+for (let k = 0; k + 1 < rows.length; k++) {
+const a = rows[k].base, b = rows[k + 1].base;
+for (let j = 0; j < 4; j++) { const j1 = (j + 1) % 4; idx.push(a + j, b + j, b + j1, a + j, b + j1, a + j1); }
+}
+{ const a = rows[0].base, b = rows[rows.length - 1].base; idx.push(a, a + 2, a + 1, a, a + 3, a + 2, b, b + 1, b + 2, b, b + 2, b + 3); }
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+const stemRow = rows[nSide];
+headRead.cheeks.push({ which, armSideM: CK.armSideM, armKneeM: +armK.toFixed(3), kneeClamped: armK < CK.armKneeM - 1e-6,
+stemYLo: stemRow.yLo, stemYHi: stemRow.yHi, stemX: +xS.toFixed(3), aft: rows[0], fore: rows[rows.length - 1] });
+for (const sgn of [-1, 1]) {
+const m = new THREE.Mesh(geo, mats.woodPale);
+if (sgn < 0) m.scale.z = -1;
+m.userData.headCheek = { which, sgn };
+group.add(tag(m, 'headCheek'));
+}
+}
+const lo = headRead.cheeks[0], up = headRead.cheeks[1];
+headRead.stemGapM = +(up.stemYLo - lo.stemYHi).toFixed(3);
+const rr = S.hawse.diaM / 2 + (S.hawse.pipeThickM || 0.03);
+headRead.holes = HB.holes.map(h => ({ c: h.c, u: +h.u.toFixed(4), y: +h.p[1].toFixed(3),
+bolsterBelowM: +(h.p[1] - rr - CL.lowerTop(h.u)).toFixed(3), bolsterAboveM: +(CL.upperBot(h.u) - h.p[1] - rr).toFixed(3) }));
+{ const rc = rails[1][0]; let best = null;
+for (let i = 0; i <= 400; i++) { const q = rc.getPoint(i / 400); if (!best || Math.abs(q.x - xT) < Math.abs(best.x - xT)) best = q; }
+const hf = CK.heightsFt || {}, FT = 0.3048, ft = v => (Array.isArray(v) ? v[0] + v[1] / 12 : v);
+headRead.mainRailTopAtStem = +(best.y + railR).toFixed(3);
+headRead.lowerSideToMainRailM = +(best.y + railR - lo.stemYLo).toFixed(3);
+if (hf.mainRailUpperSideAtStem && hf.lowerCheekLowerSideAtStem)
+headRead.steelLowerSideToMainRailM = +((ft(hf.mainRailUpperSideAtStem) - ft(hf.lowerCheekLowerSideAtStem)) * FT).toFixed(3); }
+S.__headRead = headRead;
 }
 if (grade >= 2) {
 let fStem = 0.5;
@@ -13307,5 +13426,5 @@ extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;
 }
-window.SHIPS_HULL = { hawseCentres, sideBands, tierPortRows, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { cheekLines, hawseCentres, sideBands, tierPortRows, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
 superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

@@ -1,0 +1,22 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a cheek off the bow",
+  "detail": "lower: its inner face at x -23.90 stands 0.081 m from the skin at its own height and half-breadth"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a cheek off the bow",
+  "detail": "upper: its inner face at x -24.27 stands 0.077 m from the skin at its own height and half-breadth"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "cheeks off their recorded distance at the stem",
+  "detail": "0.745 m clear at the throat, recorded 0.762 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hawse-hole not between the cheeks",
+  "detail": "the hole at x -24.69: 0.032 m of bolster over the lower cheek and 0.117 m under the upper, each must be 0.05 m or more"
+ }
+]
