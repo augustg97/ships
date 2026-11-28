@@ -663,6 +663,28 @@ let a = 0, b = 1;
 for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else b = m; }
 return (a + b) / 2;
 }
+function hawseHoles(S, H) {
+const HW = S.hawse;
+if (!HW || !(HW.diaM > 0) || !Array.isArray(HW.centresM)) return { holes: [], aftU: 0 };
+H = H || hullSurface(S);
+const vPort = sideBands(S).tiers[0].port;
+const zAt = (u, y) => Math.abs(surfacePoint(S, H, u, vAtY(S, H, u, y))[2]);
+const holes = [];
+for (const c of HW.centresM) {
+let u = 0.03, y = surfacePoint(S, H, u, vPort)[1];
+for (let it = 0; it < 4; it++) {
+let a = 0.0005, b = 0.3;
+for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (zAt(m, y) < c) a = m; else b = m; }
+u = (a + b) / 2; y = surfacePoint(S, H, u, vPort)[1];
+}
+const v = vAtY(S, H, u, y);
+holes.push({ c, u, v, p: surfacePoint(S, H, u, v) });
+}
+const last = holes.reduce((m, h) => (h.u > m.u ? h : m), holes[0]);
+const dxdu = Math.abs(surfacePoint(S, H, last.u + 0.002, last.v)[0] - last.p[0]) / 0.002;
+const aftU = last.u + (HW.diaM / 2 + (HW.pipeThickM || 0.03) + 0.10) / dxdu;
+return { holes, aftU };
+}
 function tierPortRows(S) {
 const T = sideBands(S).tiers, rec = Array.isArray(S.tierPorts) ? S.tierPorts : [];
 let H = null;
@@ -4265,6 +4287,13 @@ what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'for every rate. The 74\'s is 0.44 m by 0.42 m in section and reaches 2.6 m out from '
 + 'the side. It rises 6 inches in every foot of its length, and its underside rests on '
 + 'the forecastle deck where it passes through the side.' },
+hawse:    { stage: 3, name: 'Hawse-holes',
+what: 'The holes in the bow that the anchor cables run out through. Steel (1822) gives a 74 '
++ 'two on each side of the stem. Each is 17 inches across inside a lead pipe 1.5 inches thick, '
++ 'and the two stand 18 inches apart. Each hole is cut on the joint between two of the four '
++ 'hawse pieces, the upright timbers of the bow beside the stem, so that it takes half the '
++ 'wood out of each timber and the whole of neither. At sea the cables were unbent from the '
++ 'anchors and the holes were closed from inside with plugs and blind bucklers.' },
 head:     { stage: 4, name: 'Head and beakhead',
 what: 'A working platform carried out beyond the stem, and the rails that sweep up '
 + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -9960,6 +9989,41 @@ if (CR) { rec.stiveTan = Math.tan(stv); rec.seat = seat; cg.userData.catSeat = s
 S.__catheads.push(rec);
 }
 }
+if (S.hawse && S.hawse.diaM > 0 && Array.isArray(S.hawse.centresM)) {
+const HW = S.hawse, r = HW.diaM / 2, t = HW.pipeThickM || 0.03;
+const leadMat = mats.lead || new THREE.MeshStandardMaterial({ color: 0x6f7377, roughness: 0.55, metalness: 0.35 });
+const lipMat = leadMat.clone(); lipMat.side = THREE.DoubleSide;
+const holeMat = new THREE.MeshStandardMaterial({ color: 0x0b0907, roughness: 0.95, metalness: 0.0,
+polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+S.__hawse = [];
+for (const { c, u, v, p } of hawseHoles(S, H).holes) {
+const y = p[1];
+const pu = surfacePoint(S, H, Math.min(1, u + 0.002), v), pv = surfacePoint(S, H, u, Math.min(1, v + 0.01));
+for (const sgn of [-1, 1]) {
+const P0 = new THREE.Vector3(p[0], p[1], sgn * Math.abs(p[2]));
+const du = new THREE.Vector3(pu[0] - p[0], pu[1] - p[1], sgn * (Math.abs(pu[2]) - Math.abs(p[2])));
+const dv = new THREE.Vector3(pv[0] - p[0], pv[1] - p[1], sgn * (Math.abs(pv[2]) - Math.abs(p[2])));
+const n = new THREE.Vector3().crossVectors(du, dv).normalize();
+if (n.z * sgn < 0) n.negate();
+const hg = new THREE.Group();
+hg.position.copy(P0);
+hg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+const lip = new THREE.Mesh(new THREE.CylinderGeometry(r + t, r + t, 0.06, 24, 1, true), lipMat);
+lip.rotation.x = Math.PI / 2; lip.position.z = 0.01;
+hg.add(lip);
+const rim = new THREE.Mesh(new THREE.RingGeometry(r, r + t, 24), leadMat);
+rim.position.z = 0.04;
+hg.add(rim);
+const face = new THREE.Mesh(new THREE.CircleGeometry(r, 24), holeMat);
+face.position.z = 0.04 - t;
+face.userData.hawseFace = { r, t };
+hg.add(face);
+hg.userData.hawse = { c, u: +u.toFixed(4), y: +y.toFixed(3), r, t };
+group.add(tag(hg, 'hawse'));
+S.__hawse.push({ x: P0.x, y: P0.y, z: P0.z, c, u });
+}
+}
+}
 if (S.iron) return;
 const grade = S.head || 0;
 if (!grade) return;
@@ -12914,6 +12978,7 @@ uCopperAge: { value: S.copperAge !== undefined ? S.copperAge : 0.55 },
 uWaterline: { value: 0.62 },
 uChequer: { value: S.chequer ? 1 : 0 },
 uGunDecks: { value: S.gunDecks || 0 },
+uHawseU: { value: S.hawse ? hawseHoles(S).aftU : 0 },
 ...(() => {
 const t = sideBands(S).tiers, at = (k, i) => (t[i] ? t[i][k] : 0);
 const v4 = k => new THREE.Vector4(at(k, 0), at(k, 1), at(k, 2), at(k, 3));

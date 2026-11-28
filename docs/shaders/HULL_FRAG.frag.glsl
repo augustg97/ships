@@ -9,6 +9,7 @@ uniform float uCopperAge;    // 0 = new and bright, 1 = fully verdigris
 uniform float uWaterline;    // v coordinate of the load waterline
 uniform float uChequer;      // 0 = plain, 1 = Nelson chequer with gunport bands
 uniform float uGunDecks;
+uniform float uHawseU;     // r375: no class port of the lower tier comes forward of this u (the hawse-holes)
 /* the chequer's tiers, from hull.js sideBands() (round 341): per gun deck, the ochre band's
    lower and upper edge and the port centre, in the loft's v, and the edge's half-softness */
 uniform vec4  uTierLo, uTierHi;
@@ -358,6 +359,8 @@ void main(){
                        * smoothstep(hi + uTierSoft, hi - uTierSoft, v));
         float px = fract(u * 26.0);
         float along = smoothstep(0.30, 0.22, abs(px - 0.5));
+        /* r375: a class port whose fore edge would stand forward of the after hawse-hole is not cut */
+        if (d == 0) along *= step(uHawseU, (floor(u * 26.0) + 0.2) / 26.0);
         /* r364: a tier with recorded ports is cut only at Steel's stations (tierPortStations) */
         if (uTierPortRec[d] > 0.5) {
           along = 0.0;
