@@ -2806,7 +2806,23 @@
         const c = new THREE.Vector3().applyMatrix4(new THREE.Matrix4().multiplyMatrices(invH, face.matrixWorld));
         holes.push({ c, r: face.geometry.parameters.radius });
       });
-      const want = 2 * H.hawse.centresM.length;
+      /* r376: the audit derives the centres from the tabled sidings itself (half the apron, the knight-head,
+         the hawse pieces), so a builder that reads the sidings wrongly cannot agree with it. */
+      const SD = H.hawse.sidingsM;
+      const cents = SD ? [SD.apron / 2 + SD.knightHead + SD.pieces[0], SD.apron / 2 + SD.knightHead + SD.pieces[0] + SD.pieces[1] + SD.pieces[2]]
+                       : (H.hawse.centresM || []);
+      /* (e) r376: where the joint rule and the table's 'distance from each other' disagree by more than 1 cm, the record
+         must say so in a contested field; (f) where the table is more than 50 years from the hull's year, the record
+         must say so in an era field. The audit convicts silence, not the answer (r108). */
+      if (SD && H.hawse.clearM > 0) {
+        const clear = cents[1] - cents[0] - H.hawse.diaM;
+        if (Math.abs(clear - H.hawse.clearM) > 0.01 && !H.hawse.contested)
+          say(v.id, 'a hawse record whose joint rule and table disagree, unstated', `the joints leave ${clear.toFixed(3)} m between the holes, the table ${H.hawse.clearM} m, and the record has no contested field`);
+      }
+      if (H.hawse.sourceYear > 0 && H.year > 0 && Math.abs(H.hawse.sourceYear - H.year) > 50 && !H.hawse.era)
+        say(v.id, 'a hawse record carried across an era, unstated', `source of ${H.hawse.sourceYear} on a hull of ${H.year}, and the record has no era field`);
+      if (!(H.hawse.sourceYear > 0)) say(v.id, 'a hawse record with no source year', 'sourceYear is not recorded');
+      const want = 2 * cents.length;
       if (holes.length !== want) say(v.id, 'hawse-holes off their recorded number', `${holes.length} drawn, ${want} recorded (two a side)`);
       let uniform = null;
       g.traverse(o => { if (o.isMesh && o.material && o.material.uniforms && o.material.uniforms.uGunDecks && uniform === null) uniform = o.material.uniforms.uHawseU ? o.material.uniforms.uHawseU.value : 0; });
@@ -2814,7 +2830,7 @@
       for (const h of holes) {
         if (Math.abs(h.r - H.hawse.diaM / 2) > 0.01) say(v.id, 'a hawse-hole off its recorded diameter', `${(2 * h.r).toFixed(3)} m across, recorded ${H.hawse.diaM}`);
         const z = Math.abs(h.c.z);
-        if (!H.hawse.centresM.some(cm => Math.abs(cm - z) < 0.04)) say(v.id, 'a hawse-hole off its recorded half-breadth', `centre ${z.toFixed(3)} m off the middle line, recorded ${H.hawse.centresM.join(' and ')}`);
+        if (!cents.some(cm => Math.abs(cm - z) < 0.02)) say(v.id, 'a hawse-hole off its recorded half-breadth', `centre ${z.toFixed(3)} m off the middle line, derived from the record ${cents.map(c => c.toFixed(3)).join(' and ')}`);
         let a = 0.0005, b = 0.4;
         for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (Math.abs(SHIPS_HULL.surfacePoint(H, HSh, m, vAtYh(m, h.c.y))[2]) < z) a = m; else b = m; }
         const uS = (a + b) / 2, sp = SHIPS_HULL.surfacePoint(H, HSh, uS, vAtYh(uS, h.c.y));

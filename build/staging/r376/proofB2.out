@@ -1,0 +1,27 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "hawse-holes off their recorded number",
+  "detail": "0 drawn, 4 recorded (two a side)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hawse-hole off its recorded half-breadth",
+  "detail": "centre 1.157 m off the middle line, derived from the record 1.207 and 2.096"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hawse-hole off its recorded half-breadth",
+  "detail": "centre 1.157 m off the middle line, derived from the record 1.207 and 2.096"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hawse-hole off its recorded half-breadth",
+  "detail": "centre 2.046 m off the middle line, derived from the record 1.207 and 2.096"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hawse-hole off its recorded half-breadth",
+  "detail": "centre 2.046 m off the middle line, derived from the record 1.207 and 2.096"
+ }
+]

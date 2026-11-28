@@ -663,14 +663,22 @@ let a = 0, b = 1;
 for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, u, m)[1] < y) a = m; else b = m; }
 return (a + b) / 2;
 }
+function hawseCentres(HW) {
+const s = HW && HW.sidingsM;
+if (s && s.apron > 0 && s.knightHead > 0 && Array.isArray(s.pieces) && s.pieces.length === 4) {
+const c1 = s.apron / 2 + s.knightHead + s.pieces[0];
+return [c1, c1 + s.pieces[1] + s.pieces[2]];
+}
+return Array.isArray(HW && HW.centresM) ? HW.centresM : [];
+}
 function hawseHoles(S, H) {
-const HW = S.hawse;
-if (!HW || !(HW.diaM > 0) || !Array.isArray(HW.centresM)) return { holes: [], aftU: 0 };
+const HW = S.hawse, CS = hawseCentres(HW);
+if (!HW || !(HW.diaM > 0) || !CS.length) return { holes: [], aftU: 0 };
 H = H || hullSurface(S);
 const vPort = sideBands(S).tiers[0].port;
 const zAt = (u, y) => Math.abs(surfacePoint(S, H, u, vAtY(S, H, u, y))[2]);
 const holes = [];
-for (const c of HW.centresM) {
+for (const c of CS) {
 let u = 0.03, y = surfacePoint(S, H, u, vPort)[1];
 for (let it = 0; it < 4; it++) {
 let a = 0.0005, b = 0.3;
@@ -4293,7 +4301,10 @@ what: 'The holes in the bow that the anchor cables run out through. Steel (1822)
 + 'and the two stand 18 inches apart. Each hole is cut on the joint between two of the four '
 + 'hawse pieces, the upright timbers of the bow beside the stem, so that it takes half the '
 + 'wood out of each timber and the whole of neither. At sea the cables were unbent from the '
-+ 'anchors and the holes were closed from inside with plugs and blind bucklers.' },
++ 'anchors and the holes were closed from inside with plugs and blind bucklers. The East '
++ 'Indiaman\'s holes are Steel\'s for an East India ship of 1,257 tons: 15 inches across in a '
++ 'pipe 1.25 inches thick. His table is of about 1805 and her hull is of 1620, so the size is '
++ 'his and not a record of a ship of her own century.' },
 head:     { stage: 4, name: 'Head and beakhead',
 what: 'A working platform carried out beyond the stem, and the rails that sweep up '
 + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -9989,7 +10000,7 @@ if (CR) { rec.stiveTan = Math.tan(stv); rec.seat = seat; cg.userData.catSeat = s
 S.__catheads.push(rec);
 }
 }
-if (S.hawse && S.hawse.diaM > 0 && Array.isArray(S.hawse.centresM)) {
+if (S.hawse && S.hawse.diaM > 0 && hawseCentres(S.hawse).length) {
 const HW = S.hawse, r = HW.diaM / 2, t = HW.pipeThickM || 0.03;
 const leadMat = mats.lead || new THREE.MeshStandardMaterial({ color: 0x6f7377, roughness: 0.55, metalness: 0.35 });
 const lipMat = leadMat.clone(); lipMat.side = THREE.DoubleSide;
@@ -13296,5 +13307,5 @@ extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;
 }
-window.SHIPS_HULL = { sideBands, tierPortRows, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { hawseCentres, sideBands, tierPortRows, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
 superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

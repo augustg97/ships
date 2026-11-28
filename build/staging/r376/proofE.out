@@ -1,0 +1,12 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a hawse record whose joint rule and table disagree, unstated",
+  "detail": "the joints leave 0.483 m between the holes, the table 0.4318 m, and the record has no contested field"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hawse record carried across an era, unstated",
+  "detail": "source of 1805 on a hull of 1620, and the record has no era field"
+ }
+]
