@@ -31984,3 +31984,12 @@ The other five predicted movers (`shipwright` 0.034%, `shipwright-astern`, `ship
 4. r369's item 2 (the wood stock's seam and ends), r368's items 2–4, r366's item 3, and r365's and r364's carried items still stand.
 
 **RATCHET RECEIPT (r371).** All 65 frames are being captured one process each (`run-each.sh all.txt`, `run1`) on the final `web/` from 18:23, with every `shipwright*` and `ship-*` frame first, then `action` and the `aboard-*` frames. At a load of 6–7 a frame takes about 63 s, so the run cannot finish inside the round. Live stamp at build: 1795832729.
+**RECEIPT (19:04).** `run1` (18:23–19:03) captured 65 of 65 frames, none failed (`score1.out`, r277's offline scorer). The load eased from 8 to about 3 during the run, and frames went from 63 s to about 30 s each, so the run finished inside the round. Four predicted Shipwright movers were accepted with reasons in FRAME-LOG.md, each checked by its moved-pixel clusters (`scripts/r371_clusters.py`, `wit/mv-<frame>.png`):
+- `shipwright` 0.053%: the 74's bow, with the ring lower on the stopper (x 976–1154), and at the right edge the next berth's anchor seen through the fleet panel.
+- `shipwright-ahead` 0.080%: both of the 74's catheads from ahead, and the same berth neighbour.
+- `shipwright-furled` 0.120%: the port ring and the stopper's clinch on the cathead under the card strip, and the starboard stock over the forecastle rail.
+- `shipwright-hounds` 0.076%: the same two bowers.
+
+Every other frame showing a catted hull (`shipwright-astern`, `shipwright-corbis`, the `ship-*` frames of all 12 catted hulls, `action`, `aboard-wyoming`, `aboard-clipper`, `aboard-preussen`) stayed inside the gate: at those cameras the stopper and chain are a few pixels.
+
+**r371: 65 of 65 frames scored on the final tree, all inside the gate after 4 accepts. No frames are carried to r372 as unscored.** Live stamp 1795832729, read live at 18:28, with `catStopper` in the live `hull.js`.
