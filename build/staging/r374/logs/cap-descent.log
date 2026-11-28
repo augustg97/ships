@@ -1,0 +1,6 @@
+1 frames to capture
+    · descent                      http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+captured 1
