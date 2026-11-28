@@ -1,0 +1,13 @@
+const vm = require('vm'), fs = require('fs');
+const ctx = { console, Math, JSON, Float32Array, Uint16Array, Uint32Array, Int32Array, Uint8Array, Float64Array, Array, Object, Map, Set, WeakMap, Symbol, Promise, setTimeout, performance: { now: () => 0 } };
+ctx.window = ctx; ctx.self = ctx; ctx.globalThis = ctx;
+ctx.document = { createElement: () => ({ getContext: () => null, style: {} }), createElementNS: () => ({ getContext: () => null, style: {} }) };
+vm.createContext(ctx);
+const W = process.argv[2], ID = process.argv[3];
+for (const f of ['js/three.min.js', 'js/shaders.js', 'js/hull.js']) vm.runInContext(fs.readFileSync(W + '/' + f, 'utf8'), ctx);
+ctx.__V = JSON.parse(fs.readFileSync(W + '/data/vessels.json', 'utf8')).vessels; ctx.__ID = ID;
+vm.runInContext(`const V = __V.find(v => v.id === __ID); globalThis.__DBG = [];
+const S = V.hull, H = hullSurface(S); SHIPS_HULL.buildShip(S, { fine: true });
+const f = anchorFormOf(S); globalThis.__DBG = []; const st = anchorStowOf(S, H, f, S.__catheads[1]);
+console.log('f', JSON.stringify({s:f.s,a:f.a,ringY:f.ringY,stockL:f.stockL,rCrown:f.rCrown}), 'ring', st.ring.toArray().map(q=>+q.toFixed(2)), 'bill', st.bill.toArray().map(q=>+q.toFixed(2)), 'crown', st.crown.toArray().map(q=>+q.toFixed(2)), JSON.stringify(st.gunwale), 'tilt', st.tiltDeg);
+for (const d of __DBG.filter(d => d[2] > -0.3)) console.log(JSON.stringify(d));`, ctx);

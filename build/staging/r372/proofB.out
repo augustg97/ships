@@ -1,0 +1,122 @@
+[
+ {
+  "id": "corbita",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -12.33, 2.98 m off the centreline"
+ },
+ {
+  "id": "corbita",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -12.33, 2.98 m off the centreline"
+ },
+ {
+  "id": "caravel",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -6.63, 1.82 m off the centreline"
+ },
+ {
+  "id": "caravel",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -6.63, 1.82 m off the centreline"
+ },
+ {
+  "id": "carrack",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -13.75, 3.17 m off the centreline"
+ },
+ {
+  "id": "carrack",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -13.75, 3.17 m off the centreline"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.04 m from the top of the side at x -10.00, 2.24 m off the centreline"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.04 m from the top of the side at x -10.00, 2.24 m off the centreline"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -16.01, 4.07 m off the centreline"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -16.01, 4.07 m off the centreline"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -9.69, 2.53 m off the centreline"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -9.69, 2.53 m off the centreline"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.51 m from the top of the side at x -37.84, 5.37 m off the centreline"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.51 m from the top of the side at x -37.84, 5.37 m off the centreline"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor inside the bow",
+  "detail": "140 vertices inside the skin, worst 0.154 m at x -63.82, y 7.17"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor inside the bow",
+  "detail": "135 vertices inside the skin, worst 0.205 m at x -63.83, y 7.15"
+ },
+ {
+  "id": "preussen",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -1.69 m from the top of the side at x -58.59, 3.29 m off the centreline"
+ },
+ {
+  "id": "preussen",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -1.69 m from the top of the side at x -58.59, 3.29 m off the centreline"
+ },
+ {
+  "id": "clipper",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -21.39, 4.06 m off the centreline"
+ },
+ {
+  "id": "clipper",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.05 m from the top of the side at x -21.39, 4.06 m off the centreline"
+ },
+ {
+  "id": "steamer",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.59 m from the top of the side at x -34.63, 5.41 m off the centreline"
+ },
+ {
+  "id": "steamer",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.59 m from the top of the side at x -34.63, 5.41 m off the centreline"
+ },
+ {
+  "id": "endurance",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.04 m from the top of the side at x -13.94, 2.99 m off the centreline"
+ },
+ {
+  "id": "endurance",
+  "rule": "a stowed bower with no arm on the gunwale",
+  "detail": "the anchor's highest point abaft the cathead stands -0.04 m from the top of the side at x -13.94, 2.99 m off the centreline"
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "id": "carrack",
+  "rule": "an anchor inside the bow",
+  "detail": "6 vertices inside the skin, worst 0.024 m at x -13.83, y 5.23"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor inside the bow",
+  "detail": "4 vertices inside the skin, worst 0.024 m at x -13.83, y 5.23"
+ }
+]
