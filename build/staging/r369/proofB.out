@@ -1,0 +1,302 @@
+[
+ {
+  "id": "corbita",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "corbita",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "corbita",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.374 m across where the stock is 0.206 m (1.82x)"
+ },
+ {
+  "id": "corbita",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "corbita",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "corbita",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.374 m across where the stock is 0.206 m (1.82x)"
+ },
+ {
+  "id": "caravel",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "caravel",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "caravel",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.184 m across where the stock is 0.101 m (1.82x)"
+ },
+ {
+  "id": "caravel",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "caravel",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "caravel",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.184 m across where the stock is 0.101 m (1.82x)"
+ },
+ {
+  "id": "carrack",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "carrack",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "carrack",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.374 m across where the stock is 0.206 m (1.82x)"
+ },
+ {
+  "id": "carrack",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "carrack",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "carrack",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.374 m across where the stock is 0.206 m (1.82x)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "fluyt",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.294 m across where the stock is 0.162 m (1.82x)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "fluyt",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.294 m across where the stock is 0.162 m (1.82x)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.460 m across where the stock is 0.253 m (1.82x)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.460 m across where the stock is 0.253 m (1.82x)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.514 m across where the stock is 0.283 m (1.82x)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.514 m across where the stock is 0.283 m (1.82x)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.278 m across where the stock is 0.153 m (1.82x)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.278 m across where the stock is 0.153 m (1.82x)"
+ },
+ {
+  "id": "wyoming",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "wyoming",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "wyoming",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.533 m across where the stock is 0.293 m (1.82x)"
+ },
+ {
+  "id": "wyoming",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "wyoming",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "wyoming",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.533 m across where the stock is 0.293 m (1.82x)"
+ },
+ {
+  "id": "clipper",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "clipper",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "clipper",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.517 m across where the stock is 0.285 m (1.82x)"
+ },
+ {
+  "id": "clipper",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "clipper",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "clipper",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.517 m across where the stock is 0.285 m (1.82x)"
+ },
+ {
+  "id": "endurance",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "endurance",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "endurance",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.424 m across where the stock is 0.233 m (1.82x)"
+ },
+ {
+  "id": "endurance",
+  "rule": "wood anchor stock not Cotsell's size",
+  "detail": "middle 0.062, ends 0.032 of the length; Cotsell: 1/12 (0.083) and 1/24 (0.042)"
+ },
+ {
+  "id": "endurance",
+  "rule": "wood anchor stock without six hoops",
+  "detail": "4 hoops; Cotsell pl. 31 fig. 1 shows six, three a side"
+ },
+ {
+  "id": "endurance",
+  "rule": "anchor stock hoop does not bind the stock",
+  "detail": "hoop 0.424 m across where the stock is 0.233 m (1.82x)"
+ }
+]

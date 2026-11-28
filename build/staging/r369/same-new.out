@@ -1,0 +1,34 @@
+Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation
+dugout cd6d1a347a 66729
+voyaging-canoe 3da5673502 165604
+trireme 637e6ee2fe 107093
+corbita 60cecddcb5 99954
+dhow a56a7fc318 85810
+junk cf3b60ae63 107592
+treasure-ship 28f7b9c5c8 193569
+cog ERR
+caravel 0ff7dd7008 88834
+carrack bf026cf840 126236
+galley b8901e279f 115123
+galleass cef4f56197 134252
+panokseon cabe1dda73 121000
+sekibune ae8bd8d601 100515
+fluyt 8308cde337 107515
+east-indiaman 4fc2fb8a79 213522
+ship-of-the-line ef77ac213b 476355
+slave-ship a9a06137cc 116141
+wyoming b01dd74c37 222915
+preussen d97c0db235 173582
+great-eastern 2b119e6410 115194
+titanic 7277fe537c 99342
+usv 61f89f3a9b 68377
+clipper dc7735f0ba 186697
+steamer cc3139cf12 119586
+dreadnought 03884c43e1 86297
+yamato 5baca89e00 99782
+carrier 755f84534c 81087
+container aeefea850c 137674
+ever-given ERR
+azzam 1065306ac7 90484
+endurance e138d687aa 152227
+queen-mary-2 7ecd9428e6 165547

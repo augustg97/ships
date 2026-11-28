@@ -31898,3 +31898,14 @@ The first version read each mast one metre over the deck and found 1 of 3 masts.
 3. r368's items 2 (the shank at the eye is thinner than the iron stock), 3 (Preussen's stock stands square off her side) and 4 (the corbita's anchor is contested) still stand, as do r366's items 2 and 3 and r365's and r364's carried items.
 
 **RATCHET RECEIPT (r369).** All 65 frames are being captured one process each (`run-each.sh all.txt`, `run1`) on the final `web/` from 15:55. The predicted movers go first: the six `shipwright*` frames, `ship-slave-ship`, `ship-carrack`, `ship-wyoming`, `ship-clipper`, `ship-endurance`, `aboard-wyoming`, `aboard-clipper` and `action`. The vertex hash shows only the ten oak-stocked hulls changed, so no frame that shows none of them can move. Live stamp at build: 1795823736.
+**RECEIPT (16:40).** `run1` (15:55–16:37) captured 64 of 65 frames (`score1.out`). The four predicted Shipwright movers were accepted at 16:01 with reasons in FRAME-LOG.md, each checked by its moved-pixel clusters (`scripts/r369_clusters.py`, `wit/mv-<frame>.png`):
+- `shipwright` 0.052%: the 74's bow anchor (x 978–1107), and at the right edge (x 2793–2879) the next berth's anchor seen through the fleet panel.
+- `shipwright-ahead` 0.082%: both of the 74's bowers from ahead, and the same berth neighbour.
+- `shipwright-furled` 0.099%: the port stock under the card strip and the starboard stock over the forecastle rail.
+- `shipwright-hounds` 0.050%: the same two stocks.
+
+The other ten predicted movers (`shipwright-astern`, `shipwright-corbis`, `ship-slave-ship`, `ship-carrack`, `ship-wyoming`, `ship-clipper`, `ship-endurance`, `aboard-wyoming`, `aboard-clipper`, `action`) stayed inside the gate: the stock is a few pixels at those cameras. Four capture faults were each recaptured alone:
+- `ship-dreadnought` failed to capture. Recaptured in `run1b`: inside the gate.
+- `aboard-cable` read 10.531%, `aboard-yamato` 5.812% and `sea-magnified` 16.105%. Each capture log shows a connection error, and none of the three frames shows an oak-stocked hull. `aboard-cable`'s 10.531% is the same figure r368's connection-reset capture gave. Recaptured alone in `run1c`: 0.000%, 0.020% and 0.011%.
+
+**r369: 65 of 65 frames scored on the final tree, all inside the gate after 4 accepts. No frames are carried to r370 as unscored.** Live stamp 1795823736, read live at 16:01.
