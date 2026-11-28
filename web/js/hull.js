@@ -7233,8 +7233,8 @@ const PARTS = {
                   + 'and a chain called the shank-painter holds it there (Steel, 1794; Lever, 1808). The '
                   + 'shank then runs aft along the side and the stock stands nearly upright beside the bow. '
                   + 'The outer arm points away from the ship, so the crown stands off the side by most of an '
-                  + 'arm\'s length. On the 74 the forecastle stands higher than the cathead, so the point is laid '
-                  + 'instead on the bill-board, a board on the side above the fore channel. Steel (1822) puts '
+                  + 'arm\'s length. On the 74 the point rests on the forecastle\'s rail, at the head of the '
+                  + 'bill-board, a board fixed to the side above the fore channel. Steel (1822) puts '
                   + 'a lining of plank on the side under the channel, where the point drags on the way up.' },
   grapnel:  { stage: 3, name: 'Grapnel anchor',
               what: 'The Indian Ocean\'s own ground tackle, and the one anchor in this fleet '
@@ -7323,7 +7323,10 @@ const PARTS = {
                   + 'along the topside from its tip until the next letting-go. Ancient ships '
                   + 'had them too: Torr (1894) has the anchors hung from catheads a little abaft '
                   + 'the hawse-holes. An iron ship\'s cathead is an iron beam, and on a ship with '
-                  + 'a forecastle it stands on the forecastle deck.' },
+                  + 'a forecastle it stands on the forecastle deck. Steel (1822) tabulates the cathead '
+                  + 'for every rate. The 74\'s is 0.44 m by 0.42 m in section and reaches 2.6 m out from '
+                  + 'the side. It rises 6 inches in every foot of its length, and its underside rests on '
+                  + 'the forecastle deck where it passes through the side.' },
   head:     { stage: 4, name: 'Head and beakhead',
               what: 'A working platform carried out beyond the stem, and the rails that sweep up '
                   + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -15558,7 +15561,25 @@ function buildHead(S, group, mats) {
      little way abaft of these hawse-holes", the bow's eyes "turned to account as hawse-holes for the anchor-cables".
      So the shell-built corbita is catted too, in timber, and every hull with a bowsprit now cats her bowers. */
   {
-    const blen = B * 0.26, sq = B * 0.042, ang = 0.70;   // 40° forward of athwart
+    /* ⚠ A RECORDED CATHEAD IS STEEL'S BEAM, SEATED ON THE FORECASTLE DECK (round 373). Steel (1822), Folio XLVI, gives
+       each rate's cathead: the 74's is 1 ft 5½ in fore and aft by 1 ft 4½ in deep, 8 ft 6 in without board and 8 ft 6 in
+       within it from the outside of the timber, "to stand square with the bow, and to stive upwards in every foot" 6 in
+       (26.6°). His sheer draught (Book II) seats it: "the lower part comes on the plank of the deck at the side", the deck
+       being the forecastle, where his glossary puts the catheads ("at the fore part of the forecastle"). Until r373 the
+       74's cathead was the class beam, 0.61 m square and stived 3.4°, its underside 0.13 m under her sheer: 0.73 m under
+       her forecastle deck and 1.1 m under her forecastle rail, so that no anchor hung from it could be laid on the rail.
+       hull.cathead carries the record; without it the class beam below stands unchanged. Its sides stand plumb (Steel,
+       Book III: "the sides standing perpendicular or plumb"), so the stive is a pitch in the beam's own vertical plane. */
+    const CR = !S.iron && S.cathead && S.cathead.outM ? S.cathead : null;
+    const blen = CR ? CR.inM + CR.outM : B * 0.26, sq = CR ? CR.sidedM : B * 0.042, ang = 0.70;   // 40° forward of athwart
+    const dep = CR ? CR.deepM : sq, stv = CR ? Math.atan(CR.stivePerFt) : 0.06;
+    /* "square with the bow": the beam's plan direction is the side's outward normal at the sheer, at its own station */
+    const planAng = u => {
+      if (!CR || CR.plan !== 'square') return ang;
+      const a = surfacePoint(S, H, Math.max(0, u - 0.004), 1.0), b = surfacePoint(S, H, u + 0.004, 1.0);
+      return Math.atan2(Math.abs(b[2]) - Math.abs(a[2]), b[0] - a[0]);
+    };
+    const kD = sq * 0.7;   // the supporter's siding and breadth (CLASS: Steel's table has no row for it)
     /* iron hulls only: the 74's timber forecastle also starts at the stem, and her cathead keeps r364's station
        forward of her foremost port, at the sheer (r367 first moved it onto her forecastle and the ratchet caught it) */
     const fcsle = S.iron && S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
@@ -15570,7 +15591,8 @@ function buildHead(S, group, mats) {
        ports are recorded, the station moves forward until the knee's after face stands 0.10 m forward of the foremost
        port's foreside; S.__catheadMoved records by how much. */
     let uc = fcsle ? fcsle.u[1] * 0.5 : 0.105;
-    const kneeAft = u => surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
+    const kneeAft = u => CR ? surfacePoint(S, H, u, 1.0)[0] - (kD / 2 + 0.02) * Math.sin(planAng(u)) + kD * 0.75
+                            : surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
     {
       const ST = tierPortStations(S), first = ST.filter(Boolean).map(t => t.ports[0]).sort((a, b) => a.x - b.x)[0];
       S.__catheadMoved = null;
@@ -15589,16 +15611,36 @@ function buildHead(S, group, mats) {
     S.__catheads = [];
     for (const sgn of [-1, 1]) {
       const cg = new THREE.Group();
-      const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), catMat);
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, dep, blen), catMat);
       beam.position.z = blen / 2;
+      if (CR) beam.userData.catBeam = { sided: sq, deep: dep, len: blen };
       cg.add(beam);
-      /* the supporting knee, from the topside up to the beam's underside */
-      const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), catMat);
-      kn.position.set(0, -B * 0.038, blen * 0.30);
-      cg.add(kn);
-      cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
-      cg.rotation.y = sgn > 0 ? -ang : Math.PI + ang;    // outboard and forward, both sides
-      cg.rotation.x = -sgn * 0.06;                       // a slight up-cant at the tip
+      let seat = null;
+      if (CR) {
+        /* the beam's underside on the forecastle deck where its axis crosses the side; the supporter plumb under it,
+           against the side just outboard of that crossing */
+        const a = planAng(uc);
+        cg.rotation.set(-stv, sgn > 0 ? -a : Math.PI + a, 0, 'YXZ');
+        const d = new THREE.Vector3(0, 0, 1).applyEuler(cg.rotation);
+        const yD = H.islandDeck(uc) !== null ? H.islandDeck(uc) : pd[1];
+        const A = new THREE.Vector3(pd[0], yD + dep / 2 / Math.cos(stv), sgn * Math.abs(pd[2]));
+        cg.position.copy(A).addScaledVector(d, -CR.inM);
+        const hK = B * 0.06, zk = CR.inM + (kD / 2 + 0.02) / Math.cos(stv);
+        const kn = new THREE.Mesh(new THREE.BoxGeometry(kD, hK + 0.05, kD), catMat);
+        kn.rotation.x = stv;                              // plumb in the world
+        kn.position.set(0, -dep / 2, zk).add(new THREE.Vector3(0, -hK / 2 + 0.025, 0).applyAxisAngle(new THREE.Vector3(1, 0, 0), stv));
+        cg.add(kn);
+        seat = { deck: +yD.toFixed(3), underside: +(A.y - dep / 2 / Math.cos(stv)).toFixed(3), u: +uc.toFixed(4), planDeg: +(a * 180 / Math.PI).toFixed(1),
+                 stiveDeg: +(stv * 180 / Math.PI).toFixed(1), rule: 'Steel 1822: the lower part on the plank of the forecastle deck at the side; Folio XLVI, the 74\'s column' };
+      } else {
+        /* the supporting knee, from the topside up to the beam's underside */
+        const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), catMat);
+        kn.position.set(0, -B * 0.038, blen * 0.30);
+        cg.add(kn);
+        cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
+        cg.rotation.y = sgn > 0 ? -ang : Math.PI + ang;    // outboard and forward, both sides
+        cg.rotation.x = -sgn * 0.06;                       // a slight up-cant at the tip
+      }
       /* ⚠ THREE SHEAVES IN THE OUTER END, AND THE STOPPER'S THUMB CLEAT (round 371). Steel (1822, the cathead's table):
          "In the outer end of each to have sheaves ... three", for every rate from the 100 to the smallest; Falconer (1769,
          CAT-HEADS): "two or three small wheels, or sheaves, of brass, or strong wood". They stand side by side on one pin
@@ -15608,11 +15650,12 @@ function buildHead(S, group, mats) {
       cg.updateMatrix();
       const fwd = new THREE.Vector3(1, 0, 0).applyEuler(cg.rotation).x < 0 ? 1 : -1;   // the local x side that faces forward
       {
-        const shR = sq * 0.52, shT = Math.max(0.03, sq * 0.11);
+        const shR = CR ? CR.sheaveDiaM / 2 : sq * 0.52, shT = CR ? CR.sheaveThickM : Math.max(0.03, sq * 0.11);
         for (const k of [-1, 0, 1]) {
           const sh = new THREE.Mesh(new THREE.CylinderGeometry(shR, shR, shT, 14), mats.iron || catMat);
           sh.rotation.z = Math.PI / 2;
-          sh.position.set(k * sq * 0.3, -sq * 0.08, blen - sq * 0.55);
+          /* the rims stand 0.6 sq under the axis either way, which is where the stopper's bight is hung (anchorStowOf) */
+          sh.position.set(k * sq * 0.3, CR ? -sq * 0.6 + shR : -sq * 0.08, blen - sq * 0.55);
           sh.userData.catSheave = true;
           cg.add(sh);
         }
@@ -15628,7 +15671,9 @@ function buildHead(S, group, mats) {
       /* where the beam's axis crosses the side at the sheer (the stopper's end, the shank-painter's bolts abaft it) */
       const heel = cg.position, ax = tip.clone().sub(heel).normalize();
       const zSide = Math.max(0, (Math.abs(pd[2]) - Math.abs(heel.z)) / Math.max(1e-6, Math.abs(ax.z)));
-      S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z, m: cg.matrix.toArray(), sq, blen, fwd, zSide, xSide: heel.x + ax.x * zSide });
+      const rec = { x: tip.x, y: tip.y, z: tip.z, m: cg.matrix.toArray(), sq, blen, fwd, zSide, xSide: heel.x + ax.x * zSide };
+      if (CR) { rec.stiveTan = Math.tan(stv); rec.seat = seat; cg.userData.catSeat = seat; }
+      S.__catheads.push(rec);
     }
   }
   if (S.iron) return;
@@ -17221,7 +17266,7 @@ function anchorStowOf(S, H, f, cat) {
   const ropeR = 0.018 + B * 0.0006;
   /* the sheaves' rims stand 0.10 of the beam's depth under it (0.60 sq from its axis), and the beam stives up 0.06 rad, so
      its underside a ring's radius inboard of the tip is 0.06 ringR lower again */
-  const ring = new THREE.Vector3(cat.x, cat.y - (cat.sq ? cat.sq * 0.6 + 4 * ropeR + f.ringR * 1.06 : B * 0.035), cat.z);
+  const ring = new THREE.Vector3(cat.x, cat.y - (cat.sq ? cat.sq * 0.6 + 4 * ropeR + f.ringR * (1 + (cat.stiveTan != null ? cat.stiveTan : 0.06)) : B * 0.035), cat.z);
   const fm = (S.masts || []).filter(m => m.shrouds).sort((p, q) => p.at - q.at)[0];
   let FC = null; try { const F = fm ? shroudFeet(S, H, fm, true) : null; FC = F && F.chan ? F.chan : null; } catch (e) { FC = null; }
   const gap = f.rBill + 0.04;
@@ -17247,9 +17292,9 @@ function anchorStowOf(S, H, f, cat) {
      which stood the crown 1.3–1.9 m off the side on eight hulls (r371's shank-painter, 'offSide'). The bill now rests on
      the top of the side (the sheer, or an island's rail where one stands there), on its outer edge, wherever that top
      stands under the cathead's tip: the fish hoists the flukes "towards the top of the bow" (Falconer 1769, FISH), and
-     in Lever's figure the cathead stands over the gunwale. Where the top stands above the cathead (the 74's forecastle
-     rail is 1.1 m over her cathead's tip, because her cathead stands at her sheer) the side above the bill is Steel's
-     bill-board, and r370's stow on the board stands. */
+     in Lever's figure the cathead stands over the gunwale. Where the top stands above the cathead the side above the bill
+     is Steel's bill-board, and r370's stow on the board stands. No hull reaches that branch since r373: the 74's cathead
+     was the one under its own top (1.1 m under her forecastle rail), and Steel seats it on her forecastle deck. */
   const topOf = u => { const t = H.islandTop(u), sh = surfacePoint(S, H, u, 1)[1]; return t !== null && t > sh ? t : sh; };
   const billAt = (x, lift) => {
     const u = uAtXV(S, H, x, 1, Math.max(0.01, Math.min(0.99, x / L + 0.5)));
@@ -17349,8 +17394,12 @@ function anchorStowOf(S, H, f, cat) {
         let worst = Math.min(...ends.map(clear)) - f.stockEnd - 0.03;
         /* the shank, both arms and both palms; the inner arm's last fifth lies on the gunwale */
         for (const [px, py, pz, r] of gsamples) worst = Math.min(worst, clear(crown.clone().addScaledVector(xA, px).addScaledVector(yA, py).addScaledVector(zA, pz)) - r);
+        /* a recorded fore channel under the gunwale (the 74, r373): no part of the anchor in its solid or its bill-board */
+        let cg = 9;
+        if (FC && FC.rec) for (const [px, py, pz] of samples) cg = Math.min(cg, chanGap(crown.clone().addScaledVector(xA, px).addScaledVector(yA, py).addScaledVector(zA, pz)));
+        worst = Math.min(worst, cg);
         const off = clear(crown) - f.rCrown;
-        const cand = { t: deg, crown, xA, yA, zA, worst: worst + f.stockEnd + 0.03, cg: 9, off, score: worst, ok: worst >= 0 };
+        const cand = { t: deg, crown, xA, yA, zA, worst: worst + f.stockEnd + 0.03, cg, off, score: worst, ok: worst >= 0 };
         if (cand.ok && (!pick || !pick.ok || off < pick.off)) pick = cand;
         else if (!cand.ok && (!pick || (!pick.ok && cand.score > pick.score))) pick = cand;
       }
@@ -17402,6 +17451,12 @@ function anchorStowOf(S, H, f, cat) {
     const top = H.islandTop(b.u) !== null ? H.islandTop(b.u) : b.sheer + 1.0;
     res.board = { x: bill.x, u: b.u, yLo: b.sheer + FC.tIn, yHi: top, t: BB_T, lift: +lift.toFixed(2), chanGap: +pick.cg.toFixed(3), sheer: b.sheer };
   }
+  /* ⚠ ON THE GUNWALE OVER A RECORDED CHANNEL THE BILL-BOARD STILL STANDS (round 373). Steel's board is "carried upwards
+     from the upperside of the channel to the top of the side", and his lining is where the bill rubs while fishing; both
+     are the ship's, wherever the bill comes to rest. With the 74's cathead on her forecastle the bill rests on the top of
+     the side, at the board's head. */
+  if (b.gunwale && FC && FC.rec && bill.x >= FC.x0 && bill.x <= FC.x1)
+    res.board = { x: bill.x, u: b.u, yLo: b.sheer + FC.tIn, yHi: b.top, t: BB_T, lift: 0, chanGap: +pick.cg.toFixed(3), sheer: b.sheer, head: true };
   return res;
 }
 
@@ -17440,7 +17495,15 @@ function anchorLiningOf(S, H, f, st) {
     portX.push([Math.min(x0, x1), Math.max(x0, x1)]);
   }
   const mid = xm((yBot + yTop) / 2);
+  /* ⚠ A PORT ACROSS THE BILL'S CURVE (round 373, CONTESTED). With the 74's cathead on her forecastle (Steel, Folio XLVI)
+     the ring hangs 1.6 m higher and 1.3 m further aft than the class beam's, and the bill's curve crosses the whole port
+     band inside her foremost upper-deck port (Steel's Folio XXXII station, 13 ft 1 in abaft the foremost perpendicular).
+     Two records disagree here, and the port is the ship's opening: the lining is laid at its full breadth on the pier
+     forward of the port, its after side 5 cm short of it, and the result records the straddle. */
+  let straddle = null;
+  for (const [a, c] of portX) if (a < mid && c > mid) { straddle = [a, c]; xAft = Math.min(xAft, a - 0.05); }
   for (const [a, c] of portX) {
+    if (straddle && a === straddle[0]) continue;
     if (a >= mid && a - 0.05 < xAft) xAft = a - 0.05;                  // a port abaft the middle: the after side stops short of it
     if (c <= mid && c + 0.05 > xForeMin) xForeMin = c + 0.05;          // a port afore it: the fore edge stops short of it
   }
@@ -17461,7 +17524,7 @@ function anchorLiningOf(S, H, f, st) {
       G.push(row); }
     return G;
   };
-  const foreOf = y => Math.max(xForeMin, Math.min(xAft - 0.2, xm(y) - W / 2));
+  const foreOf = y => straddle ? Math.max(xForeMin, xAft - W) : Math.max(xForeMin, Math.min(xAft - 0.2, xm(y) - W / 2));
   const lining = grid(yBot, yTop, foreOf, () => xAft, 8, 4);
   const BOL = 0.2286;                                                    // 9 in (CLASS)
   const bolster = grid(yBot - BOL, yBot, () => foreOf(yBot) - 0.61, () => xAft, 1, 6);
@@ -17469,7 +17532,7 @@ function anchorLiningOf(S, H, f, st) {
   if (!lining || !bolster || !board) return null;
   return { sgn, lining, liningT: 0.0508, bolster, bolsterT: BOL, board, boardT: st.board.t,
            yBot: +yBot.toFixed(3), yTop: +yTop.toFixed(3), xAft: +xAft.toFixed(3), mid: +mid.toFixed(3), W: +W.toFixed(3), R: +R.toFixed(3),
-           ports: portX.map(p => p.map(q => +q.toFixed(3))) };
+           ports: portX.map(p => p.map(q => +q.toFixed(3))), straddle: straddle && straddle.map(q => +q.toFixed(3)) };
 }
 /* a plank laid on the side: G[j][i] = [x, y, zSkin], drawn as a slab from the skin out to zSkin + T, both windings */
 function sideSlabGeometry(G, T, sgn) {
@@ -17591,7 +17654,8 @@ function buildAnchor(S, group, mats) {
       if (LN) {
         const wood = mats.woodDark || iron;
         const lm = new THREE.Mesh(sideSlabGeometry(LN.lining, LN.liningT, LN.sgn), wood);
-        lm.userData.lining = { yBot: LN.yBot, yTop: LN.yTop, xAft: LN.xAft, mid: LN.mid, W: LN.W, R: LN.R, ports: LN.ports,
+        lm.userData.lining = { yBot: LN.yBot, yTop: LN.yTop, xAft: LN.xAft, mid: LN.mid, W: LN.W, R: LN.R, ports: LN.ports, straddle: LN.straddle,
+          contested: LN.straddle ? 'the bill\'s curve crosses the port band inside the foremost upper-deck port; the lining is laid on the pier forward of it' : null,
           ring: st.ring.toArray().map(q => +q.toFixed(3)), bill: st.bill.toArray().map(q => +q.toFixed(3)),
           rule: 'Steel 1822 Book II: the middle on the bill\'s curve from the cathead, the after side square down from the channel, from the bolster (the channel-wale\'s upper side) to the channel; breadth 1.25 palms (CLASS), stopped 5 cm short of a port' };
         group.add(tag(lm, 'anchorLining'));

@@ -1774,8 +1774,13 @@ const side = L => L.filter(P => Math.sign(P.reduce((s2, p) => s2 + p[2], 0)) ===
 const BB = side(plank['Bill-board']).find(b => b[0][0] <= bill[0] && b[0][1] >= bill[0]);
 if (!BB) say(v.id, 'no bill-board under the stowed bill', `no Bill-board covers x ${bill[0].toFixed(2)}`);
 else {
+if (st.gunwale) {
+if (BB[1][0] > cTop + 0.02 || BB[1][1] < st.gunwale.top - 0.02) say(v.id, 'a bill-board short of the top of the side', `board y ${BB[1][0].toFixed(2)}–${BB[1][1].toFixed(2)}, channel top ${cTop.toFixed(2)}, top of the side ${st.gunwale.top.toFixed(2)}`);
+if (!(bill[1] > BB[1][1])) say(v.id, 'a bill on the gunwale below its bill-board\'s head', `bill y ${bill[1].toFixed(2)}, board head ${BB[1][1].toFixed(2)}`);
+} else {
 if (BB[1][0] > cTop + 0.02 || BB[1][1] < bill[1]) say(v.id, 'a bill-board short of the bill', `board y ${BB[1][0].toFixed(2)}–${BB[1][1].toFixed(2)}, channel top ${cTop.toFixed(2)}, bill ${bill[1].toFixed(2)}`);
 if (Math.abs(bill[2]) < Math.max(Math.abs(BB[2][0]), Math.abs(BB[2][1]))) say(v.id, 'a bill inside its bill-board', `bill |z| ${Math.abs(bill[2]).toFixed(2)}`);
+}
 }
 const LN = side(plank['Anchor-lining']), BO = side(plank['Bolster']);
 const ln = LN.find(b => b[0][0] <= bill[0] + 1 && b[0][1] >= bill[0] - 1);
@@ -1787,7 +1792,11 @@ const ring = st.ring, R = Math.hypot(bill[0] - ring[0], bill[1] - ring[1], bill[
 const xm = ring[0] + Math.sqrt(Math.max(0, R * R - (yM - ring[1]) ** 2));
 const LP = plank['Anchor-lining'].find(P => Math.sign(P[0][2]) === sg) || [];
 const band = LP.filter(p => Math.abs(p[1] - yM) < 0.12).map(p => p[0]);
-if (band.length && !(Math.min(...band) <= xm && Math.max(...band) >= xm)) say(v.id, 'an anchor-lining off the bill\'s curve', `the curve at y ${yM.toFixed(2)} is x ${xm.toFixed(2)}, the lining ${Math.min(...band).toFixed(2)}–${Math.max(...band).toFixed(2)}`);
+const rowsS = SHIPS_HULL.tierPortRows(H), STs = SHIPS_HULL.tierPortStations(H)[rowsS.length - 1], HSs = SHIPS_HULL.hullSurface(H);
+const inPort = STs ? STs.ports.map(pp => [SHIPS_HULL.surfacePoint(H, HSs, pp.uLo, rowsS[rowsS.length - 1].port)[0], SHIPS_HULL.surfacePoint(H, HSs, pp.uHi, rowsS[rowsS.length - 1].port)[0]])
+.map(q => [Math.min(...q), Math.max(...q)]).find(q => q[0] < xm && q[1] > xm) : null;
+if (inPort && band.length) { if (!(Math.max(...band) <= inPort[0] && Math.max(...band) > inPort[0] - 0.10)) say(v.id, 'an anchor-lining off the pier before a port across the curve', `the curve at y ${yM.toFixed(2)} is x ${xm.toFixed(2)}, inside the port ${inPort[0].toFixed(2)}–${inPort[1].toFixed(2)}; the lining ${Math.min(...band).toFixed(2)}–${Math.max(...band).toFixed(2)}`); }
+else if (band.length && !(Math.min(...band) <= xm && Math.max(...band) >= xm)) say(v.id, 'an anchor-lining off the bill\'s curve', `the curve at y ${yM.toFixed(2)} is x ${xm.toFixed(2)}, the lining ${Math.min(...band).toFixed(2)}–${Math.max(...band).toFixed(2)}`);
 const rows = SHIPS_HULL.tierPortRows(H), ST = SHIPS_HULL.tierPortStations(H)[rows.length - 1];
 if (ST) { const HSb = SHIPS_HULL.hullSurface(H), top = rows[rows.length - 1];
 for (const p of ST.ports) { const x0 = SHIPS_HULL.surfacePoint(H, HSb, p.uLo, top.port)[0], x1 = SHIPS_HULL.surfacePoint(H, HSb, p.uHi, top.port)[0];
@@ -1863,6 +1872,36 @@ if (dy >= -0.02 && dy <= 0.15 && dz >= 0 && dz < 0.5) { best = p; break; } }
 if (!best) { let hi = null; for (const p of P) if (p[0] > xAft) { const d = p[1] - topAt(p[0]).y; if (!hi || d > hi.d) hi = { d, p }; }
 say(v.id, 'a stowed bower with no arm on the gunwale', hi ? `the anchor's highest point abaft the cathead stands ${hi.d.toFixed(2)} m from the top of the side at x ${hi.p[0].toFixed(2)}, ${Math.abs(hi.p[2]).toFixed(2)} m off the centreline` : 'no anchor vertex abaft the cathead'); }
 }
+}
+if (part.cathead && !H.iron) {
+const HSc = SHIPS_HULL.hullSurface(H), invC = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const uAtC = x => { let a = 0, b = 1; for (let i = 0; i < 26; i++) { const m = (a + b) / 2; if (SHIPS_HULL.surfacePoint(H, HSc, m, 1)[0] < x) a = m; else b = m; } return (a + b) / 2; };
+const R = H.cathead && H.cathead.outM ? H.cathead : null;
+g.traverse(o => {
+if (!(o.isGroup && o.userData.part && o.userData.part.key === 'cathead')) return;
+let bm = null; o.traverse(m => { const P = m.isMesh && m.geometry && m.geometry.parameters; if (P && P.depth && (!bm || P.depth > bm.geometry.parameters.depth)) bm = m; });
+if (!bm) return;
+bm.updateMatrixWorld(true);
+const P = bm.geometry.parameters, T = new THREE.Matrix4().multiplyMatrices(invC, bm.matrixWorld);
+const at = (y, z) => new THREE.Vector3(0, y, z).applyMatrix4(T);
+let cross = null, prev = null;
+for (let i = 0; i <= 200; i++) {
+const z = -P.depth / 2 + P.depth * i / 200, q = at(-P.height / 2, z), u = uAtC(q.x), half = Math.abs(SHIPS_HULL.surfacePoint(H, HSc, u, 1)[2]);
+const d = Math.abs(q.z) - half;
+if (prev && prev.d < 0 && d >= 0) { cross = { q, u, z }; break; }
+prev = { d };
+}
+if (!cross) { say(v.id, 'a cathead that never crosses the side', `its underside stays ${prev && prev.d < 0 ? 'inside' : 'outside'} the sheer's half-breadth`); return; }
+const dk = HSc.islandDeck ? HSc.islandDeck(cross.u) : null;
+if (dk !== null && Math.abs(cross.q.y - dk) > 0.05) say(v.id, 'a cathead off its forecastle deck', `underside ${cross.q.y.toFixed(2)} where it crosses the side at x ${cross.q.x.toFixed(2)}, the island's deck ${dk.toFixed(2)}; Steel: the lower part comes on the plank of the deck at the side`);
+if (R) {
+if (Math.abs(P.width - R.sidedM) > 0.01 || Math.abs(P.height - R.deepM) > 0.01) say(v.id, 'a cathead off its recorded section', `${P.width.toFixed(3)} x ${P.height.toFixed(3)} m, recorded ${R.sidedM} x ${R.deepM}`);
+const a0 = at(0, -P.depth / 2), a1 = at(0, P.depth / 2), dl = a1.clone().sub(a0), rise = dl.y / Math.hypot(dl.x, dl.z);
+if (Math.abs(rise - R.stivePerFt) > 0.1 * R.stivePerFt) say(v.id, 'a cathead off its recorded stive', `rises ${(rise * 12).toFixed(2)} in a foot, recorded ${(R.stivePerFt * 12).toFixed(2)}`);
+const outb = P.depth / 2 - cross.z;
+if (Math.abs(outb - R.outM) > 0.15) say(v.id, 'a cathead off its recorded length without board', `${outb.toFixed(2)} m beyond the side, recorded ${R.outM}`);
+}
+});
 }
 {
 let untagged = 0, first = null;

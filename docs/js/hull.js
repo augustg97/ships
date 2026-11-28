@@ -4171,8 +4171,8 @@ what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her
 + 'and a chain called the shank-painter holds it there (Steel, 1794; Lever, 1808). The '
 + 'shank then runs aft along the side and the stock stands nearly upright beside the bow. '
 + 'The outer arm points away from the ship, so the crown stands off the side by most of an '
-+ 'arm\'s length. On the 74 the forecastle stands higher than the cathead, so the point is laid '
-+ 'instead on the bill-board, a board on the side above the fore channel. Steel (1822) puts '
++ 'arm\'s length. On the 74 the point rests on the forecastle\'s rail, at the head of the '
++ 'bill-board, a board fixed to the side above the fore channel. Steel (1822) puts '
 + 'a lining of plank on the side under the channel, where the point drags on the way up.' },
 grapnel:  { stage: 3, name: 'Grapnel anchor',
 what: 'The Indian Ocean\'s own ground tackle, and the one anchor in this fleet '
@@ -4261,7 +4261,10 @@ what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'along the topside from its tip until the next letting-go. Ancient ships '
 + 'had them too: Torr (1894) has the anchors hung from catheads a little abaft '
 + 'the hawse-holes. An iron ship\'s cathead is an iron beam, and on a ship with '
-+ 'a forecastle it stands on the forecastle deck.' },
++ 'a forecastle it stands on the forecastle deck. Steel (1822) tabulates the cathead '
++ 'for every rate. The 74\'s is 0.44 m by 0.42 m in section and reaches 2.6 m out from '
++ 'the side. It rises 6 inches in every foot of its length, and its underside rests on '
++ 'the forecastle deck where it passes through the side.' },
 head:     { stage: 4, name: 'Head and beakhead',
 what: 'A working platform carried out beyond the stem, and the rails that sweep up '
 + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -9873,11 +9876,20 @@ if (!S.bowsprit) return;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 {
-const blen = B * 0.26, sq = B * 0.042, ang = 0.70;
+const CR = !S.iron && S.cathead && S.cathead.outM ? S.cathead : null;
+const blen = CR ? CR.inM + CR.outM : B * 0.26, sq = CR ? CR.sidedM : B * 0.042, ang = 0.70;
+const dep = CR ? CR.deepM : sq, stv = CR ? Math.atan(CR.stivePerFt) : 0.06;
+const planAng = u => {
+if (!CR || CR.plan !== 'square') return ang;
+const a = surfacePoint(S, H, Math.max(0, u - 0.004), 1.0), b = surfacePoint(S, H, u + 0.004, 1.0);
+return Math.atan2(Math.abs(b[2]) - Math.abs(a[2]), b[0] - a[0]);
+};
+const kD = sq * 0.7;
 const fcsle = S.iron && S.islands && S.islands.list ? S.islands.list.find(i => i.u[0] <= 0.001) : null;
 const catMat = S.iron ? (mats.iron || mats.woodDark) : mats.woodDark;
 let uc = fcsle ? fcsle.u[1] * 0.5 : 0.105;
-const kneeAft = u => surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
+const kneeAft = u => CR ? surfacePoint(S, H, u, 1.0)[0] - (kD / 2 + 0.02) * Math.sin(planAng(u)) + kD * 0.75
+: surfacePoint(S, H, u, 1.0)[0] - blen * 0.30 * Math.sin(ang) + sq * 0.7;
 {
 const ST = tierPortStations(S), first = ST.filter(Boolean).map(t => t.ports[0]).sort((a, b) => a.x - b.x)[0];
 S.__catheadMoved = null;
@@ -9896,23 +9908,41 @@ if (fcsle) pd[1] = H.islandTop(uc);
 S.__catheads = [];
 for (const sgn of [-1, 1]) {
 const cg = new THREE.Group();
-const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), catMat);
+const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, dep, blen), catMat);
 beam.position.z = blen / 2;
+if (CR) beam.userData.catBeam = { sided: sq, deep: dep, len: blen };
 cg.add(beam);
+let seat = null;
+if (CR) {
+const a = planAng(uc);
+cg.rotation.set(-stv, sgn > 0 ? -a : Math.PI + a, 0, 'YXZ');
+const d = new THREE.Vector3(0, 0, 1).applyEuler(cg.rotation);
+const yD = H.islandDeck(uc) !== null ? H.islandDeck(uc) : pd[1];
+const A = new THREE.Vector3(pd[0], yD + dep / 2 / Math.cos(stv), sgn * Math.abs(pd[2]));
+cg.position.copy(A).addScaledVector(d, -CR.inM);
+const hK = B * 0.06, zk = CR.inM + (kD / 2 + 0.02) / Math.cos(stv);
+const kn = new THREE.Mesh(new THREE.BoxGeometry(kD, hK + 0.05, kD), catMat);
+kn.rotation.x = stv;
+kn.position.set(0, -dep / 2, zk).add(new THREE.Vector3(0, -hK / 2 + 0.025, 0).applyAxisAngle(new THREE.Vector3(1, 0, 0), stv));
+cg.add(kn);
+seat = { deck: +yD.toFixed(3), underside: +(A.y - dep / 2 / Math.cos(stv)).toFixed(3), u: +uc.toFixed(4), planDeg: +(a * 180 / Math.PI).toFixed(1),
+stiveDeg: +(stv * 180 / Math.PI).toFixed(1), rule: 'Steel 1822: the lower part on the plank of the forecastle deck at the side; Folio XLVI, the 74\'s column' };
+} else {
 const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), catMat);
 kn.position.set(0, -B * 0.038, blen * 0.30);
 cg.add(kn);
 cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
 cg.rotation.y = sgn > 0 ? -ang : Math.PI + ang;
 cg.rotation.x = -sgn * 0.06;
+}
 cg.updateMatrix();
 const fwd = new THREE.Vector3(1, 0, 0).applyEuler(cg.rotation).x < 0 ? 1 : -1;
 {
-const shR = sq * 0.52, shT = Math.max(0.03, sq * 0.11);
+const shR = CR ? CR.sheaveDiaM / 2 : sq * 0.52, shT = CR ? CR.sheaveThickM : Math.max(0.03, sq * 0.11);
 for (const k of [-1, 0, 1]) {
 const sh = new THREE.Mesh(new THREE.CylinderGeometry(shR, shR, shT, 14), mats.iron || catMat);
 sh.rotation.z = Math.PI / 2;
-sh.position.set(k * sq * 0.3, -sq * 0.08, blen - sq * 0.55);
+sh.position.set(k * sq * 0.3, CR ? -sq * 0.6 + shR : -sq * 0.08, blen - sq * 0.55);
 sh.userData.catSheave = true;
 cg.add(sh);
 }
@@ -9925,7 +9955,9 @@ group.add(tag(cg, 'cathead'));
 const tip = new THREE.Vector3(0, 0, blen).applyEuler(cg.rotation).add(cg.position);
 const heel = cg.position, ax = tip.clone().sub(heel).normalize();
 const zSide = Math.max(0, (Math.abs(pd[2]) - Math.abs(heel.z)) / Math.max(1e-6, Math.abs(ax.z)));
-S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z, m: cg.matrix.toArray(), sq, blen, fwd, zSide, xSide: heel.x + ax.x * zSide });
+const rec = { x: tip.x, y: tip.y, z: tip.z, m: cg.matrix.toArray(), sq, blen, fwd, zSide, xSide: heel.x + ax.x * zSide };
+if (CR) { rec.stiveTan = Math.tan(stv); rec.seat = seat; cg.userData.catSeat = seat; }
+S.__catheads.push(rec);
 }
 }
 if (S.iron) return;
@@ -11009,7 +11041,7 @@ return A;
 function anchorStowOf(S, H, f, cat) {
 const L = S.lwl, B = S.beam;
 const ropeR = 0.018 + B * 0.0006;
-const ring = new THREE.Vector3(cat.x, cat.y - (cat.sq ? cat.sq * 0.6 + 4 * ropeR + f.ringR * 1.06 : B * 0.035), cat.z);
+const ring = new THREE.Vector3(cat.x, cat.y - (cat.sq ? cat.sq * 0.6 + 4 * ropeR + f.ringR * (1 + (cat.stiveTan != null ? cat.stiveTan : 0.06)) : B * 0.035), cat.z);
 const fm = (S.masts || []).filter(m => m.shrouds).sort((p, q) => p.at - q.at)[0];
 let FC = null; try { const F = fm ? shroudFeet(S, H, fm, true) : null; FC = F && F.chan ? F.chan : null; } catch (e) { FC = null; }
 const gap = f.rBill + 0.04;
@@ -11092,8 +11124,11 @@ const ends = [sc.clone().addScaledVector(zA, f.stockL / 2), sc.clone().addScaled
 if (f.ironStock) ends.push(sc.clone().addScaledVector(zA, f.stockL / 2).addScaledVector(yA, f.legL));
 let worst = Math.min(...ends.map(clear)) - f.stockEnd - 0.03;
 for (const [px, py, pz, r] of gsamples) worst = Math.min(worst, clear(crown.clone().addScaledVector(xA, px).addScaledVector(yA, py).addScaledVector(zA, pz)) - r);
+let cg = 9;
+if (FC && FC.rec) for (const [px, py, pz] of samples) cg = Math.min(cg, chanGap(crown.clone().addScaledVector(xA, px).addScaledVector(yA, py).addScaledVector(zA, pz)));
+worst = Math.min(worst, cg);
 const off = clear(crown) - f.rCrown;
-const cand = { t: deg, crown, xA, yA, zA, worst: worst + f.stockEnd + 0.03, cg: 9, off, score: worst, ok: worst >= 0 };
+const cand = { t: deg, crown, xA, yA, zA, worst: worst + f.stockEnd + 0.03, cg, off, score: worst, ok: worst >= 0 };
 if (cand.ok && (!pick || !pick.ok || off < pick.off)) pick = cand;
 else if (!cand.ok && (!pick || (!pick.ok && cand.score > pick.score))) pick = cand;
 }
@@ -11143,6 +11178,8 @@ if (b.board) {
 const top = H.islandTop(b.u) !== null ? H.islandTop(b.u) : b.sheer + 1.0;
 res.board = { x: bill.x, u: b.u, yLo: b.sheer + FC.tIn, yHi: top, t: BB_T, lift: +lift.toFixed(2), chanGap: +pick.cg.toFixed(3), sheer: b.sheer };
 }
+if (b.gunwale && FC && FC.rec && bill.x >= FC.x0 && bill.x <= FC.x1)
+res.board = { x: bill.x, u: b.u, yLo: b.sheer + FC.tIn, yHi: b.top, t: BB_T, lift: 0, chanGap: +pick.cg.toFixed(3), sheer: b.sheer, head: true };
 return res;
 }
 function anchorLiningOf(S, H, f, st) {
@@ -11164,7 +11201,10 @@ const x0 = surfacePoint(S, H, p.uLo, top.port)[0], x1 = surfacePoint(S, H, p.uHi
 portX.push([Math.min(x0, x1), Math.max(x0, x1)]);
 }
 const mid = xm((yBot + yTop) / 2);
+let straddle = null;
+for (const [a, c] of portX) if (a < mid && c > mid) { straddle = [a, c]; xAft = Math.min(xAft, a - 0.05); }
 for (const [a, c] of portX) {
+if (straddle && a === straddle[0]) continue;
 if (a >= mid && a - 0.05 < xAft) xAft = a - 0.05;
 if (c <= mid && c + 0.05 > xForeMin) xForeMin = c + 0.05;
 }
@@ -11185,7 +11225,7 @@ for (let i = 0; i <= ni; i++) { const p = skinAt(x0 + (x1 - x0) * i / ni, y); if
 G.push(row); }
 return G;
 };
-const foreOf = y => Math.max(xForeMin, Math.min(xAft - 0.2, xm(y) - W / 2));
+const foreOf = y => straddle ? Math.max(xForeMin, xAft - W) : Math.max(xForeMin, Math.min(xAft - 0.2, xm(y) - W / 2));
 const lining = grid(yBot, yTop, foreOf, () => xAft, 8, 4);
 const BOL = 0.2286;
 const bolster = grid(yBot - BOL, yBot, () => foreOf(yBot) - 0.61, () => xAft, 1, 6);
@@ -11193,7 +11233,7 @@ const board = grid(st.board.yLo, st.board.yHi, () => st.bill.x - W / 2, () => st
 if (!lining || !bolster || !board) return null;
 return { sgn, lining, liningT: 0.0508, bolster, bolsterT: BOL, board, boardT: st.board.t,
 yBot: +yBot.toFixed(3), yTop: +yTop.toFixed(3), xAft: +xAft.toFixed(3), mid: +mid.toFixed(3), W: +W.toFixed(3), R: +R.toFixed(3),
-ports: portX.map(p => p.map(q => +q.toFixed(3))) };
+ports: portX.map(p => p.map(q => +q.toFixed(3))), straddle: straddle && straddle.map(q => +q.toFixed(3)) };
 }
 function sideSlabGeometry(G, T, sgn) {
 const pos = [];
@@ -11295,7 +11335,8 @@ const LN = anchorLiningOf(S, H, f, st);
 if (LN) {
 const wood = mats.woodDark || iron;
 const lm = new THREE.Mesh(sideSlabGeometry(LN.lining, LN.liningT, LN.sgn), wood);
-lm.userData.lining = { yBot: LN.yBot, yTop: LN.yTop, xAft: LN.xAft, mid: LN.mid, W: LN.W, R: LN.R, ports: LN.ports,
+lm.userData.lining = { yBot: LN.yBot, yTop: LN.yTop, xAft: LN.xAft, mid: LN.mid, W: LN.W, R: LN.R, ports: LN.ports, straddle: LN.straddle,
+contested: LN.straddle ? 'the bill\'s curve crosses the port band inside the foremost upper-deck port; the lining is laid on the pier forward of it' : null,
 ring: st.ring.toArray().map(q => +q.toFixed(3)), bill: st.bill.toArray().map(q => +q.toFixed(3)),
 rule: 'Steel 1822 Book II: the middle on the bill\'s curve from the cathead, the after side square down from the channel, from the bolster (the channel-wale\'s upper side) to the channel; breadth 1.25 palms (CLASS), stopped 5 cm short of a port' };
 group.add(tag(lm, 'anchorLining'));
