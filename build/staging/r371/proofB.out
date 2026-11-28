@@ -1,0 +1,482 @@
+[
+ {
+  "id": "corbita",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 2.982, the cathead's underside over it 2.885"
+ },
+ {
+  "id": "corbita",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "corbita",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "corbita",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "corbita",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 2.982, the cathead's underside over it 2.885"
+ },
+ {
+  "id": "corbita",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "corbita",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "corbita",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "caravel",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 2.699, the cathead's underside over it 2.629"
+ },
+ {
+  "id": "caravel",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "caravel",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "caravel",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "caravel",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 2.699, the cathead's underside over it 2.629"
+ },
+ {
+  "id": "caravel",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "caravel",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "caravel",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 5.588, the cathead's underside over it 5.457"
+ },
+ {
+  "id": "carrack",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 5.588, the cathead's underside over it 5.457"
+ },
+ {
+  "id": "carrack",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "carrack",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 3.730, the cathead's underside over it 3.686"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 3.730, the cathead's underside over it 3.686"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 5.576, the cathead's underside over it 5.454"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 5.576, the cathead's underside over it 5.454"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 6.640, the cathead's underside over it 6.490"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 6.640, the cathead's underside over it 6.490"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 3.722, the cathead's underside over it 3.637"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 3.722, the cathead's underside over it 3.637"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "wyoming",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 5.043, the cathead's underside over it 4.956"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "wyoming",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "wyoming",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "wyoming",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 5.043, the cathead's underside over it 4.956"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "wyoming",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "wyoming",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 7.955, the cathead's underside over it 7.685"
+ },
+ {
+  "id": "preussen",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 7.955, the cathead's underside over it 7.685"
+ },
+ {
+  "id": "preussen",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "preussen",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "clipper",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 4.021, the cathead's underside over it 3.915"
+ },
+ {
+  "id": "clipper",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "clipper",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "clipper",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "clipper",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 4.021, the cathead's underside over it 3.915"
+ },
+ {
+  "id": "clipper",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "clipper",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "clipper",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 6.870, the cathead's underside over it 6.757"
+ },
+ {
+  "id": "steamer",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 6.870, the cathead's underside over it 6.757"
+ },
+ {
+  "id": "steamer",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "steamer",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "endurance",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 3.933, the cathead's underside over it 3.857"
+ },
+ {
+  "id": "endurance",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "endurance",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "endurance",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ },
+ {
+  "id": "endurance",
+  "rule": "an anchor ring inside its cathead",
+  "detail": "ring top 3.933, the cathead's underside over it 3.857"
+ },
+ {
+  "id": "endurance",
+  "rule": "a cathead without its sheaves",
+  "detail": "0 sheaves and 0 thumb cleat(s); Steel's table gives three sheaves in the outer end"
+ },
+ {
+  "id": "endurance",
+  "rule": "an anchor ring with no stopper",
+  "detail": "no Anchor stopper on this side"
+ },
+ {
+  "id": "endurance",
+  "rule": "an anchor shank with no shank-painter",
+  "detail": "no Shank-painter on this side"
+ }
+]

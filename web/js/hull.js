@@ -7302,6 +7302,15 @@ const PARTS = {
                   + 'forward so that a man can stand on it while the anchor is fished. Above the channel is '
                   + 'the bill-board, a board on the side running from the channel up to the top of the side. '
                   + 'The point of the stowed anchor rests on it.' },
+  catStopper: { stage: 3, name: 'Anchor stopper',
+              what: 'The rope the anchor hangs by at sea. Steel (1794) clinches one end round the cathead, passes '
+                  + 'the other down through the anchor\'s ring and back up over a thumb cleat on the cathead, and '
+                  + 'makes it fast there; the end is hitched round a timber-head forward of the cathead. The cat '
+                  + 'tackle that hoisted the anchor is unhooked once the stopper holds it.' },
+  shankPainter: { stage: 3, name: 'Shank-painter',
+              what: 'A chain bolted through the topside abaft the cathead (Steel 1822). It is passed under the '
+                  + 'anchor\'s inner arm and round the shank, and made fast with two or three turns, so that the '
+                  + 'shank and the flukes are held up against the side while the stopper holds the ring.' },
   cathead:  { stage: 3, name: 'Cathead',
               what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
                   + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -15586,11 +15595,36 @@ function buildHead(S, group, mats) {
       cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
       cg.rotation.y = sgn > 0 ? -ang : Math.PI + ang;    // outboard and forward, both sides
       cg.rotation.x = -sgn * 0.06;                       // a slight up-cant at the tip
+      /* ⚠ THREE SHEAVES IN THE OUTER END, AND THE STOPPER'S THUMB CLEAT (round 371). Steel (1822, the cathead's table):
+         "In the outer end of each to have sheaves ... three", for every rate from the 100 to the smallest; Falconer (1769,
+         CAT-HEADS): "two or three small wheels, or sheaves, of brass, or strong wood". They stand side by side on one pin
+         across the beam, each in its own mortise, the rims proud of the underside where the fall leads down. Steel 1794
+         (vol. 2) leads the anchor's stopper "over a large thumb cleat bolted to the cathead". Sheave diameter 1.04 of the
+         beam's depth and the cleat's size are CLASS: Steel's table gives them, but its OCR is unreadable. */
+      cg.updateMatrix();
+      const fwd = new THREE.Vector3(1, 0, 0).applyEuler(cg.rotation).x < 0 ? 1 : -1;   // the local x side that faces forward
+      {
+        const shR = sq * 0.52, shT = Math.max(0.03, sq * 0.11);
+        for (const k of [-1, 0, 1]) {
+          const sh = new THREE.Mesh(new THREE.CylinderGeometry(shR, shR, shT, 14), mats.iron || catMat);
+          sh.rotation.z = Math.PI / 2;
+          sh.position.set(k * sq * 0.3, -sq * 0.08, blen - sq * 0.55);
+          sh.userData.catSheave = true;
+          cg.add(sh);
+        }
+        const cl = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.32, sq * 0.24, sq * 0.7), catMat);
+        cl.position.set(fwd * sq * 0.66, 0, blen - sq * 0.55);
+        cl.userData.thumbCleat = true;
+        cg.add(cl);
+      }
       group.add(tag(cg, 'cathead'));
       /* the tip, measured through the SAME transform the beam gets — a parallel formula
          here is the drift bug this project keeps rediscovering */
       const tip = new THREE.Vector3(0, 0, blen).applyEuler(cg.rotation).add(cg.position);
-      S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z });
+      /* where the beam's axis crosses the side at the sheer (the stopper's end, the shank-painter's bolts abaft it) */
+      const heel = cg.position, ax = tip.clone().sub(heel).normalize();
+      const zSide = Math.max(0, (Math.abs(pd[2]) - Math.abs(heel.z)) / Math.max(1e-6, Math.abs(ax.z)));
+      S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z, m: cg.matrix.toArray(), sq, blen, fwd, zSide, xSide: heel.x + ax.x * zSide });
     }
   }
   if (S.iron) return;
@@ -17177,7 +17211,13 @@ function anchorMeshOf(f, iron, oak) {
  * the arms' plane lies along the side (round 99), the palms clear of it. */
 function anchorStowOf(S, H, f, cat) {
   const L = S.lwl, B = S.beam;
-  const ring = new THREE.Vector3(cat.x, cat.y - B * 0.035, cat.z);
+  /* ⚠ THE RING HANGS BELOW THE CATHEAD, ON THE STOPPER'S BIGHT (round 371). Until r371 the ring's centre hung 0.035 B
+     under the cathead's axis, and the ring's top stood up to 0.1 m inside the beam's underside on every catted hull. Its
+     top now stands under the sheaves' rims by the stopper's bight (the rope doubled, two diameters). */
+  const ropeR = 0.018 + B * 0.0006;
+  /* the sheaves' rims stand 0.10 of the beam's depth under it (0.60 sq from its axis), and the beam stives up 0.06 rad, so
+     its underside a ring's radius inboard of the tip is 0.06 ringR lower again */
+  const ring = new THREE.Vector3(cat.x, cat.y - (cat.sq ? cat.sq * 0.6 + 4 * ropeR + f.ringR * 1.06 : B * 0.035), cat.z);
   const fm = (S.masts || []).filter(m => m.shrouds).sort((p, q) => p.at - q.at)[0];
   let FC = null; try { const F = fm ? shroudFeet(S, H, fm, true) : null; FC = F && F.chan ? F.chan : null; } catch (e) { FC = null; }
   const gap = f.rBill + 0.04;
@@ -17408,8 +17448,81 @@ function buildAnchor(S, group, mats) {
         board: st.board || null,
         rule: st.board ? 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the bill-board over the fore channel; the crown against the lining under it'
                        : 'Steel: the bill swept from the cathead at the anchor\'s length to the bill, onto the side under the fore channel' };
-      const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), st.ring]], 0.018 + B * 0.0006, mats.ropeSolid || iron);
-      if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));
+      /* ⚠ THE RING HANGS ON STEEL'S STOPPER, AND THE SHANK ON HIS SHANK-PAINTER (round 371). Until r371 the ring hung on
+         one straight rope from the cathead's tip to the ring's centre, and nothing held the shank. Steel (1794, vol. 2,
+         "To cat and fish the anchor"): the bowers "are secured by their stoppers, from the catheads and shank-painters.
+         The stopper has one end clinched round the cathead; the other end passes through the ring of the anchor, returns
+         upwards, and leads over a large thumb cleat bolted to the cathead, and is made fast with several turns, and the
+         end hitched round the head-rail and timber-head, on the fore side of the cathead. The shank-painter hangs the
+         shank and fluke of the anchor to the ship's side outboard; and when stowed, the shank-painter is passed under the
+         inner fluke round the shank of the anchor, and made fast with two or three turns, and the end stopt round
+         timber-heads on the forecastle." Steel 1822's glossary: "SHANK-PAINTER. A chain bolted through the topside, abaft
+         the cathead". Lever (1808; 1827 ed., p. 69): "the Shank Painter, which is a Stopper, with an Iron Chain, is passed
+         under the inner Arm and Shank". The timber-heads both ends are belayed to are not drawn: the stopper's end stops
+         at the cathead where it crosses the top of the side, the painter's at the topside (CLASS). */
+      const ropeR = 0.018 + B * 0.0006, M = new THREE.Matrix4().fromArray(cat.m);
+      const Lc = (x, y, z) => new THREE.Vector3(x, y, z).applyMatrix4(M);
+      const sq = cat.sq, bl = cat.blen, fw = cat.fwd, h = sq / 2 + ropeR;
+      /* the bight bears on the inside of the ring at its highest point, in the ring's own plane (the shank and the arms) */
+      const up = st.xA.clone().multiplyScalar(st.xA.y).addScaledVector(st.yA, st.yA.y);
+      if (up.lengthSq() < 1e-6) up.copy(st.yA); up.normalize();
+      const bear = st.ring.clone().addScaledVector(up, f.ringR - f.ringT - ropeR);
+      const along = Lc(0, 0, 1).sub(Lc(0, 0, 0)).normalize();
+      const zc = bl - sq * 1.25, zq = bl - sq * 0.55;
+      const clinch = [];
+      for (const [a, c] of [[1, 1], [1, -1], [-1, -1], [-1, 1], [1, 1]]) clinch.push(Lc(a * h, c * h, zc));
+      const segs = [];
+      for (let i = 0; i + 1 < clinch.length; i++) segs.push([clinch[i], clinch[i + 1]]);
+      const b0 = bear.clone().addScaledVector(along, -ropeR * 1.5), b1 = bear.clone().addScaledVector(along, ropeR * 1.5);
+      segs.push([Lc(0, -h, zc), b0], [b0, b1]);
+      /* up from the ring to the thumb cleat on the cathead's fore side, over it, and inboard along that side */
+      const cleatOut = sq * 0.5 + sq * 0.32;
+      const q0 = Lc(fw * (cleatOut + ropeR), -sq * 0.12, zq), q1 = Lc(fw * (cleatOut + ropeR), sq * 0.12, zq);
+      const zs = cat.zSide;
+      const q2 = Lc(fw * h, sq * 0.2, zq - sq * 0.4), q3 = Lc(fw * h, sq * 0.2, Math.max(0, zs));
+      segs.push([b1, q0], [q0, q1], [q1, q2], [q2, q3]);
+      const stp = ropeMesh(segs, ropeR, mats.ropeSolid || iron);
+      if (stp) {
+        stp.userData.catStopper = { ring: st.ring.toArray().map(q => +q.toFixed(3)), bear: bear.toArray().map(q => +q.toFixed(3)),
+          tip: [cat.x, cat.y, cat.z].map(q => +q.toFixed(3)), clinchZ: +zc.toFixed(3), cleatZ: +zq.toFixed(3), sq: +sq.toFixed(3), r: +ropeR.toFixed(3),
+          rule: 'Steel 1794 vol. 2: one end clinched round the cathead, through the ring, up over a thumb cleat bolted to the cathead, made fast, the end to the timber-head on the cathead\'s fore side' };
+        group.add(tag(stp, 'catStopper'));
+      }
+      /* the shank-painter: a chain bolted through the topside abaft the cathead, under the inner arm and round the shank
+         at the crown, back up to a second bolt 0.3 m abaft the first; the inner arm is the one nearer the side */
+      {
+        const tOut = Lc(0, 0, bl);
+        const armDir = k => st.xA.clone().multiplyScalar(k * f.sin).addScaledVector(st.yA, f.cos);   // crown → bill on arm k
+        const bills = [1, -1].map(k => ({ k, p: st.crown.clone().addScaledVector(armDir(k), f.a) }));
+        const inner = bills.sort((p, q) => Math.abs(p.p.z) - Math.abs(q.p.z))[0];
+        /* round the shank just above the arms, and under the inner arm a quarter of its length from the crown */
+        const shankPt = st.crown.clone().addScaledVector(st.yA, f.a * 0.15);
+        const armPt = st.crown.clone().addScaledVector(armDir(inner.k), f.a * 0.25);
+        const xb = Math.max(shankPt.x, cat.xSide + sq * 1.2);
+        const ub = uAtXV(S, H, xb, 1, Math.max(0.01, Math.min(0.99, xb / S.lwl + 0.5)));
+        if (ub !== null) {
+          const shr = surfacePoint(S, H, ub, 1), yb = shr[1] - 0.25;
+          const vb = vAtY(S, H, ub, yb), ub2 = uAtXV(S, H, xb, vb, ub) ?? ub;
+          const pb = surfacePoint(S, H, ub2, vAtY(S, H, ub2, yb));
+          const zb = Math.abs(pb[2]) + 0.03;
+          const sg = Math.sign(st.ring.z) || 1;
+          const bolt0 = new THREE.Vector3(xb, yb, sg * zb), bolt1 = new THREE.Vector3(xb + 0.3, yb, sg * zb);
+          const cr = f.rCrown + 0.025, ar = f.rCrown * 0.8 + 0.025;
+          /* under a member: the world's down, square to the member's axis */
+          const under = (ax, pt, r) => { const d = new THREE.Vector3(0, -1, 0); d.addScaledVector(ax, -d.dot(ax)); if (d.lengthSq() < 1e-6) d.set(0, -1, 0); return pt.clone().addScaledVector(d.normalize(), r); };
+          const sU = under(st.yA, shankPt, cr), aU = under(armDir(inner.k).normalize(), armPt, ar);
+          const chainR = Math.max(0.012, B * 0.0012);
+          const ch = ropeMesh([[bolt0, aU], [aU, sU], [sU, bolt1]], chainR, iron);
+          if (ch) {
+            ch.userData.shankPainter = { bolt: [bolt0, bolt1].map(p => p.toArray().map(q => +q.toFixed(3))), shank: shankPt.toArray().map(q => +q.toFixed(3)),
+              arm: armPt.toArray().map(q => +q.toFixed(3)), topY: +shr[1].toFixed(3), cathead: +cat.xSide.toFixed(3), r: +chainR.toFixed(3),
+              offSide: +(Math.abs(shankPt.z) - zb).toFixed(3),
+              rule: 'Steel 1822 glossary: a chain bolted through the topside abaft the cathead; Steel 1794 and Lever: passed under the inner arm and round the shank' };
+            group.add(tag(ch, 'shankPainter'));
+            for (const p of [bolt0, bolt1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(chainR * 2.2, 8, 6), iron); e.position.copy(p); group.add(tag(e, 'shankPainter', 'Shank-painter bolt')); }
+          }
+        }
+      }
       group.add(tag(A, 'anchor'));
       const LN = anchorLiningOf(S, H, f, st);
       if (LN) {
