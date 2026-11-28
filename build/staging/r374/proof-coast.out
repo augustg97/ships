@@ -1,0 +1,10 @@
+before none {'ready': True, 'aborted': 0, 's': 16.4, 'level': 2, 'maskFine': 2, 'faults': None}
+before reset {'ready': True, 'aborted': 1, 's': 12.5, 'level': 1, 'maskFine': 1, 'faults': None}
+after none {'ready': True, 'aborted': 0, 's': 16.3, 'level': 2, 'maskFine': 2, 'faults': []}
+after reset {'ready': True, 'aborted': 1, 's': 15.4, 'level': 2, 'maskFine': 2, 'faults': []}
+/Users/augustgweon/Ships/build/staging/r374/scripts/r374_reset_proof.py:48: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  n = sum(1 for v in d.getdata() if v > 8)
+before/none    vs after/none: 0.000% of pixels
+before/reset   vs after/none: 14.496% of pixels
+after/none     vs after/none: 0.000% of pixels
+after/reset    vs after/none: 0.000% of pixels

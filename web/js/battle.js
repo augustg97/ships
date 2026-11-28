@@ -416,7 +416,7 @@ function btShoreLoad(battle) {
   BT.shoreReady = false; BT.shoreGrid = null; BT.shoreFor = battle.id;
   if (BT.land) BT.land.visible = false;
   if (!sh) { BT.shoreReady = true; return; }
-  fetch(sh.src).then(r => r.blob())
+  window.fetchRetry(sh.src, 'blob')
     .then(b => createImageBitmap(b, { colorSpaceConversion: 'none' }))
     .then(img => {
       if (BT.shoreFor !== battle.id) return;         // a different battle opened meanwhile

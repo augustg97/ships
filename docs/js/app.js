@@ -31,6 +31,30 @@ let renderer, scene, camera, globe, mat, raycaster, sphere;
 let W = 1, H = 1;
 const VERT = SHADERS['VERT.vert'];
 const FRAG = SHADERS['FRAG.frag'];
+const fetchFaults = [];
+APP.fetchFaults = fetchFaults;
+async function fetchRetry(url, kind) {
+let err = null;
+for (let k = 0; k < 5; k++) {
+if (k) await new Promise(res => setTimeout(res, 200 * k * k));
+try {
+const r = await fetch(url);
+if (!r.ok) {
+err = new Error(url + ' → HTTP ' + r.status);
+if (r.status < 500) { err.status = r.status; throw err; }
+continue;
+}
+return kind === 'json' ? await r.json() : await r.blob();
+} catch (e) {
+if (e.status) throw e;
+err = e;
+if (k < 4) console.info('fetch retry', k + 1, url, String(e && e.message || e));
+}
+}
+fetchFaults.push(url);
+throw err;
+}
+window.fetchRetry = fetchRetry;
 async function loadLevel(level, manifest, note) {
 const L = manifest.levels.find(x => x.level === level);
 const core = manifest.core, sk = manifest.skirt;
@@ -44,8 +68,7 @@ const jobs = [];
 for (let ty = 0; ty < L.ny; ty++) {
 for (let tx = 0; tx < L.nx; tx++) {
 jobs.push((async () => {
-const r = await fetch(`fields/z${level}/${tx}_${ty}.png`);
-const blob = await r.blob();
+const blob = await fetchRetry(`fields/z${level}/${tx}_${ty}.png`, 'blob');
 const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none',
 premultiplyAlpha: 'none' });
 ctx.drawImage(bmp, sk, sk, core, core, tx * core, ty * core, core, core);
@@ -103,9 +126,7 @@ t.generateMipmaps = false;
 return t;
 }
 async function loadTex(url) {
-const r = await fetch(url);
-if (!r.ok) throw new Error(url + ' → HTTP ' + r.status);
-const bmp = await createImageBitmap(await r.blob(),
+const bmp = await createImageBitmap(await fetchRetry(url, 'blob'),
 { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
 const t = new THREE.CanvasTexture(bmp);
 t.needsUpdate = true;
@@ -131,6 +152,7 @@ document.fonts.ready.then(() => { fontsDone = true; markReady(); });
 function markReady() {
 if (FROZEN && !fontsDone) return;
 if (FROZEN && !upgradesDone) return;
+if (FROZEN && fetchFaults.length) return;
 if (FROZEN && shipSelectPending) return;
 if (FROZEN && battleOpenPending) return;
 if (FROZEN && fleetQueue.length) return;
@@ -435,7 +457,7 @@ APP.phase = n => APP.boot.push([n, Math.round(performance.now())]);
 const phase = APP.phase;
 phase('boot in');
 phase('renderer+scene');
-const manifest = await (await fetch('fields/tiles.json')).json();
+const manifest = await fetchRetry('fields/tiles.json', 'json');
 APP.manifest = manifest;
 note.textContent = 'reading the sea floor…';
 const z0 = await loadLevel(0, manifest, p => setP(p * 0.55));
@@ -502,7 +524,11 @@ APP.maskFineLevel = window.SHIPS_ROUTE.FINE.level;
 buildEraFleet();
 APP.phase && APP.phase('  lv' + lv + ' fleet');
 }
-} catch (e) { console.warn('level', lv, 'failed', e); break; }
+} catch (e) {
+console.warn('level', lv, 'failed', e);
+if (FROZEN) fetchFaults.push('level ' + lv);
+break;
+}
 }
 upgradesDone = true;
 };
@@ -521,7 +547,7 @@ upgradeTerrain();
 async function loadData() {
 const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
 const get = async u => {
-try { return await (await fetch(u + '?v=' + DV)).json(); } catch (e) { return null; }
+try { return await fetchRetry(u + '?v=' + DV, 'json'); } catch (e) { return null; }
 };
 APP.ports    = await get('data/ports.json')    || { ports: [] };
 APP.vessels  = await get('data/vessels.json')  || { vessels: [] };
@@ -543,10 +569,9 @@ if (APP._provenance) return APP._provenance;
 const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
 APP._provenance = (async () => {
 const out = { split: false, merged: 0, missed: [] };
-let r = null;
-try { r = await fetch('data/provenance.json?v=' + DV); } catch (e) { r = null; }
-if (!r || !r.ok) return out;
-const P = await r.json();
+let P = null;
+try { P = await fetchRetry('data/provenance.json?v=' + DV, 'json'); } catch (e) { P = null; }
+if (!P) return out;
 out.split = true;
 const byId = new Map(((APP.vessels && APP.vessels.vessels) || []).map(v => [v.id, v]));
 for (const id in P) {

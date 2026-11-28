@@ -131,6 +131,48 @@ const VERT = SHADERS['VERT.vert'];
 
 const FRAG = SHADERS['FRAG.frag'];
 
+/* ── ⚠ ONE DROPPED CONNECTION MUST NOT MOVE A SHIP (round 374) ──────────────────────
+ * Level 1 of the terrain is 8 tile fetches and level 2 is 32, and loadLevel awaited them with
+ * Promise.all, so a single ERR_CONNECTION_RESET failed the whole level. upgradeTerrain then
+ * stopped at the coarser level, and every route in the era was planned on that coastline. A
+ * route on a different coastline has a different length, so at the same frozen instant the
+ * voyage stands at a different point on it. r373 captured the Syracuse trireme at 36°26′
+ * against the baseline's 36°25′ (aboard-coast 17.996%) and the Sahul dugouts at 8°48′ against
+ * 8°51′ (passage-sahul 24.618%), with a connection reset in each capture's console. The same
+ * figures recurred in r322, r352 and r373, because the fault always leaves the same state. A
+ * visitor on a poor connection got the same result: the coarse coastline, with no message.
+ *
+ * Every fetch the app makes goes through here, and the body is read inside the retry, because
+ * a reset can also land mid-body. A network error or a 5xx is retried four times with a
+ * growing pause. A 4xx is the server's answer and is thrown at once: plates.json and
+ * provenance.json are legitimately absent from some builds. Under ?frozen a fetch that still
+ * fails is recorded in fetchFaults, and markReady refuses. The capture then times out rather
+ * than photographing a world built from part of its data. */
+const fetchFaults = [];
+APP.fetchFaults = fetchFaults;
+async function fetchRetry(url, kind) {
+  let err = null;
+  for (let k = 0; k < 5; k++) {
+    if (k) await new Promise(res => setTimeout(res, 200 * k * k));
+    try {
+      const r = await fetch(url);
+      if (!r.ok) {
+        err = new Error(url + ' → HTTP ' + r.status);
+        if (r.status < 500) { err.status = r.status; throw err; }
+        continue;
+      }
+      return kind === 'json' ? await r.json() : await r.blob();
+    } catch (e) {
+      if (e.status) throw e;                  /* a 4xx: the server answered, do not retry */
+      err = e;
+      if (k < 4) console.info('fetch retry', k + 1, url, String(e && e.message || e));
+    }
+  }
+  fetchFaults.push(url);
+  throw err;
+}
+window.fetchRetry = fetchRetry;
+
 /* ── tile assembly ──────────────────────────────────────────────────────── */
 /* Tiles are stitched into one canvas per level, then uploaded as a single texture. The globe
  * samples it by lat/lon, so no per-tile geometry is needed.
@@ -150,8 +192,7 @@ async function loadLevel(level, manifest, note) {
   for (let ty = 0; ty < L.ny; ty++) {
     for (let tx = 0; tx < L.nx; tx++) {
       jobs.push((async () => {
-        const r = await fetch(`fields/z${level}/${tx}_${ty}.png`);
-        const blob = await r.blob();
+        const blob = await fetchRetry(`fields/z${level}/${tx}_${ty}.png`, 'blob');
         const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none',
                                                    premultiplyAlpha: 'none' });
         // draw the CORE only; the skirt exists so the tile edge samples a real neighbour
@@ -265,9 +306,7 @@ function setTexParams(t) {
  * colorSpaceConversion:'none' matters for the same reason it does for the tiles: these PNGs are
  * DATA, and a colour transform would corrupt the low byte of a 16-bit field. */
 async function loadTex(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(url + ' → HTTP ' + r.status);
-  const bmp = await createImageBitmap(await r.blob(),
+  const bmp = await createImageBitmap(await fetchRetry(url, 'blob'),
                 { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
   const t = new THREE.CanvasTexture(bmp);
   t.needsUpdate = true;
@@ -329,6 +368,8 @@ document.fonts.ready.then(() => { fontsDone = true; markReady(); });
 function markReady() {
   if (FROZEN && !fontsDone) return;
   if (FROZEN && !upgradesDone) return;
+  /* and not on a world built from part of its data (fetchRetry, r374) */
+  if (FROZEN && fetchFaults.length) return;
   /* ⚠ AND NOT WHILE THE NAMED HULL IS STILL BEING FOUND. `#s=container` is applied by calling
      window.swOpenById, which the Shipwright only defines once its view has opened — so the
      call is a race, and it was silently skipped when lost: `typeof swOpenById === 'function'`
@@ -948,7 +989,7 @@ async function boot() {
   phase('boot in');
 
   phase('renderer+scene');
-  const manifest = await (await fetch('fields/tiles.json')).json();
+  const manifest = await fetchRetry('fields/tiles.json', 'json');
   APP.manifest = manifest;
 
   note.textContent = 'reading the sea floor…';
@@ -1045,7 +1086,11 @@ async function boot() {
           buildEraFleet();
           APP.phase && APP.phase('  lv' + lv + ' fleet');
         }
-      } catch (e) { console.warn('level', lv, 'failed', e); break; }
+      } catch (e) {
+        console.warn('level', lv, 'failed', e);
+        if (FROZEN) fetchFaults.push('level ' + lv);   /* markReady refuses: see fetchRetry */
+        break;
+      }
     }
     upgradesDone = true;      // capture mode has been waiting on this
   };
@@ -1094,7 +1139,7 @@ async function loadData() {
      field is ever regenerated, its filename must change. */
   const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
   const get = async u => {
-    try { return await (await fetch(u + '?v=' + DV)).json(); } catch (e) { return null; }
+    try { return await fetchRetry(u + '?v=' + DV, 'json'); } catch (e) { return null; }
   };
   APP.ports    = await get('data/ports.json')    || { ports: [] };
   APP.vessels  = await get('data/vessels.json')  || { vessels: [] };
@@ -1130,10 +1175,9 @@ APP.loadProvenance = function () {
   const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
   APP._provenance = (async () => {
     const out = { split: false, merged: 0, missed: [] };
-    let r = null;
-    try { r = await fetch('data/provenance.json?v=' + DV); } catch (e) { r = null; }
-    if (!r || !r.ok) return out;
-    const P = await r.json();
+    let P = null;
+    try { P = await fetchRetry('data/provenance.json?v=' + DV, 'json'); } catch (e) { P = null; }
+    if (!P) return out;
     out.split = true;
     const byId = new Map(((APP.vessels && APP.vessels.vessels) || []).map(v => [v.id, v]));
     for (const id in P) {

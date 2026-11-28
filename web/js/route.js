@@ -77,7 +77,7 @@ async function sampleWind(monthIndex) {
   const m = ((monthIndex % 12) + 12) % 12;
   if (_windCache.has(m)) return _windCache.get(m);
   const name = `fields/wind_${String(m + 1).padStart(2, '0')}.png`;
-  const blob = await (await fetch(name)).blob();
+  const blob = await window.fetchRetry(name, 'blob');
   const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none',
                                               premultiplyAlpha: 'none' });
   const img = { width: bmp.width, height: bmp.height };
