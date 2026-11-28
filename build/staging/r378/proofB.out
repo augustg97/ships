@@ -1,0 +1,12 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck rising off its table",
+  "detail": "the deck rises 1.463 m from dead-flat (u 0.364) to the foremost perpendicular (u 0.030); the table gives 0.610 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck rising off its table",
+  "detail": "the deck rises 0.772 m from dead-flat (u 0.364) to the after perpendicular (u 0.984); the table gives 0.610 m"
+ }
+]

@@ -104,6 +104,28 @@ g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return new THREE.Mesh(g, mat);
 }
+function sheerTableFn(S) {
+const T = S.sheerTable;
+if (!(T && T.gunDeckOverRabbetFt && T.deadFlatAbaftFpFt && S.perpendiculars)) return null;
+const key = JSON.stringify([T, S.lwl, S.loa, S.freeboard, S.perpendiculars, S.tierPorts, (S.masts || []).map(m => m.at), S.forefoot, S.run, S.stemRake, S.sternRake]);
+if (S.__sheerTable && S.__sheerTable.key === key) return S.__sheerTable.fn;
+const base = Object.assign({}, S); delete base.sheerTable; delete base.__sheerTable;
+const H0 = hullSurface(base), P = steelPerpendiculars(base, H0);
+if (!P || !(P.lpp > 0)) return null;
+const FT = 0.3048, F = a => a[0] + a[1] / 12, g = T.gunDeckOverRabbetFt;
+const xa = 0, xm = F(T.deadFlatAbaftFpFt), xb = P.lpp / FT;
+const ya = F(g.afore), ym = F(g.midships), yb = F(g.abaft);
+const d = 2 * (xa * (ym - yb) + xm * (yb - ya) + xb * (ya - ym));
+const xc = ((xa * xa + ya * ya) * (ym - yb) + (xm * xm + ym * ym) * (yb - ya) + (xb * xb + yb * yb) * (ya - ym)) / d;
+const yc = ((xa * xa + ya * ya) * (xb - xm) + (xm * xm + ym * ym) * (xa - xb) + (xb * xb + yb * yb) * (xm - xa)) / d;
+const R = Math.hypot(xa - xc, ya - yc);
+const sweepFt = xf => yc - Math.sqrt(Math.max(0, R * R - (xf - xc) * (xf - xc)));
+const yAt = u => sweepFt(((u - 0.5) * S.lwl + H0.rake(u) - P.fp) / FT) * FT;
+const lu = T.levelAtU != null ? T.levelAtU : 0.5, off = S.freeboard - yAt(lu);
+const fn = u => yAt(u) + off;
+S.__sheerTable = { key, fn, fp: P.fp, ap: P.ap, lpp: P.lpp, deadFlatX: P.fp + xm * FT, xc: P.fp + xc * FT, R: R * FT };
+return fn;
+}
 function hullSurface(S) {
 const nExp = exponentForCm(S.cm);
 const halfB = S.beam / 2;
@@ -114,12 +136,14 @@ const fore = 1 - Math.pow(Math.max(0, (S.forefoot - u) / S.forefoot), 2) * S.ris
 const aft = 1 - Math.pow(Math.max(0, (u - (1 - S.run)) / S.run), 2) * S.riseA;
 return Math.max(0.06, Math.min(fore, aft));
 };
+const STB = SR0 => SR0 ? null : sheerTableFn(S);
 const SR = S.sheerRead && Array.isArray(S.sheerRead.stations) && S.sheerRead.stations.length >= 2
 ? pchip(S.sheerRead.stations.map(([u, r]) => ({ u, r }))) : null;
+const STF = STB(SR);
 const sheer = u => {
 const s = Math.abs(2 * u - 1);
 const rise = u < 0.5 ? S.sheerBow : S.sheerStern;
-const base = SR ? SR(u) : S.freeboard + rise * Math.pow(s, 2.8);
+const base = SR ? SR(u) : STF ? STF(u) : S.freeboard + rise * Math.pow(s, 2.8);
 if (S.sternSteps)
 for (const st of S.sternSteps.steps)
 if (u >= st.u[0] && u <= st.u[1] && st.deckM !== undefined)
@@ -13426,5 +13450,5 @@ extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;
 }
-window.SHIPS_HULL = { cheekLines, hawseCentres, sideBands, tierPortRows, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { sheerTableFn, cheekLines, hawseCentres, sideBands, tierPortRows, tierPortStations, steelPerpendiculars, waleFinish, PARTS, readWaleV, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
 superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

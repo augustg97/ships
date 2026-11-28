@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a deck level off its table, unstated",
+  "detail": "the deck at dead-flat stands 3.94 m over the water and Steel's 3.33 m on his own waterline; sheerTable.contested must state the LEVEL and levelProvenance derive it"
+ }
+]
